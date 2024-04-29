@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "aaron-bond.better-comments",
+        "tamasfe.even-better-toml",
+        "julialang.language-julia",
+        "james-yu.latex-workshop",
+        "valentjn.vscode-ltex",
+        "yzhang.markdown-all-in-one"
+    ]
+}
