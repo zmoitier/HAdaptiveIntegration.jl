@@ -1,0 +1,11 @@
+name = "AdaptiveSimplexQuadrature"
+uuid = "eaa5ad34-b243-48e9-b09c-54bc0655cecf"
+authors = ["Zois Moitier", "Luiz M. Faria"]
+version = "0.1.0"
+
+[deps]
+GrundmannMoeller = "36aa67b7-9d79-4e90-bbc0-05abd90a007e"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[compat]
+julia = "1"

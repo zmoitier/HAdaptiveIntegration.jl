@@ -1,4 +1,10 @@
-# Adaptive Quadrature over Simplices
+# AdaptiveSimplexQuadrature
+
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl/dev/)
+[![Build Status](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/zmoitier/AdaptiveSimplexQuadrature.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/zmoitier/AdaptiveSimplexQuadrature.jl)
+[![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 * list of schemes:
   - https://github.com/sigma-py/quadpy
