@@ -1,0 +1,219 @@
+% !TeX root = main.tex
+% LTeX: language=en-US
+
+\documentclass[english,12pt]{article}
+
+
+%*** \Usepackages =============================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{amssymb,amsthm,mathtools}
+\usepackage{graphicx}
+\usepackage{babel}
+\usepackage[colorlinks]{hyperref}
+\usepackage{microtype}
+% \usepackage{caption}
+% \usepackage{subcaption}
+% \usepackage{enumitem}
+% \usepackage{tabularx}
+
+%*** Links and drawing ----------------------------------------
+% \usepackage{xcolor}
+\usepackage{tikz}
+
+%*** Math -----------------------------------------------------
+\usepackage{siunitx}
+\usepackage[capitalize,nameinlink]{cleveref}
+\numberwithin{equation}{section}
+\raggedbottom{}
+\allowdisplaybreaks{}
+
+%*** Bibliography ---------------------------------------------
+\usepackage[backend=biber,style=alphabetic,sorting=nyt]{biblatex}
+\addbibresource{references.bib}
+\usepackage{csquotes}
+
+
+%*** Colors ===================================================
+%*** \definecolor ---------------------------------------------
+\definecolor{Blue}{HTML}{1F77B4}
+\definecolor{Orange}{HTML}{FF7F0E}
+\definecolor{Green}{HTML}{2CA02C}
+\definecolor{Red}{HTML}{D62728}
+\definecolor{Grey}{HTML}{7F7F7F}
+% \definecolor{Purple}{HTML}{9467BD}
+% \definecolor{Brown}{HTML}{8C564B}
+% \definecolor{Pink}{HTML}{E377C2}
+
+\NewDocumentCommand{\Black}{m}{\textcolor{black}{#1}}
+\NewDocumentCommand{\Blue}{m}{\textcolor{Blue}{#1}}
+\NewDocumentCommand{\Orange}{m}{\textcolor{Orange}{#1}}
+\NewDocumentCommand{\Green}{m}{\textcolor{Green}{#1}}
+\NewDocumentCommand{\Red}{m}{\textcolor{Red}{#1}}
+\NewDocumentCommand{\Grey}{m}{\textcolor{Grey}{#1}}
+% \NewDocumentCommand{\Purple}{m}{\textcolor{Purple}{#1}}
+% \NewDocumentCommand{\Brown}{m}{\textcolor{Brown}{#1}}
+% \NewDocumentCommand{\Pink}{m}{\textcolor{Pink}{#1}}
+
+\NewDocumentCommand{\todo}{m}{\noindent{\color{Red}\texttt{:\!:todo:\!:} \bfseries #1}}
+\NewDocumentCommand{\zmcom}{m}{\noindent{\color{Green}\texttt{:\!:Z:\!:} #1}}
+
+%*** hypersetup ----------------------------------------------
+\hypersetup{%
+    colorlinks = True,
+    linkcolor  = Red,
+    citecolor  = Green,
+    urlcolor   = Blue,
+}
+
+
+%*** Math =====================================================
+%*** mathbb ---------------------------------------------------
+\NewDocumentCommand{\bbC}{}{\mathbb{C}}
+\NewDocumentCommand{\bbN}{}{\mathbb{N}}
+\NewDocumentCommand{\bbR}{}{\mathbb{R}}
+\NewDocumentCommand{\bbZ}{}{\mathbb{Z}}
+
+%*** mathcal --------------------------------------------------
+\NewDocumentCommand{\calT}{}{\mathcal{T}}
+
+%*** Constants ------------------------------------------------
+\NewDocumentCommand{\ex}{}{\mathsf{e}}
+\NewDocumentCommand{\im}{}{\mathsf{i}\mkern1mu}
+
+%*** Spaces ---------------------------------------------------
+\NewDocumentCommand{\spC}{}{\mathscr{C}}
+\NewDocumentCommand{\spL}{}{\mathrm{L}}
+\NewDocumentCommand{\spH}{}{\mathrm{H}}
+
+%*** Keywords -------------------------------------------------
+\NewDocumentCommand{\loc}{}{\mathrm{loc}}
+\NewDocumentCommand{\comp}{}{\mathrm{comp}}
+
+%*** Operators ------------------------------------------------
+\NewDocumentCommand{\di}{m}{\mathop{}\!\mathrm{d}#1}
+\DeclareMathOperator{\OO}{\mathcal{O}}
+\DeclareMathOperator{\oo}{\mathcal{\scriptstyle{}O}}
+
+%*** Delimiter ------------------------------------------------
+\DeclarePairedDelimiter{\plr}\lparen\rparen%
+\DeclarePairedDelimiter{\clr}\lbrack\rbrack%
+\DeclarePairedDelimiter{\blr}\lbrace\rbrace%
+\DeclarePairedDelimiter{\alr}\langle\rangle%
+\DeclarePairedDelimiter{\abs}\lvert\rvert%
+\DeclarePairedDelimiter{\norm}\lVert\rVert%
+
+\DeclarePairedDelimiterXPP\normF[1]{}\lVert\rVert{_\mathrm{F}}{#1}
+
+\DeclarePairedDelimiterX\setst[2]\lbrace\rbrace{#1\:\delimsize\vert\:\mathopen{}#2} % chktex 21
+\DeclarePairedDelimiterX\setwt[2]\lbrace\rbrace{#1\:{:}\:\mathopen{}#2}
+
+\DeclarePairedDelimiterX\ioo[2]\lparen\rparen{#1,\:#2}
+\DeclarePairedDelimiterX\ioc[2]\lparen\rbrack{#1,\:#2}
+\DeclarePairedDelimiterX\ico[2]\lbrack\rparen{#1,\:#2}
+\DeclarePairedDelimiterX\icc[2]\lbrack\rbrack{#1,\:#2}
+
+\NewDocumentCommand\restr{s m m}{%
+    \IfBooleanTF{#1}{%
+        \left. #2 \right\vert_{#3}%
+    }{%
+        #2 \arrowvert_{#3}%
+    }%
+}
+
+%*** Specials -------------------------------------------------
+\NewDocumentCommand{\eps}{}{\varepsilon}
+
+\NewDocumentCommand{\Simplex}{}{\Delta}
+\NewDocumentCommand{\St}{}{\mathsf{st}}
+\NewDocumentCommand{\Rf}{}{\mathsf{ref}}
+
+
+%*** Environment ==============================================
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{notation}[definition]{Notation}
+\newtheorem{assumption}[definition]{Assumption}
+
+\crefname{assumption}{Assumption}{Assumptions}
+\Crefname{assumption}{Assumption}{Assumptions}
+
+\theoremstyle{plain}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{corollary}[definition]{Corollary}
+
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{example}[definition]{Example}
+
+
+%*** Title ====================================================
+\title{Note on adaptive integration on simplices}
+
+\author{
+    Luiz \textsc{Faria}\({}^1\)
+    \and
+    Zo{\"\i}s \textsc{Moitier}\({}^2\)
+}
+
+\date{\raggedright\footnotesize%
+    \({^1}\)POEMS, CNRS, Inria, ENSTA Paris, Institut Polytechnique de Paris, 91120 Palaiseau, France.\\
+    \({}^2\)IDEFIX, Inria, ENSTA Paris, Institut Polytechnique de Paris, 91120 Palaiseau, France.\\[1em]
+    \large\Red{\textbf{\today}}
+}
+
+%*** Document =================================================
+\begin{document}
+
+\maketitle
+
+% \begin{abstract}
+%     \ldots
+% \end{abstract}
+
+% \setcounter{tocdepth}{2}
+% \tableofcontents
+
+
+%***===========================================================
+\section{Mathematical settings}
+
+For \( n  \in \bbN \), an \( n \)-simplex is an \( n \)-dimensional polytope which is the convex hull of its \( n+1 \) vertices \( v_0, \ldots, v_n \in \bbR^n \).
+We assume that the \( n+1 \) vertices are independent, which means that the \( n \) vectors \( \blr{v_1 - v_0, \ldots, v_n - v_0} \) are linearly independent.
+
+\begin{definition}
+    We define two special simplices.
+    \begin{itemize}
+        \item The \emph{standard \( n \)-simplex} (which is also a regular polytope):
+              \[
+                  \Simplex_\St^n \coloneqq \setst*{\lambda \in \bbR_+^{n+1}}{\lambda_0 + \cdots + \lambda_n = 1}.
+              \]
+
+        \item The \emph{reference \( n \)-simplex}:
+              \[
+                  \Simplex_\Rf \coloneqq \setst*{u \in \bbR_+^n}{u_1 + \cdots + u_n \leq 1}.
+              \]
+    \end{itemize}
+\end{definition}
+
+%***===========================================================
+% \section{Acknowledgement}
+
+
+%***===========================================================
+% \section{Funding}
+
+
+%*** Bibliography =============================================
+% \printbibliography%[heading=bibintoc,title={References}]
+
+
+%*** Appendix =================================================
+% \appendix
+
+%***===========================================================
+% \section{Miscellaneous}
+
+\end{document}

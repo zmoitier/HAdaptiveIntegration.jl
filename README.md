@@ -1,4 +1,4 @@
-# Adaptive quadrature on Simplices
+# Adaptive quadrature on simplices
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl/dev/)
