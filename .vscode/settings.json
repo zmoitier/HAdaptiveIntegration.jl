@@ -1,0 +1,9 @@
+{
+    "cSpell.enableFiletypes": [
+        "julia"
+    ],
+    "cSpell.words": [
+        "struct",
+        "testset"
+    ],
+}

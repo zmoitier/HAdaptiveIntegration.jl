@@ -57,7 +57,4 @@ struct EmbeddedQuadrature{N,T}
     weights_low::Vector{T}
 end
 
-
-
-
 end
