@@ -27,9 +27,30 @@ Segment(args...) = Segment{Float64}(args...)
 Triangle(args...) = Triangle{Float64}(args...)
 Tetrahedron(args...) = Tetrahedron{Float64}(args...)
 
-function (t::Triangle)(u)
+"""
+    parametrization(s::Simplex)
+
+Return an anonymous function that maps the reference simplex to the physical
+simplex. The reference simplex has vertices given by
+`(0,...,0),(0,...,0,1),(0,...,0,1,0),(1,0,...,0)`.
+"""
+function parametrization(t)
     v = t.points
-    return v[1] + (v[2] - v[1]) * u[1] + (v[3] - v[1]) * u[2]
+    e1 = (v[2] - v[1])
+    e2 = (v[3] - v[1])
+    return u -> v[1] + e1 * u[1] + e2 * u[2]
+end
+
+"""
+    measure(s::Simplex)
+
+The area/volume of the simplex.
+"""
+function measure(t::Triangle)
+    v = t.points
+    e1 = (v[2] - v[1])
+    e2 = (v[3] - v[1])
+    return 0.5 * norm(cross(e1, e2))
 end
 
 function subdivide(t::Triangle{T}) where {T}
