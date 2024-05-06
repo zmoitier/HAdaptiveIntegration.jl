@@ -54,10 +54,10 @@ function _integrate_with_error(
     nlow   = length(w_low)
     # assuming that nodes in quad_high are ordered so that the overlapping nodes
     # come first, add them up
-    S      = Base.promote_op((x, w) -> f(x) * w, SVector{N,T}, T)
-    I_high = zero(S)
-    I_low  = zero(S)
-    for i in 1:nlow
+    x1     = phi(xref[1])
+    I_high = f(x1) * w_high[1]
+    I_low  = f(x1) * w_low[1]
+    for i in 2:nlow
         x = phi(xref[i])
         v = f(x)
         I_high += v * w_high[i]
