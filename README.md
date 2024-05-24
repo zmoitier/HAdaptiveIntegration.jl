@@ -20,3 +20,21 @@
   - https://github.com/stevengj/cubature
   - https://github.com/eschnett/GrundmannMoeller.jl
   - https://github.com/eschnett/SimplexQuad.jl
+
+# To-Do
+
+1. Make it work!
+2. Make it right!
+3. Make it fast!
+
+* 1-simplex (a.k.a. segment):
+  - Add Gauss–Kronrod quadrature
+
+* 2-simplex (a.k.a. triangle):
+  - try log singularity and nearly singular
+
+* 3-simplex (a.k.a. tetrahedron):
+  - try to do something
+
+* n-simplex:
+  - hope for the best
