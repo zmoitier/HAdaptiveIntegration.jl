@@ -28,29 +28,65 @@ Triangle(args...) = Triangle{Float64}(args...)
 Tetrahedron(args...) = Tetrahedron{Float64}(args...)
 
 """
-    parametrization(s::Simplex)
+    map_from_ref(s::Simplex)
 
 Return an anonymous function that maps the reference simplex to the physical
 simplex. The reference simplex has vertices given by
 `(0,...,0),(0,...,0,1),(0,...,0,1,0),(1,0,...,0)`.
 """
-function parametrization(t)
-    v = t.points
-    e1 = (v[2] - v[1])
-    e2 = (v[3] - v[1])
-    return u -> v[1] + e1 * u[1] + e2 * u[2]
+function map_from_ref(s::Simplex{N,T,Np1})::Function where {N,T,Np1}
+    return u ->
+        (1 - sum(u)) * s.points[1] + sum(c * p for (c, p) in zip(u, s.points[2:Np1]))
 end
 
 """
     measure(s::Simplex)
 
-The area/volume of the simplex.
+The n-dimensional volume of the simplex.
 """
-function measure(t::Triangle)
+function measure(s::Simplex{N,T,Np1}) where {N,T,Np1}
+    v = s.points
+    return abs(det(reinterpret(reshape, T, [x - v[1] for x in v[2:Np1]]))) / factorial(N)
+end
+
+"""
+    measure(s::Segment)
+
+The length of the segment.
+"""
+function measure(s::Segment{T}) where {T}
+    return abs(s.points[1][1] - s.points[2][1])
+end
+
+"""
+    measure(t::Triangle)
+
+The area of the triangle.
+"""
+function measure(t::Triangle{T}) where {T}
     v = t.points
     e1 = (v[2] - v[1])
     e2 = (v[3] - v[1])
     return 0.5 * norm(cross(e1, e2))
+end
+
+"""
+    measure(t::Tetrahedron)
+
+The volume of the Tetrahedron.
+"""
+function measure(t::Tetrahedron{T}) where {T}
+    v = t.points
+    e1 = (v[2] - v[1])
+    e2 = (v[3] - v[1])
+    e3 = (v[4] - v[1])
+    return norm(dot(e1, cross(e2, e3))) / 6
+end
+
+function subdivide(s::Segment{T}) where {T}
+    a, b = s.points
+    m = (a + b) / 2
+    return (Segment(a, m), Segment(m, b))
 end
 
 function subdivide(t::Triangle{T}) where {T}
@@ -59,9 +95,9 @@ function subdivide(t::Triangle{T}) where {T}
     p23 = (p2 + p3) / 2
     p31 = (p3 + p1) / 2
     return (
-        Triangle{T}(p1, p12, p31),
-        Triangle{T}(p2, p23, p12),
-        Triangle{T}(p3, p31, p23),
-        Triangle{T}(p12, p23, p31),
+        Triangle(p1, p12, p31),
+        Triangle(p2, p23, p12),
+        Triangle(p3, p31, p23),
+        Triangle(p12, p23, p31),
     )
 end
