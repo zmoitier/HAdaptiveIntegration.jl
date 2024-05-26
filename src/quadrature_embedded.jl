@@ -1,8 +1,7 @@
 """
     struct EmbeddedQuadrature{N,T}
 
-An embedded quadrature rule for the `N`-dimensional reference simplex defined by
-the N+1 vertices `(0,...,0),(0,...,0,1),(0,...,0,1,0),(1,0,...,0)`. The low
+An embedded quadrature rule for the reference N-simplex. The low
 order quadrature uses the first `n` `nodes`, where `n = length(weights_low)`.
 """
 struct EmbeddedQuadrature{N,T}
@@ -24,36 +23,38 @@ struct EmbeddedQuadrature{N,T}
     end
 end
 
-function _integrate_with_error(
-    f,
-    t::Simplex{N},
-    quad::EmbeddedQuadrature{N,T},
+size(quad::EmbeddedQuadrature) = (length(quad.weights_low), length(quad.weights_high))
+
+function (quad::EmbeddedQuadrature{N,T})(
+    fct::Function,
+    simplex::Simplex{N},
     norm = LinearAlgebra.norm,
 ) where {N,T}
-    mu     = 2 * measure(t)
-    phi    = map_from_ref(t)
-    xref   = quad.nodes
-    w_high = quad.weights_high
-    w_low  = quad.weights_low
-    nhigh  = length(w_high)
-    nlow   = length(w_low)
+    mu            = measure(simplex)
+    phi           = map_from_ref(simplex)
+    x_ref         = quad.nodes
+    w_low         = quad.weights_low
+    w_high        = quad.weights_high
+    n_low, n_high = size(quad)
+
     # assuming that nodes in quad_high are ordered so that the overlapping nodes
     # come first, add them up
-    x1     = phi(xref[1])
-    I_high = f(x1) * w_high[1]
-    I_low  = f(x1) * w_low[1]
-    for i in 2:nlow
-        x = phi(xref[i])
-        v = f(x)
+    x      = phi(x_ref[1])
+    I_high = fct(x) * w_high[1]
+    I_low  = fct(x) * w_low[1]
+    for i in 2:n_low
+        x = phi(x_ref[i])
+        v = fct(x)
         I_high += v * w_high[i]
         I_low += v * w_low[i]
     end
+
     # now compute the rest of the high order quadrature
-    for i in nlow+1:nhigh
-        x = phi(xref[i])
-        v = f(x)
-        I_high += v * w_high[i]
+    for i in n_low+1:n_high
+        x = phi(x_ref[i])
+        I_high += fct(x) * w_high[i]
     end
+
     return mu * I_high, mu * norm(I_high - I_low)
 end
 

@@ -25,7 +25,7 @@ function _integrate(
     buf,
 ) where {N,T}
     nsplit = 0
-    I, E = _integrate_with_error(f, s, quad)
+    I, E = quad(f, s)
     # a quick check to see if splitting is really needed
     if E < atol || E < rtol * norm(I) || nsplit >= maxsplit
         return I, E
@@ -46,7 +46,7 @@ function _integrate(
         E -= Ec
         for child in subdivide(sc)
             # since the jacobian is constant, factor it out of the integration
-            Inew, Enew = _integrate_with_error(f, child, quad)
+            Inew, Enew = quad(f, child)
             I += Inew
             E += Enew
             push!(heap, (child, Inew, Enew))

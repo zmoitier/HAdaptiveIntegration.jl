@@ -10,6 +10,10 @@ using Test
 
         @test ASQ.check_order(ASQ.SEGMENT_G7, 13)
         @test ASQ.check_order(ASQ.SEGMENT_K15, 23)
+
+        embd_quad = ASQ.EmbeddedQuadrature(; name = "segment-G7K15")
+        simplex = ASQ.Simplex((0,), (2,))
+        @show embd_quad(x -> exp(x[1]), simplex)
     end
 
     # @testset "Simplex" begin
