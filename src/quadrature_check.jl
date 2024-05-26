@@ -1,30 +1,25 @@
 function check_order(quad::Quadrature{N,T}, order::Int) where {N,T}
+    rtol = 10 * eps(T)
     exp_val = _exponent_to_value(N, order + 1)
 
     all_true = true
     for k in 0:order
         for α in _tot_deg(k, N)
             fct = x -> prod(xᵢ^αᵢ for (xᵢ, αᵢ) in zip(x, α))
-            val = exp_val[α]
-            if val == 0
-                atol = √eps(T)
-            else
-                atol = 0
-            end
-            all_true = all_true & isapprox(quad(fct), T(val); atol = atol)
+            is_integrated = isapprox(quad(fct), T(exp_val[α]); rtol = rtol)
+            all_true = all_true & is_integrated
+
+            @debug α is_integrated abs(quad(fct) / T(exp_val[α]) - T(1))
         end
     end
 
     all_true_next_order = true
     for α in _tot_deg(order + 1, N)
         fct = x -> prod(xᵢ^αᵢ for (xᵢ, αᵢ) in zip(x, α))
-        val = exp_val[α]
-        if val == 0
-            atol = √eps(T)
-        else
-            atol = 0
-        end
-        all_true_next_order = all_true_next_order & isapprox(quad(fct), T(0); atol = atol)
+        is_integrated = isapprox(quad(fct), T(exp_val[α]); rtol = rtol)
+        all_true_next_order = all_true_next_order & is_integrated
+
+        @debug α is_integrated abs(quad(fct) / T(exp_val[α]) - T(1))
     end
 
     return all_true & !all_true_next_order
@@ -39,9 +34,9 @@ function _exponent_to_value(dim::Int, order::Int)
 end
 
 function _seg_ref_val(order::Int)
-    exponent_to_value = DefaultDict{Tuple{Int},Rational}(0 // 1)
-    for k in 0:2:order
-        exponent_to_value[(k,)] = 2 // (k + 1)
+    exponent_to_value = Dict{Tuple{Int},Rational{Int64}}()
+    for k in 0:order
+        exponent_to_value[(k,)] = 1 // (k + 1)
     end
     return exponent_to_value
 end

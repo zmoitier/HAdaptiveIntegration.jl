@@ -5,11 +5,11 @@ using Test
     # include("aqua_test.jl")
 
     @testset "Segment" begin
-        segment = ASQ.Segment((-1.0), (1.0))
-        @test ASQ.measure(segment) ≈ 2
+        segment = ASQ.Segment((0.0), (1.0))
+        @test ASQ.measure(segment) ≈ 1
 
-        quad = ASQ.EmbeddedQuadrature(; name = "segment-G7K15")
-        # I, E = ASQ._integrate_with_error(f, tri, quad)
+        @test ASQ.check_order(ASQ.SEGMENT_G7, 13)
+        @test ASQ.check_order(ASQ.SEGMENT_K15, 23)
     end
 
     # @testset "Simplex" begin

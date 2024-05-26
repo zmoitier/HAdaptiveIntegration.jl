@@ -1,13 +1,18 @@
 module AdaptiveSimplexQuadrature
 
+import Base: length, size
+
 using DataStructures
 using LinearAlgebra
 using StaticArrays
 
-include("quadrules.jl")
 include("simplex.jl")
-include("embeddedquadrature.jl")
+
+include("quadrature.jl")
+include("quadrature_embedded.jl")
+include("quadrature_rules.jl")
+include("quadrature_check.jl")
+
 include("integrate.jl")
-include("reference_values.jl")
 
 end
