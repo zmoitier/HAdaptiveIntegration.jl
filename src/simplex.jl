@@ -79,64 +79,49 @@ function map_to_ref(s::Simplex{N,T,Np1})::Function where {N,T,Np1}
 end
 
 """
-    measure(s::Simplex)
+    det_jac(s::Simplex)
 
-The n-dimensional volume of the simplex.
+The determinant of the Jacobian of the map from the reference simplex to the physical
+simplex.
 """
-function measure(s::Simplex{N,T,Np1}) where {N,T,Np1}
+function det_jac(s::Simplex{N,T,Np1}) where {N,T,Np1}
     v = s.points
-    return abs(det(reinterpret(reshape, T, [x - v[1] for x in v[2:Np1]]))) / factorial(N)
+    return abs(det(reinterpret(reshape, T, [x - v[1] for x in v[2:Np1]])))
 end
 
 """
-    measure(s::Segment)
+    det_jac(s::Segment)
 
-The length of the segment.
+The determinant of the Jacobian of the map from the reference simplex to the physical
+simplex.
 """
-function measure(s::Segment{T}) where {T}
+function det_jac(s::Segment{T}) where {T}
     return abs(s.points[1][1] - s.points[2][1])
 end
 
 """
-    measure(t::Triangle)
+    det_jac(t::Triangle)
 
-The area of the triangle.
+The determinant of the Jacobian of the map from the reference simplex to the physical
+simplex.
 """
-function measure(t::Triangle{T}) where {T}
+function det_jac(t::Triangle{T}) where {T}
     v = t.points
     e1 = (v[2] - v[1])
     e2 = (v[3] - v[1])
-    return norm(cross(e1, e2)) / 2
+    return norm(cross(e1, e2))
 end
 
 """
-    measure(t::Tetrahedron)
+    det_jac(t::Tetrahedron)
 
-The volume of the Tetrahedron.
+The determinant of the Jacobian of the map from the reference simplex to the physical
+simplex.
 """
-function measure(t::Tetrahedron{T}) where {T}
+function det_jac(t::Tetrahedron{T}) where {T}
     v = t.points
     e1 = (v[2] - v[1])
     e2 = (v[3] - v[1])
     e3 = (v[4] - v[1])
-    return norm(dot(e1, cross(e2, e3))) / 6
-end
-
-function subdivide(s::Segment{T}) where {T}
-    a, b = s.points
-    m = (a + b) / 2
-    return (Segment(a, m), Segment(m, b))
-end
-
-function subdivide(t::Triangle{T}) where {T}
-    p1, p2, p3 = t.points
-    p12 = (p1 + p2) / 2
-    p23 = (p2 + p3) / 2
-    p31 = (p3 + p1) / 2
-    return (
-        Triangle(p1, p12, p31),
-        Triangle(p2, p23, p12),
-        Triangle(p3, p31, p23),
-        Triangle(p12, p23, p31),
-    )
+    return norm(dot(e1, cross(e2, e3)))
 end

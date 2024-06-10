@@ -7,6 +7,7 @@ using LinearAlgebra
 using StaticArrays
 
 include("simplex.jl")
+include("subdivision.jl")
 
 include("quadrature.jl")
 include("quadrature_embedded.jl")

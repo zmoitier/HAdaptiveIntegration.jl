@@ -27,9 +27,6 @@
 2. Make it right!
 3. Make it fast!
 
-* 1-simplex (a.k.a. segment):
-  - Add Gauss–Kronrod quadrature
-
 * 2-simplex (a.k.a. triangle):
   - try log singularity and nearly singular
 
@@ -38,3 +35,7 @@
 
 * n-simplex:
   - hope for the best
+
+# Remark
+
+* If you show the measure of the simplex in the integrate function, they seem to be way smaller than the `rtol`. Might need to add a test on the size which could speed up the computation.

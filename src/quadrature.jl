@@ -39,7 +39,7 @@ Maps a quadrature on the simplex `simplex` to the quadrature on the reference N-
 """
 function map_quad(quad::Quadrature{N,T}, simplex::Simplex{N,T,Np1}) where {N,T,Np1}
     Φ = map_to_ref(simplex)
-    c = 1 / (measure(simplex) * factorial(N))
+    c = 1 / (det_jac(simplex) * factorial(N))
 
     return Quadrature(Φ.(quad.nodes), c .* quad.weights)
 end

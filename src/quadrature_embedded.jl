@@ -30,7 +30,7 @@ function (quad::EmbeddedQuadrature{N,T})(
     simplex::Simplex{N},
     norm = LinearAlgebra.norm,
 ) where {N,T}
-    mu            = measure(simplex)
+    mu            = det_jac(simplex)
     phi           = map_from_ref(simplex)
     x_ref         = quad.nodes
     w_low         = quad.weights_low

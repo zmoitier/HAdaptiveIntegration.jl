@@ -188,15 +188,34 @@ We assume that the \( n+1 \) vertices are independent, which means that the \( n
     \begin{itemize}
         \item The \emph{standard \( n \)-simplex} (which is also a regular polytope):
               \[
-                  \Simplex_\St^n \coloneqq \setst*{\lambda \in \bbR_+^{n+1}}{\lambda_0 + \cdots + \lambda_n = 1} \subset \bbR^{n+1}.
+                  \Simplex_\St^n \coloneqq \setst*{\lambda \in \bbR_+^{n+1}}{\lambda_0 + \cdots + \lambda_n = 1} \subset \bbR^{n+1},
               \]
+              which is also defined by being the convex-hull of the \( n+1 \) canonical basis vectors (\( \plr{1,0,\ldots, 0} \), \ldots) in \( \bbR^{n+1} \).
 
         \item The \emph{reference \( n \)-simplex}:
               \[
-                  \Simplex_\Rf^n \coloneqq \setst*{u \in \bbR_+^n}{u_1 + \cdots + u_n \leq 1} \subset \bbR^n.
+                  \Simplex_\Rf^n \coloneqq \setst*{u \in \bbR_+^n}{u_1 + \cdots + u_n \leq 1} \subset \bbR^n,
               \]
+              which is also defined by being the convex-hull of the vector \( \plr{0, \ldots, 0} \) and of the \( n \) canonical basis vectors (\( \plr{1,0,\ldots, 0} \), \ldots) in \( \bbR^n \).
     \end{itemize}
+    We drop the superscript \( n \) when it is clear from the context.
 \end{definition}
+
+Let \( \Simplex \) be an \( n \)-simplex defined by the points \( v_0, \ldots, v_n \) and \( \Phi_\Simplex \colon \Simplex_\Rf \to \Simplex \) the affine map from the reference simplex to the simplex \( \Simplex \) defined by \( \Phi_\Simplex \colon u \mapsto A_\Simplex u + v_0 \) where
+\[
+    A_\Simplex = \begin{pmatrix}
+        v_1 - v_0 & \cdots & v_n - v_0
+    \end{pmatrix}.
+\]
+\begin{align*}
+    \int_\Simplex f(x) \di{x}
+     & = \int_{\Simplex_\Rf} f\plr*{\Phi_\Simplex(u)} \ \abs*{\det A_\Simplex} \di{u},
+    \\
+     & = \abs*{\det A_\Simplex} \int_{\Simplex_\Rf} f\plr*{\Phi_\Simplex(u)} \ \abs*{\det A_\Simplex} \di{u},
+    \\
+     & \approx \abs*{\det A_\Simplex} \sum_{i=1}^N w_i f\plr*{\Phi_\Simplex(u_i)},
+\end{align*}
+
 
 %***===========================================================
 % \section{Acknowledgement}

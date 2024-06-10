@@ -2,58 +2,61 @@
     integrate(f, s::Simplex[, quad; atol = 0, rtol = 0, maxsplit, norm])
 """
 function integrate(
-    f,
-    s::Simplex{N,T},
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(s);
+    fct,
+    simplex::Simplex{N,T},
+    quad::EmbeddedQuadrature{N,T} = default_quadrature(simplex);
     atol = zero(T),
     rtol = atol == zero(T) ? sqrt(eps(T)) : zero(T),
     maxsplit = 1000,
     norm = LinearAlgebra.norm,
     heap = nothing,
 ) where {N,T}
-    return _integrate(f, s, quad, atol, rtol, maxsplit, norm, heap)
+    return _integrate(fct, simplex, quad, atol, rtol, maxsplit, norm, heap)
 end
 
 function _integrate(
-    f,
-    s::Simplex{N,T},
+    fct,
+    simplex::Simplex{N,T},
     quad::EmbeddedQuadrature{N,T},
     atol,
     rtol,
     maxsplit,
     norm,
-    buf,
+    buffer,
 ) where {N,T}
     nsplit = 0
-    I, E = quad(f, s)
+    I, E = quad(fct, simplex)
+
     # a quick check to see if splitting is really needed
     if E < atol || E < rtol * norm(I) || nsplit >= maxsplit
         return I, E
     end
     # split is needed, so prepare heap if needed, push the element to the heap
     # and begin
-    heap = if isnothing(buf)
+    heap = if isnothing(buffer)
         ord = Base.Order.By(el -> -el[3])
         BinaryHeap{Tuple{Simplex{N,T},typeof(I),typeof(E)}}(ord)
     else
-        empty!(buf.valtree)
-        buf
+        empty!(buffer.valtree)
+        buffer
     end
-    push!(heap, (s, I, E))
+
+    push!(heap, (simplex, I, E))
     while E > atol && E > rtol * norm(I) && nsplit < maxsplit
         sc, Ic, Ec = pop!(heap)
         I -= Ic
         E -= Ec
         for child in subdivide(sc)
-            # since the jacobian is constant, factor it out of the integration
-            Inew, Enew = quad(f, child)
+            Inew, Enew = quad(fct, child)
             I += Inew
             E += Enew
             push!(heap, (child, Inew, Enew))
         end
         nsplit += 1
     end
+
     nsplit >= maxsplit && @warn "maximum number of steps reached"
+
     return I, E
 end
 
