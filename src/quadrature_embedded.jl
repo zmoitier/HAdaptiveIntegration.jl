@@ -23,8 +23,41 @@ struct EmbeddedQuadrature{N,T}
     end
 end
 
+"""
+    size(quad::EmbeddedQuadrature)
+
+Return the number of nodes in the low and high order quadrature.
+"""
 size(quad::EmbeddedQuadrature) = (length(quad.weights_low), length(quad.weights_high))
 
+"""
+    embedded_from_2quad(quad_low, quad_high, name)
+
+Create an embedded quadrature rule from two quadrature rules.
+"""
+function embedded_from_2quad(
+    quad_low::Quadrature{N,T},
+    quad_high::Quadrature{N,T},
+    name::String,
+) where {N,T}
+    return EmbeddedQuadrature(
+        quad_high.nodes,
+        quad_low.nodes,
+        quad_high.weights,
+        quad_low.weights,
+        name,
+    )
+end
+
+"""
+    (quad::EmbeddedQuadrature{N,T})(
+    fct::Function,
+    simplex::Simplex{N},
+    norm = LinearAlgebra.norm,
+) where {N,T}
+
+Compute the integral of `fct` over the simplex using the embedded quadrature.
+"""
 function (quad::EmbeddedQuadrature{N,T})(
     fct::Function,
     simplex::Simplex{N},
@@ -60,26 +93,23 @@ end
 
 # default quadrature rule for simplices
 
-const PREDEFINED_QUADRATURES = ["segment-G7K15", "triangle-LaurieRadon"]
+const PREDEFINED_QUADRATURES = Set(["segment-G7K15", "triangle-LaurieRadon"])
 
+"""
+    EmbeddedQuadrature(; name::String)
+
+Create an embedded quadrature rule with the given `name`.
+"""
 function EmbeddedQuadrature(; name::String)
     name in PREDEFINED_QUADRATURES || error(
         "Unknown quadrature rule: $name. Options are: $(join(PREDEFINED_QUADRATURES, ", "))",
     )
 
     if name == "segment-G7K15"
-        nodes_low    = SEGMENT_G7.nodes
-        weights_low  = SEGMENT_G7.weights
-        node_high    = SEGMENT_K15.nodes
-        weights_high = SEGMENT_K15.weights
-        return EmbeddedQuadrature(node_high, nodes_low, weights_high, weights_low, name)
+        return embedded_from_2quad(SEGMENT_G7, SEGMENT_K15, "G7K15")
 
     elseif name == "triangle-LaurieRadon"
-        nodes_low    = TRIANGLE_R5N7.nodes
-        weights_low  = TRIANGLE_R5N7.weights
-        node_high    = TRIANGLE_L8N19.nodes
-        weights_high = TRIANGLE_L8N19.weights
-        return EmbeddedQuadrature(node_high, nodes_low, weights_high, weights_low, name)
+        return embedded_from_2quad(TRIANGLE_R5N7, TRIANGLE_L8N19, "LaurieRadon")
 
     else
         error("Unknown rule.")

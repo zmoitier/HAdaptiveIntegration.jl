@@ -1,23 +1,25 @@
 """
-    integrate(f, s::Simplex[, quad; atol = 0, rtol = 0, maxsplit, norm])
+    integrate(f, s::Simplex[, quad, subdiv_algo; atol = 0, rtol = 0, maxsplit, norm])
 """
 function integrate(
-    fct,
+    fct::Function,
     simplex::Simplex{N,T},
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(simplex);
+    quad::EmbeddedQuadrature{N,T} = default_quadrature(simplex),
+    subdiv_algo::Function = default_subdivision(simplex);
     atol = zero(T),
     rtol = atol == zero(T) ? sqrt(eps(T)) : zero(T),
     maxsplit = 1000,
     norm = LinearAlgebra.norm,
     heap = nothing,
 ) where {N,T}
-    return _integrate(fct, simplex, quad, atol, rtol, maxsplit, norm, heap)
+    return _integrate(fct, simplex, quad, subdiv_algo, atol, rtol, maxsplit, norm, heap)
 end
 
 function _integrate(
     fct,
     simplex::Simplex{N,T},
     quad::EmbeddedQuadrature{N,T},
+    subdiv_algo::Function,
     atol,
     rtol,
     maxsplit,
@@ -46,7 +48,7 @@ function _integrate(
         sc, Ic, Ec = pop!(heap)
         I -= Ic
         E -= Ec
-        for child in subdivide(sc)
+        for child in subdiv_algo(sc)
             Inew, Enew = quad(fct, child)
             I += Inew
             E += Enew
@@ -61,13 +63,13 @@ function _integrate(
 end
 
 function allocate_buffer(
-    f,
-    s::Simplex{N,T},
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(s),
+    fct,
+    simplex::Simplex{N,T},
+    quad::EmbeddedQuadrature{N,T} = default_quadrature(simplex),
 ) where {N,T}
     # type of element that will be returned by by quad. Pay the cost of single
     # call to figure this out
-    I, E = _integrate_with_error(f, s, quad)
+    I, E = quad(fct, simplex)
     # the heap of adaptive quadratures have elements of the form (s,I,E), where
     # I and E are the value and error estimate over the simplex s. The ordering
     # used is based the maximum error
