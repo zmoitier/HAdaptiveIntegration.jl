@@ -1,8 +1,18 @@
 """
     struct EmbeddedQuadrature{N,T}
 
-An embedded quadrature rule for the reference N-simplex. The low
-order quadrature uses the first `n` `nodes`, where `n = length(weights_low)`.
+An embedded quadrature rule for the a reference domain.
+
+## Fields:
+- `nodes::Vector{SVector{N,T}}`: the quadrature nodes
+- `weights_high::Vector{T}`: the quadrature weights for the high order
+  quadrature
+- `weights_low::Vector{T}`: the quadrature weights for the low order
+  quadrature
+- `label::String`: a label for the quadrature rule
+
+Note that the low order quadrature uses `nodes[1:n]` as its nodes, where `n =
+length(weights_low)`.
 """
 struct EmbeddedQuadrature{N,T}
     nodes::Vector{SVector{N,T}}
@@ -17,58 +27,35 @@ struct EmbeddedQuadrature{N,T}
         weights_low::Vector{T},
         label::String,
     ) where {N,T}
-        @assert nodes_high[1:length(nodes_low)] == nodes_low
-
+        @assert view(nodes_high, 1:length(nodes_low)) == nodes_low
         return new{N,T}(nodes_high, weights_high, weights_low, label)
     end
 end
 
 """
-    size(quad::EmbeddedQuadrature)
+    embedded_from_2quad(quad_low, quad_high, name, T = Float64)
 
-Return the number of nodes in the low and high order quadrature.
+Create an embedded quadrature rule from two quadrature rules. The nodes and
+weights will be represented as `SVector{N,T}` and `T`, respectively.
 """
-size(quad::EmbeddedQuadrature) = (length(quad.weights_low), length(quad.weights_high))
-
-"""
-    embedded_from_2quad(quad_low, quad_high, name)
-
-Create an embedded quadrature rule from two quadrature rules.
-"""
-function embedded_from_2quad(
-    quad_low::Quadrature{N,T},
-    quad_high::Quadrature{N,T},
-    name::String,
-) where {N,T}
+function embedded_from_2quad(quad_low, quad_high, name::String, T::DataType = Float64)
+    N = length(quad_low.nodes[1])
     return EmbeddedQuadrature(
-        quad_high.nodes,
-        quad_low.nodes,
-        quad_high.weights,
-        quad_low.weights,
+        SVector{N,T}.(quad_high.nodes),
+        SVector{N,T}.(quad_low.nodes),
+        T.(quad_high.weights),
+        T.(quad_low.weights),
         name,
     )
 end
 
-"""
-    (quad::EmbeddedQuadrature{N,T})(
-    fct::Function,
-    simplex::Simplex{N},
-    norm = LinearAlgebra.norm,
-) where {N,T}
-
-Compute the integral of `fct` over the simplex using the embedded quadrature.
-"""
-function (quad::EmbeddedQuadrature{N,T})(
-    fct::Function,
-    simplex::Simplex{N},
-    norm = LinearAlgebra.norm,
-) where {N,T}
-    mu            = det_jac(simplex)
-    phi           = map_from_ref(simplex)
+function (quad::EmbeddedQuadrature)(fct::Function, domain, norm = LinearAlgebra.norm)
+    mu            = det_jac(domain)
+    phi           = map_from_ref(domain)
     x_ref         = quad.nodes
     w_low         = quad.weights_low
     w_high        = quad.weights_high
-    n_low, n_high = size(quad)
+    n_low, n_high = length(quad.weights_low), length(quad.weights_high)
 
     # assuming that nodes in quad_high are ordered so that the overlapping nodes
     # come first, add them up
@@ -88,34 +75,57 @@ function (quad::EmbeddedQuadrature{N,T})(
         I_high += fct(x) * w_high[i]
     end
 
+    # return the integral and the error estimate
     return mu * I_high, mu * norm(I_high - I_low)
 end
 
-# default quadrature rule for simplices
+# default quadrature rules
 
-const PREDEFINED_QUADRATURES = Set(["segment-G7K15", "triangle-LaurieRadon"])
+const PREDEFINED_QUADRATURES =
+    Set(["segment-G7K15", "triangle-LaurieRadon", "square-CoolsHaegemans"])
 
 """
     EmbeddedQuadrature(; name::String)
 
 Create an embedded quadrature rule with the given `name`.
 """
-function EmbeddedQuadrature(; name::String)
+function EmbeddedQuadrature(; name::String, datatype::DataType = Float64)
     name in PREDEFINED_QUADRATURES || error(
         "Unknown quadrature rule: $name. Options are: $(join(PREDEFINED_QUADRATURES, ", "))",
     )
 
     if name == "segment-G7K15"
-        return embedded_from_2quad(SEGMENT_G7, SEGMENT_K15, "G7K15")
-
+        return embedded_from_2quad(
+            SEGMENT_GAUSS_O13_N7,
+            SEGMENT_KRONROD_O20_N15,
+            "G7K15",
+            datatype,
+        )
     elseif name == "triangle-LaurieRadon"
-        return embedded_from_2quad(TRIANGLE_R5N7, TRIANGLE_L8N19, "LaurieRadon")
-
+        return embedded_from_2quad(
+            TRIANGLE_RADON_O5_N7,
+            TRIANGLE_LAURIE_O8_N19,
+            "LaurieRadon",
+            datatype,
+        )
+    elseif name == "square-CoolsHaegemans"
+        return embedded_from_2quad(
+            SQUARE_COOLS_HAEGEMANS_O7_N21,
+            SQUARE_GAUSS_O9_N25,
+            "CoolsHaegemans",
+            datatype,
+        )
     else
         error("Unknown rule.")
     end
 end
 
-#TODO: use type information when creating defaults (e.g. single-precision)
-default_quadrature(::Segment) = EmbeddedQuadrature(; name = "segment-G7K15")
-default_quadrature(::Triangle) = EmbeddedQuadrature(; name = "triangle-LaurieRadon")
+function default_quadrature(::Segment, T)
+    return EmbeddedQuadrature(; name = "segment-G7K15", datatype = T)
+end
+function default_quadrature(::Triangle, T)
+    return EmbeddedQuadrature(; name = "triangle-LaurieRadon", datatype = T)
+end
+function default_quadrature(::Square, T)
+    return EmbeddedQuadrature(; name = "square-CoolsHaegemans", datatype = T)
+end
