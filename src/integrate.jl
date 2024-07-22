@@ -3,21 +3,21 @@
 """
 function integrate(
     fct::Function,
-    simplex::Simplex{N,T},
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(simplex),
-    subdiv_algo::Function = default_subdivision(simplex);
+    domain,
+    quad::EmbeddedQuadrature{N,T} = default_quadrature(domain),
+    subdiv_algo::Function = default_subdivision(domain);
     atol = zero(T),
     rtol = atol == zero(T) ? sqrt(eps(T)) : zero(T),
-    maxsplit = 1000,
+    maxsplit = 10_000,
     norm = LinearAlgebra.norm,
     heap = nothing,
 ) where {N,T}
-    return _integrate(fct, simplex, quad, subdiv_algo, atol, rtol, maxsplit, norm, heap)
+    return _integrate(fct, domain, quad, subdiv_algo, atol, rtol, maxsplit, norm, heap)
 end
 
 function _integrate(
     fct,
-    simplex::Simplex{N,T},
+    domain,
     quad::EmbeddedQuadrature{N,T},
     subdiv_algo::Function,
     atol,
@@ -27,7 +27,7 @@ function _integrate(
     buffer,
 ) where {N,T}
     nsplit = 0
-    I, E = quad(fct, simplex)
+    I, E = quad(fct, domain)
 
     # a quick check to see if splitting is really needed
     if E < atol || E < rtol * norm(I) || nsplit >= maxsplit
@@ -37,13 +37,13 @@ function _integrate(
     # and begin
     heap = if isnothing(buffer)
         ord = Base.Order.By(el -> -el[3])
-        BinaryHeap{Tuple{Simplex{N,T},typeof(I),typeof(E)}}(ord)
+        BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(ord)
     else
         empty!(buffer.valtree)
         buffer
     end
 
-    push!(heap, (simplex, I, E))
+    push!(heap, (domain, I, E))
     while E > atol && E > rtol * norm(I) && nsplit < maxsplit
         sc, Ic, Ec = pop!(heap)
         I -= Ic

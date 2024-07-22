@@ -13,7 +13,6 @@ function check_order(quad::Quadrature{N,T}, order::Int)::Bool where {N,T}
             fct = x -> prod(xᵢ^αᵢ for (xᵢ, αᵢ) in zip(x, α))
             is_integrated = isapprox(quad(fct), T(exp_val[α]); rtol = rtol)
             all_true = all_true & is_integrated
-
             @debug α is_integrated abs(quad(fct) / T(exp_val[α]) - T(1))
         end
     end
@@ -80,4 +79,31 @@ function _multi_index(tot_deg::Int, N::Int)::Vector{NTuple{N,Int}}
     end
 
     return [(d, t...) for d in tot_deg:-1:0 for t in _multi_index(tot_deg - d, N - 1)]
+end
+
+"""
+    check_order_square(quad::Quadrature{N,T}, order::Int)::Bool where {N,T}
+
+Check if the quadrature rule `quad` has order `order` by integrating monomials.
+"""
+function check_order_square(quad::Quadrature{N,T}, order::Int)::Bool where {N,T}
+    rtol = 10 * eps(T)
+    all_true = true
+    all_true_next_order = true
+    for i in 0:order+1
+        for j in 0:order+1
+            fct = x -> x[1]^i * x[2]^j
+            approx = quad(fct)
+            exact = 1 // ((i + 1) * (j + 1))
+            is_integrated = isapprox(approx, exact; rtol)
+            if i + j ≤ order
+                all_true = all_true & is_integrated
+                @debug (i, j) is_integrated approx exact abs(approx / exact - 1)
+            elseif i + j == order + 1
+                all_true_next_order = all_true_next_order & is_integrated
+                @debug (i, j) is_integrated approx exact abs(approx / exact - 1)
+            end
+        end
+    end
+    return all_true & !all_true_next_order
 end

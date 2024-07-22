@@ -1,19 +1,22 @@
 module AdaptiveSimplexQuadrature
 
-import Base: length, size
-
 using DataStructures
 using LinearAlgebra
 using StaticArrays
 
+# Supported integration domains
 include("simplex.jl")
-include("subdivision.jl")
+include("hyperrectangle.jl")
 
-include("quadrature.jl")
-include("quadrature_embedded.jl")
+# Tabulated quadratures for supported domains
 include("quadrature_rules.jl")
-include("quadrature_check.jl")
+
+# Subdivision strategies for various domains
+include("subdivision.jl")
+include("quadrature_embedded.jl")
 
 include("integrate.jl")
+
+include("quadrature_check.jl")
 
 end
