@@ -1,5 +1,5 @@
 % !TeX root = main.tex
-% LTeX: language=en-US
+% LTeX: enabled=false
 
 \documentclass[english,12pt]{article}
 
@@ -23,7 +23,7 @@
 \usepackage{tikz}
 
 %*** Math -----------------------------------------------------
-\usepackage{siunitx}
+\usepackage{mathrsfs,bm,siunitx}
 \usepackage[capitalize,nameinlink]{cleveref}
 \numberwithin{equation}{section}
 \raggedbottom{}
@@ -76,7 +76,7 @@
 \NewDocumentCommand{\bbZ}{}{\mathbb{Z}}
 
 %*** mathcal --------------------------------------------------
-\NewDocumentCommand{\calT}{}{\mathcal{T}}
+\NewDocumentCommand{\calX}{}{\mathcal{X}}
 
 %*** Constants ------------------------------------------------
 \NewDocumentCommand{\ex}{}{\mathsf{e}}
@@ -86,6 +86,10 @@
 \NewDocumentCommand{\spC}{}{\mathscr{C}}
 \NewDocumentCommand{\spL}{}{\mathrm{L}}
 \NewDocumentCommand{\spH}{}{\mathrm{H}}
+
+\NewDocumentCommand{\spPolyP}{o}{\IfNoValueTF{#1}{\mathbb{P}}{\mathbb{P}_{#1}}}
+\NewDocumentCommand{\spPolyH}{m}{\mathbb{H}_{#1}}
+\NewDocumentCommand{\spPolyQ}{m}{\mathbb{Q}_{#1}}
 
 %*** Keywords -------------------------------------------------
 \NewDocumentCommand{\loc}{}{\mathrm{loc}}
@@ -123,11 +127,18 @@
 }
 
 %*** Specials -------------------------------------------------
+\RenewDocumentCommand{\vec}{m}{\bm{#1}}
 \NewDocumentCommand{\eps}{}{\varepsilon}
 
-\NewDocumentCommand{\Simplex}{}{\Delta}
+\NewDocumentCommand{\Simplex}{}{\triangle}
+\NewDocumentCommand{\Orthotope}{}{\square}
 \NewDocumentCommand{\St}{}{\mathsf{st}}
 \NewDocumentCommand{\Rf}{}{\mathsf{ref}}
+
+\NewDocumentCommand{\Quad}{}{\mathcal{Q}}
+\NewDocumentCommand{\Err}{}{\mathcal{E}}
+\NewDocumentCommand{\lo}{}{\mathsf{L}}
+\NewDocumentCommand{\hi}{}{\mathsf{H}}
 
 
 %*** Environment ==============================================
@@ -150,7 +161,7 @@
 
 
 %*** Title ====================================================
-\title{Note on adaptive integration on simplices}
+\title{Note on adaptive integration on simplices and orthotopes}
 
 \author{
     Luiz \textsc{Faria}\({}^1\)
@@ -169,52 +180,16 @@
 
 \maketitle
 
-% \begin{abstract}
-%     \ldots
-% \end{abstract}
+\begin{abstract}
+    Note on adaptive integration using embedded quadrature rule on simplices and orthotopes.
+\end{abstract}
 
-% \setcounter{tocdepth}{2}
-% \tableofcontents
+\setcounter{tocdepth}{2}
+\tableofcontents
 
-
-%***===========================================================
-\section{Mathematical settings}
-
-For \( n  \in \bbN \), an \( n \)-simplex is an \( n \)-dimensional polytope which is the convex hull of its \( n+1 \) vertices \( v_0, \ldots, v_n \in \bbR^n \).
-We assume that the \( n+1 \) vertices are independent, which means that the \( n \) vectors \( \blr{v_1 - v_0, \ldots, v_n - v_0} \) are linearly independent.
-
-\begin{definition}
-    We define two special simplices.
-    \begin{itemize}
-        \item The \emph{standard \( n \)-simplex} (which is also a regular polytope):
-              \[
-                  \Simplex_\St^n \coloneqq \setst*{\lambda \in \bbR_+^{n+1}}{\lambda_0 + \cdots + \lambda_n = 1} \subset \bbR^{n+1},
-              \]
-              which is also defined by being the convex-hull of the \( n+1 \) canonical basis vectors (\( \plr{1,0,\ldots, 0} \), \ldots) in \( \bbR^{n+1} \).
-
-        \item The \emph{reference \( n \)-simplex}:
-              \[
-                  \Simplex_\Rf^n \coloneqq \setst*{u \in \bbR_+^n}{u_1 + \cdots + u_n \leq 1} \subset \bbR^n,
-              \]
-              which is also defined by being the convex-hull of the vector \( \plr{0, \ldots, 0} \) and of the \( n \) canonical basis vectors (\( \plr{1,0,\ldots, 0} \), \ldots) in \( \bbR^n \).
-    \end{itemize}
-    We drop the superscript \( n \) when it is clear from the context.
-\end{definition}
-
-Let \( \Simplex \) be an \( n \)-simplex defined by the points \( v_0, \ldots, v_n \) and \( \Phi_\Simplex \colon \Simplex_\Rf \to \Simplex \) the affine map from the reference simplex to the simplex \( \Simplex \) defined by \( \Phi_\Simplex \colon u \mapsto A_\Simplex u + v_0 \) where
-\[
-    A_\Simplex = \begin{pmatrix}
-        v_1 - v_0 & \cdots & v_n - v_0
-    \end{pmatrix}.
-\]
-\begin{align*}
-    \int_\Simplex f(x) \di{x}
-     & = \int_{\Simplex_\Rf} f\plr*{\Phi_\Simplex(u)} \ \abs*{\det A_\Simplex} \di{u},
-    \\
-     & = \abs*{\det A_\Simplex} \int_{\Simplex_\Rf} f\plr*{\Phi_\Simplex(u)} \ \abs*{\det A_\Simplex} \di{u},
-    \\
-     & \approx \abs*{\det A_\Simplex} \sum_{i=1}^N w_i f\plr*{\Phi_\Simplex(u_i)},
-\end{align*}
+%*** include ==================================================
+\input{sec-domain.tex}
+\input{sec-quadrature.tex}
 
 
 %***===========================================================
