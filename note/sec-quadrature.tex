@@ -2,10 +2,10 @@
 % LTeX: language=en-US
 
 %***===========================================================
-\section{Embedded quadrature rule}
+\section{Embedded cubature rule}
 
 For \( \Omega \) an open domain in \( \mathbb{R}^n \), mainly the interior of the reference simplex \( \Simplex_\Rf \) or reference orthotope \( \Orthotope_\Rf \).
-An embedded quadrature \( \Quad = \plr{\Quad_\lo, \Quad_\hi} \) is composed of two nested quadrature rules, one of low order \( \Quad_\lo = \plr{\calX_\lo, \vec{w}_\lo} \) and one of high order \( \Quad_\hi = \plr{\calX_\hi, \vec{w}_\hi} \) where
+An embedded cubature \( \Quad = \plr{\Quad_\lo, \Quad_\hi} \) is composed of two nested cubature rules, one of low order \( \Quad_\lo = \plr{\calX_\lo, \vec{w}_\lo} \) and one of high order \( \Quad_\hi = \plr{\calX_\hi, \vec{w}_\hi} \) where
 \[
     \calX_\lo \coloneqq \blr*{x_1, \ldots, x_{N_\lo}}
     \subset \calX_\hi \coloneqq \blr*{x_1, \ldots, x_{N_\lo}, \ldots, x_{N_\hi}}
@@ -18,8 +18,8 @@ are sets of points with \( 1 \leq N_\lo < N_\hi \) and
     \vec{w}_\hi \coloneqq \plr*{w_1^\hi, \ldots, w_{N_\hi}^\hi}
 \]
 are the corresponding weights.
-In addition, we assume that the order of the low order quadrature rule is \( d_\lo \) and the order of the high order quadrature rule is \( d_\hi \) with \( d_\lo < d_\hi \).
-For a continuous function \( f \in \spC\plr{\Omega} \), an embedded quadrature rule is used to give an approximation \( \Quad\clr{f} \) of the integral of a function \( f \) over \( \Omega \) and give error estimate \( \Err\clr{f} \) of the approximation by
+In addition, we assume that the order of the low order cubature rule is \( d_\lo \) and the order of the high order cubature rule is \( d_\hi \) with \( d_\lo < d_\hi \).
+For a continuous function \( f \in \spC\plr{\Omega} \), an embedded cubature rule is used to give an approximation \( \Quad\clr{f} \) of the integral of a function \( f \) over \( \Omega \) and give error estimate \( \Err\clr{f} \) of the approximation by
 \[
     \Quad\clr{f} \coloneqq \Quad_\hi\clr{f} \approx \int_\Omega f\plr{x} \di{x}
     \qquad \text{and} \qquad

@@ -1,0 +1,93 @@
+% !TeX root = main.tex
+% LTeX: language=en-US
+
+%***===========================================================
+\section{Example of embedded quadrature rule}
+
+%***-----------------------------------------------------------
+\subsection{Simplex}
+
+Moments:
+\[
+    \int_{\Simplex_\Rf^n} \vec{x}^{\vec{\alpha}} \di{\vec{x}} = \frac{\vec{\alpha}!}{\plr*{\abs{\vec{\alpha}}_1 + n}!}.
+\]
+
+One point cubature of order 1:
+\[
+    \vec{x}_* = \frac{1}{n+1} \vec{1}
+    \quad \text{and} \quad
+    w_* = \frac{1}{n!}
+\]
+
+\( x_*, x_0, x_1, \ldots, x_n \) where
+\begin{align*}
+    x_0 & = \plr*{0, \ldots, 0}
+    \\
+    x_1 & = \plr*{1, 0, \ldots, 0}
+    \\
+        & \vdots
+    \\
+    x_n & = \plr*{0, \ldots, 0, 1}
+\end{align*}
+
+\begin{align*}
+    w_* + (n+1) w_1               & = \frac{1}{n!}
+    \\
+    \frac{w_*}{n+1} + w_1         & = \frac{1}{(n+1)!}
+    \\
+    \frac{w_*}{\plr{n+1}^2} + w_1 & = \frac{2}{(n+2)!}
+    \\
+    \frac{w_*}{\plr{n+1}^2}       & = \frac{1}{(n+2)!}
+\end{align*}
+
+\begin{align*}
+    w_* & = \frac{\plr{n+1}^2}{\plr{n+2}!}
+    \\
+    w_1 & = \frac{1}{\plr{n+2}!}
+\end{align*}
+
+%***-----------------------------------------------------------
+\subsection{Orthotope}
+
+Moments:
+\[
+    \int_{\Orthotope_\Rf^n} \vec{x}^{\vec{\alpha}} \di{\vec{x}} = \prod_{i=1}^n \frac{1}{\alpha_i + 1}
+\]
+
+\[
+    \vec{x}_0 = \frac{1}{2} \vec{1}
+\]
+
+One point cubature of order 1:
+\[
+    \vec{x}_* = \frac{1}{2} \vec{1}
+    \quad \text{and} \quad
+    w_* = 1
+\]
+
+\( x_*, x_0, x_1, \ldots, x_{2^n-1} \) where
+\begin{align*}
+    x_i = \plr{\text{binary representation}}
+\end{align*}
+
+\begin{align*}
+    w_* + 2^n w_1               & = 1
+    \\
+    \frac{w_*}{2} + 2^{n-1} w_1 & = \frac{1}{2}
+    \\
+    \frac{w_*}{4} + 2^{n-1} w_1 & = \frac{1}{3}
+    \\
+    \frac{w_*}{4} + 2^{n-2} w_1 & = \frac{1}{4}
+\end{align*}
+
+\begin{align*}
+    w_* + 2^n w_1     & = 1
+    \\
+    w_* + 2^{n+1} w_1 & = \frac{4}{3}
+\end{align*}
+
+\begin{align*}
+    w_* & = \frac{2}{3}
+    \\
+    w_1 & = \frac{1}{2^n 3}
+\end{align*}
