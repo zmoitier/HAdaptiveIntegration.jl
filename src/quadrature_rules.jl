@@ -37,7 +37,7 @@ end
 Compute `sum(quad.weights .* fct.(quad.nodes))`.
 """
 function (quad::Quadrature)(fct::Function)
-    return sum(quad.weights .* fct.(quad.nodes))
+    return sum(w * fct(x) for (x, w) in zip(quad.nodes, quad.weights))
 end
 
 #=
