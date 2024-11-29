@@ -213,6 +213,11 @@ const TRIANGLE_LAURIE_O8_N19 = Quadrature(
     "TRIANGLE_RADON_O5_N7",
 )
 
+"""
+    const SQUARE_GAUSS_O9_N25
+
+Tensor product quadrature of Gauss-Legendre quadrature with 5 points in each direction.
+"""
 const SQUARE_GAUSS_O9_N25 = Quadrature(
     map(
         x -> (x .+ 1) ./ 2,
@@ -329,7 +334,7 @@ const SQUARE_GAUSS_O9_N25 = Quadrature(
 """
     const SQUARE_COOLS_HAEGEMANS_O8_N25
 
-Quadrature rule embedded in a [SQUARE_GAUSS_O9_N25](@ref) for the square domain.
+Quadrature rule embedded in a [`SQUARE_GAUSS_O9_N25`](@ref) for the square domain.
 
 Reference: https://link.springer.com/article/10.1007/BF01389339
 """
