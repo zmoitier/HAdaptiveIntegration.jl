@@ -52,7 +52,7 @@ function embedded_from_2quad(quad_low, quad_high, name::String, T::DataType = Fl
     )
 end
 
-function _check_precision(quad::Quadrature{<:,S}, T::DataType) where {S}
+function _check_precision(quad::Quadrature{<:Any,S}, T::DataType) where {S}
     if eps(T) < eps(S)
         error("requested precision $T cannot be achieved with quadrature rule of type {S}")
     end
