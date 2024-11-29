@@ -12,7 +12,7 @@ using Test
         T = Float64
         Q = ASQ.Quadrature{T}
         @test ASQ.check_order(Q(ASQ.SEGMENT_GAUSS_O13_N7), 13)
-        @test ASQ.check_order(Q(ASQ.SEGMENT_KRONROD_O20_N15), 23)
+        @test ASQ.check_order(Q(ASQ.SEGMENT_KRONROD_O23_N15), 23)
         embd_quad = ASQ.EmbeddedQuadrature(; name = "segment-G7K15", datatype = T)
 
         I, E = embd_quad(x -> exp(x[1]), segment)

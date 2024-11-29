@@ -4,6 +4,13 @@ using DataStructures
 using LinearAlgebra
 using StaticArrays
 
+"""
+    abstract type Domain{N,T}
+
+Abstract type for integration domains in `N` dimensions.
+"""
+abstract type Domain{N,T} end
+
 # Supported integration domains
 include("simplex.jl")
 include("hyperrectangle.jl")

@@ -1,7 +1,8 @@
 """
     struct EmbeddedQuadrature{N,T}
 
-An embedded quadrature rule for the a reference domain.
+An embedded quadrature rule consisting of a high order quadrature rule and a low order
+quadrature rule.
 
 ## Fields:
 - `nodes::Vector{SVector{N,T}}`: the quadrature nodes
@@ -39,6 +40,8 @@ Create an embedded quadrature rule from two quadrature rules. The nodes and
 weights will be represented as `SVector{N,T}` and `T`, respectively.
 """
 function embedded_from_2quad(quad_low, quad_high, name::String, T::DataType = Float64)
+    _check_precision(quad_low, T)
+    _check_precision(quad_high, T)
     N = length(quad_low.nodes[1])
     return EmbeddedQuadrature(
         SVector{N,T}.(quad_high.nodes),
@@ -47,6 +50,12 @@ function embedded_from_2quad(quad_low, quad_high, name::String, T::DataType = Fl
         T.(quad_low.weights),
         name,
     )
+end
+
+function _check_precision(quad::Quadrature{<:Any,S}, T::DataType) where {S}
+    if eps(T) < eps(S)
+        error("requested precision $T cannot be achieved with quadrature rule of type {S}")
+    end
 end
 
 function (quad::EmbeddedQuadrature)(fct::Function, domain, norm = LinearAlgebra.norm)
@@ -97,7 +106,7 @@ function EmbeddedQuadrature(; name::String, datatype::DataType = Float64)
     if name == "segment-G7K15"
         return embedded_from_2quad(
             SEGMENT_GAUSS_O13_N7,
-            SEGMENT_KRONROD_O20_N15,
+            SEGMENT_KRONROD_O23_N15,
             "G7K15",
             datatype,
         )
@@ -120,12 +129,12 @@ function EmbeddedQuadrature(; name::String, datatype::DataType = Float64)
     end
 end
 
-function default_quadrature(::Segment, T)
+function default_quadrature(::Segment{T}) where {T}
     return EmbeddedQuadrature(; name = "segment-G7K15", datatype = T)
 end
-function default_quadrature(::Triangle, T)
+function default_quadrature(::Triangle{T}) where {T}
     return EmbeddedQuadrature(; name = "triangle-LaurieRadon", datatype = T)
 end
-function default_quadrature(::Square, T)
+function default_quadrature(::Square{T}) where {T}
     return EmbeddedQuadrature(; name = "square-CoolsHaegemans", datatype = T)
 end

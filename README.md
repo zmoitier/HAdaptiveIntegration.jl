@@ -39,3 +39,5 @@
 # Remark
 
 * If you show the measure of the simplex in the integrate function, they seem to be way smaller than the `rtol`. Might need to add a test on the size which could speed up the computation.
+  
+## Related packages
