@@ -97,7 +97,7 @@ function EmbeddedQuadrature(; name::String, datatype::DataType = Float64)
     if name == "segment-G7K15"
         return embedded_from_2quad(
             SEGMENT_GAUSS_O13_N7,
-            SEGMENT_KRONROD_O20_N15,
+            SEGMENT_KRONROD_O23_N15,
             "G7K15",
             datatype,
         )

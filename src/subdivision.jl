@@ -28,6 +28,12 @@ function subdivide_triangle4(t::Triangle)
     )
 end
 
+"""
+    subdivide_square4(s::Square)
+
+Divide the square `s` into four squares by connecting the center of the square
+to the midpoints of the edges.
+"""
 function subdivide_square4(s::Square)
     xl, yl = s.low_corner
     xu, yu = s.high_corner

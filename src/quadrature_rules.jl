@@ -86,11 +86,11 @@ const SEGMENT_GAUSS_O13_N7 = Quadrature(
 )
 
 """
-    const SEGMENT_KRONROD_O20_N15
+    const SEGMENT_KRONROD_O23_N15
 
 Reference: https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/
 """
-const SEGMENT_KRONROD_O20_N15 = Quadrature(
+const SEGMENT_KRONROD_O23_N15 = Quadrature(
     [
         SVector(big(2.54460438286207377369051579760743700e-02)),
         SVector(big(1.29234407200302780068067613359605795e-01)),
@@ -127,7 +127,7 @@ const SEGMENT_KRONROD_O20_N15 = Quadrature(
         big(5.23950051611250919199381612707590100e-02),
         big(1.14676610052646124818660040294847960e-02),
     ],
-    "SEGMENT_KRONROD_O20_N15",
+    "SEGMENT_KRONROD_O23_N15",
 )
 
 # TODO: extended precision version
@@ -156,7 +156,7 @@ const TRIANGLE_RADON_O5_N7 = Quadrature(
         0.13239415278850616 / 2,
         0.13239415278850616 / 2,
     ],
-    "triangle",
+    "TRIANGLE_RADON_O5_N7",
 )
 
 # TODO: extended precision version
@@ -329,7 +329,7 @@ const SQUARE_GAUSS_O9_N25 = Quadrature(
 """
     const SQUARE_COOLS_HAEGEMANS_O8_N25
 
-Quadrature rule embedded in a GAUSS_O9_N25 quadrature rule for the square domain.
+Quadrature rule embedded in a [SQUARE_GAUSS_O9_N25](@ref) for the square domain.
 
 Reference: https://link.springer.com/article/10.1007/BF01389339
 """
@@ -442,5 +442,4 @@ const SQUARE_COOLS_HAEGEMANS_O7_N21 = Quadrature(
     "SQUARE_COOLS_HAEGEMANS_O7_N21", # name
 )
 
-# TODO: implement SQUARE_COOLS_HAEGEMANS_O7_N21, SQUARE_COOLS_HAEGEMANS_O5_N13,
-# ...
+# TODO: implement SQUARE_COOLS_HAEGEMANS_O7_N21, SQUARE_COOLS_HAEGEMANS_O5_N13, etc...
