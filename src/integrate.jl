@@ -4,12 +4,12 @@
 """
 function integrate(
     fct::Function,
-    domain,
+    domain::Domain{N,T},
     quad::EmbeddedQuadrature{N,T} = default_quadrature(domain),
     subdiv_algo::Function = default_subdivision(domain);
     atol = zero(T),
     rtol = atol == zero(T) ? sqrt(eps(T)) : zero(T),
-    maxsplit = 10_000,
+    maxsplit = 1000,
     norm = LinearAlgebra.norm,
     heap = nothing,
 ) where {N,T}

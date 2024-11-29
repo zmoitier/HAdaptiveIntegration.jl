@@ -1,10 +1,10 @@
 """
-    struct HyperRectangle{N,T} <: ReferenceInterpolant{ReferenceHyperCube{N},T}
+    struct HyperRectangle{N,T} <: Domain{N,T}
 
 Axis-aligned hyperrectangle in `N` dimensions given by
 `low_corner::SVector{N,T}` and `high_corner::SVector{N,T}`.
 """
-struct HyperRectangle{N,T}
+struct HyperRectangle{N,T} <: Domain{N,T}
     low_corner::SVector{N,T}
     high_corner::SVector{N,T}
 end

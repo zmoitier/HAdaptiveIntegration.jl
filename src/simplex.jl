@@ -3,7 +3,7 @@
 
 A simplex in `N` dimensions with Np1=N+1 points of type `T`.
 """
-struct Simplex{N,T,Np1}
+struct Simplex{N,T,Np1} <: Domain{N,T}
     points::SVector{Np1,SVector{N,T}}
 end
 
