@@ -5,12 +5,18 @@
 \section{Example of embedded quadrature rule}
 
 %***-----------------------------------------------------------
-\subsection{Simplex}
+\subsection{Reference \texorpdfstring{\(n\)}{n}-simplex}
 
-Moments:
-\[
-    \int_{\Simplex_\Rf^n} \vec{x}^{\vec{\alpha}} \di{\vec{x}} = \frac{\vec{\alpha}!}{\plr*{\abs{\vec{\alpha}}_1 + n}!}.
-\]
+\begin{lemma}
+    The moments on the reference \(n\)-simplex \( \Simplex_\Rf^n \) are
+    \[
+        \int_{\Simplex_\Rf^n} \vec{x}^{\vec{\alpha}} \di{\vec{x}} = \frac{\vec{\alpha}!}{\plr*{\abs{\vec{\alpha}}_1 + n}!},
+    \]
+    for \( \vec{\alpha} \) multi-index.
+\end{lemma}
+\begin{proof}
+    \todo{Find a reference.}
+\end{proof}
 
 One point cubature of order 1:
 \[
@@ -47,12 +53,14 @@ One point cubature of order 1:
 \end{align*}
 
 %***-----------------------------------------------------------
-\subsection{Orthotope}
+\subsection{Reference \texorpdfstring{\(n\)}{n}-orthotope}
 
-Moments:
-\[
-    \int_{\Orthotope_\Rf^n} \vec{x}^{\vec{\alpha}} \di{\vec{x}} = \prod_{i=1}^n \frac{1}{\alpha_i + 1}
-\]
+\begin{lemma}
+    Moments:
+    \[
+        \int_{\Orthotope_\Rf^n} \vec{x}^{\vec{\alpha}} \di{\vec{x}} = \prod_{i=1}^n \frac{1}{\alpha_i + 1}
+    \]
+\end{lemma}
 
 \[
     \vec{x}_0 = \frac{1}{2} \vec{1}
