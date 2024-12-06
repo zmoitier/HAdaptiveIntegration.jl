@@ -26,4 +26,6 @@ include("integrate.jl")
 
 include("quadrature_check.jl")
 
+export integrate
+
 end
