@@ -59,19 +59,19 @@ function _check_precision(quad::Quadrature{<:Any,S}, T::DataType) where {S}
 end
 
 function (quad::EmbeddedQuadrature)(fct::Function, domain, norm = LinearAlgebra.norm)
-    mu            = det_jac(domain)
-    phi           = map_from_ref(domain)
-    x_ref         = quad.nodes
-    w_low         = quad.weights_low
-    w_high        = quad.weights_high
+    mu = det_jac(domain)
+    phi = map_from_ref(domain)
+    x_ref = quad.nodes
+    w_low = quad.weights_low
+    w_high = quad.weights_high
     n_low, n_high = length(quad.weights_low), length(quad.weights_high)
 
     # assuming that nodes in quad_high are ordered so that the overlapping nodes
     # come first, add them up
-    x      = phi(x_ref[1])
+    x = phi(x_ref[1])
     I_high = fct(x) * w_high[1]
-    I_low  = fct(x) * w_low[1]
-    for i in 2:n_low
+    I_low = fct(x) * w_low[1]
+    for i = 2:n_low
         x = phi(x_ref[i])
         v = fct(x)
         I_high += v * w_high[i]
@@ -79,7 +79,7 @@ function (quad::EmbeddedQuadrature)(fct::Function, domain, norm = LinearAlgebra.
     end
 
     # now compute the rest of the high order quadrature
-    for i in n_low+1:n_high
+    for i = n_low+1:n_high
         x = phi(x_ref[i])
         I_high += fct(x) * w_high[i]
     end

@@ -46,6 +46,6 @@ function subdivide_square4(s::Square)
     )
 end
 
-default_subdivision(::Segment)  = subdivide_segment2
+default_subdivision(::Segment) = subdivide_segment2
 default_subdivision(::Triangle) = subdivide_triangle4
-default_subdivision(::Square)   = subdivide_square4
+default_subdivision(::Square) = subdivide_square4

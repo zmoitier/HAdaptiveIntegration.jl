@@ -18,7 +18,7 @@ function Simplex{N,T,Np1}(pts...)::Simplex{N,T,Np1} where {N,T,Np1}
     return Simplex(pts...)
 end
 
-const Triangle{T}    = Simplex{2,T,3}
+const Triangle{T} = Simplex{2,T,3}
 const Tetrahedron{T} = Simplex{3,T,4}
 
 # default types
@@ -35,7 +35,7 @@ function reference_simplex(N::Int, T::DataType = Float64)
     @assert N ≥ 1 "N = $N must be greater than 1."
 
     vertices = [zeros(T, N)]
-    for i in 1:N
+    for i = 1:N
         tmp = zeros(T, N)
         tmp[i] = T(1)
         push!(vertices, tmp)

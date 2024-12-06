@@ -10,36 +10,36 @@
 [![BestieTemplate](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/JuliaBesties/BestieTemplate.jl/main/docs/src/assets/badge.json)](https://github.com/JuliaBesties/BestieTemplate.jl)
 
 * list of schemes:
-  - https://github.com/sigma-py/quadpy
-  - https://github.com/zfergus/legacy-quadpy
+  * <https://github.com/sigma-py/quadpy>
+  * <https://github.com/zfergus/legacy-quadpy>
 
 * Possibly relevant Julia packages:
-  - https://github.com/JuliaMath/Cubature.jl
-  - https://github.com/JuliaMath/HCubature.jl
-  - https://github.com/JuliaMath/QuadGK.jl
+  * <https://github.com/JuliaMath/Cubature.jl>
+  * <https://github.com/JuliaMath/HCubature.jl>
+  * <https://github.com/JuliaMath/QuadGK.jl>
 
-  - https://github.com/SciML/Integrals.jl
+  * <https://github.com/SciML/Integrals.jl>
 
-  - https://github.com/stevengj/cubature
-  - https://github.com/eschnett/GrundmannMoeller.jl
-  - https://github.com/eschnett/SimplexQuad.jl
+  * <https://github.com/stevengj/cubature>
+  * <https://github.com/eschnett/GrundmannMoeller.jl>
+  * <https://github.com/eschnett/SimplexQuad.jl>
 
-# To-Do
+## To-Do
 
 1. Make it work!
 2. Make it right!
 3. Make it fast!
 
 * 2-simplex (a.k.a. triangle):
-  - try log singularity and nearly singular
+  * try log singularity and nearly singular
 
 * 3-simplex (a.k.a. tetrahedron):
-  - try to do something
+  * try to do something
 
 * n-simplex:
-  - hope for the best
+  * hope for the best
 
-# Remark
+## Remark
 
 * If you show the measure of the simplex in the integrate function, they seem to be way smaller than the `rtol`. Might need to add a test on the size which could speed up the computation.
 

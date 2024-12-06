@@ -1,12 +1,12 @@
 {
-    "recommendations": [
-        "aaron-bond.better-comments",
-        "streetsidesoftware.code-spell-checker",
-        "tamasfe.even-better-toml",
-        "eamodio.gitlens",
-        "julialang.language-julia",
-        "james-yu.latex-workshop",
-        "yzhang.markdown-all-in-one",
-        "valentjn.vscode-ltex",
-    ]
+  "recommendations": [
+    "aaron-bond.better-comments",
+    "streetsidesoftware.code-spell-checker",
+    "tamasfe.even-better-toml",
+    "eamodio.gitlens",
+    "julialang.language-julia",
+    "james-yu.latex-workshop",
+    "yzhang.markdown-all-in-one",
+    "valentjn.vscode-ltex"
+  ]
 }

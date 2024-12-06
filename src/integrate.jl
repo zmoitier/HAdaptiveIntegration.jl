@@ -73,7 +73,7 @@ function allocate_buffer(
     # the heap of adaptive quadratures have elements of the form (s,I,E), where
     # I and E are the value and error estimate over the simplex s. The ordering
     # used is based on the maximum error
-    ord  = Base.Order.By(el -> -el[3])
+    ord = Base.Order.By(el -> -el[3])
     heap = BinaryHeap{Tuple{Simplex{N,T},typeof(I),typeof(E)}}(ord)
     return heap
 end
