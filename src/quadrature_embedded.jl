@@ -39,7 +39,7 @@ end
 Create an embedded quadrature rule from two quadrature rules. The nodes and
 weights will be represented as `SVector{N,T}` and `T`, respectively.
 """
-function embedded_from_2quad(quad_low, quad_high, name::String, T::DataType = Float64)
+function embedded_from_2quad(quad_low, quad_high, name::String, T::DataType=Float64)
     _check_precision(quad_low, T)
     _check_precision(quad_high, T)
     N = length(quad_low.nodes[1])
@@ -58,19 +58,19 @@ function _check_precision(quad::Quadrature{<:Any,S}, T::DataType) where {S}
     end
 end
 
-function (quad::EmbeddedQuadrature)(fct::Function, domain, norm = LinearAlgebra.norm)
-    mu            = det_jac(domain)
-    phi           = map_from_ref(domain)
-    x_ref         = quad.nodes
-    w_low         = quad.weights_low
-    w_high        = quad.weights_high
+function (quad::EmbeddedQuadrature)(fct::Function, domain, norm=LinearAlgebra.norm)
+    mu = det_jac(domain)
+    phi = map_from_ref(domain)
+    x_ref = quad.nodes
+    w_low = quad.weights_low
+    w_high = quad.weights_high
     n_low, n_high = length(quad.weights_low), length(quad.weights_high)
 
     # assuming that nodes in quad_high are ordered so that the overlapping nodes
     # come first, add them up
-    x      = phi(x_ref[1])
+    x = phi(x_ref[1])
     I_high = fct(x) * w_high[1]
-    I_low  = fct(x) * w_low[1]
+    I_low = fct(x) * w_low[1]
     for i in 2:n_low
         x = phi(x_ref[i])
         v = fct(x)
@@ -79,7 +79,7 @@ function (quad::EmbeddedQuadrature)(fct::Function, domain, norm = LinearAlgebra.
     end
 
     # now compute the rest of the high order quadrature
-    for i in n_low+1:n_high
+    for i in (n_low + 1):n_high
         x = phi(x_ref[i])
         I_high += fct(x) * w_high[i]
     end
@@ -90,39 +90,31 @@ end
 
 # default quadrature rules
 
-const PREDEFINED_QUADRATURES =
-    Set(["segment-G7K15", "triangle-LaurieRadon", "square-CoolsHaegemans"])
+const PREDEFINED_QUADRATURES = Set([
+    "segment-G7K15", "triangle-LaurieRadon", "square-CoolsHaegemans"
+])
 
 """
     EmbeddedQuadrature(; name::String)
 
 Create an embedded quadrature rule with the given `name`.
 """
-function EmbeddedQuadrature(; name::String, datatype::DataType = Float64)
+function EmbeddedQuadrature(; name::String, datatype::DataType=Float64)
     name in PREDEFINED_QUADRATURES || error(
         "Unknown quadrature rule: $name. Options are: $(join(PREDEFINED_QUADRATURES, ", "))",
     )
 
     if name == "segment-G7K15"
         return embedded_from_2quad(
-            SEGMENT_GAUSS_O13_N7,
-            SEGMENT_KRONROD_O23_N15,
-            "G7K15",
-            datatype,
+            SEGMENT_GAUSS_O13_N7, SEGMENT_KRONROD_O23_N15, "G7K15", datatype
         )
     elseif name == "triangle-LaurieRadon"
         return embedded_from_2quad(
-            TRIANGLE_RADON_O5_N7,
-            TRIANGLE_LAURIE_O8_N19,
-            "LaurieRadon",
-            datatype,
+            TRIANGLE_RADON_O5_N7, TRIANGLE_LAURIE_O8_N19, "LaurieRadon", datatype
         )
     elseif name == "square-CoolsHaegemans"
         return embedded_from_2quad(
-            SQUARE_COOLS_HAEGEMANS_O7_N21,
-            SQUARE_GAUSS_O9_N25,
-            "CoolsHaegemans",
-            datatype,
+            SQUARE_COOLS_HAEGEMANS_O7_N21, SQUARE_GAUSS_O9_N25, "CoolsHaegemans", datatype
         )
     else
         error("Unknown rule.")
@@ -130,11 +122,11 @@ function EmbeddedQuadrature(; name::String, datatype::DataType = Float64)
 end
 
 function default_quadrature(::Segment{T}) where {T}
-    return EmbeddedQuadrature(; name = "segment-G7K15", datatype = T)
+    return EmbeddedQuadrature(; name="segment-G7K15", datatype=T)
 end
 function default_quadrature(::Triangle{T}) where {T}
-    return EmbeddedQuadrature(; name = "triangle-LaurieRadon", datatype = T)
+    return EmbeddedQuadrature(; name="triangle-LaurieRadon", datatype=T)
 end
 function default_quadrature(::Square{T}) where {T}
-    return EmbeddedQuadrature(; name = "square-CoolsHaegemans", datatype = T)
+    return EmbeddedQuadrature(; name="square-CoolsHaegemans", datatype=T)
 end

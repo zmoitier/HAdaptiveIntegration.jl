@@ -5,13 +5,13 @@
 function integrate(
     fct::Function,
     domain::Domain{N,T},
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(domain),
-    subdiv_algo::Function = default_subdivision(domain);
-    atol = zero(T),
-    rtol = atol == zero(T) ? sqrt(eps(T)) : zero(T),
-    maxsplit = 1000,
-    norm = LinearAlgebra.norm,
-    heap = nothing,
+    quad::EmbeddedQuadrature{N,T}=default_quadrature(domain),
+    subdiv_algo::Function=default_subdivision(domain);
+    atol=zero(T),
+    rtol=atol == zero(T) ? sqrt(eps(T)) : zero(T),
+    maxsplit=1000,
+    norm=LinearAlgebra.norm,
+    heap=nothing,
 ) where {N,T}
     return _integrate(fct, domain, quad, subdiv_algo, atol, rtol, maxsplit, norm, heap)
 end
@@ -63,9 +63,7 @@ function _integrate(
 end
 
 function allocate_buffer(
-    fct,
-    domain,
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(domain),
+    fct, domain, quad::EmbeddedQuadrature{N,T}=default_quadrature(domain)
 ) where {N,T}
     # type of element that will be returned by quad. Pay the cost of single
     # call to figure this out
@@ -73,7 +71,7 @@ function allocate_buffer(
     # the heap of adaptive quadratures have elements of the form (s,I,E), where
     # I and E are the value and error estimate over the simplex s. The ordering
     # used is based on the maximum error
-    ord  = Base.Order.By(el -> -el[3])
+    ord = Base.Order.By(el -> -el[3])
     heap = BinaryHeap{Tuple{Simplex{N,T},typeof(I),typeof(E)}}(ord)
     return heap
 end

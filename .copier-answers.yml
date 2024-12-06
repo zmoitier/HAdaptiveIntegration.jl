@@ -1,0 +1,27 @@
+# Changes here will be overwritten by Copier
+AddAllcontributors: false
+AddCodeOfConduct: false
+AddContributionDocs: false
+AddCopierCI: false
+AddGitHubTemplates: false
+AddMacToCI: false
+AddPrecommit: true
+AddWinToCI: false
+AnswerStrategy: ask
+Authors: Zois Moitier,Luiz M. Faria
+AutoIncludeTests: true
+CheckExplicitImports: false
+ConfigIndentation: 2
+JuliaIndentation: 4
+JuliaMinCIVersion: '1'
+JuliaMinVersion: '1'
+License: MIT
+LicenseCopyrightHolders: Zois Moitier, Luiz M. Faria
+MarkdownIndentation: 2
+PackageName: AdaptiveSimplexQuadrature
+PackageOwner: zmoitier
+PackageUUID: eaa5ad34-b243-48e9-b09c-54bc0655cecf
+RunJuliaNightlyOnCI: false
+UseCirrusCI: false
+_commit: v0.14.1
+_src_path: https://github.com/JuliaBesties/BestieTemplate.jl

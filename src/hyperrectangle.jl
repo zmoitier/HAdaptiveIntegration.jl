@@ -10,13 +10,13 @@ struct HyperRectangle{N,T} <: Domain{N,T}
 end
 
 const Segment{T} = HyperRectangle{1,T}
-const Square{T}  = HyperRectangle{2,T}
-const Cube{T}    = HyperRectangle{3,T}
+const Square{T} = HyperRectangle{2,T}
+const Cube{T} = HyperRectangle{3,T}
 
 # default types
 Segment(args...) = Segment{Float64}(args...)
-Square(args...)  = Square{Float64}(args...)
-Cube(args...)    = Cube{Float64}(args...)
+Square(args...) = Square{Float64}(args...)
+Cube(args...) = Cube{Float64}(args...)
 
 """
     reference_hyperrectangle(N::Int, T::DataType)
