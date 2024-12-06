@@ -1,3 +1,0 @@
-polytope
-cubature
-orthotope
