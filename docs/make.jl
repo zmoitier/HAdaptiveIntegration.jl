@@ -5,7 +5,7 @@ DocMeta.setdocmeta!(
     AdaptiveSimplexQuadrature,
     :DocTestSetup,
     :(using AdaptiveSimplexQuadrature);
-    recursive = true,
+    recursive=true,
 )
 
 const page_rename = Dict("developer.md" => "Developer docs") # Without the numbers
@@ -15,14 +15,14 @@ const numbered_pages = [
 ]
 
 makedocs(;
-    modules = [AdaptiveSimplexQuadrature],
-    authors = "Zois Moitier,Luiz M. Faria",
-    repo = "https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/blob/{commit}{path}#{line}",
-    sitename = "AdaptiveSimplexQuadrature.jl",
-    format = Documenter.HTML(;
-        canonical = "https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl",
+    modules=[AdaptiveSimplexQuadrature],
+    authors="Zois Moitier,Luiz M. Faria",
+    repo="https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/blob/{commit}{path}#{line}",
+    sitename="AdaptiveSimplexQuadrature.jl",
+    format=Documenter.HTML(;
+        canonical="https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl"
     ),
-    pages = ["Home" => "index.md"; numbered_pages],
+    pages=["Home" => "index.md"; numbered_pages],
 )
 
-deploydocs(; repo = "github.com/zmoitier/AdaptiveSimplexQuadrature.jl", devbranch = "main")
+deploydocs(; repo="github.com/zmoitier/AdaptiveSimplexQuadrature.jl", devbranch="main")

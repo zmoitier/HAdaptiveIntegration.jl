@@ -31,11 +31,11 @@ Tetrahedron(args...) = Tetrahedron{Float64}(args...)
 Return the reference N-simplex. The reference simplex has vertices given by
 `(0,...,0), (1,0,...,0), (0,1,0,...,0), (0,...,0,1)`.
 """
-function reference_simplex(N::Int, T::DataType = Float64)
+function reference_simplex(N::Int, T::DataType=Float64)
     @assert N ≥ 1 "N = $N must be greater than 1."
 
     vertices = [zeros(T, N)]
-    for i = 1:N
+    for i in 1:N
         tmp = zeros(T, N)
         tmp[i] = T(1)
         push!(vertices, tmp)

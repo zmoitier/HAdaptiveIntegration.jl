@@ -13,7 +13,7 @@ using Test
         Q = ASQ.Quadrature{T}
         @test ASQ.check_order(Q(ASQ.SEGMENT_GAUSS_O13_N7), 13)
         @test ASQ.check_order(Q(ASQ.SEGMENT_KRONROD_O23_N15), 23)
-        embd_quad = ASQ.EmbeddedQuadrature(; name = "segment-G7K15", datatype = T)
+        embd_quad = ASQ.EmbeddedQuadrature(; name="segment-G7K15", datatype=T)
 
         I, E = embd_quad(x -> exp(x[1]), segment)
         R = exp(1) - exp(0)
@@ -42,7 +42,7 @@ using Test
         @test ASQ.check_order(Q(ASQ.TRIANGLE_RADON_O5_N7), 5)
         @test ASQ.check_order(Q(ASQ.TRIANGLE_LAURIE_O8_N19), 8)
 
-        embd_quad = ASQ.EmbeddedQuadrature(; name = "triangle-LaurieRadon", datatype = T)
+        embd_quad = ASQ.EmbeddedQuadrature(; name="triangle-LaurieRadon", datatype=T)
 
         simplex = ASQ.Simplex((0, 0), (2, 0), (0, 2))
         I, E = embd_quad(x -> exp(x[1] + 3 * x[2]), simplex)
@@ -70,7 +70,7 @@ using Test
         Q2 = ASQ.Quadrature{T}(ASQ.SQUARE_COOLS_HAEGEMANS_O7_N21)
         @test ASQ.check_order_square(Q2, 7)
 
-        embd_quad = ASQ.EmbeddedQuadrature(; name = "square-CoolsHaegemans", datatype = T)
+        embd_quad = ASQ.EmbeddedQuadrature(; name="square-CoolsHaegemans", datatype=T)
 
         # FIXME: it seems the CoolsHaegemens rule underestimates the
         # error for one-dimensional integrands

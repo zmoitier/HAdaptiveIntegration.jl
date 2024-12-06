@@ -5,13 +5,13 @@
 function integrate(
     fct::Function,
     domain::Domain{N,T},
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(domain),
-    subdiv_algo::Function = default_subdivision(domain);
-    atol = zero(T),
-    rtol = atol == zero(T) ? sqrt(eps(T)) : zero(T),
-    maxsplit = 1000,
-    norm = LinearAlgebra.norm,
-    heap = nothing,
+    quad::EmbeddedQuadrature{N,T}=default_quadrature(domain),
+    subdiv_algo::Function=default_subdivision(domain);
+    atol=zero(T),
+    rtol=atol == zero(T) ? sqrt(eps(T)) : zero(T),
+    maxsplit=1000,
+    norm=LinearAlgebra.norm,
+    heap=nothing,
 ) where {N,T}
     return _integrate(fct, domain, quad, subdiv_algo, atol, rtol, maxsplit, norm, heap)
 end
@@ -63,9 +63,7 @@ function _integrate(
 end
 
 function allocate_buffer(
-    fct,
-    domain,
-    quad::EmbeddedQuadrature{N,T} = default_quadrature(domain),
+    fct, domain, quad::EmbeddedQuadrature{N,T}=default_quadrature(domain)
 ) where {N,T}
     # type of element that will be returned by quad. Pay the cost of single
     # call to figure this out

@@ -8,10 +8,10 @@ function check_order(quad::Quadrature{N,T}, order::Int)::Bool where {N,T}
     exp_val = _exponent_to_value(order + 1, N)
 
     all_true = true
-    for k = 0:order
+    for k in 0:order
         for α in _multi_index(k, N)
             fct = x -> prod(xᵢ^αᵢ for (xᵢ, αᵢ) in zip(x, α))
-            is_integrated = isapprox(quad(fct), T(exp_val[α]); rtol = rtol)
+            is_integrated = isapprox(quad(fct), T(exp_val[α]); rtol=rtol)
             all_true = all_true & is_integrated
             @debug α is_integrated abs(quad(fct) / T(exp_val[α]) - T(1))
         end
@@ -20,7 +20,7 @@ function check_order(quad::Quadrature{N,T}, order::Int)::Bool where {N,T}
     all_true_next_order = true
     for α in _multi_index(order + 1, N)
         fct = x -> prod(xᵢ^αᵢ for (xᵢ, αᵢ) in zip(x, α))
-        is_integrated = isapprox(quad(fct), T(exp_val[α]); rtol = rtol)
+        is_integrated = isapprox(quad(fct), T(exp_val[α]); rtol=rtol)
         all_true_next_order = all_true_next_order & is_integrated
 
         @debug α is_integrated abs(quad(fct) / T(exp_val[α]) - T(1))
@@ -36,10 +36,11 @@ Generate a dictionary mapping multi-indices to the value of the integral of the
 monomial on the reference simplex.
 """
 function _exponent_to_value(tot_deg_max::Int, N::Int)::Dict{NTuple{N,Int64},Rational{Int64}}
-    exponent_to_value =
-        Dict{NTuple{N,Int64},Rational{Int64}}(Tuple(0 for _ = 1:N) => 1 // factorial(N))
+    exponent_to_value = Dict{NTuple{N,Int64},Rational{Int64}}(
+        Tuple(0 for _ in 1:N) => 1//factorial(N)
+    )
 
-    for k = 1:tot_deg_max
+    for k in 1:tot_deg_max
         for exponent in _multi_index(k, N)
             decr_exp, i = _decr_multi_idx(exponent)
             exponent_to_value[exponent] =
@@ -78,7 +79,7 @@ function _multi_index(tot_deg::Int, N::Int)::Vector{NTuple{N,Int}}
         return [(tot_deg,)]
     end
 
-    return [(d, t...) for d = tot_deg:-1:0 for t in _multi_index(tot_deg - d, N - 1)]
+    return [(d, t...) for d in tot_deg:-1:0 for t in _multi_index(tot_deg - d, N - 1)]
 end
 
 """
@@ -90,11 +91,11 @@ function check_order_square(quad::Quadrature{N,T}, order::Int)::Bool where {N,T}
     rtol = 10 * eps(T)
     all_true = true
     all_true_next_order = true
-    for i = 0:order+1
-        for j = 0:order+1
+    for i in 0:(order + 1)
+        for j in 0:(order + 1)
             fct = x -> x[1]^i * x[2]^j
             approx = quad(fct)
-            exact = 1 // ((i + 1) * (j + 1))
+            exact = 1//((i + 1) * (j + 1))
             is_integrated = isapprox(approx, exact; rtol)
             if i + j ≤ order
                 all_true = all_true & is_integrated
