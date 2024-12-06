@@ -121,12 +121,15 @@ function EmbeddedQuadrature(; name::String, datatype::DataType=Float64)
     end
 end
 
-function default_quadrature(::Segment{T}) where {T}
-    return EmbeddedQuadrature(; name="segment-G7K15", datatype=T)
+@generated function _default_quadrature(::Segment{T}) where {T}
+    quad = EmbeddedQuadrature(; name="segment-G7K15", datatype=T)
+    return :($quad)
 end
-function default_quadrature(::Triangle{T}) where {T}
-    return EmbeddedQuadrature(; name="triangle-LaurieRadon", datatype=T)
+@generated function _default_quadrature(::Triangle{T}) where {T}
+    quad = EmbeddedQuadrature(; name="triangle-LaurieRadon", datatype=T)
+    return :($quad)
 end
-function default_quadrature(::Square{T}) where {T}
-    return EmbeddedQuadrature(; name="square-CoolsHaegemans", datatype=T)
+@generated function default_quadrature(::Square{T}) where {T}
+    quad = EmbeddedQuadrature(; name="square-CoolsHaegemans", datatype=T)
+    return :($quad)
 end
