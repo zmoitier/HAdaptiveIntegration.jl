@@ -1,5 +1,5 @@
 using HCubature, LinearAlgebra
-import AdaptiveSimplexQuadrature as ASQ
+import HAdaptiveIntegration as ASQ
 
 a, b = (0.0, 0.0), (1.0, 1.0)
 f = x -> cos(200 * prod(x))

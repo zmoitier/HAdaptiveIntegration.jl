@@ -45,9 +45,9 @@ jobs:
         run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using AdaptiveSimplexQuadrature
-            DocMeta.setdocmeta!(AdaptiveSimplexQuadrature, :DocTestSetup, :(using AdaptiveSimplexQuadrature); recursive=true)
-            doctest(AdaptiveSimplexQuadrature)'
+            using HAdaptiveIntegration
+            DocMeta.setdocmeta!(HAdaptiveIntegration, :DocTestSetup, :(using HAdaptiveIntegration); recursive=true)
+            doctest(HAdaptiveIntegration)'
       - name: Generate and deploy documentation
         run: julia --project=docs docs/make.jl
         env:

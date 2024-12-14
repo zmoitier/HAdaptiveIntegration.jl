@@ -18,7 +18,7 @@ JuliaMinVersion: '1'
 License: MIT
 LicenseCopyrightHolders: Zois Moitier, Luiz M. Faria
 MarkdownIndentation: 2
-PackageName: AdaptiveSimplexQuadrature
+PackageName: HAdaptiveIntegration
 PackageOwner: zmoitier
 PackageUUID: eaa5ad34-b243-48e9-b09c-54bc0655cecf
 RunJuliaNightlyOnCI: false

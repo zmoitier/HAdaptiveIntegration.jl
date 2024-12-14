@@ -1,6 +1,6 @@
 using StaticArrays, Printf
 
-import AdaptiveSimplexQuadrature as ASQ
+import HAdaptiveIntegration as ASQ
 
 simplex = ASQ.Simplex((big"-1.0",), (big"1.0",))
 

@@ -1,11 +1,8 @@
-using AdaptiveSimplexQuadrature
+using HAdaptiveIntegration
 using Documenter
 
 DocMeta.setdocmeta!(
-    AdaptiveSimplexQuadrature,
-    :DocTestSetup,
-    :(using AdaptiveSimplexQuadrature);
-    recursive=true,
+    HAdaptiveIntegration, :DocTestSetup, :(using HAdaptiveIntegration); recursive=true
 )
 
 const page_rename = Dict("developer.md" => "Developer docs") # Without the numbers
@@ -15,14 +12,14 @@ const numbered_pages = [
 ]
 
 makedocs(;
-    modules=[AdaptiveSimplexQuadrature],
+    modules=[HAdaptiveIntegration],
     authors="Zois Moitier,Luiz M. Faria",
-    repo="https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/blob/{commit}{path}#{line}",
-    sitename="AdaptiveSimplexQuadrature.jl",
+    repo="https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/{commit}{path}#{line}",
+    sitename="HAdaptiveIntegration.jl",
     format=Documenter.HTML(;
-        canonical="https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl"
+        canonical="https://zmoitier.github.io/HAdaptiveIntegration.jl"
     ),
     pages=["Home" => "index.md"; numbered_pages],
 )
 
-deploydocs(; repo="github.com/zmoitier/AdaptiveSimplexQuadrature.jl", devbranch="main")
+deploydocs(; repo="github.com/zmoitier/HAdaptiveIntegration.jl", devbranch="main")

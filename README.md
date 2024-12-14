@@ -1,12 +1,12 @@
-# AdaptiveSimplexQuadrature
+# HAdaptiveIntegration
 
-[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl/stable)
-[![In development documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://zmoitier.github.io/AdaptiveSimplexQuadrature.jl/dev)
-[![Build Status](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/workflows/Test/badge.svg)](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions)
-[![Test workflow status](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/Test.yml/badge.svg?branch=main)](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/Test.yml?query=branch%3Amain)
-[![Lint workflow Status](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/Lint.yml/badge.svg?branch=main)](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/Lint.yml?query=branch%3Amain)
-[![Docs workflow Status](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/Docs.yml/badge.svg?branch=main)](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl/actions/workflows/Docs.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/zmoitier/AdaptiveSimplexQuadrature.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/zmoitier/AdaptiveSimplexQuadrature.jl)
+[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable)
+[![In development documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev)
+[![Build Status](https://github.com/zmoitier/HAdaptiveIntegration.jl/workflows/Test/badge.svg)](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions)
+[![Test workflow status](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Test.yml/badge.svg?branch=main)](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Test.yml?query=branch%3Amain)
+[![Lint workflow Status](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Lint.yml/badge.svg?branch=main)](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Lint.yml?query=branch%3Amain)
+[![Docs workflow Status](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Docs.yml/badge.svg?branch=main)](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Docs.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl)
 [![BestieTemplate](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/JuliaBesties/BestieTemplate.jl/main/docs/src/assets/badge.json)](https://github.com/JuliaBesties/BestieTemplate.jl)
 
 * list of schemes:

@@ -1,4 +1,4 @@
-name = "AdaptiveSimplexQuadrature"
+name = "HAdaptiveIntegration"
 uuid = "eaa5ad34-b243-48e9-b09c-54bc0655cecf"
 authors = ["Zois Moitier", "Luiz M. Faria"]
 version = "0.1.0"

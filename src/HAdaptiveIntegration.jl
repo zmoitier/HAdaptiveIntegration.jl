@@ -1,4 +1,4 @@
-module AdaptiveSimplexQuadrature
+module HAdaptiveIntegration
 
 using DataStructures
 using LinearAlgebra

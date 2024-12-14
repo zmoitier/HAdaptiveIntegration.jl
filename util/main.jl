@@ -1,6 +1,6 @@
 using StaticArrays, Plots
 
-import AdaptiveSimplexQuadrature as ASQ
+import HAdaptiveIntegration as ASQ
 
 # simplex = ASQ.Simplex((-1,), (1,))
 # simplex = ASQ.Simplex((1, 0), (-1 // 2, √3 / 2), (-1 // 2, -√3 / 2))

@@ -1,8 +1,8 @@
-import AdaptiveSimplexQuadrature as ASQ
+import HAdaptiveIntegration as ASQ
 using LinearAlgebra
 using Test
 
-@testset "AdaptiveSimplexQuadrature.jl" begin
+@testset "HAdaptiveIntegration.jl" begin
     # include("aqua_test.jl")
 
     @testset "Segment" begin

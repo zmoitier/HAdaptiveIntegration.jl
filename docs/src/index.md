@@ -1,11 +1,11 @@
 ```@meta
-CurrentModule = AdaptiveSimplexQuadrature
+CurrentModule = HAdaptiveIntegration
 ```
 
-# AdaptiveSimplexQuadrature
+# HAdaptiveIntegration
 
 Documentation for
-[AdaptiveSimplexQuadrature](https://github.com/zmoitier/AdaptiveSimplexQuadrature.jl).
+[HAdaptiveIntegration](https://github.com/zmoitier/HAdaptiveIntegration.jl).
 
 ## Basic usage
 
@@ -14,8 +14,8 @@ The main function of this package is `integrate`, which computes the integral of
 
 ```@example
 using InteractiveUtils # hide
-using AdaptiveSimplexQuadrature
-subtypes(AdaptiveSimplexQuadrature.Domain)
+using HAdaptiveIntegration
+subtypes(HAdaptiveIntegration.Domain)
 ```
 
 ## Comparisson with `HCubature.jl`
@@ -23,10 +23,10 @@ subtypes(AdaptiveSimplexQuadrature.Domain)
 This package shares many similarities with `HCubature.jl`; there are, however, a few
 important differences:
 
-- `AdaptiveSimplexQuadrature.jl` uses tabulated embedded cubature rules such as the ones
+- `HAdaptiveIntegration.jl` uses tabulated embedded cubature rules such as the ones
   found in [Cubature.jl](https://www.google.com/?client=safari), whereas `HCubature.jl`
   implemented the Genz-Malik algorithm valid axis-aligned rectangles in any dimension.
-- `AdaptiveSimplexQuadrature.jl` supports simplicies in low dimensions, whereas
+- `HAdaptiveIntegration.jl` supports simplicies in low dimensions, whereas
   `HCubature.jl` supports axis-aligned rectangles in any dimension.
 
 Let's start with a simple example using `HCubature`:
@@ -41,10 +41,10 @@ I, E = hcubature(f, a, b)
 println("I = $I, E = $E, counter = $(counter[])")
 ```
 
-Now, let's do the same with `AdaptiveSimplexQuadrature`:
+Now, let's do the same with `HAdaptiveIntegration`:
 
 ```@example hcubature
-import AdaptiveSimplexQuadrature as ASQ
+import HAdaptiveIntegration as ASQ
 domain = ASQ.Square(a, b)
 counter[] = 0
 I, E = ASQ.integrate(f, domain)
