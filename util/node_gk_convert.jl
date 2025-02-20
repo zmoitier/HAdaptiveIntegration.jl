@@ -1,12 +1,12 @@
 using StaticArrays, Printf
 
-import HAdaptiveIntegration as ASQ
+import HAdaptiveIntegration as HAI
 
-simplex = ASQ.Simplex((big"-1.0",), (big"1.0",))
+simplex = HAI.Simplex((big"-1.0",), (big"1.0",))
 
 # https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/
 # 7 points Gauss rule of order 13
-segment_G7 = ASQ.Quadrature(
+segment_G7 = HAI.Quadrature(
     [
         SVector(big"-9.4910791234275852452618968404785126e-01"),
         SVector(big"-7.4153118559939443986386477328078841e-01"),
@@ -27,7 +27,7 @@ segment_G7 = ASQ.Quadrature(
     ],
 )
 # 15 points Kronrod rule of order 20
-segment_K15 = ASQ.Quadrature(
+segment_K15 = HAI.Quadrature(
     [
         SVector(big"-9.4910791234275852452618968404785126e-01"),
         SVector(big"-7.4153118559939443986386477328078841e-01"),
@@ -66,7 +66,7 @@ segment_K15 = ASQ.Quadrature(
 )
 
 for quad in [segment_G7, segment_K15]
-    quad_new = ASQ.map_quad(quad, simplex)
+    quad_new = HAI.map_quad(quad, simplex)
 
     for x in quad_new.nodes
         @printf("SVector(%.35e),\n", only(x))

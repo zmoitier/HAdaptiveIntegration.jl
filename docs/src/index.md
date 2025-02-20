@@ -44,10 +44,10 @@ println("I = $I, E = $E, counter = $(counter[])")
 Now, let's do the same with `HAdaptiveIntegration`:
 
 ```@example hcubature
-import HAdaptiveIntegration as ASQ
-domain = ASQ.Square(a, b)
+import HAdaptiveIntegration as HAI
+domain = HAI.Square(a, b)
 counter[] = 0
-I, E = ASQ.integrate(f, domain)
+I, E = HAI.integrate(f, domain)
 println("I = $I, E = $E, counter = $(counter[])")
 ```
 
@@ -61,5 +61,5 @@ b1 = @benchmark hcubature($f, $a, $b)
 
 ```@example hcubature
 counter[] = 0
-b2 = @benchmark ASQ.integrate($f, $domain)
+b2 = @benchmark HAI.integrate($f, $domain)
 ```
