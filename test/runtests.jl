@@ -1,13 +1,13 @@
-import HAdaptiveIntegration as HAI
-using LinearAlgebra
-using Test
+using Test, LinearAlgebra
 
 @testset "HAdaptiveIntegration.jl" begin
     # include("aqua_test.jl")
 
+    include("test_simplex.jl")
+    include("test_orthotope.jl")
+
     @testset "Segment" begin
         segment = HAI.Segment((0.0,), (1.0,))
-        @test HAI.det_jac(segment) ≈ 1
         # Test on Float64 precision
         T = Float64
         Q = HAI.Quadrature{T}
@@ -34,7 +34,6 @@ using Test
 
     @testset "Triangle" begin
         triangle = HAI.Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-        @test HAI.det_jac(triangle) ≈ 1
 
         # Test on Float64 precision
         T = Float64
@@ -61,8 +60,8 @@ using Test
     end
 
     @testset "Square" begin
-        sq = HAI.Square((0.0, 0.0), (1.0, 1.0))
-        @test HAI.det_jac(sq) ≈ 1
+        sq = HAI.Rectangle((0.0, 0.0), (1.0, 1.0))
+
         # Test on Float64 precision
         T = Float64
         Q1 = HAI.Quadrature{T}(HAI.SQUARE_GAUSS_O9_N25)

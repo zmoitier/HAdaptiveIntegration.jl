@@ -52,15 +52,15 @@ function embedded_from_2quad(quad_low, quad_high, name::String, T::DataType=Floa
     )
 end
 
-function _check_precision(quad::Quadrature{<:Any,S}, T::DataType) where {S}
+function _check_precision(::Quadrature{<:Any,S}, T::DataType) where {S}
     if eps(T) < eps(S)
         error("requested precision $T cannot be achieved with quadrature rule of type {S}")
     end
 end
 
 function (quad::EmbeddedQuadrature)(fct::Function, domain, norm=LinearAlgebra.norm)
-    mu = det_jac(domain)
-    phi = map_from_ref(domain)
+    mu = abs_jacobian_determinant(domain)
+    phi = map_from_reference(domain)
     x_ref = quad.nodes
     w_low = quad.weights_low
     w_high = quad.weights_high
@@ -129,7 +129,7 @@ end
     quad = EmbeddedQuadrature(; name="triangle-LaurieRadon", datatype=T)
     return :($quad)
 end
-@generated function default_quadrature(::Square{T}) where {T}
+@generated function default_quadrature(::Rectangle{T}) where {T}
     quad = EmbeddedQuadrature(; name="square-CoolsHaegemans", datatype=T)
     return :($quad)
 end
