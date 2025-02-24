@@ -3,7 +3,7 @@
 
 Divide the segment `s` into two segments of equal length.
 """
-function subdivide_segment2(s::Segment{T}) where {T}
+function subdivide_segment2(s::Segment)
     a, b = s.low_corner, s.high_corner
     m = (a + b) / 2
     return (Segment(a, m), Segment(m, b))
@@ -43,14 +43,13 @@ Divide the rectangle `r` into four squares by connecting the center of the squar
 of the edges.
 """
 function subdivide_rectangle4(r::Rectangle)
-    lc = r.low_corner
-    hc = r.high_corner
-    m = (lc + hc) / 2
+    a, b = r.low_corner, r.high_corner
+    m = (a + b) / 2
     return (
-        Rectangle(r.low_corner, m),
-        Rectangle(SVector{2}(m[1], lc[2]), SVector{2}(hc[1], m[2])),
-        Rectangle(SVector{2}(lc[1], m[2]), SVector{2}(m[1], hc[2])),
-        Rectangle(m, r.high_corner),
+        Rectangle(a, m),
+        Rectangle(SVector{2}(m[1], a[2]), SVector{2}(b[1], m[2])),
+        Rectangle(SVector{2}(a[1], m[2]), SVector{2}(m[1], b[2])),
+        Rectangle(m, b),
     )
 end
 
@@ -87,20 +86,23 @@ end
 Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the
 edges.
 """
-function subdivide_cuboid8(c::Cuboid)
-    xl, yl, zl = c.low_corner
-    xu, yu, zu = c.high_corner
-    xm, ym, zm = (xl + xu) / 2, (yl + yu) / 2, (zl + zu) / 2
+function subdivide_cuboid8(c::Cuboid{T}) where {T}
+    a, b = c.low_corner, c.high_corner
+    m = (a + b) / 2
     return (
-        Cuboid((xl, yl), (xm, ym), (zl, zm)),
-        Cuboid((xm, yl), (xu, ym), (zl, zm)),
-        Cuboid((xl, ym), (xm, yu), (zl, zm)),
-        Cuboid((xm, ym), (xu, yu), (zl, zm)),
-        Cuboid((xl, yl), (xm, ym), (zm, zu)),
-        Cuboid((xm, yl), (xu, ym), (zm, zu)),
-        Cuboid((xl, ym), (xm, yu), (zm, zu)),
-        Cuboid((xm, ym), (xu, yu), (zm, zu)),
+        Cuboid(a, m),
+        Cuboid(SVector{3,T}([m[1], a[2], a[3]]), SVector{3,T}([b[1], m[2], m[3]])),
+        Cuboid(SVector{3,T}([a[1], m[2], a[3]]), SVector{3,T}([m[1], b[2], m[3]])),
+        Cuboid(SVector{3,T}([a[1], a[2], m[3]]), SVector{3,T}([m[1], m[2], b[3]])),
+        Cuboid(SVector{3,T}([a[1], m[2], m[3]]), SVector{3,T}([m[1], b[2], b[3]])),
+        Cuboid(SVector{3,T}([m[1], a[2], m[3]]), SVector{3,T}([b[1], m[2], b[3]])),
+        Cuboid(SVector{3,T}([m[1], m[2], a[3]]), SVector{3,T}([b[1], b[2], m[3]])),
+        Cuboid(m, b),
     )
+end
+
+function default_subdivision(domain::Domain)
+    @error "no default subdivision for $(typeof(domain))."
 end
 
 default_subdivision(::Segment) = subdivide_segment2

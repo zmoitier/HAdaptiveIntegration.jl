@@ -5,9 +5,10 @@ using Test, LinearAlgebra
 
     include("test_simplex.jl")
     include("test_orthotope.jl")
+    include("test_subdivision.jl")
 
     @testset "Segment" begin
-        segment = HAI.Segment((0.0,), (1.0,))
+        segment = HAI.segment(0.0, 1.0)
         # Test on Float64 precision
         T = Float64
         Q = HAI.Quadrature{T}
@@ -33,7 +34,7 @@ using Test, LinearAlgebra
     end
 
     @testset "Triangle" begin
-        triangle = HAI.Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+        triangle = HAI.triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
 
         # Test on Float64 precision
         T = Float64
@@ -43,24 +44,24 @@ using Test, LinearAlgebra
 
         embd_quad = HAI.EmbeddedQuadrature(; name="triangle-LaurieRadon", datatype=T)
 
-        simplex = HAI.Simplex((0, 0), (2, 0), (0, 2))
+        simplex = HAI.simplex((0, 0), (2, 0), (0, 2))
         I, E = embd_quad(x -> exp(x[1] + 3 * x[2]), simplex)
         R = (exp(6) - 3 * exp(2) + 2) / 6
         @test abs(I - R) ≤ E * abs(R)
 
-        simplex = HAI.Simplex((0, 0), (2, 0), (0, 2))
+        simplex = HAI.simplex((0, 0), (2, 0), (0, 2))
         I, E = embd_quad(x -> cos(7 * x[1] + 3 * x[2]), simplex)
         R = (-3 * cos(14) + 7 * cos(6) - 4) / 84
         @test abs(I - R) ≤ E * abs(R)
 
-        simplex = HAI.Simplex((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+        simplex = HAI.simplex((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
         I, E = HAI.integrate(x -> 1 / norm(x), simplex, embd_quad)
         R = sqrt(2) * asinh(1)
         @test abs(I - R) ≤ E * abs(R)
     end
 
     @testset "Square" begin
-        sq = HAI.Rectangle((0.0, 0.0), (1.0, 1.0))
+        sq = HAI.rectangle((0.0, 1.0), (0.0, 1.0))
 
         # Test on Float64 precision
         T = Float64

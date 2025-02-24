@@ -13,10 +13,10 @@ abstract type Domain{D,T} end
 
 # Supported integration domains
 include("domain_simplex.jl")
-export Triangle, Tetrahedron, reference_triangle, reference_tetrahedron
+export triangle, reference_triangle, tetrahedron, reference_tetrahedron
 
 include("domain_orthotope.jl")
-export Segment, Rectangle, Cuboid, reference_segment, reference_rectangle, reference_cuboid
+export segment, reference_segment, rectangle, reference_rectangle, cuboid, reference_cuboid
 
 include("domain_subdivision.jl")
 

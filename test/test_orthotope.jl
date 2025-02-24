@@ -3,28 +3,28 @@ import HAdaptiveIntegration as HAI
 
 @testset "domain_orthotope.jl" begin
     @testset "Orthotope construction" begin
-        @test typeof(HAI.Orthotope((0,), (1,))) <: HAI.Orthotope
-        @test typeof(HAI.Orthotope([0], [1])) <: HAI.Orthotope
-        @test typeof(HAI.Orthotope(SVector{1}([0]), SVector{1}([1]))) <: HAI.Orthotope
+        @test typeof(HAI.orthotope((0,), (1,))) <: HAI.Orthotope
+        @test typeof(HAI.orthotope([0], [1])) <: HAI.Orthotope
+        @test typeof(HAI.orthotope(SVector{1}([0]), SVector{1}([1]))) <: HAI.Orthotope
     end
 
     @testset "Segment" begin
         ref = HAI.reference_segment()
-        s = HAI.Segment((0,), (1,))
+        s = HAI.segment(0, 1)
         @test (s.low_corner ≈ ref.low_corner) && (s.high_corner ≈ ref.high_corner)
         @test HAI.abs_jacobian_determinant(ref) ≈ 1
     end
 
     @testset "Rectangle" begin
         ref = HAI.reference_rectangle()
-        r = HAI.Rectangle((0, 0), (1, 1))
+        r = HAI.rectangle((0, 1), (0, 1))
         @test (r.low_corner ≈ ref.low_corner) && (r.high_corner ≈ ref.high_corner)
         @test HAI.abs_jacobian_determinant(ref) ≈ 1
     end
 
     @testset "Cuboid" begin
         ref = HAI.reference_cuboid()
-        c = HAI.Cuboid((0, 0, 0), (1, 1, 1))
+        c = HAI.cuboid((0, 1), (0, 1), (0, 1))
         @test (c.low_corner ≈ ref.low_corner) && (c.high_corner ≈ ref.high_corner)
         @test HAI.abs_jacobian_determinant(ref) ≈ 1
     end
