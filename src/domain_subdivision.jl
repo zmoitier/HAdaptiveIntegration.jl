@@ -100,13 +100,3 @@ function subdivide_cuboid8(c::Cuboid{T}) where {T}
         Cuboid(m, b),
     )
 end
-
-function default_subdivision(domain::Domain)
-    @error "no default subdivision for $(typeof(domain))."
-end
-
-default_subdivision(::Segment) = subdivide_segment2
-default_subdivision(::Triangle) = subdivide_triangle4
-default_subdivision(::Rectangle) = subdivide_rectangle4
-default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
-default_subdivision(::Cuboid) = subdivide_cuboid8

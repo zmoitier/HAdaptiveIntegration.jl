@@ -87,7 +87,7 @@ end
 """
     abs_jacobian_determinant(t::Triangle)
 
-The determinant of the Jacobian of the map from the reference triangle to the physical triangle `t`.
+The absolute value of the Jacobian's determinant of the map from the reference triangle to the physical triangle `t`.
 """
 function abs_jacobian_determinant(t::Triangle)
     e1 = t.points[2] - t.points[1]
@@ -127,8 +127,7 @@ end
 """
     abs_jacobian_determinant(t::Tetrahedron)
 
-The determinant of the Jacobian of the map from the reference tetrahedron to the physical
-tetrahedron `t`.
+The absolute value of the Jacobian's determinant of the map from the reference tetrahedron to the physical tetrahedron `t`.
 """
 function abs_jacobian_determinant(t::Tetrahedron)
     e1 = t.points[2] - t.points[1]

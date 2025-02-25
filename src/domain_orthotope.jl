@@ -45,6 +45,15 @@ function map_from_reference(h::Orthotope)::Function
 end
 
 """
+    map_to_reference(h::Orthotope)::Function
+
+Return an anonymous function that maps the physical orthotope `h` to the reference orthotope.
+"""
+function map_to_reference(h::Orthotope)::Function
+    return u -> (u - h.low_corner) ./ (h.high_corner - h.low_corner)
+end
+
+"""
     abs_jacobian_determinant(s::Orthotope)
 
 The absolute value of the Jacobian's determinant of the map from the reference orthotope to the physical orthotope.
