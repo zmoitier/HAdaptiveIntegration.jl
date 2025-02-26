@@ -9,3 +9,15 @@ function check_order_orthotope(
 ) where {N,D,T<:Real}
     return nothing
 end
+
+function integral_monomial_simplex(dim::Int, kmax::Int)
+    base = Matrix(I, dim, dim)
+
+    values = Dict(Tuple(0 for _ in 1:dim) => 1//factorial(dim))
+    for k in 1:kmax
+    end
+
+    return values
+end
+
+function integral_monomial_orthotope() end

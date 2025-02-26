@@ -1,5 +1,5 @@
 """
-    struct Simplex{D,T,N} <: Domain{D,T}
+    struct Simplex{D,T,N}
 
 A simplex in `D` dimensions with N=D+1 points of type `T`.
 """
@@ -22,7 +22,7 @@ function simplex(points...)
 end
 
 """
-    reference_simplex(D::Int, T::DataType)
+    reference_simplex(D, T=Float64)
 
 Return the reference D-simplex given by the vertices `(0,...,0), (1,0,...,0), (0,1,0,...,0), (0,...,0,1)`.
 """
@@ -38,21 +38,17 @@ function reference_simplex(D::Int, T::DataType=Float64)
     return Simplex(SVector{N,SVector{D,T}}(SVector{D,T}.(points)))
 end
 
-"""
-    map_from_reference(s::Simplex)::Function
-
-Return an anonymous function that maps the reference simplex to the physical simplex `s`.
-"""
-function map_from_reference(s::Simplex{D,T,N})::Function where {D,T,N}
+function map_from_reference(s::Simplex{D,T,N}) where {D,T<:Real,N}
     return u -> (1 - sum(u)) * s.points[1] + sum(c * p for (c, p) in zip(u, s.points[2:N]))
 end
 
-"""
-    abs_jacobian_determinant(s::Simplex)
+function map_to_reference(s::Simplex{D,T,N}) where {D,T<:Real,N}
+    v = s.points
+    M = inv(SMatrix{D,D}(reinterpret(reshape, T, [x - v[1] for x in v[2:N]])))
+    return u -> M * (u - v[1])
+end
 
-The absolute value of the Jacobian's determinant of the map from the reference simplex to the physical simplex `s`.
-"""
-function abs_jacobian_determinant(s::Simplex{D,T,N}) where {D,T,N}
+function abs_det_jacobian(s::Simplex{D,T,N}) where {D,T<:Real,N}
     v = s.points
     return abs(det(SMatrix{D,D}(reinterpret(reshape, T, [x - v[1] for x in v[2:N]]))))
 end
@@ -62,21 +58,21 @@ A triangle in 2 dimensions with 3 vertices of type `T`.
 """
 const Triangle{T} = Simplex{2,T,3}
 
-function Triangle(a::SVector{2,T}, b::SVector{2,T}, c::SVector{2,T}) where {T}
+function Triangle(a::SVector{2,T}, b::SVector{2,T}, c::SVector{2,T}) where {T<:Real}
     return Simplex(SVector{3,SVector{2,T}}([a, b, c]))
 end
 
 """
-    triangle(a::V, b::V, c::V) where {V}
+    triangle(a, b, c)
 
-A triangle in 2 dimensions given by the points `a`, `b`, and `c`.
+A triangle in 2 dimensions given by the 2d-points `a`, `b`, and `c`.
 """
-function triangle(a::V, b::V, c::V) where {V}
+function triangle(a, b, c)
     return simplex(a, b, c)
 end
 
 """
-    reference_triangle(T::DataType=Float64)
+    reference_triangle(T=Float64)
 
 Return the reference triangle given by the points `(0,0), (1,0), (0,1)`.
 """
@@ -84,12 +80,7 @@ function reference_triangle(T::DataType=Float64)
     return reference_simplex(2, T)
 end
 
-"""
-    abs_jacobian_determinant(t::Triangle)
-
-The absolute value of the Jacobian's determinant of the map from the reference triangle to the physical triangle `t`.
-"""
-function abs_jacobian_determinant(t::Triangle)
+function abs_det_jacobian(t::Triangle{T}) where {T<:Real}
     e1 = t.points[2] - t.points[1]
     e2 = t.points[3] - t.points[1]
     return norm(cross(e1, e2))
@@ -102,16 +93,16 @@ const Tetrahedron{T} = Simplex{3,T,4}
 
 function Tetrahedron(
     a::SVector{3,T}, b::SVector{3,T}, c::SVector{3,T}, d::SVector{3,T}
-) where {T}
+) where {T<:Real}
     return Simplex(SVector{4,SVector{3,T}}([a, b, c, d]))
 end
 
 """
-    tetrahedron(a::V, b::V, c::V, d::V) where {V}
+    tetrahedron(a, b, c, d)
 
-A tetrahedron in 3 dimensions given by the points `a`, `b`, `c`, and `d`.
+A tetrahedron in 3 dimensions given by the 3d-points `a`, `b`, `c`, and `d`.
 """
-function tetrahedron(a::V, b::V, c::V, d::V) where {V}
+function tetrahedron(a, b, c, d)
     return simplex(a, b, c, d)
 end
 
@@ -124,12 +115,7 @@ function reference_tetrahedron(T::DataType=Float64)
     return reference_simplex(3, T)
 end
 
-"""
-    abs_jacobian_determinant(t::Tetrahedron)
-
-The absolute value of the Jacobian's determinant of the map from the reference tetrahedron to the physical tetrahedron `t`.
-"""
-function abs_jacobian_determinant(t::Tetrahedron)
+function abs_det_jacobian(t::Tetrahedron{T}) where {T<:Real}
     e1 = t.points[2] - t.points[1]
     e2 = t.points[3] - t.points[1]
     e3 = t.points[4] - t.points[1]

@@ -36,7 +36,7 @@ using HCubature, LinearAlgebra
 a, b = (0.0, 0.0), (1.0,1.0)
 const counter = Ref(0)
 # f = x -> (counter[]+=1; 1 / (norm(x) + 1e-0))
-f = x -> (counter[]+=1; cos(20*prod(x)))
+f = x -> (counter[]+=1; 1+cos(20*prod(x)))
 I, E = hcubature(f, a, b)
 println("I = $I, E = $E, counter = $(counter[])")
 ```
@@ -45,7 +45,7 @@ Now, let's do the same with `HAdaptiveIntegration`:
 
 ```@example hcubature
 import HAdaptiveIntegration as HAI
-domain = HAI.Square(a, b)
+domain = HAI.rectangle(a, b)
 counter[] = 0
 I, E = HAI.integrate(f, domain)
 println("I = $I, E = $E, counter = $(counter[])")

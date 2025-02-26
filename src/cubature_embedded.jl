@@ -1,5 +1,5 @@
 """
-    struct EmbeddedCubatureRaw
+    @kwdef struct EmbeddedCubatureRaw
 
 An embedded cubature rule consisting of a high order cubature rule nodes and a low order cubature rule.
 The cubature nodes and weights are assume to be for the reference simplex or orthotope.
@@ -9,10 +9,10 @@ Note that the low order cubature uses `nodes[1:L]` as its nodes.
 - `name::String`: name of the embedded cubature;
 - `reference::String`: where the values are found;
 - `nb_significant_digits::Int`: number of significant digits on the node and weight values, `10^-nb_significant_digits` give the relative precision of the values;
-- `nodes::SVector{H,SVector{D,T}}`: the cubature nodes;
-- `weights_high::SVector{H,T}`: the cubature weights for the high order cubature;
+- `nodes::Vector{Vector{String}}`: the cubature nodes;
+- `weights_high::Vector{String}`: the cubature weights for the high order cubature;
 - `order_high::Int`: order of the high order cubature;
-- `weights_low::SVector{L,T}`: the cubature weights for the low order cubature;
+- `weights_low::Vector{String}`: the cubature weights for the low order cubature;
 - `order_low::Int`: order of the low order cubature.
 """
 @kwdef struct EmbeddedCubatureRaw
@@ -101,7 +101,7 @@ end
 function (ec::EmbeddedCubature{H,L,D,T})(
     fct::Function, domain::Domain{D,T}, norm=LinearAlgebra.norm
 ) where {H,L,D,T<:Real}
-    μ = abs_jacobian_determinant(domain)
+    μ = abs_det_jacobian(domain)
     Φ = map_from_reference(domain)
 
     v = fct(Φ(ec.nodes[1]))
