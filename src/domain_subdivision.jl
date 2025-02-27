@@ -1,4 +1,31 @@
 """
+    check_subdivision(
+        domain::Domain{D,T},
+        subdiv_algo;
+        atol::T=zero(T),
+        rtol::T=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+    ) where {D,T<:Real}
+
+Return `nothing` if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the volume of the domain else throw an error.
+"""
+function check_subdivision(
+    domain::Domain{D,T},
+    subdiv_algo;
+    atol=zero(T),
+    rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+) where {D,T<:Real}
+    subdomains = subdiv_algo(domain)
+    if isapprox(
+        sum(abs_det_jacobian.(subdomains)), abs_det_jacobian(domain); atol=atol, rtol=rtol
+    )
+        @info "`$(Symbol(subdiv_algo))` pass volume test."
+        return nothing
+    else
+        @error "`$(Symbol(subdiv_algo))` do not partition the domain."
+    end
+end
+
+"""
     subdivide_segment2(s::Segment)
 
 Divide the segment `s` into two segments of equal length.

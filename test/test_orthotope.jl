@@ -12,26 +12,26 @@ import HAdaptiveIntegration as HAI
         ref = HAI.reference_segment()
         s = HAI.segment(0, 1)
         @test (s.low_corner ≈ ref.low_corner) && (s.high_corner ≈ ref.high_corner)
-        @test HAI.abs_jacobian_determinant(ref) ≈ 1
+        @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "Rectangle" begin
         ref = HAI.reference_rectangle()
-        r = HAI.rectangle((0, 1), (0, 1))
+        r = HAI.rectangle((0, 0), (1, 1))
         @test (r.low_corner ≈ ref.low_corner) && (r.high_corner ≈ ref.high_corner)
-        @test HAI.abs_jacobian_determinant(ref) ≈ 1
+        @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "Cuboid" begin
         ref = HAI.reference_cuboid()
-        c = HAI.cuboid((0, 1), (0, 1), (0, 1))
+        c = HAI.cuboid((0, 0, 0), (1, 1, 1))
         @test (c.low_corner ≈ ref.low_corner) && (c.high_corner ≈ ref.high_corner)
-        @test HAI.abs_jacobian_determinant(ref) ≈ 1
+        @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "4-orthotope" begin
         ref = HAI.reference_orthotope(4)
-        @test HAI.abs_jacobian_determinant(ref) ≈ 1
+        @test HAI.abs_det_jacobian(ref) ≈ 1
 
         Φ = HAI.map_from_reference(ref)
         @test Φ([0, 0, 0, 0]) ≈ SVector{4}([0, 0, 0, 0])

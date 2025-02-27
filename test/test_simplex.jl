@@ -12,19 +12,19 @@ import HAdaptiveIntegration as HAI
         ref = HAI.reference_triangle()
         t = HAI.triangle((0, 0), (1, 0), (0, 1))
         @test t.points == ref.points
-        @test HAI.abs_jacobian_determinant(ref) ≈ 1
+        @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "Tetrahedron" begin
         ref = HAI.reference_tetrahedron()
         t = HAI.tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
         @test t.points == ref.points
-        @test HAI.abs_jacobian_determinant(ref) ≈ 1
+        @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "4-simplex" begin
         ref = HAI.reference_simplex(4)
-        @test HAI.abs_jacobian_determinant(ref) ≈ 1
+        @test HAI.abs_det_jacobian(ref) ≈ 1
 
         Φ = HAI.map_from_reference(ref)
         @test Φ([0, 0, 0, 0]) ≈ SVector{4}([0, 0, 0, 0])

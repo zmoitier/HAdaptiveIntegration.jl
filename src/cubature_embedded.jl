@@ -79,26 +79,6 @@ function embedded_cubature_from_raw(ecr::EmbeddedCubatureRaw, T::DataType=Float6
 end
 
 function (ec::EmbeddedCubature{H,L,D,T})(
-    fct::Function, norm=LinearAlgebra.norm
-) where {H,L,D,T<:Real}
-    v = fct(ec.nodes[1])
-    I_low = v * ec.weights_low[1]
-    I_high = v * ec.weights_high[1]
-    for i in 2:L
-        v = fct(ec.nodes[i])
-        I_low += v * ec.weights_low[i]
-        I_high += v * ec.weights_high[i]
-    end
-
-    for i in (L + 1):H
-        I_high += fct(ec.nodes[i]) * ec.weights_high[i]
-    end
-
-    # TODO: check if it is better to use relative error.
-    return I_high, norm(I_high - I_low, Inf)
-end
-
-function (ec::EmbeddedCubature{H,L,D,T})(
     fct::Function, domain::Domain{D,T}, norm=LinearAlgebra.norm
 ) where {H,L,D,T<:Real}
     μ = abs_det_jacobian(domain)

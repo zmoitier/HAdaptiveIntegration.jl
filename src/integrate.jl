@@ -4,12 +4,12 @@ function integrate(
     ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain);
     atol=zero(T),
-    rtol=atol == zero(T) ? sqrt(eps(T)) : zero(T),
-    maxsplit=1024,
+    rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+    maxsplit=D * 1024,
     norm=LinearAlgebra.norm,
-    heap=nothing,
+    buffer=nothing,
 ) where {H,L,D,T<:Real}
-    return _integrate(fct, domain, ec, subdiv_algo, atol, rtol, maxsplit, norm, heap)
+    return _integrate(fct, domain, ec, subdiv_algo, atol, rtol, maxsplit, norm, buffer)
 end
 
 function _integrate(
@@ -19,7 +19,7 @@ function _integrate(
     I, E = ec(fct, domain)
 
     # a quick check to see if splitting is really needed
-    if E < atol || E < rtol * norm(I) || nsplit >= maxsplit
+    if (E < atol) || (E < rtol * norm(I)) || (nsplit >= maxsplit)
         return I, E
     end
 
@@ -33,7 +33,7 @@ function _integrate(
     end
 
     push!(heap, (domain, I, E))
-    while E > atol && E > rtol * norm(I) && nsplit < maxsplit
+    while (E > atol) && (E > rtol * norm(I)) && (nsplit < maxsplit)
         sc, Ic, Ec = pop!(heap)
         I -= Ic
         E -= Ec
@@ -46,7 +46,7 @@ function _integrate(
         nsplit += 1
     end
 
-    nsplit >= maxsplit && @warn "maximum number of steps reached"
+    (nsplit >= maxsplit) && @warn "maximum number of subdivide reached"
 
     return I, E
 end

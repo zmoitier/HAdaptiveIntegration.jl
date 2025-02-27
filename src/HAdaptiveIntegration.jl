@@ -5,11 +5,11 @@ using LinearAlgebra
 using StaticArrays
 
 """
-    abstract type Domain{D,T}
+    abstract type Domain{D,T<:Real}
 
 Abstract type for integration domains in `D` dimensions with type `T<:Real`.
 """
-abstract type Domain{D,T} end
+abstract type Domain{D,T<:Real} end
 
 """
     map_from_reference(d::Domain)::Function
@@ -17,7 +17,7 @@ abstract type Domain{D,T} end
 Return an anonymous function that maps the reference domain to the physical domain `d`.
 """
 function map_from_reference(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_from_reference` is unimplemented for type $(typeof(d))."
+    @error "`map_from_reference` is not implemented for type $(typeof(d))."
 end
 
 """
@@ -26,7 +26,7 @@ end
 Return an anonymous function that maps the physical domain `d` to the reference domain.
 """
 function map_to_reference(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_to_reference` is unimplemented for type $(typeof(d))."
+    @error "`map_to_reference` is not implemented for type $(typeof(d))."
 end
 
 """
@@ -35,7 +35,7 @@ end
 The absolute value of the Jacobian's determinant of the map from the reference domain to the physical domain `d`.
 """
 function abs_det_jacobian(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_from_reference` is unimplemented for $(typeof(d))."
+    @error "`map_from_reference` is not implemented for $(typeof(d))."
 end
 
 # Supported integration domains
@@ -47,6 +47,14 @@ export segment, reference_segment, rectangle, reference_rectangle, cuboid, refer
 
 # Subdivision strategies for various domains
 include("domain_subdivision.jl")
+export subdivide_segment2,
+    subdivide_segment3,
+    subdivide_triangle2,
+    subdivide_triangle4,
+    subdivide_rectangle4,
+    subdivide_tetrahedron8,
+    subdivide_cuboid8,
+    check_subdivision
 
 const TABULATED_SUBDIVISION = Dict(
     :segment => ["subdivide_segment2", "subdivide_segment3"],
@@ -71,11 +79,15 @@ include("cubature_embedded.jl")
 export EmbeddedCubatureRaw, embedded_cubature
 
 include("cubature_check.jl")
+export check_order
 
 # Tabulated cubature rule for supported domains
 include("rule_segment.jl")
+export SEGMENT_G7K15, SEGMENT_G15K31
 include("rule_triangle.jl")
+export TRIANGLE_LAURIE_RADON
 include("rule_square.jl")
+export SQUARE_CH21_G25
 include("rule_tetrahedron.jl")
 include("rule_cube.jl")
 
