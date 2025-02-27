@@ -67,7 +67,7 @@ using Test, LinearAlgebra
         T = Float64
         Q1 = HAI.Quadrature{T}(HAI.SQUARE_GAUSS_O9_N25)
         @test HAI.check_order_square(Q1, 9)
-        Q2 = HAI.Quadrature{T}(HAI.SQUARE_COOLS_HAEGEMANS_O7_N21)
+        Q2 = HAI.Quadrature{T}(HAI.SQUARE_CH21_G25_O7_N21)
         @test HAI.check_order_square(Q2, 7)
 
         embd_quad = HAI.EmbeddedQuadrature(; name="square-CoolsHaegemans", datatype=T)

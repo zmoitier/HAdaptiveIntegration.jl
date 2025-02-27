@@ -10,6 +10,17 @@ function subdivide_segment2(s::Segment)
 end
 
 """
+    subdivide_segment3(s::Segment)
+
+Divide the segment `s` into three segments of equal length.
+"""
+function subdivide_segment3(s::Segment)
+    a, b = s.low_corner, s.high_corner
+    m1, m2 = (2 * a + b) / 3, (a + 2 * b) / 3
+    return (Segment(a, m1), Segment(m1, m2), Segment(m2, b))
+end
+
+"""
     subdivide_triangle2(s::Triangle)
 
 Divide the triangle `t` into two triangles by connecting the first point of `t` to the midpoints of

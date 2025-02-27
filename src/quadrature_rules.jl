@@ -332,13 +332,13 @@ const SQUARE_GAUSS_O9_N25 = Quadrature(
 )
 
 """
-    const SQUARE_COOLS_HAEGEMANS_O8_N25
+    const SQUARE_CH21_G25_O8_N25
 
 Quadrature rule embedded in a [`SQUARE_GAUSS_O9_N25`](@ref) for the square domain.
 
 Reference: https://link.springer.com/article/10.1007/BF01389339
 """
-const SQUARE_COOLS_HAEGEMANS_O7_N21 = Quadrature(
+const SQUARE_CH21_G25_O7_N21 = Quadrature(
     map(
         x -> (x .+ 1) ./ 2,
         SVector{2,Float64}[
@@ -444,7 +444,7 @@ const SQUARE_COOLS_HAEGEMANS_O7_N21 = Quadrature(
         0.039089597169698608216,
         0.082373073956971141166,
     ] ./ 4, # weights
-    "SQUARE_COOLS_HAEGEMANS_O7_N21", # name
+    "SQUARE_CH21_G25_O7_N21", # name
 )
 
-# TODO: implement SQUARE_COOLS_HAEGEMANS_O7_N21, SQUARE_COOLS_HAEGEMANS_O5_N13, etc...
+# TODO: implement SQUARE_CH21_G25_O7_N21, SQUARE_CH21_G25_O5_N13, etc...

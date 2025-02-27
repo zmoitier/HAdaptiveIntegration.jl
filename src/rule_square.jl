@@ -1,5 +1,5 @@
-const SQUARE_COOLS_HAEGEMANS = EmbeddedCubatureRaw(;
-    name="Cools Haegemans (SQUARE_COOLS_HAEGEMANS)",
+const SQUARE_CH21_G25 = EmbeddedCubatureRaw(;
+    name="Cools Haegemans (SQUARE_CH21_G25)",
     reference="https://link.springer.com/article/10.1007/BF01389339",
     nb_significant_digits=19,
     nodes=[

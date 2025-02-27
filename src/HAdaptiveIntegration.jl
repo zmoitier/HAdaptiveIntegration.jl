@@ -49,11 +49,11 @@ export segment, reference_segment, rectangle, reference_rectangle, cuboid, refer
 include("domain_subdivision.jl")
 
 const TABULATED_SUBDIVISION = Dict(
-    :segment => [subdivide_segment2],
-    :triangle => [subdivide_triangle2, subdivide_triangle4],
-    :rectangle => [subdivide_rectangle4],
-    :tetrahedron => [subdivide_tetrahedron8],
-    :cuboid => [subdivide_cuboid8],
+    :segment => ["subdivide_segment2", "subdivide_segment3"],
+    :triangle => ["subdivide_triangle2", "subdivide_triangle4"],
+    :rectangle => ["subdivide_rectangle4"],
+    :tetrahedron => ["subdivide_tetrahedron8"],
+    :cuboid => ["subdivide_cuboid8"],
 )
 
 function default_subdivision(d::Domain)
@@ -82,7 +82,7 @@ include("rule_cube.jl")
 const TABULATED_EMBEDDED_CUBATURE = Dict(
     :segment => ["SEGMENT_G7K15", "SEGMENT_G15K31"],
     :triangle => ["TRIANGLE_LAURIE_RADON"],
-    :rectangle => ["SQUARE_COOLS_HAEGEMANS"],
+    :rectangle => ["SQUARE_CH21_G25"],
     :tetrahedron => [],
     :cuboid => [],
 )
@@ -98,7 +98,7 @@ function default_embedded_cubature(::Triangle{T}) where {T}
     return embedded_cubature_from_raw(TRIANGLE_LAURIE_RADON, T)
 end
 function default_embedded_cubature(::Rectangle{T}) where {T}
-    return embedded_cubature_from_raw(SQUARE_COOLS_HAEGEMANS, T)
+    return embedded_cubature_from_raw(SQUARE_CH21_G25, T)
 end
 # default_embedded_cubature(::Tetrahedron) = 
 # default_embedded_cubature(::Cuboid) = 

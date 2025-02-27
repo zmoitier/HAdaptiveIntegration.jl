@@ -114,7 +114,7 @@ function EmbeddedQuadrature(; name::String, datatype::DataType=Float64)
         )
     elseif name == "square-CoolsHaegemans"
         return embedded_from_2quad(
-            SQUARE_COOLS_HAEGEMANS_O7_N21, SQUARE_GAUSS_O9_N25, "CoolsHaegemans", datatype
+            SQUARE_CH21_G25_O7_N21, SQUARE_GAUSS_O9_N25, "CoolsHaegemans", datatype
         )
     else
         error("Unknown rule.")
