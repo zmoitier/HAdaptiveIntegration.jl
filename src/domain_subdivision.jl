@@ -1,4 +1,31 @@
 """
+    check_subdivision(
+        domain::Domain{D,T},
+        subdiv_algo;
+        atol::T=zero(T),
+        rtol::T=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+    ) where {D,T<:Real}
+
+Return `nothing` if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the volume of the domain else throw an error.
+"""
+function check_subdivision(
+    domain::Domain{D,T},
+    subdiv_algo;
+    atol=zero(T),
+    rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+) where {D,T<:Real}
+    subdomains = subdiv_algo(domain)
+    if isapprox(
+        sum(abs_det_jacobian.(subdomains)), abs_det_jacobian(domain); atol=atol, rtol=rtol
+    )
+        @info "`$(Symbol(subdiv_algo))` pass volume test."
+        return nothing
+    else
+        @error "`$(Symbol(subdiv_algo))` do not partition the domain."
+    end
+end
+
+"""
     subdivide_segment2(s::Segment)
 
 Divide the segment `s` into two segments of equal length.
@@ -7,6 +34,17 @@ function subdivide_segment2(s::Segment)
     a, b = s.low_corner, s.high_corner
     m = (a + b) / 2
     return (Segment(a, m), Segment(m, b))
+end
+
+"""
+    subdivide_segment3(s::Segment)
+
+Divide the segment `s` into three segments of equal length.
+"""
+function subdivide_segment3(s::Segment)
+    a, b = s.low_corner, s.high_corner
+    m1, m2 = (2 * a + b) / 3, (a + 2 * b) / 3
+    return (Segment(a, m1), Segment(m1, m2), Segment(m2, b))
 end
 
 """
@@ -101,8 +139,16 @@ function subdivide_cuboid8(c::Cuboid{T}) where {T}
     )
 end
 
-function default_subdivision(domain::Domain)
-    @error "no default subdivision for $(typeof(domain))."
+const LIST_SUBDIVISION_ALGO = [
+    "segment" => ["subdivide_segment2", "subdivide_segment3"],
+    "rectangle" => ["subdivide_rectangle4"],
+    "triangle" => ["subdivide_triangle2", "subdivide_triangle4"],
+    "cuboid" => ["subdivide_cuboid8"],
+    "tetrahedron" => ["subdivide_tetrahedron8"],
+]
+
+function default_subdivision(d::Domain)
+    @error "no default subdivision for $(typeof(d))."
 end
 
 default_subdivision(::Segment) = subdivide_segment2

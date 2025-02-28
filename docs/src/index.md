@@ -45,7 +45,7 @@ Now, let's do the same with `HAdaptiveIntegration`:
 
 ```@example hcubature
 import HAdaptiveIntegration as HAI
-domain = HAI.Square(a, b)
+domain = HAI.rectangle(a, b)
 counter[] = 0
 I, E = HAI.integrate(f, domain)
 println("I = $I, E = $E, counter = $(counter[])")
@@ -63,3 +63,7 @@ b1 = @benchmark hcubature($f, $a, $b)
 counter[] = 0
 b2 = @benchmark HAI.integrate($f, $domain)
 ```
+
+<!-- function Base.parse(T::Type{MultiFloat{Float64,N}}, str::String) where {N}
+    return T(str)
+end -->
