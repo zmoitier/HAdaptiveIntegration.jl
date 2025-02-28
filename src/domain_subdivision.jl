@@ -138,3 +138,21 @@ function subdivide_cuboid8(c::Cuboid{T}) where {T}
         Cuboid(m, b),
     )
 end
+
+const LIST_SUBDIVISION_ALGO = [
+    "segment" => ["subdivide_segment2", "subdivide_segment3"],
+    "rectangle" => ["subdivide_rectangle4"],
+    "triangle" => ["subdivide_triangle2", "subdivide_triangle4"],
+    "cuboid" => ["subdivide_cuboid8"],
+    "tetrahedron" => ["subdivide_tetrahedron8"],
+]
+
+function default_subdivision(d::Domain)
+    @error "no default subdivision for $(typeof(d))."
+end
+
+default_subdivision(::Segment) = subdivide_segment2
+default_subdivision(::Triangle) = subdivide_triangle4
+default_subdivision(::Rectangle) = subdivide_rectangle4
+default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
+default_subdivision(::Cuboid) = subdivide_cuboid8

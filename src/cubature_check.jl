@@ -18,26 +18,26 @@ function check_order(
 
     ec = embedded_cubature_from_raw(ecr, T)
 
-    val_lo::Vector{Vector{Pair{NTuple{D,Int},T}}} = []
-    val_hi::Vector{Vector{Pair{NTuple{D,Int},T}}} = []
+    val_lo::Vector{Vector{T}} = []
+    val_hi::Vector{Vector{T}} = []
     for i in 1:(ol + 1)
-        tmp_lo::Vector{Pair{NTuple{D,Int},T}} = []
-        tmp_hi::Vector{Pair{NTuple{D,Int},T}} = []
+        tmp_lo = Vector{T}()
+        tmp_hi = Vector{T}()
         for (idx, _) in val_ref[i]
             fct = x -> prod(xᵢ^eᵢ for (xᵢ, eᵢ) in zip(x, idx))
             Ih, Il = ec(fct)
-            push!(tmp_lo, idx => Il)
-            push!(tmp_hi, idx => Ih)
+            push!(tmp_lo, Il)
+            push!(tmp_hi, Ih)
         end
         push!(val_lo, tmp_lo)
         push!(val_hi, tmp_hi)
     end
     for i in (ol + 2):(oh + 1)
-        tmp_hi::Vector{Pair{NTuple{D,Int},T}} = []
+        tmp_hi = Vector{T}()
         for (idx, _) in val_ref[i]
             fct = x -> prod(xᵢ^eᵢ for (xᵢ, eᵢ) in zip(x, idx))
             Ih, _ = ec(fct)
-            push!(tmp_hi, idx => Ih)
+            push!(tmp_hi, Ih)
         end
         push!(val_hi, tmp_hi)
     end
@@ -48,6 +48,9 @@ function check_order(
     if isnothing(rtol)
         rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T)
     end
+
+    _isapprox(val_ref, val_lo, atol, rtol)
+    _isapprox(val_ref, val_hi, atol, rtol)
 
     return nothing
 end
@@ -116,10 +119,25 @@ function (ec::EmbeddedCubature{H,L,D,T})(fct::Function) where {H,L,D,T<:Real}
         I_low += v * ec.weights_low[i]
         I_high += v * ec.weights_high[i]
     end
-
     for i in (L + 1):H
         I_high += fct(ec.nodes[i]) * ec.weights_high[i]
     end
-
     return I_high, I_low
+end
+
+function _isapprox(
+    val_ref::Vector{Vector{Pair{NTuple{D,Int},Rational{Int}}}},
+    val_num::Vector{Vector{T}},
+    atol::T,
+    rtol::T,
+) where {D,T<:Real}
+    for (i, (idx_ref, num)) in enumerate(zip(val_ref, val_num))
+        for ((_, vr), vn) in zip(idx_ref, num)
+            if !isapprox(vn, vr; atol=atol, rtol=rtol)
+                @error "fail at $(i-1)"
+            end
+        end
+    end
+    @info "pass $(length(val_num) - 1)"
+    return nothing
 end

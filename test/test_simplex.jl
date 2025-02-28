@@ -9,21 +9,21 @@ import HAdaptiveIntegration as HAI
     end
 
     @testset "Triangle" begin
-        ref = HAI.reference_triangle()
+        ref = HAI.reference_domain(HAI.Triangle{Float64})
         t = HAI.triangle((0, 0), (1, 0), (0, 1))
         @test t.points == ref.points
         @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "Tetrahedron" begin
-        ref = HAI.reference_tetrahedron()
+        ref = HAI.reference_domain(HAI.Tetrahedron{Float64})
         t = HAI.tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
         @test t.points == ref.points
         @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "4-simplex" begin
-        ref = HAI.reference_simplex(4)
+        ref = HAI.reference_domain(HAI.Simplex{4,Float64,5})
         @test HAI.abs_det_jacobian(ref) ≈ 1
 
         Φ = HAI.map_from_reference(ref)

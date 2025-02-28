@@ -9,28 +9,28 @@ import HAdaptiveIntegration as HAI
     end
 
     @testset "Segment" begin
-        ref = HAI.reference_segment()
+        ref = HAI.reference_domain(HAI.Segment{Float64})
         s = HAI.segment(0, 1)
         @test (s.low_corner ≈ ref.low_corner) && (s.high_corner ≈ ref.high_corner)
         @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "Rectangle" begin
-        ref = HAI.reference_rectangle()
+        ref = HAI.reference_domain(HAI.Rectangle{Float64})
         r = HAI.rectangle((0, 0), (1, 1))
         @test (r.low_corner ≈ ref.low_corner) && (r.high_corner ≈ ref.high_corner)
         @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "Cuboid" begin
-        ref = HAI.reference_cuboid()
+        ref = HAI.reference_domain(HAI.Cuboid{Float64})
         c = HAI.cuboid((0, 0, 0), (1, 1, 1))
         @test (c.low_corner ≈ ref.low_corner) && (c.high_corner ≈ ref.high_corner)
         @test HAI.abs_det_jacobian(ref) ≈ 1
     end
 
     @testset "4-orthotope" begin
-        ref = HAI.reference_orthotope(4)
+        ref = HAI.reference_domain(HAI.Orthotope{4,Float64})
         @test HAI.abs_det_jacobian(ref) ≈ 1
 
         Φ = HAI.map_from_reference(ref)
