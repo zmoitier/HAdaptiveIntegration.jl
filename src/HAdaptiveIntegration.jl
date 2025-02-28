@@ -39,7 +39,7 @@ export check_subdivision,
 
 # Embedded cubature
 include("cubature_embedded.jl")
-export EmbeddedCubatureRaw, embedded_cubature_from_raw, embedded_cubature
+export EmbeddedCubatureData, embedded_cubature, embedded_cubature
 
 include("cubature_check.jl")
 export check_order
@@ -58,7 +58,7 @@ include("rule_tetrahedron.jl")
 # export
 
 include("rule_cube.jl")
-#export
+# export
 
 const LIST_EMBEDDED_CUBATURE = [
     "segment" => ["SEGMENT_G7K15", "SEGMENT_G15K31"],
@@ -73,13 +73,13 @@ function default_embedded_cubature(d::Domain)
 end
 
 function default_embedded_cubature(::Segment{T}) where {T}
-    return embedded_cubature_from_raw(SEGMENT_G7K15, T)
+    return embedded_cubature(SEGMENT_G7K15, T)
 end
 function default_embedded_cubature(::Triangle{T}) where {T}
-    return embedded_cubature_from_raw(TRIANGLE_R7L19, T)
+    return embedded_cubature(TRIANGLE_R7L19, T)
 end
 function default_embedded_cubature(::Rectangle{T}) where {T}
-    return embedded_cubature_from_raw(SQUARE_CH21G25, T)
+    return embedded_cubature(SQUARE_CH21G25, T)
 end
 # default_embedded_cubature(::Tetrahedron) = 
 # default_embedded_cubature(::Cuboid) = 

@@ -1,4 +1,4 @@
-const SQUARE_CH21G25 = EmbeddedCubatureRaw(;
+const SQUARE_CH21G25 = EmbeddedCubatureData(;
     name="Cools Haegemans (SQUARE_CH21G25)",
     reference="https://link.springer.com/article/10.1007/BF01389339",
     nb_significant_digits=19,

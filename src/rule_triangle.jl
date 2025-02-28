@@ -1,4 +1,4 @@
-const TRIANGLE_R7L19 = EmbeddedCubatureRaw(;
+const TRIANGLE_R7L19 = EmbeddedCubatureData(;
     name="Laurie Radon (TRIANGLE_R7L19)",
     reference="""https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/radon/set_radon_standard.m
     https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/laurie/set_laurie_standard.m""",

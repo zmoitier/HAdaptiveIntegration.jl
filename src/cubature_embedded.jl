@@ -1,5 +1,5 @@
 """
-    @kwdef struct EmbeddedCubatureRaw
+    @kwdef struct EmbeddedCubatureData
 
 An embedded cubature rule consisting of a high order cubature rule nodes and a low order cubature rule.
 The cubature nodes and weights are assume to be for the reference simplex or orthotope.
@@ -15,7 +15,7 @@ Note that the low order cubature uses `nodes[1:L]` as its nodes.
 - `weights_low::Vector{String}`: the cubature weights for the low order cubature;
 - `order_low::Int`: order of the low order cubature.
 """
-@kwdef struct EmbeddedCubatureRaw
+@kwdef struct EmbeddedCubatureData
     name::String
     reference::String
     nb_significant_digits::Int
@@ -47,7 +47,7 @@ end
 """
     embedded_cubature(nodes, weights_high, weights_low)
 
-Construct an embedded cubature form a vector of nodes and two vector of weights high and low.
+Return an embedded cubature form a vector of nodes and two vector of weights for the high order and low order cubature.
 """
 function embedded_cubature(
     nodes::Vector{Vector{T}}, weights_high::Vector{T}, weights_low::Vector{T}
@@ -69,11 +69,11 @@ function embedded_cubature(
 end
 
 """
-    embedded_cubature_from_raw(ecr::EmbeddedCubatureRaw, T=Float64)
+    embedded_cubature(ecr::EmbeddedCubatureData, T=Float64)
 
-Return the `EmbeddedCubature` with type `T` from an `EmbeddedCubatureRaw`.
+Return the `EmbeddedCubature` with type `T` from an `EmbeddedCubatureData`.
 """
-function embedded_cubature_from_raw(ecr::EmbeddedCubatureRaw, T::DataType=Float64)
+function embedded_cubature(ecr::EmbeddedCubatureData, T::DataType=Float64)
     @assert eps(T) > 10.0^(-ecr.nb_significant_digits) "the embedded cubature `$(ecr.name)` has less precision than type $T."
 
     return embedded_cubature(

@@ -1,5 +1,5 @@
 function check_order(
-    ecr::EmbeddedCubatureRaw,
+    ecr::EmbeddedCubatureData,
     domain_type::DataType;
     atol::Union{Real,Nothing}=nothing,
     rtol::Union{Real,Nothing}=nothing,
@@ -16,7 +16,7 @@ function check_order(
         @error "unknown monomial's integrals on the reference domain of $domain_type."
     end
 
-    ec = embedded_cubature_from_raw(ecr, T)
+    ec = embedded_cubature(ecr, T)
 
     val_lo::Vector{Vector{T}} = []
     val_hi::Vector{Vector{T}} = []
@@ -52,6 +52,38 @@ function check_order(
     _isapprox(val_ref, val_lo, atol, rtol)
     _isapprox(val_ref, val_hi, atol, rtol)
 
+    return nothing
+end
+
+function (ec::EmbeddedCubature{H,L,D,T})(fct::Function) where {H,L,D,T<:Real}
+    v = fct(ec.nodes[1])
+    I_low = v * ec.weights_low[1]
+    I_high = v * ec.weights_high[1]
+    for i in 2:L
+        v = fct(ec.nodes[i])
+        I_low += v * ec.weights_low[i]
+        I_high += v * ec.weights_high[i]
+    end
+    for i in (L + 1):H
+        I_high += fct(ec.nodes[i]) * ec.weights_high[i]
+    end
+    return I_high, I_low
+end
+
+function _isapprox(
+    val_ref::Vector{Vector{Pair{NTuple{D,Int},Rational{Int}}}},
+    val_num::Vector{Vector{T}},
+    atol::T,
+    rtol::T,
+) where {D,T<:Real}
+    for (i, (idx_ref, num)) in enumerate(zip(val_ref, val_num))
+        for ((_, vr), vn) in zip(idx_ref, num)
+            if !isapprox(vn, vr; atol=atol, rtol=rtol)
+                @assert false "fail to integrate within tolerance at total degree = $(i-1)"
+            end
+        end
+    end
+    @info "integrate within tolerance up to total degree = $(length(val_num) - 1)"
     return nothing
 end
 
@@ -108,36 +140,4 @@ function simplex_int_val(dim::Int, tot_deg_max::Int)
     end
 
     return indexes
-end
-
-function (ec::EmbeddedCubature{H,L,D,T})(fct::Function) where {H,L,D,T<:Real}
-    v = fct(ec.nodes[1])
-    I_low = v * ec.weights_low[1]
-    I_high = v * ec.weights_high[1]
-    for i in 2:L
-        v = fct(ec.nodes[i])
-        I_low += v * ec.weights_low[i]
-        I_high += v * ec.weights_high[i]
-    end
-    for i in (L + 1):H
-        I_high += fct(ec.nodes[i]) * ec.weights_high[i]
-    end
-    return I_high, I_low
-end
-
-function _isapprox(
-    val_ref::Vector{Vector{Pair{NTuple{D,Int},Rational{Int}}}},
-    val_num::Vector{Vector{T}},
-    atol::T,
-    rtol::T,
-) where {D,T<:Real}
-    for (i, (idx_ref, num)) in enumerate(zip(val_ref, val_num))
-        for ((_, vr), vn) in zip(idx_ref, num)
-            if !isapprox(vn, vr; atol=atol, rtol=rtol)
-                @error "fail at $(i-1)"
-            end
-        end
-    end
-    @info "pass $(length(val_num) - 1)"
-    return nothing
 end

@@ -1,4 +1,4 @@
-const SEGMENT_G7K15 = EmbeddedCubatureRaw(;
+const SEGMENT_G7K15 = EmbeddedCubatureData(;
     name="Gauss-Kronrod (SEGMENT_G7K15)",
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=34,
@@ -49,7 +49,7 @@ const SEGMENT_G7K15 = EmbeddedCubatureRaw(;
     order_low=13,
 )
 
-const SEGMENT_G15K31 = EmbeddedCubatureRaw(;
+const SEGMENT_G15K31 = EmbeddedCubatureData(;
     name="Gauss-Kronrod (SEGMENT_G15K31)",
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=33,
