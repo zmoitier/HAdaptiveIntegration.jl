@@ -66,15 +66,6 @@ function segment(xmin::T, xmax::T) where {T<:Real}
 end
 
 """
-    reference_segment(D::Int, T::DataType)
-
-Return the reference segment in 1 dimensions, representing `[0, 1]`.
-"""
-function reference_segment(T::DataType=Float64)
-    return reference_orthotope(1, T)
-end
-
-"""
 An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
 """
 const Rectangle{T} = Orthotope{2,T}
@@ -93,15 +84,6 @@ function rectangle(low_corner, high_corner)
 end
 
 """
-    reference_rectangle(D::Int, T::DataType)
-
-Return the reference rectangle (square) in 2 dimensions, representing `[0, 1]²`.
-"""
-function reference_rectangle(T::DataType=Float64)
-    return reference_orthotope(2, T)
-end
-
-"""
 A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
 """
 const Cuboid{T} = Orthotope{3,T}
@@ -117,13 +99,4 @@ A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
 """
 function cuboid(low_corner, high_corner)
     return orthotope(low_corner, high_corner)
-end
-
-"""
-    reference_cuboid(D::Int, T::DataType)
-
-Return the reference cuboid (cube) in 3 dimensions, representing `[0, 1]³`.
-"""
-function reference_cuboid(T::DataType=Float64)
-    return reference_orthotope(3, T)
 end

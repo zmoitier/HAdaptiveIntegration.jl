@@ -18,28 +18,28 @@ function check_order(
 
     ec = embedded_cubature_from_raw(ecr, T)
 
-    err_lo::Vector{Vector{Pair{NTuple{D,Int},T}}} = []
-    err_hi::Vector{Vector{Pair{NTuple{D,Int},T}}} = []
+    val_lo::Vector{Vector{Pair{NTuple{D,Int},T}}} = []
+    val_hi::Vector{Vector{Pair{NTuple{D,Int},T}}} = []
     for i in 1:(ol + 1)
         tmp_lo::Vector{Pair{NTuple{D,Int},T}} = []
         tmp_hi::Vector{Pair{NTuple{D,Int},T}} = []
-        for (idx, val) in val_ref[i]
+        for (idx, _) in val_ref[i]
             fct = x -> prod(xᵢ^eᵢ for (xᵢ, eᵢ) in zip(x, idx))
             Ih, Il = ec(fct)
-            push!(tmp_lo, idx => abs(Il / val - 1))
-            push!(tmp_hi, idx => abs(Ih / val - 1))
+            push!(tmp_lo, idx => Il)
+            push!(tmp_hi, idx => Ih)
         end
-        push!(err_lo, tmp_lo)
-        push!(err_hi, tmp_hi)
+        push!(val_lo, tmp_lo)
+        push!(val_hi, tmp_hi)
     end
     for i in (ol + 2):(oh + 1)
         tmp_hi::Vector{Pair{NTuple{D,Int},T}} = []
-        for (idx, val) in val_ref[i]
+        for (idx, _) in val_ref[i]
             fct = x -> prod(xᵢ^eᵢ for (xᵢ, eᵢ) in zip(x, idx))
             Ih, _ = ec(fct)
-            push!(tmp_hi, idx => abs(Ih / val - 1))
+            push!(tmp_hi, idx => Ih)
         end
-        push!(err_hi, tmp_hi)
+        push!(val_hi, tmp_hi)
     end
 
     if isnothing(atol)

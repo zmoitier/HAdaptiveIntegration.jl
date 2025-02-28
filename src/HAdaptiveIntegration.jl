@@ -4,46 +4,24 @@ using DataStructures
 using LinearAlgebra
 using StaticArrays
 
-"""
-    abstract type Domain{D,T<:Real}
-
-Abstract type for integration domains in `D` dimensions with type `T<:Real`.
-"""
-abstract type Domain{D,T<:Real} end
-
-"""
-    map_from_reference(d::Domain)::Function
-
-Return an anonymous function that maps the reference domain to the physical domain `d`.
-"""
-function map_from_reference(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_from_reference` is not implemented for type $(typeof(d))."
-end
-
-"""
-    map_to_reference(d::Domain)::Function
-
-Return an anonymous function that maps the physical domain `d` to the reference domain.
-"""
-function map_to_reference(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_to_reference` is not implemented for type $(typeof(d))."
-end
-
-"""
-    abs_det_jacobian(d::Domain)
-
-The absolute value of the Jacobian's determinant of the map from the reference domain to the physical domain `d`.
-"""
-function abs_det_jacobian(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_from_reference` is not implemented for $(typeof(d))."
-end
+# Abstract domain type
+include("domain.jl")
+export reference_domain
 
 # Supported integration domains
 include("domain_simplex.jl")
-export triangle, reference_triangle, tetrahedron, reference_tetrahedron
+export Triangle, triangle, Tetrahedron, tetrahedron, Simplex, simplex, reference_simplex
 
 include("domain_orthotope.jl")
-export segment, reference_segment, rectangle, reference_rectangle, cuboid, reference_cuboid
+export Segment,
+    segment, Rectangle, rectangle, Cuboid, cuboid, Orthotope, orthotope, reference_orthotope
+
+const LIST_DOMAIN_TYPE = [
+    "dimension 1" => ["segment"],
+    "dimension 2" => ["rectangle", "triangle"],
+    "dimension 3" => ["cuboid", "tetrahedron"],
+    "dimension D" => ["orthotope", "simplex"],
+]
 
 # Subdivision strategies for various domains
 include("domain_subdivision.jl")
@@ -56,13 +34,13 @@ export subdivide_segment2,
     subdivide_cuboid8,
     check_subdivision
 
-const TABULATED_SUBDIVISION = Dict(
-    :segment => ["subdivide_segment2", "subdivide_segment3"],
-    :triangle => ["subdivide_triangle2", "subdivide_triangle4"],
-    :rectangle => ["subdivide_rectangle4"],
-    :tetrahedron => ["subdivide_tetrahedron8"],
-    :cuboid => ["subdivide_cuboid8"],
-)
+const LIST_SUBDIVISION_ALGO = [
+    "segment" => ["subdivide_segment2", "subdivide_segment3"],
+    "rectangle" => ["subdivide_rectangle4"],
+    "triangle" => ["subdivide_triangle2", "subdivide_triangle4"],
+    "cuboid" => ["subdivide_cuboid8"],
+    "tetrahedron" => ["subdivide_tetrahedron8"],
+]
 
 function default_subdivision(d::Domain)
     @error "no default subdivision for $(typeof(d))."
@@ -76,7 +54,7 @@ default_subdivision(::Cuboid) = subdivide_cuboid8
 
 # Embedded cubature
 include("cubature_embedded.jl")
-export EmbeddedCubatureRaw, embedded_cubature
+export EmbeddedCubatureRaw, embedded_cubature_from_raw, embedded_cubature
 
 include("cubature_check.jl")
 export check_order
@@ -84,20 +62,26 @@ export check_order
 # Tabulated cubature rule for supported domains
 include("rule_segment.jl")
 export SEGMENT_G7K15, SEGMENT_G15K31
+
 include("rule_triangle.jl")
-export TRIANGLE_LAURIE_RADON
+export TRIANGLE_R7_L19
+
 include("rule_square.jl")
 export SQUARE_CH21_G25
-include("rule_tetrahedron.jl")
-include("rule_cube.jl")
 
-const TABULATED_EMBEDDED_CUBATURE = Dict(
-    :segment => ["SEGMENT_G7K15", "SEGMENT_G15K31"],
-    :triangle => ["TRIANGLE_LAURIE_RADON"],
-    :rectangle => ["SQUARE_CH21_G25"],
-    :tetrahedron => [],
-    :cuboid => [],
-)
+include("rule_tetrahedron.jl")
+# export
+
+include("rule_cube.jl")
+#export
+
+const LIST_EMBEDDED_CUBATURE = [
+    "segment" => ["SEGMENT_G7K15", "SEGMENT_G15K31"],
+    "rectangle" => ["SQUARE_CH21_G25"],
+    "triangle" => ["TRIANGLE_R7_L19"],
+    "cuboid" => [],
+    "tetrahedron" => [],
+]
 
 function default_embedded_cubature(d::Domain)
     @error "no default embedded cubature for $(typeof(d))."
@@ -107,7 +91,7 @@ function default_embedded_cubature(::Segment{T}) where {T}
     return embedded_cubature_from_raw(SEGMENT_G7K15, T)
 end
 function default_embedded_cubature(::Triangle{T}) where {T}
-    return embedded_cubature_from_raw(TRIANGLE_LAURIE_RADON, T)
+    return embedded_cubature_from_raw(TRIANGLE_R7_L19, T)
 end
 function default_embedded_cubature(::Rectangle{T}) where {T}
     return embedded_cubature_from_raw(SQUARE_CH21_G25, T)

@@ -68,6 +68,11 @@ function embedded_cubature(
     )
 end
 
+"""
+    embedded_cubature_from_raw(ecr::EmbeddedCubatureRaw, T=Float64)
+
+Return the `EmbeddedCubature` with type `T` from an `EmbeddedCubatureRaw`.
+"""
 function embedded_cubature_from_raw(ecr::EmbeddedCubatureRaw, T::DataType=Float64)
     @assert eps(T) > 10.0^(-ecr.nb_significant_digits) "the embedded cubature `$(ecr.name)` has less precision than type $T."
 

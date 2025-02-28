@@ -71,15 +71,6 @@ function triangle(a, b, c)
     return simplex(a, b, c)
 end
 
-"""
-    reference_triangle(T=Float64)
-
-Return the reference triangle given by the points `(0,0), (1,0), (0,1)`.
-"""
-function reference_triangle(T::DataType=Float64)
-    return reference_simplex(2, T)
-end
-
 function abs_det_jacobian(t::Triangle{T}) where {T<:Real}
     e1 = t.points[2] - t.points[1]
     e2 = t.points[3] - t.points[1]
@@ -104,15 +95,6 @@ A tetrahedron in 3 dimensions given by the 3d-points `a`, `b`, `c`, and `d`.
 """
 function tetrahedron(a, b, c, d)
     return simplex(a, b, c, d)
-end
-
-"""
-    reference_tetrahedron(T::DataType=Float64)
-
-Return the reference tetrahedron given by the vertices `(0,0,0), (1,0,0), (0,1,0), (0,0,1)`.
-"""
-function reference_tetrahedron(T::DataType=Float64)
-    return reference_simplex(3, T)
 end
 
 function abs_det_jacobian(t::Tetrahedron{T}) where {T<:Real}
