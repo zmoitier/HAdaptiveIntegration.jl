@@ -61,6 +61,8 @@ end
 An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
 """
 function rectangle(low_corner, high_corner)
+    # @assert length(low_corner) == 2
+    # @assert length(high_corner) == 2
     return orthotope(low_corner, high_corner)
 end
 
@@ -111,7 +113,7 @@ A triangle in 2 dimensions with 3 vertices of type `T`.
 const Triangle{T} = Simplex{2,T,3}
 
 function Triangle(a::SVector{2,T}, b::SVector{2,T}, c::SVector{2,T}) where {T<:Real}
-    return Simplex(SVector{3,SVector{2,T}}([a, b, c]))
+    return Simplex(SVector{3,SVector{2,T}}(a, b, c))
 end
 
 """
@@ -131,7 +133,7 @@ const Tetrahedron{T} = Simplex{3,T,4}
 function Tetrahedron(
     a::SVector{3,T}, b::SVector{3,T}, c::SVector{3,T}, d::SVector{3,T}
 ) where {T<:Real}
-    return Simplex(SVector{4,SVector{3,T}}([a, b, c, d]))
+    return Simplex(SVector{4,SVector{3,T}}(a, b, c, d))
 end
 
 """
