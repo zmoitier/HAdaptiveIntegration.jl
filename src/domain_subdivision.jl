@@ -1,3 +1,4 @@
+# TODO: move to utils
 """
     check_subdivision(
         domain::Domain{D,T},
@@ -30,10 +31,10 @@ end
 
 Divide the segment `s` into two segments of equal length.
 """
-function subdivide_segment2(s::Segment)
+function subdivide_segment2(s::Segment{T}) where {T<:Real}
     a, b = s.low_corner, s.high_corner
     m = (a + b) / 2
-    return (Segment(a, m), Segment(m, b))
+    return (Segment{T}(a, m), Segment{T}(m, b))
 end
 
 """
@@ -41,10 +42,10 @@ end
 
 Divide the segment `s` into three segments of equal length.
 """
-function subdivide_segment3(s::Segment)
+function subdivide_segment3(s::Segment{T}) where {T<:Real}
     a, b = s.low_corner, s.high_corner
     m1, m2 = (2 * a + b) / 3, (a + 2 * b) / 3
-    return (Segment(a, m1), Segment(m1, m2), Segment(m2, b))
+    return (Segment{T}(a, m1), Segment{T}(m1, m2), Segment{T}(m2, b))
 end
 
 """
@@ -53,10 +54,10 @@ end
 Divide the triangle `t` into two triangles by connecting the first point of `t` to the midpoints of
 the two other points.
 """
-function subdivide_triangle2(t::Triangle)
+function subdivide_triangle2(t::Triangle{T}) where {T<:Real}
     a, b, c = t.points
     bc = (b + c) / 2
-    return (Triangle(bc, a, b), Triangle(bc, c, a))
+    return (Triangle{T}(bc, a, b), Triangle{T}(bc, c, a))
 end
 
 """
@@ -64,13 +65,16 @@ end
 
 Divide the triangle `t` into four triangles by connecting the midpoints of the edges.
 """
-function subdivide_triangle4(t::Triangle)
+function subdivide_triangle4(t::Triangle{T}) where {T<:Real}
     a, b, c = t.points
     ab = (a + b) / 2
     ac = (c + a) / 2
     bc = (b + c) / 2
     return (
-        Triangle(a, ab, ac), Triangle(b, bc, ab), Triangle(c, ac, bc), Triangle(ab, bc, ac)
+        Triangle{T}(a, ab, ac),
+        Triangle{T}(b, bc, ab),
+        Triangle{T}(c, ac, bc),
+        Triangle{T}(ab, bc, ac),
     )
 end
 
@@ -80,14 +84,14 @@ end
 Divide the rectangle `r` into four squares by connecting the center of the square to the midpoints
 of the edges.
 """
-function subdivide_rectangle4(r::Rectangle)
+function subdivide_rectangle4(r::Rectangle{T}) where {T<:Real}
     a, b = r.low_corner, r.high_corner
     m = (a + b) / 2
     return (
-        Rectangle(a, m),
-        Rectangle(SVector{2}(m[1], a[2]), SVector{2}(b[1], m[2])),
-        Rectangle(SVector{2}(a[1], m[2]), SVector{2}(m[1], b[2])),
-        Rectangle(m, b),
+        Rectangle{T}(a, m),
+        Rectangle{T}(SVector(m[1], a[2]), SVector(b[1], m[2])),
+        Rectangle{T}(SVector(a[1], m[2]), SVector(m[1], b[2])),
+        Rectangle{T}(m, b),
     )
 end
 
@@ -96,7 +100,7 @@ end
 
 Divide the tetrahedron `t` into eight tetrahedra by connecting the midpoints of the edges.
 """
-function subdivide_tetrahedron8(t::Tetrahedron)
+function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T<:Real}
     a, b, c, d = t.points
     ab = (a + b) / 2
     ac = (a + c) / 2
@@ -106,15 +110,15 @@ function subdivide_tetrahedron8(t::Tetrahedron)
     cd = (c + d) / 2
     return [
         # (1/2)-tetrahedron on each vertices
-        Tetrahedron(a, ab, ac, ad),
-        Tetrahedron(ab, b, bc, bd),
-        Tetrahedron(ac, bc, c, cd),
-        Tetrahedron(ad, bd, cd, d),
+        Tetrahedron{T}(a, ab, ac, ad),
+        Tetrahedron{T}(ab, b, bc, bd),
+        Tetrahedron{T}(ac, bc, c, cd),
+        Tetrahedron{T}(ad, bd, cd, d),
         # octahedron splitting
-        Tetrahedron(ab, bc, bd, ad),
-        Tetrahedron(ac, bc, cd, ad),
-        Tetrahedron(ad, cd, bd, bc),
-        Tetrahedron(bc, ac, ab, ad),
+        Tetrahedron{T}(ab, bc, bd, ad),
+        Tetrahedron{T}(ac, bc, cd, ad),
+        Tetrahedron{T}(ad, cd, bd, bc),
+        Tetrahedron{T}(bc, ac, ab, ad),
     ]
 end
 
@@ -124,18 +128,18 @@ end
 Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the
 edges.
 """
-function subdivide_cuboid8(c::Cuboid{T}) where {T}
+function subdivide_cuboid8(c::Cuboid{T}) where {T<:Real}
     a, b = c.low_corner, c.high_corner
     m = (a + b) / 2
     return (
-        Cuboid(a, m),
-        Cuboid(SVector{3,T}([m[1], a[2], a[3]]), SVector{3,T}([b[1], m[2], m[3]])),
-        Cuboid(SVector{3,T}([a[1], m[2], a[3]]), SVector{3,T}([m[1], b[2], m[3]])),
-        Cuboid(SVector{3,T}([a[1], a[2], m[3]]), SVector{3,T}([m[1], m[2], b[3]])),
-        Cuboid(SVector{3,T}([a[1], m[2], m[3]]), SVector{3,T}([m[1], b[2], b[3]])),
-        Cuboid(SVector{3,T}([m[1], a[2], m[3]]), SVector{3,T}([b[1], m[2], b[3]])),
-        Cuboid(SVector{3,T}([m[1], m[2], a[3]]), SVector{3,T}([b[1], b[2], m[3]])),
-        Cuboid(m, b),
+        Cuboid{T}(a, m),
+        Cuboid{T}(SVector(m[1], a[2], a[3]), SVector(b[1], m[2], m[3])),
+        Cuboid{T}(SVector(a[1], m[2], a[3]), SVector(m[1], b[2], m[3])),
+        Cuboid{T}(SVector(a[1], a[2], m[3]), SVector(m[1], m[2], b[3])),
+        Cuboid{T}(SVector(a[1], m[2], m[3]), SVector(m[1], b[2], b[3])),
+        Cuboid{T}(SVector(m[1], a[2], m[3]), SVector(b[1], m[2], b[3])),
+        Cuboid{T}(SVector(m[1], m[2], a[3]), SVector(b[1], b[2], m[3])),
+        Cuboid{T}(m, b),
     )
 end
 

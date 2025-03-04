@@ -33,10 +33,6 @@ A segment in 1 dimensions given by two value `xmin` and `xmax`.
 """
 const Segment{T} = Orthotope{1,T}
 
-function Segment(low_corner::SVector{1,T}, high_corner::SVector{1,T}) where {T<:Real}
-    return Orthotope(low_corner, high_corner)
-end
-
 """
     segment(xmin, xmax)
 
@@ -51,18 +47,13 @@ An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
 """
 const Rectangle{T} = Orthotope{2,T}
 
-function Rectangle(low_corner::SVector{2,T}, high_corner::SVector{2,T}) where {T<:Real}
-    return Orthotope(low_corner, high_corner)
-end
-
 """
     rectangle(low_corner, high_corner)
 
 An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
 """
 function rectangle(low_corner, high_corner)
-    # @assert length(low_corner) == 2
-    # @assert length(high_corner) == 2
+    @assert length(low_corner) == length(high_corner) == 2 "must be 2d-vector."
     return orthotope(low_corner, high_corner)
 end
 
@@ -71,16 +62,13 @@ A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
 """
 const Cuboid{T} = Orthotope{3,T}
 
-function Cuboid(low_corner::SVector{3,T}, high_corner::SVector{3,T}) where {T<:Real}
-    return Orthotope(low_corner, high_corner)
-end
-
 """
     cuboid(low_corner, high_corner)
 
 A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
 """
 function cuboid(low_corner, high_corner)
+    @assert length(low_corner) == length(high_corner) == 3 "must be 3d-vector."
     return orthotope(low_corner, high_corner)
 end
 
@@ -93,28 +81,27 @@ struct Simplex{D,T,N} <: Domain{D,T}
     points::SVector{N,SVector{D,T}}
 end
 
+function Simplex{D,T,N}(points::SVector{D,T}...) where {D,T<:Real,N}
+    return Simplex(SVector{N}(points...))
+end
+
 """
     simplex(points...)
 
 A simplex in `D` dimensions with N=D+1 points of type `T`.
 """
 function simplex(points...)
-    D = length(points) - 1
+    N = length(points)
+    D = N - 1
     @assert all(pt -> length(pt) == D, points)
-    N = D + 1
 
-    vec_pts = SVector{N}(SVector{D}.(points))
-    return Simplex(vec_pts)
+    return Simplex(SVector{N}(SVector{D}.(points)))
 end
 
 """
 A triangle in 2 dimensions with 3 vertices of type `T`.
 """
 const Triangle{T} = Simplex{2,T,3}
-
-function Triangle(a::SVector{2,T}, b::SVector{2,T}, c::SVector{2,T}) where {T<:Real}
-    return Simplex(SVector{3,SVector{2,T}}(a, b, c))
-end
 
 """
     triangle(a, b, c)
@@ -129,12 +116,6 @@ end
 A tetrahedron in 3 dimensions with 4 points of type `T`.
 """
 const Tetrahedron{T} = Simplex{3,T,4}
-
-function Tetrahedron(
-    a::SVector{3,T}, b::SVector{3,T}, c::SVector{3,T}, d::SVector{3,T}
-) where {T<:Real}
-    return Simplex(SVector{4,SVector{3,T}}(a, b, c, d))
-end
 
 """
     tetrahedron(a, b, c, d)
@@ -152,6 +133,7 @@ const LIST_DOMAIN_TYPE = [
     "dimension D" => ["orthotope", "simplex"],
 ]
 
+# TODO: move to utils
 """
     reference_domain(domain_type::DataType)
 

@@ -7,17 +7,11 @@ using StaticArrays
 # Supported integration domains
 include("domain.jl")
 export Orthotope,
-    Segment,
     segment,
-    Rectangle,
     rectangle,
-    Cuboid,
     cuboid,
-    Triangle,
     triangle,
-    Tetrahedron,
     tetrahedron,
-    Simplex,
     simplex,
     LIST_DOMAIN_TYPE,
     reference_domain,
@@ -39,7 +33,7 @@ export check_subdivision,
 
 # Embedded cubature
 include("cubature_embedded.jl")
-export EmbeddedCubatureData, embedded_cubature, embedded_cubature
+export EmbeddedCubatureData, embedded_cubature
 
 include("cubature_check.jl")
 export check_order
