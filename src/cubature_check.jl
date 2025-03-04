@@ -1,5 +1,6 @@
+# TODO: move to utils
 function check_order(
-    ecr::EmbeddedCubatureData,
+    tec::TabulatedEmbeddedCubature,
     domain_type::DataType;
     atol::Union{Real,Nothing}=nothing,
     rtol::Union{Real,Nothing}=nothing,
@@ -7,7 +8,7 @@ function check_order(
     D = domain_type.parameters[1]
     T = domain_type.parameters[2]
 
-    ol, oh = ecr.order_low, ecr.order_high
+    ol, oh = tec.order_low, tec.order_high
     if domain_type <: Simplex
         val_ref = simplex_int_val(D, oh)
     elseif domain_type <: Orthotope
@@ -16,7 +17,7 @@ function check_order(
         @error "unknown monomial's integrals on the reference domain of $domain_type."
     end
 
-    ec = embedded_cubature(ecr, T)
+    ec = embedded_cubature(tec, T)
 
     val_lo::Vector{Vector{T}} = []
     val_hi::Vector{Vector{T}} = []

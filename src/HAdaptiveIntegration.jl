@@ -6,53 +6,21 @@ using StaticArrays
 
 # Supported integration domains
 include("domain.jl")
-export Orthotope,
-    segment,
-    rectangle,
-    cuboid,
-    triangle,
-    tetrahedron,
-    simplex,
-    LIST_DOMAIN_TYPE,
-    reference_domain,
-    map_from_reference,
-    map_to_reference
+export Orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
 
 # Subdivision strategies for various domains
 include("domain_subdivision.jl")
-export check_subdivision,
-    subdivide_segment2,
-    subdivide_segment3,
-    subdivide_triangle2,
-    subdivide_triangle4,
-    subdivide_rectangle4,
-    subdivide_tetrahedron8,
-    subdivide_cuboid8,
-    LIST_SUBDIVISION_ALGO,
-    default_subdivision
 
 # Embedded cubature
 include("cubature_embedded.jl")
-export EmbeddedCubatureData, embedded_cubature
-
 include("cubature_check.jl")
-export check_order
 
 # Tabulated cubature rule for supported domains
 include("rule_segment.jl")
-export SEGMENT_G7K15, SEGMENT_G15K31
-
 include("rule_triangle.jl")
-export TRIANGLE_R7L19
-
 include("rule_square.jl")
-export SQUARE_CH21G25
-
 include("rule_tetrahedron.jl")
-# export
-
 include("rule_cube.jl")
-# export
 
 const LIST_EMBEDDED_CUBATURE = [
     "segment" => ["SEGMENT_G7K15", "SEGMENT_G15K31"],
@@ -65,7 +33,6 @@ const LIST_EMBEDDED_CUBATURE = [
 function default_embedded_cubature(d::Domain)
     @error "no default embedded cubature for $(typeof(d))."
 end
-
 function default_embedded_cubature(::Segment{T}) where {T}
     return embedded_cubature(SEGMENT_G7K15, T)
 end

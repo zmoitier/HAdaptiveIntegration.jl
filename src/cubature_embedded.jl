@@ -1,5 +1,5 @@
 """
-    @kwdef struct EmbeddedCubatureData
+    struct TabulatedEmbeddedCubature
 
 An embedded cubature rule consisting of a high order cubature rule nodes and a low order cubature rule.
 The cubature nodes and weights are assume to be for the reference simplex or orthotope.
@@ -7,6 +7,7 @@ Note that the low order cubature uses `nodes[1:L]` as its nodes.
 
 ## Fields:
 - `name::String`: name of the embedded cubature;
+- `domain::Domain`: domain of the cubature.
 - `reference::String`: where the values are found;
 - `nb_significant_digits::Int`: number of significant digits on the node and weight values, `10^-nb_significant_digits` give the relative precision of the values;
 - `nodes::Vector{Vector{String}}`: the cubature nodes;
@@ -15,8 +16,9 @@ Note that the low order cubature uses `nodes[1:L]` as its nodes.
 - `weights_low::Vector{String}`: the cubature weights for the low order cubature;
 - `order_low::Int`: order of the low order cubature.
 """
-@kwdef struct EmbeddedCubatureData
+struct TabulatedEmbeddedCubature
     name::String
+    domain::Domain
     reference::String
     nb_significant_digits::Int
     nodes::Vector{Vector{String}}
@@ -24,6 +26,60 @@ Note that the low order cubature uses `nodes[1:L]` as its nodes.
     order_high::Int
     weights_low::Vector{String}
     order_low::Int
+end
+
+"""
+    tabulated_embedded_cubature(;
+        name::String,
+        domain::Domain,
+        reference::String,
+        nb_significant_digits::Int,
+        nodes::Vector{Vector{String}},
+        weights_high::Vector{String},
+        order_high::Int,
+        weights_low::Vector{String},
+        order_low::Int,
+    )
+
+An embedded cubature rule consisting of a high order cubature rule nodes and a low order cubature rule.
+The cubature nodes and weights are assume to be for the reference simplex or orthotope.
+Note that the low order cubature uses `nodes[1:L]` as its nodes.
+
+## Fields:
+- `name::String`: name of the embedded cubature;
+- `domain::Domain`: domain of the cubature.
+- `reference::String`: where the values are found;
+- `nb_significant_digits::Int`: number of significant digits on the node and weight values, `10^-nb_significant_digits` give the relative precision of the values;
+- `nodes::Vector{Vector{String}}`: the cubature nodes;
+- `weights_high::Vector{String}`: the cubature weights for the high order cubature;
+- `order_high::Int`: order of the high order cubature;
+- `weights_low::Vector{String}`: the cubature weights for the low order cubature;
+- `order_low::Int`: order of the low order cubature.
+"""
+function tabulated_embedded_cubature(;
+    name::String,
+    domain::Domain{D,T},
+    reference::String,
+    nb_significant_digits::Int,
+    nodes::Vector{Vector{String}},
+    weights_high::Vector{String},
+    order_high::Int,
+    weights_low::Vector{String},
+    order_low::Int,
+) where {D,T<:Real}
+    @assert all(length(node) == D for node in nodes) "all nodes must have length `D` where `D` is the domain dimension."
+
+    return TabulatedEmbeddedCubature(
+        name,
+        domain,
+        reference,
+        nb_significant_digits,
+        nodes,
+        weights_high,
+        order_high,
+        weights_low,
+        order_low,
+    )
 end
 
 """
@@ -69,17 +125,17 @@ function embedded_cubature(
 end
 
 """
-    embedded_cubature(ecr::EmbeddedCubatureData, T=Float64)
+    embedded_cubature(tec::TabulatedEmbeddedCubature, T=Float64)
 
-Return the `EmbeddedCubature` with type `T` from an `EmbeddedCubatureData`.
+Return the `EmbeddedCubature` with type `T` from an `TabulatedEmbeddedCubature`.
 """
-function embedded_cubature(ecr::EmbeddedCubatureData, T::DataType=Float64)
-    @assert eps(T) > 10.0^(-ecr.nb_significant_digits) "the embedded cubature `$(ecr.name)` has less precision than type $T."
+function embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
+    @assert eps(T) > 10.0^(-tec.nb_significant_digits) "the embedded cubature `$(tec.name)` has less precision than type $T."
 
     return embedded_cubature(
-        [parse.(T, x) for x in ecr.nodes],
-        parse.(T, ecr.weights_high),
-        parse.(T, ecr.weights_low),
+        [parse.(T, x) for x in tec.nodes],
+        parse.(T, tec.weights_high),
+        parse.(T, tec.weights_low),
     )
 end
 
@@ -102,6 +158,5 @@ function (ec::EmbeddedCubature{H,L,D,T})(
         I_high += fct(Φ(ec.nodes[i])) * ec.weights_high[i]
     end
 
-    # TODO: check if it is better to use relative error.
     return μ * I_high, μ * norm(I_high - I_low, Inf)
 end
