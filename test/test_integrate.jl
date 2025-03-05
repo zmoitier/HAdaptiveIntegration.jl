@@ -83,3 +83,27 @@ end
     R = sqrt(2) * asinh(1)
     @test abs(I - R) ≤ E * abs(R)
 end
+
+@testset "Integrate over a Cuboid" begin
+    # Test on Float64 precision
+    @test isnothing(HAI.check_order(HAI.CUBE_BE65, HAI.Cuboid{Float64}))
+
+    ec = HAI.embedded_cubature(HAI.CUBE_BE65, Float64)
+    cube = HAI.cuboid((0.0, 0.0, 0.0), (1.0, 1.0, 1.0))
+
+    I, E = ec(x -> exp(x[1]), cube)
+    R = exp(1) - exp(0)
+    @test abs(I - R) < 1e-8
+    @test abs(I - R) ≤ E * abs(R)
+
+    I, E = ec(x -> exp(x[1] + x[2] + x[3]), cube)
+    R = (exp(1) - exp(0))^3
+    @test abs(I - R) ≤ E * abs(R)
+
+    I, E = ec(x -> 1 / (1 + norm(x)^2)^2, cube)
+    R = π^2 / 32
+    @test abs(I - R) ≤ E * abs(R)
+
+    I, E = HAI.integrate(x -> 1 / norm(x), cube, ec)
+    @test E ≤ √eps(Float64) * I
+end

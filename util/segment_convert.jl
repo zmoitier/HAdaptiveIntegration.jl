@@ -180,7 +180,7 @@ for (name, cbt, n) in [("G7", g7, 34), ("K15", k15, 34), ("G15", g15, 33), ("K31
 
     local Φ = HAI.map_to_reference(segment)
     local j =
-        HAI.abs_det_jacobian(HAI.reference_segment(BigFloat)) /
+        HAI.abs_det_jacobian(HAI.reference_domain(HAI.Segment{BigFloat})) /
         HAI.abs_det_jacobian(segment)
 
     fmt_node = Format("[\"%.$(n)e\"],")

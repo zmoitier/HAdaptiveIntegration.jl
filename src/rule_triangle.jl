@@ -3,7 +3,7 @@ const TRIANGLE_R7L19 = tabulated_embedded_cubature(;
     domain=triangle((0, 0), (1, 0), (0, 1)),
     reference="""https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/radon/set_radon_standard.m
     https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/laurie/set_laurie_standard.m""",
-    nb_significant_digits=16,
+    nb_significant_digits=15,
     nodes=[
         ["3.333333333333333e-01", "3.333333333333333e-01"],
         ["7.974269853530872e-01", "1.012865073234563e-01"],

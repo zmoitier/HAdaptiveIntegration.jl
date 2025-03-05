@@ -1,5 +1,5 @@
 const SQUARE_CH21G25 = tabulated_embedded_cubature(;
-    name="Cools Haegemans (SQUARE_CH21G25)",
+    name="Cools and Haegemans (SQUARE_CH21G25)",
     domain=rectangle((0, 0), (1, 1)),
     reference="https://link.springer.com/article/10.1007/BF01389339",
     nb_significant_digits=19,

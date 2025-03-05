@@ -26,7 +26,7 @@ const LIST_EMBEDDED_CUBATURE = [
     "segment" => ["SEGMENT_G7K15", "SEGMENT_G15K31"],
     "rectangle" => ["SQUARE_CH21G25"],
     "triangle" => ["TRIANGLE_R7L19"],
-    "cuboid" => [],
+    "cuboid" => ["CUBE_BE65"],
     "tetrahedron" => [],
 ]
 
