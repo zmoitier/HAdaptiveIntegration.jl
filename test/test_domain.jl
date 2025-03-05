@@ -85,6 +85,7 @@ end
         s = HAI.triangle((-0.86, -0.19), (0.97, -0.84), (-0.05, 0.74))
         @test isnothing(HAI.check_subdivision(s, HAI.subdivide_triangle2))
         @test isnothing(HAI.check_subdivision(s, HAI.subdivide_triangle4))
+        @test isnothing(HAI.check_subdivision(s, HAI.subdivide_simplex_freudenthal))
     end
 
     @testset "rectangle" begin
@@ -100,6 +101,18 @@ end
             (-0.27, -0.12, 0.14),
         )
         @test isnothing(HAI.check_subdivision(s, HAI.subdivide_tetrahedron8))
+        @test isnothing(HAI.check_subdivision(s, HAI.subdivide_simplex_freudenthal))
+    end
+
+    @testset "4-simplex" begin
+        s = HAI.simplex(
+            (-0.13, -0.78, -0.22, 0.0),
+            (0.70, -0.23, -0.37, 0.0),
+            (-0.06, 0.57, -0.34, 0.0),
+            (-0.27, -0.12, 0.14, 0.0),
+            (-0.27, -0.12, 0.14, 1.0),
+        )
+        @test isnothing(HAI.check_subdivision(s, HAI.subdivide_simplex_freudenthal))
     end
 
     @testset "cuboid" begin

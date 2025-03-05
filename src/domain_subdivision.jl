@@ -123,6 +123,92 @@ function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T<:Real}
 end
 
 """
+    _subdivide_reference_simplex_freudenthal(::Val{D}, ::Type{T}=Float64)
+
+Like `subdivide_simplex_freudenthal`, but operates on the reference simplex. Since the
+output depends only on the dimension `D`, and the type `T` used to represent coordinates,
+this function is generated for each combination of `D` and `T`.
+"""
+@generated function _subdivide_reference_simplex_freudenthal(
+    ::Val{D}, ::Type{T}=Float64
+) where {D,T}
+    # vertices of the reference simplex
+    vertices = [zeros(T, D)]
+    for i in 1:D
+        v = zeros(T, D)
+        v[i] = 1
+        push!(vertices, v)
+    end
+
+    # valid permutations of the vertices
+    function generate_valid_permutations(n, k)
+        valid_perms = []
+        # Generate all combinations of k positions from 1:n
+        for positions in combinations(1:n, k)
+            # Create a permutation where the first k elements (1:k) are placed
+            # at the selected positions in order, and the rest (k+1:n) follow.
+            perm = zeros(Int, n)
+            selected_pos = sort(positions)
+            remaining_pos = setdiff(1:n, selected_pos)
+            perm[selected_pos] = 1:k
+            perm[remaining_pos] = (k + 1):n
+            push!(valid_perms, perm)
+        end
+        return valid_perms
+    end
+
+    n = length(vertices) - 1  # T is an n-simplex with (n+1) vertices
+    subsimplices = []
+    for k in 0:n
+        # Compute initial vertex v₀ = (x⁰ + xᵏ) / 2
+        x₀ = vertices[1]
+        xₖ = vertices[k + 1]
+        v₀ = (x₀ .+ xₖ) ./ 2
+        # Generate valid permutations for this k
+        perms = generate_valid_permutations(n, k)
+        for π in perms
+            new_vertices = [v₀]
+            current_v = v₀
+            for ℓ in 1:n
+                edge_num = π[ℓ]  # Edge between x^{edge_num-1} and x^{edge_num}
+                edge_start = vertices[edge_num]
+                edge_end = vertices[edge_num + 1]
+                edge_vector = edge_end .- edge_start
+                current_v = current_v .+ 0.5 .* edge_vector
+                push!(new_vertices, current_v)
+            end
+            push!(subsimplices, new_vertices)
+        end
+    end
+    # convert to an efficient format with known sizes
+
+    static_subsimplices = ntuple(2^D) do i
+        pts = SVector{D + 1,SVector{D,T}}(subsimplices[i])
+        Simplex(pts)
+    end
+
+    return :($static_subsimplices)
+end
+
+"""
+    subdivide_simplex_freudenthal(s::Simplex)
+
+Subdivive a `D`-dimensional simplex into `2ᴰ` simplices by using the Freudenthal
+triangulation.
+
+Implements the `RedRefinementND`` algorithm in [Simplicial grid refinement: on Freudenthal's
+algorithm and the optimal number of congruence
+classes](https://link.springer.com/article/10.1007/s002110050475).
+"""
+function subdivide_simplex_freudenthal(s::Simplex{D,T}) where {D,T}
+    refs = _subdivide_reference_simplex_freudenthal(Val(D), T)
+    f = map_from_reference(s)
+    map(refs) do ref
+        Simplex(f.(ref.points))
+    end
+end
+
+"""
     subdivide_cuboid8(c::Cuboid)
 
 Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the
