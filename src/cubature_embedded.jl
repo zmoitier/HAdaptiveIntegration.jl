@@ -155,7 +155,6 @@ function embedded_cubature(::GrundmannMoeller, dimension, degree, T::DataType=Fl
     Tn_low = grundmann_moeller(T, Val(dimension), degree - 2)
     L = length(Tn_low.points)
     weights_low = SVector(ntuple(i -> Tn_low.weights[L - i + 1] * vol, L))
-    @show typeof(nodes_high)
     return EmbeddedCubature(nodes_high, weights_high, weights_low)
 end
 
