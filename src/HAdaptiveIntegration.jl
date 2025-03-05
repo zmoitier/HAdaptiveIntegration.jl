@@ -33,17 +33,11 @@ const LIST_EMBEDDED_CUBATURE = [
 function default_embedded_cubature(d::Domain)
     @error "no default embedded cubature for $(typeof(d))."
 end
-function default_embedded_cubature(::Segment{T}) where {T}
-    return embedded_cubature(SEGMENT_G7K15, T)
-end
-function default_embedded_cubature(::Triangle{T}) where {T}
-    return embedded_cubature(TRIANGLE_R7L19, T)
-end
-function default_embedded_cubature(::Rectangle{T}) where {T}
-    return embedded_cubature(SQUARE_CH21G25, T)
-end
+default_embedded_cubature(::Segment{T}) where {T} = embedded_cubature(SEGMENT_G7K15, T)
+default_embedded_cubature(::Rectangle{T}) where {T} = embedded_cubature(SQUARE_CH21G25, T)
+default_embedded_cubature(::Triangle{T}) where {T} = embedded_cubature(TRIANGLE_R7L19, T)
+default_embedded_cubature(::Cuboid{T}) where {T} = embedded_cubature(CUBE_BE65, T)
 # default_embedded_cubature(::Tetrahedron) = 
-# default_embedded_cubature(::Cuboid) = 
 
 # Compute integrals
 include("integrate.jl")

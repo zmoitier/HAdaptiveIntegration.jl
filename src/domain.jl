@@ -126,7 +126,7 @@ function tetrahedron(a, b, c, d)
     return simplex(a, b, c, d)
 end
 
-const LIST_DOMAIN_TYPE = [
+const LIST_DOMAIN = [
     "dimension 1" => ["segment"],
     "dimension 2" => ["rectangle", "triangle"],
     "dimension 3" => ["cuboid", "tetrahedron"],

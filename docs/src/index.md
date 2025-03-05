@@ -15,10 +15,10 @@ The main function of this package is `integrate`, which computes the integral of
 ```@example
 using InteractiveUtils # hide
 using HAdaptiveIntegration
-subtypes(HAdaptiveIntegration.Domain)
+HAdaptiveIntegration.LIST_DOMAIN
 ```
 
-## Comparisson with `HCubature.jl`
+## Comparison with `HCubature.jl`
 
 This package shares many similarities with `HCubature.jl`; there are, however, a few
 important differences:
@@ -31,7 +31,7 @@ important differences:
 
 Let's start with a simple example using `HCubature`:
 
-```@example hcubature
+```@example hcubature-square
 using HCubature, LinearAlgebra
 a, b = (0.0, 0.0), (1.0,1.0)
 const counter = Ref(0)
@@ -43,25 +43,55 @@ println("I = $I, E = $E, counter = $(counter[])")
 
 Now, let's do the same with `HAdaptiveIntegration`:
 
-```@example hcubature
-import HAdaptiveIntegration as HAI
-domain = HAI.rectangle(a, b)
+```@example hcubature-square
+using HAdaptiveIntegration
+domain = rectangle(a, b)
 counter[] = 0
-I, E = HAI.integrate(f, domain)
+I, E = integrate(f, domain)
 println("I = $I, E = $E, counter = $(counter[])")
 ```
 
 Lets look at performance now:
 
-```@example hcubature
+```@example hcubature-square
 using BenchmarkTools
 counter[] = 0
 b1 = @benchmark hcubature($f, $a, $b)
 ```
 
-```@example hcubature
+```@example hcubature-square
 counter[] = 0
-b2 = @benchmark HAI.integrate($f, $domain)
+b2 = @benchmark integrate($f, $domain)
+```
+
+Let's do the same comparison for the 3d-cube.
+
+```@example hcubature-cube
+using HCubature, LinearAlgebra
+a, b = (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)
+const counter = Ref(0)
+f = x -> (counter[]+=1; cos(5*prod(x)))
+I, E = hcubature(f, a, b)
+println("I = $I, E = $E, counter = $(counter[])")
+```
+
+```@example hcubature-cube
+using HAdaptiveIntegration
+domain = cuboid(a, b)
+counter[] = 0
+I, E = integrate(f, domain)
+println("I = $I, E = $E, counter = $(counter[])")
+```
+
+```@example hcubature-cube
+using BenchmarkTools
+counter[] = 0
+b1 = @benchmark hcubature($f, $a, $b)
+```
+
+```@example hcubature-cube
+counter[] = 0
+b2 = @benchmark integrate($f, $domain)
 ```
 
 <!-- function Base.parse(T::Type{MultiFloat{Float64,N}}, str::String) where {N}
