@@ -27,9 +27,9 @@ include("rule_cube.jl")
 const LIST_EMBEDDED_CUBATURE = [
     "segment" => ["SEGMENT_GK15", "SEGMENT_GK31"],
     "rectangle" => ["SQUARE_CHG25"],
-    "triangle" => ["TRIANGLE_RL19"],
+    "triangle" => ["TRIANGLE_RL19", "TRIANGLE_GM20"],
     "cuboid" => ["CUBE_BE65"],
-    "tetrahedron" => [],
+    "tetrahedron" => ["TETRAHEDRON_GM35"],
     "d-simplex" => ["GrundmannMoeller()"],
 ]
 
@@ -50,6 +50,10 @@ end
 end
 @generated function default_embedded_cubature(::Cuboid{T}) where {T}
     ec = embedded_cubature(CUBE_BE65, T)
+    return :($ec)
+end
+@generated function default_embedded_cubature(::Tetrahedron{T}) where {T}
+    ec = embedded_cubature(TETRAHEDRON_GM35, T)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}

@@ -3,6 +3,8 @@ import Printf: Format, format
 
 import HAdaptiveIntegration as HAI
 
+setprecision(40; base=10)
+
 segment = HAI.segment(big"-1.0", big"1.0")
 
 # https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/
@@ -185,13 +187,14 @@ for (name, cbt, n) in [("G7", g7, 34), ("K15", k15, 34), ("G15", g15, 33), ("K31
 
     fmt_node = Format("[\"%.$(n)e\"],")
     for x in cbt[:nodes]
-        println(format(fmt_node, first(Φ(SVector{1}([x])))))
+        local v = Φ(SVector{1}([x]))[1]
+        println(format(fmt_node, round(v; sigdigits=n + 1, base=10)))
     end
     println()
 
     fmt_weight = Format("\"%.$(n)e\",")
     for w in cbt[:weights]
-        println(format(fmt_weight, j * w))
+        println(format(fmt_weight, round(j * w; sigdigits=n + 1, base=10)))
     end
     println()
 end

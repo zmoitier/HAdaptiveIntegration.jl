@@ -107,13 +107,9 @@ end
 
 @testset "GrundmannMoeller quadrature" begin
     @testset "Triangle" begin
-        degree = 7 # must be odd
-        ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 2, degree, Float64)
-        @test isnothing(
-            HAI.check_order(
-                ec, degree, degree - 2, HAI.Triangle{Float64}; rtol=15 * eps(Float64)
-            ),
-        )
+        @test isnothing(HAI.check_order(HAI.TRIANGLE_GM20, HAI.Triangle{Float64}))
+
+        ec = HAI.embedded_cubature(HAI.TRIANGLE_GM20, Float64)
 
         rtol = 1e-8
 
@@ -134,13 +130,13 @@ end
     end
 
     @testset "Tetrahedron" begin
-        degree = 7 # must be odd
-        ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 3, degree, Float64)
         @test isnothing(
             HAI.check_order(
-                ec, degree, degree - 2, HAI.Tetrahedron{Float64}; rtol=15 * eps(Float64)
+                HAI.TETRAHEDRON_GM35, HAI.Tetrahedron{Float64}; rtol=12 * eps(Float64)
             ),
         )
+
+        ec = HAI.embedded_cubature(HAI.TETRAHEDRON_GM35, Float64)
 
         rtol = 1e-8
         tetrahedron = HAI.tetrahedron(

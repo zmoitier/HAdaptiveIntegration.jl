@@ -3,7 +3,7 @@ import Printf: Format, format
 
 import HAdaptiveIntegration as HAI
 
-setprecision(128)
+setprecision(30; base=10)
 
 square = HAI.rectangle([big"-1.0", big"-1.0"], [big"1.0", big"1.0"])
 
@@ -147,13 +147,19 @@ for (name, cbt, n) in [("CH21", ch21, 19), ("G25", g25, 19)]
     fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\"],")
     for x in cbt[:nodes]
         local v = Φ(SVector{2}(x))
-        println(format(fmt_node, v[1], v[2]))
+        println(
+            format(
+                fmt_node,
+                round(v[1]; sigdigits=n + 1, base=10),
+                round(v[2]; sigdigits=n + 1, base=10),
+            ),
+        )
     end
     println()
 
     fmt_weight = Format("\"%.$(n)e\",")
     for w in cbt[:weights]
-        println(format(fmt_weight, j * w))
+        println(format(fmt_weight, round(j * w; sigdigits=n + 1, base=10)))
     end
     println()
 end

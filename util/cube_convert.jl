@@ -144,13 +144,20 @@ for (name, cbt, n) in [("BE_9_65", ruleA, 16), ("BE_7_65", ruleB, 16)]
     fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\", \"%.$(n)e\"],")
     for x in cbt[:nodes]
         local v = Φ(SVector{3}(x))
-        println(format(fmt_node, v[1], v[2], v[3]))
+        println(
+            format(
+                fmt_node,
+                round(v[1]; sigdigits=n + 1, base=10),
+                round(v[2]; sigdigits=n + 1, base=10),
+                round(v[3]; sigdigits=n + 1, base=10),
+            ),
+        )
     end
     println()
 
     fmt_weight = Format("\"%.$(n)e\",")
     for w in cbt[:weights]
-        println(format(fmt_weight, j * w))
+        println(format(fmt_weight, round(j * w; sigdigits=n + 1, base=10)))
     end
     println()
 end
