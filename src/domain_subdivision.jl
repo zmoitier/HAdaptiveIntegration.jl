@@ -108,7 +108,7 @@ function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T<:Real}
     bc = (b + c) / 2
     bd = (b + d) / 2
     cd = (c + d) / 2
-    return [
+    return (
         # (1/2)-tetrahedron on each vertices
         Tetrahedron{T}(a, ab, ac, ad),
         Tetrahedron{T}(ab, b, bc, bd),
@@ -119,7 +119,7 @@ function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T<:Real}
         Tetrahedron{T}(ac, bc, cd, ad),
         Tetrahedron{T}(ad, cd, bd, bc),
         Tetrahedron{T}(bc, ac, ab, ad),
-    ]
+    )
 end
 
 """
@@ -154,7 +154,6 @@ const LIST_SUBDIVISION_ALGO = [
 function default_subdivision(d::Domain)
     @error "no default subdivision for $(typeof(d))."
 end
-
 default_subdivision(::Segment) = subdivide_segment2
 default_subdivision(::Triangle) = subdivide_triangle4
 default_subdivision(::Rectangle) = subdivide_rectangle4
