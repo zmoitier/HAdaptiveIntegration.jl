@@ -52,6 +52,10 @@ end
     ec = embedded_cubature(CUBE_BE65, T)
     return :($ec)
 end
+@generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
+    ec = embedded_cubature(GrundmannMoeller, D, 7, T)
+    return :($ec)
+end
 
 # Compute integrals
 include("integrate.jl")

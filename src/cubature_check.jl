@@ -1,27 +1,41 @@
-# TODO: move to utils
 function check_order(
     tec::TabulatedEmbeddedCubature,
     domain_type::DataType;
     atol::Union{Real,Nothing}=nothing,
     rtol::Union{Real,Nothing}=nothing,
 )
-    D = domain_type.parameters[1]
-    T = domain_type.parameters[2]
+    T = value_type(reference_domain(domain_type))
+    check_order(
+        embedded_cubature(tec, T),
+        tec.order_high,
+        tec.order_low,
+        domain_type;
+        atol=atol,
+        rtol=rtol,
+    )
 
-    ol, oh = tec.order_low, tec.order_high
+    return nothing
+end
+
+function check_order(
+    ec::EmbeddedCubature{H,L,D,T},
+    degree_high::Int,
+    degree_low::Int,
+    domain_type::DataType;
+    atol::Union{Real,Nothing}=nothing,
+    rtol::Union{Real,Nothing}=nothing,
+) where {H,L,D,T<:Real}
     if domain_type <: Simplex
-        val_ref = simplex_int_val(D, oh)
+        val_ref = simplex_int_val(D, degree_high)
     elseif domain_type <: Orthotope
-        val_ref = orthotope_int_val(D, oh)
+        val_ref = orthotope_int_val(D, degree_high)
     else
         @error "unknown monomial's integrals on the reference domain of $domain_type."
     end
 
-    ec = embedded_cubature(tec, T)
-
     val_lo::Vector{Vector{T}} = []
     val_hi::Vector{Vector{T}} = []
-    for i in 1:(ol + 1)
+    for i in 1:(degree_low + 1)
         tmp_lo = Vector{T}()
         tmp_hi = Vector{T}()
         for (idx, _) in val_ref[i]
@@ -33,7 +47,7 @@ function check_order(
         push!(val_lo, tmp_lo)
         push!(val_hi, tmp_hi)
     end
-    for i in (ol + 2):(oh + 1)
+    for i in (degree_low + 2):(degree_high + 1)
         tmp_hi = Vector{T}()
         for (idx, _) in val_ref[i]
             fct = x -> prod(xᵢ^eᵢ for (xᵢ, eᵢ) in zip(x, idx))
@@ -50,9 +64,8 @@ function check_order(
         rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T)
     end
 
-    _isapprox(val_ref, val_lo, atol, rtol)
     _isapprox(val_ref, val_hi, atol, rtol)
-
+    _isapprox(val_ref, val_lo, atol, rtol)
     return nothing
 end
 
@@ -80,6 +93,7 @@ function _isapprox(
     for (i, (idx_ref, num)) in enumerate(zip(val_ref, val_num))
         for ((_, vr), vn) in zip(idx_ref, num)
             if !isapprox(vn, vr; atol=atol, rtol=rtol)
+                @show vr vn abs(vn - vr) (rtol * vr)
                 @assert false "fail to integrate within tolerance at total degree = $(i-1)"
             end
         end

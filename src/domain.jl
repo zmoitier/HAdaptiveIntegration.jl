@@ -5,6 +5,9 @@ Abstract type for integration domains in `D` dimensions with type `T<:Real`.
 """
 abstract type Domain{D,T<:Real} end
 
+dimension(::Domain{D,T}) where {D,T<:Real} = D
+value_type(::Domain{D,T}) where {D,T<:Real} = T
+
 """
     struct Orthotope{D,T}
 

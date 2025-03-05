@@ -26,7 +26,6 @@ import HAdaptiveIntegration as HAI
 end
 
 @testset "Integrate over a rectangle" begin
-    # Test on Float64 precision
     @test isnothing(HAI.check_order(HAI.SQUARE_CH21G25, HAI.Rectangle{Float64}))
 
     ec = HAI.embedded_cubature(HAI.SQUARE_CH21G25, Float64)
@@ -63,7 +62,6 @@ end
 end
 
 @testset "Integrate over a triangle" begin
-    # Test on Float64 precision
     @test isnothing(HAI.check_order(HAI.TRIANGLE_R7L19, HAI.Triangle{Float64}))
 
     ec = HAI.embedded_cubature(HAI.TRIANGLE_R7L19, Float64)
@@ -85,7 +83,6 @@ end
 end
 
 @testset "Integrate over a Cuboid" begin
-    # Test on Float64 precision
     @test isnothing(HAI.check_order(HAI.CUBE_BE65, HAI.Cuboid{Float64}))
 
     ec = HAI.embedded_cubature(HAI.CUBE_BE65, Float64)
@@ -107,12 +104,16 @@ end
     I, E = HAI.integrate(x -> 1 / norm(x), cube, ec)
     @test E ≤ √eps(Float64) * I
 end
+
 @testset "GrundmannMoeller quadrature" begin
     @testset "Triangle" begin
         degree = 7 # must be odd
         ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 2, degree, Float64)
-        # FIXME: how to test this? `check_order` seems very attached to the
-        # TabulatedEmbeddedCubature structure
+        @test isnothing(
+            HAI.check_order(
+                ec, degree, degree - 2, HAI.Triangle{Float64}; rtol=15 * eps(Float64)
+            ),
+        )
 
         rtol = 1e-8
 
@@ -135,7 +136,11 @@ end
     @testset "Tetrahedron" begin
         degree = 7 # must be odd
         ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 3, degree, Float64)
-        # FIXME: test this
+        @test isnothing(
+            HAI.check_order(
+                ec, degree, degree - 2, HAI.Tetrahedron{Float64}; rtol=15 * eps(Float64)
+            ),
+        )
 
         rtol = 1e-8
         tetrahedron = HAI.tetrahedron(
@@ -153,5 +158,15 @@ end
         I, E = HAI.integrate(x -> 1 / norm(x), tetrahedron, ec; rtol)
         R = 0.361426 # not sure if an analytic solution exists... this was from WolframAlpha
         @test abs(I - R) ≤ 1e-4
+    end
+
+    @testset "4-Simplex" begin
+        degree = 7 # must be odd
+        ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 4, degree, Float64)
+        @test isnothing(
+            HAI.check_order(
+                ec, degree, degree - 2, HAI.Simplex{4,Float64,5}; rtol=50 * eps(Float64)
+            ),
+        )
     end
 end

@@ -1,4 +1,3 @@
-# TODO: move to utils
 """
     check_subdivision(
         domain::Domain{D,T},
@@ -148,15 +147,13 @@ function combinations(n, k)
 end
 
 """
-    _subdivide_reference_simplex_freudenthal(::Val{D}, ::Type{T}=Float64)
+    _subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64)
 
-Like `subdivide_simplex_freudenthal`, but operates on the reference simplex. Since the
+Like `subdivide_simplex`, but operates on the reference simplex. Since the
 output depends only on the dimension `D`, and the type `T` used to represent coordinates,
 this function is generated for each combination of `D` and `T`.
 """
-@generated function _subdivide_reference_simplex_freudenthal(
-    ::Val{D}, ::Type{T}=Float64
-) where {D,T}
+@generated function _subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
     # vertices of the reference simplex
     vertices = [zeros(T, D)]
     for i in 1:D
@@ -216,7 +213,7 @@ this function is generated for each combination of `D` and `T`.
 end
 
 """
-    subdivide_simplex_freudenthal(s::Simplex)
+    subdivide_simplex(s::Simplex)
 
 Subdivive a `D`-dimensional simplex into `2ᴰ` simplices by using the Freudenthal
 triangulation.
@@ -225,8 +222,8 @@ Implements the `RedRefinementND`` algorithm in [Simplicial grid refinement: on F
 algorithm and the optimal number of congruence
 classes](https://link.springer.com/article/10.1007/s002110050475).
 """
-function subdivide_simplex_freudenthal(s::Simplex{D,T}) where {D,T}
-    refs = _subdivide_reference_simplex_freudenthal(Val(D), T)
+function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
+    refs = _subdivide_reference_simplex(Val(D), T)
     f = map_from_reference(s)
     map(refs) do ref
         Simplex(f.(ref.points))
@@ -260,14 +257,15 @@ const LIST_SUBDIVISION_ALGO = [
     "triangle" => ["subdivide_triangle2", "subdivide_triangle4"],
     "cuboid" => ["subdivide_cuboid8"],
     "tetrahedron" => ["subdivide_tetrahedron8"],
+    "d-simplex" => ["subdivide_simplex"],
 ]
 
 function default_subdivision(d::Domain)
     @error "no default subdivision for $(typeof(d))."
 end
 default_subdivision(::Segment) = subdivide_segment2
-default_subdivision(::Triangle) = subdivide_triangle4
 default_subdivision(::Rectangle) = subdivide_rectangle4
-# default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
-default_subdivision(::Simplex) = subdivide_simplex_freudenthal
+default_subdivision(::Triangle) = subdivide_triangle4
 default_subdivision(::Cuboid) = subdivide_cuboid8
+default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
+default_subdivision(::Simplex) = subdivide_simplex
