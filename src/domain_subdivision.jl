@@ -268,5 +268,6 @@ end
 default_subdivision(::Segment) = subdivide_segment2
 default_subdivision(::Triangle) = subdivide_triangle4
 default_subdivision(::Rectangle) = subdivide_rectangle4
-default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
+# default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
+default_subdivision(::Simplex) = subdivide_simplex_freudenthal
 default_subdivision(::Cuboid) = subdivide_cuboid8
