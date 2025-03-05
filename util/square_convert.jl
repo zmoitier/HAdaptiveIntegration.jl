@@ -141,7 +141,7 @@ for (name, cbt, n) in [("CH21", ch21, 19), ("G25", g25, 19)]
 
     local Φ = HAI.map_to_reference(square)
     local j =
-        HAI.abs_det_jacobian(HAI.reference_rectangle(BigFloat)) /
+        HAI.abs_det_jacobian(HAI.reference_domain(HAI.Rectangle{BigFloat})) /
         HAI.abs_det_jacobian(square)
 
     fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\"],")

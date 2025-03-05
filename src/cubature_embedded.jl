@@ -130,7 +130,9 @@ end
 Return the `EmbeddedCubature` with type `T` from an `TabulatedEmbeddedCubature`.
 """
 function embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
-    @assert eps(T) > 10.0^(-tec.nb_significant_digits) "the embedded cubature `$(tec.name)` has less precision than type $T."
+    if 10 * eps(T) < 10.0^(-tec.nb_significant_digits)
+        @warn "the embedded cubature `$(tec.name)` has less precision than type $T."
+    end
 
     return embedded_cubature(
         [parse.(T, x) for x in tec.nodes],
