@@ -123,6 +123,31 @@ function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T<:Real}
 end
 
 """
+    combinations(n, k)
+
+Helper function to generate all combinations of `k` elements from `1:n`, similar to calling
+`combinations(1:n, k)` from `Combinatorics.jl`.
+"""
+function combinations(n, k)
+    function combinations_helper(start, end_, k_)
+        if k_ == 0
+            return Vector{Int}[[]]
+        elseif k_ > (end_ - start + 1)
+            return Vector{Int}[]
+        else
+            res = Vector{Int}[]
+            for i in start:(end_ - k_ + 1)
+                for c in combinations_helper(i + 1, end_, k_ - 1)
+                    push!(res, vcat([i], c))
+                end
+            end
+            return res
+        end
+    end
+    return combinations_helper(1, n, k)
+end
+
+"""
     _subdivide_reference_simplex_freudenthal(::Val{D}, ::Type{T}=Float64)
 
 Like `subdivide_simplex_freudenthal`, but operates on the reference simplex. Since the
@@ -144,7 +169,7 @@ this function is generated for each combination of `D` and `T`.
     function generate_valid_permutations(n, k)
         valid_perms = []
         # Generate all combinations of k positions from 1:n
-        for positions in combinations(1:n, k)
+        for positions in combinations(n, k)
             # Create a permutation where the first k elements (1:k) are placed
             # at the selected positions in order, and the rest (k+1:n) follow.
             perm = zeros(Int, n)
