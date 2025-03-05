@@ -181,7 +181,15 @@ function map_from_reference(h::Orthotope{D,T}) where {D,T<:Real}
 end
 
 function map_from_reference(s::Simplex{D,T,N}) where {D,T<:Real,N}
-    return u -> (1 - sum(u)) * s.points[1] + sum(c * p for (c, p) in zip(u, s.points[2:N]))
+    # return u -> (1 - sum(u)) * s.points[1] + sum(u[i - 1] * s.points[i] for i in 2:N)
+    # NOTE: for loop is faster than the above expression
+    u -> begin
+        v = (1 - sum(u)) * s.points[1]
+        for i in 2:N
+            v += u[i - 1] * s.points[i]
+        end
+        return v
+    end
 end
 
 """

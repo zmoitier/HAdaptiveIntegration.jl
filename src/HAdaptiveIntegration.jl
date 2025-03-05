@@ -3,6 +3,7 @@ module HAdaptiveIntegration
 using DataStructures
 using LinearAlgebra
 using StaticArrays
+using Combinatorics
 
 # Supported integration domains
 include("domain.jl")
@@ -49,7 +50,6 @@ end
     ec = embedded_cubature(CUBE_BE65, T)
     return :($ec)
 end
-# default_embedded_cubature(::Tetrahedron) = 
 
 # Compute integrals
 include("integrate.jl")
