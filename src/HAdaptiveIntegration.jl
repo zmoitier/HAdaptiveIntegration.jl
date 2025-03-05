@@ -3,7 +3,6 @@ module HAdaptiveIntegration
 using DataStructures
 using LinearAlgebra
 using StaticArrays
-using Combinatorics
 
 # Supported integration domains
 include("domain.jl")
