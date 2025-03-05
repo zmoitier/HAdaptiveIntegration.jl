@@ -1,4 +1,4 @@
-using Test, StaticArrays
+using Test, StaticArrays, LinearAlgebra
 import HAdaptiveIntegration as HAI
 
 @testset "Integrate over a segment" begin
@@ -106,4 +106,52 @@ end
 
     I, E = HAI.integrate(x -> 1 / norm(x), cube, ec)
     @test E ≤ √eps(Float64) * I
+end
+@testset "GrundmannMoeller quadrature" begin
+    @testset "Triangle" begin
+        degree = 7 # must be odd
+        ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 2, degree, Float64)
+        # FIXME: how to test this? `check_order` seems very attached to the
+        # TabulatedEmbeddedCubature structure
+
+        rtol = 1e-8
+
+        triangle = HAI.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
+        I, E = HAI.integrate(x -> exp(x[1] + 3 * x[2]), triangle, ec; rtol)
+        R = (exp(6) - 3 * exp(2) + 2) / 6
+        @test abs(I - R) ≤ rtol * abs(R)
+
+        triangle = HAI.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
+        I, E = HAI.integrate(x -> cos(7 * x[1] + 3 * x[2]), triangle, ec; rtol)
+        R = (-3 * cos(14) + 7 * cos(6) - 4) / 84
+        @test abs(I - R) ≤ rtol * abs(R)
+
+        triangle = HAI.triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+        I, E = HAI.integrate(x -> 1 / norm(x), triangle, ec; rtol)
+        R = sqrt(2) * asinh(1)
+        @test abs(I - R) ≤ rtol * abs(R)
+    end
+
+    @testset "Tetrahedron" begin
+        degree = 7 # must be odd
+        ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 3, degree, Float64)
+        # FIXME: test this
+
+        rtol = 1e-8
+        tetrahedron = HAI.tetrahedron(
+            (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
+        )
+
+        I, E = HAI.integrate(x -> 1, tetrahedron, ec; rtol)
+        R = 1 / 6
+        @test abs(I - R) ≤ rtol * abs(R)
+
+        I, E = HAI.integrate(x -> exp(x[1] + 3 * x[2] + 5 * x[3]), tetrahedron, ec; rtol)
+        R = (3 * exp(5) - 10 * exp(3) + 15 * exp(1) - 8) / 120
+        @test abs(I - R) ≤ rtol * abs(R)
+
+        I, E = HAI.integrate(x -> 1 / norm(x), tetrahedron, ec; rtol)
+        R = 0.361426 # not sure if an analytic solution exists... this was from WolframAlpha
+        @test abs(I - R) ≤ 1e-4
+    end
 end

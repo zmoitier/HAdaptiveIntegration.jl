@@ -141,6 +141,24 @@ function embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
     )
 end
 
+struct GrundmannMoeller end
+
+function embedded_cubature(::GrundmannMoeller, dimension, degree, T::DataType=Float64)
+    vol = 1 / T(factorial(dimension)) # volume of the reference simplex
+    # high order cubature
+    Tn = grundmann_moeller(T, Val(dimension), degree)
+    H = length(Tn.points)
+    nodes_high = SVector(ntuple(i -> SVector{dimension}(Tn.points[H - i + 1][2:end]), H))
+    weights_high = SVector(ntuple(i -> Tn.weights[H - i + 1] * vol, H))
+
+    # low order cubature
+    Tn_low = grundmann_moeller(T, Val(dimension), degree - 2)
+    L = length(Tn_low.points)
+    weights_low = SVector(ntuple(i -> Tn_low.weights[L - i + 1] * vol, L))
+    @show typeof(nodes_high)
+    return EmbeddedCubature(nodes_high, weights_high, weights_low)
+end
+
 function (ec::EmbeddedCubature{H,L,D,T})(
     fct::Function, domain::Domain{D,T}, norm=LinearAlgebra.norm
 ) where {H,L,D,T<:Real}

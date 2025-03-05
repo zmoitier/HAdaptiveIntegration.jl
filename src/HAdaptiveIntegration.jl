@@ -4,6 +4,8 @@ using DataStructures
 using LinearAlgebra
 using StaticArrays
 
+using GrundmannMoeller: grundmann_moeller
+
 # Supported integration domains
 include("domain.jl")
 export Orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
@@ -18,6 +20,7 @@ include("cubature_check.jl")
 # Tabulated cubature rule for supported domains
 include("rule_segment.jl")
 include("rule_triangle.jl")
+include("grundmann_moller.jl")
 include("rule_square.jl")
 include("rule_tetrahedron.jl")
 include("rule_cube.jl")
