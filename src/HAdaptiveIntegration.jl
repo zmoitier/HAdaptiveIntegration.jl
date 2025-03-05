@@ -25,26 +25,27 @@ include("rule_tetrahedron.jl")
 include("rule_cube.jl")
 
 const LIST_EMBEDDED_CUBATURE = [
-    "segment" => ["SEGMENT_G7K15", "SEGMENT_G15K31"],
-    "rectangle" => ["SQUARE_CH21G25"],
-    "triangle" => ["TRIANGLE_R7L19"],
+    "segment" => ["SEGMENT_GK15", "SEGMENT_GK31"],
+    "rectangle" => ["SQUARE_CHG25"],
+    "triangle" => ["TRIANGLE_RL19"],
     "cuboid" => ["CUBE_BE65"],
     "tetrahedron" => [],
+    "d-simplex" => ["GrundmannMoeller()"],
 ]
 
 function default_embedded_cubature(d::Domain)
     @error "no default embedded cubature for $(typeof(d))."
 end
 @generated function default_embedded_cubature(::Segment{T}) where {T}
-    ec = embedded_cubature(SEGMENT_G7K15, T)
+    ec = embedded_cubature(SEGMENT_GK15, T)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Rectangle{T}) where {T}
-    ec = embedded_cubature(SQUARE_CH21G25, T)
+    ec = embedded_cubature(SQUARE_CHG25, T)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Triangle{T}) where {T}
-    ec = embedded_cubature(TRIANGLE_R7L19, T)
+    ec = embedded_cubature(TRIANGLE_RL19, T)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Cuboid{T}) where {T}
@@ -52,7 +53,7 @@ end
     return :($ec)
 end
 @generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(GrundmannMoeller, D, 7, T)
+    ec = embedded_cubature(GrundmannMoeller(), D, 7, T)
     return :($ec)
 end
 

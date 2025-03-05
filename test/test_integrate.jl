@@ -3,9 +3,9 @@ import HAdaptiveIntegration as HAI
 
 @testset "Integrate over a segment" begin
     # Test on Float64 precision
-    @test isnothing(HAI.check_order(HAI.SEGMENT_G7K15, HAI.Segment{Float64}))
+    @test isnothing(HAI.check_order(HAI.SEGMENT_GK15, HAI.Segment{Float64}))
 
-    ec = HAI.embedded_cubature(HAI.SEGMENT_G7K15, Float64)
+    ec = HAI.embedded_cubature(HAI.SEGMENT_GK15, Float64)
     segment = HAI.segment(0.0, 1.0)
 
     I, E = ec(x -> exp(x[1]), segment)
@@ -26,9 +26,9 @@ import HAdaptiveIntegration as HAI
 end
 
 @testset "Integrate over a rectangle" begin
-    @test isnothing(HAI.check_order(HAI.SQUARE_CH21G25, HAI.Rectangle{Float64}))
+    @test isnothing(HAI.check_order(HAI.SQUARE_CHG25, HAI.Rectangle{Float64}))
 
-    ec = HAI.embedded_cubature(HAI.SQUARE_CH21G25, Float64)
+    ec = HAI.embedded_cubature(HAI.SQUARE_CHG25, Float64)
     square = HAI.rectangle((0.0, 0.0), (1.0, 1.0))
 
     # FIXME: it seems the Cools Haegemens rule underestimates the error for one-dimensional integrands
@@ -62,9 +62,9 @@ end
 end
 
 @testset "Integrate over a triangle" begin
-    @test isnothing(HAI.check_order(HAI.TRIANGLE_R7L19, HAI.Triangle{Float64}))
+    @test isnothing(HAI.check_order(HAI.TRIANGLE_RL19, HAI.Triangle{Float64}))
 
-    ec = HAI.embedded_cubature(HAI.TRIANGLE_R7L19, Float64)
+    ec = HAI.embedded_cubature(HAI.TRIANGLE_RL19, Float64)
 
     triangle = HAI.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
     I, E = ec(x -> exp(x[1] + 3 * x[2]), triangle)

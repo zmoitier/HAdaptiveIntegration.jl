@@ -1,5 +1,5 @@
-const SEGMENT_G7K15 = tabulated_embedded_cubature(;
-    name="Gauss-Kronrod (SEGMENT_G7K15)",
+const SEGMENT_GK15 = tabulated_embedded_cubature(;
+    name="Gauss-Kronrod (SEGMENT_GK15)",
     domain=segment(0, 1),
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=34,
@@ -50,8 +50,8 @@ const SEGMENT_G7K15 = tabulated_embedded_cubature(;
     order_low=13,
 )
 
-const SEGMENT_G15K31 = tabulated_embedded_cubature(;
-    name="Gauss-Kronrod (SEGMENT_G15K31)",
+const SEGMENT_GK31 = tabulated_embedded_cubature(;
+    name="Gauss-Kronrod (SEGMENT_GK31)",
     domain=segment(0, 1),
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=33,

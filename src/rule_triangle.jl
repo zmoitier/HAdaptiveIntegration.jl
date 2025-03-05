@@ -1,5 +1,5 @@
-const TRIANGLE_R7L19 = tabulated_embedded_cubature(;
-    name="Laurie Radon (TRIANGLE_R7L19)",
+const TRIANGLE_RL19 = tabulated_embedded_cubature(;
+    name="Laurie Radon (TRIANGLE_RL19)",
     domain=triangle((0, 0), (1, 0), (0, 1)),
     reference="""https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/radon/set_radon_standard.m
     https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/laurie/set_laurie_standard.m""",
