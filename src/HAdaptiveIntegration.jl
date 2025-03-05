@@ -20,7 +20,6 @@ include("cubature_check.jl")
 # Tabulated cubature rule for supported domains
 include("rule_segment.jl")
 include("rule_triangle.jl")
-include("grundmann_moller.jl")
 include("rule_square.jl")
 include("rule_tetrahedron.jl")
 include("rule_cube.jl")
