@@ -423,5 +423,3 @@ const TETRAHEDRON_GM35 = tabulated_embedded_cubature(;
     ],
     order_low=5,
 )
-
-const SIMPLEX_GM = GrundmannMoeller()

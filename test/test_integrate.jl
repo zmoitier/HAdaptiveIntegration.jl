@@ -142,7 +142,7 @@ end
 
     @testset "4-Simplex" begin
         degree = 7 # must be odd
-        ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 4, degree, Float64)
+        ec = HAI.embedded_cubature(HAI.GrundmannMoeller(4, degree), Float64)
         @test isnothing(
             HAI.check_order(
                 ec, degree, degree - 2, HAI.Simplex{4,Float64,5}; rtol=50 * eps(Float64)

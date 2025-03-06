@@ -1,3 +1,18 @@
+"""
+    integrate(
+        fct,
+        domain::Domain{D,T},
+        ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
+        subdiv_algo=default_subdivision(domain);
+        atol=zero(T),
+        rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+        maxsplit=D * 1024,
+        norm=LinearAlgebra.norm,
+        buffer=nothing,
+    ) where {H,L,D,T<:Real}
+
+TBW
+"""
 function integrate(
     fct,
     domain::Domain{D,T},
@@ -6,7 +21,7 @@ function integrate(
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsplit=D * 1024,
-    norm=LinearAlgebra.norm,
+    norm=x -> LinearAlgebra.norm(x, Inf),
     buffer=nothing,
 ) where {H,L,D,T<:Real}
     return _integrate(fct, domain, ec, subdiv_algo, atol, rtol, maxsplit, norm, buffer)
@@ -16,7 +31,7 @@ function _integrate(
     fct::F, domain::D, ec::EmbeddedCubature, subdiv_algo, atol, rtol, maxsplit, norm, buffer
 ) where {F,D}
     nsplit = 0
-    I, E = ec(fct, domain)
+    I, E = ec(fct, domain, norm)
 
     # a quick check to see if splitting is really needed
     if (E < atol) || (E < rtol * norm(I)) || (nsplit >= maxsplit)
@@ -38,7 +53,7 @@ function _integrate(
         I -= Ic
         E -= Ec
         for child in subdiv_algo(sc)
-            Inew, Enew = ec(fct, child)
+            Inew, Enew = ec(fct, child, norm)
             I += Inew
             E += Enew
             push!(heap, (child, Inew, Enew))
@@ -51,15 +66,22 @@ function _integrate(
     return I, E
 end
 
+"""
+    allocate_buffer(
+        fct::Function, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
+    ) where {DOM<:Domain}
+
+TBW
+"""
 function allocate_buffer(
-    fct::Function, domain::D, ec::EmbeddedCubature=default_embedded_cubature(domain)
-) where {D<:Domain}
+    fct::Function, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
+) where {DOM<:Domain}
     # type of element that will be returned by quad. Pay the cost of single
     # call to figure this out
     I, E = ec(fct, domain)
     # the heap of adaptive quadratures have elements of the form (s,I,E), where
     # I and E are the value and error estimate over the simplex s. The ordering
     # used is based on the maximum error
-    heap = BinaryHeap{Tuple{D,typeof(I),typeof(E)}}(Base.Order.By(el -> -el[3]))
+    heap = BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(el -> -el[3]))
     return heap
 end

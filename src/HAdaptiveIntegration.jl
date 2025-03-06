@@ -8,7 +8,7 @@ using GrundmannMoeller: grundmann_moeller
 
 # Supported integration domains
 include("domain.jl")
-export Orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
+export orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
 
 # Subdivision strategies for various domains
 include("domain_subdivision.jl")
@@ -27,7 +27,7 @@ const LIST_EMBEDDED_CUBATURE = [
     "triangle" => ["TRIANGLE_RL19", "TRIANGLE_GM20"],
     "cuboid" => ["CUBE_BE65"],
     "tetrahedron" => ["TETRAHEDRON_GM35"],
-    "d-simplex" => ["SIMPLEX_GM"],
+    "d-simplex" => ["GrundmannMoeller(D, 7)"],
 ]
 
 function default_embedded_cubature(d::Domain)
@@ -54,7 +54,7 @@ end
     return :($ec)
 end
 @generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(SIMPLEX_GM, D, 7, T)
+    ec = embedded_cubature(GrundmannMoeller(D, 7), T)
     return :($ec)
 end
 

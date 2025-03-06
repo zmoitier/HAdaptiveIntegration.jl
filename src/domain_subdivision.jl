@@ -37,14 +37,41 @@ function subdivide_segment2(s::Segment{T}) where {T<:Real}
 end
 
 """
-    subdivide_segment3(s::Segment)
+    subdivide_rectangle4(r::Rectangle)
 
-Divide the segment `s` into three segments of equal length.
+Divide the rectangle `r` into four squares by connecting the center of the square to the midpoints
+of the edges.
 """
-function subdivide_segment3(s::Segment{T}) where {T<:Real}
-    a, b = s.low_corner, s.high_corner
-    m1, m2 = (2 * a + b) / 3, (a + 2 * b) / 3
-    return (Segment{T}(a, m1), Segment{T}(m1, m2), Segment{T}(m2, b))
+function subdivide_rectangle4(r::Rectangle{T}) where {T<:Real}
+    a, b = r.low_corner, r.high_corner
+    m = (a + b) / 2
+    return (
+        Rectangle{T}(a, m),
+        Rectangle{T}(SVector(m[1], a[2]), SVector(b[1], m[2])),
+        Rectangle{T}(SVector(a[1], m[2]), SVector(m[1], b[2])),
+        Rectangle{T}(m, b),
+    )
+end
+
+"""
+    subdivide_cuboid8(c::Cuboid)
+
+Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the
+edges.
+"""
+function subdivide_cuboid8(c::Cuboid{T}) where {T<:Real}
+    a, b = c.low_corner, c.high_corner
+    m = (a + b) / 2
+    return (
+        Cuboid{T}(a, m),
+        Cuboid{T}(SVector(m[1], a[2], a[3]), SVector(b[1], m[2], m[3])),
+        Cuboid{T}(SVector(a[1], m[2], a[3]), SVector(m[1], b[2], m[3])),
+        Cuboid{T}(SVector(a[1], a[2], m[3]), SVector(m[1], m[2], b[3])),
+        Cuboid{T}(SVector(a[1], m[2], m[3]), SVector(m[1], b[2], b[3])),
+        Cuboid{T}(SVector(m[1], a[2], m[3]), SVector(b[1], m[2], b[3])),
+        Cuboid{T}(SVector(m[1], m[2], a[3]), SVector(b[1], b[2], m[3])),
+        Cuboid{T}(m, b),
+    )
 end
 
 """
@@ -74,23 +101,6 @@ function subdivide_triangle4(t::Triangle{T}) where {T<:Real}
         Triangle{T}(b, bc, ab),
         Triangle{T}(c, ac, bc),
         Triangle{T}(ab, bc, ac),
-    )
-end
-
-"""
-    subdivide_rectangle4(r::Rectangle)
-
-Divide the rectangle `r` into four squares by connecting the center of the square to the midpoints
-of the edges.
-"""
-function subdivide_rectangle4(r::Rectangle{T}) where {T<:Real}
-    a, b = r.low_corner, r.high_corner
-    m = (a + b) / 2
-    return (
-        Rectangle{T}(a, m),
-        Rectangle{T}(SVector(m[1], a[2]), SVector(b[1], m[2])),
-        Rectangle{T}(SVector(a[1], m[2]), SVector(m[1], b[2])),
-        Rectangle{T}(m, b),
     )
 end
 
@@ -215,7 +225,7 @@ end
 """
     subdivide_simplex(s::Simplex)
 
-Subdivive a `D`-dimensional simplex into `2ᴰ` simplices by using the Freudenthal
+Subdivide a `D`-dimensional simplex into `2ᴰ` simplices by using the Freudenthal
 triangulation.
 
 Implements the `RedRefinementND`` algorithm in [Simplicial grid refinement: on Freudenthal's
@@ -230,29 +240,8 @@ function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     end
 end
 
-"""
-    subdivide_cuboid8(c::Cuboid)
-
-Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the
-edges.
-"""
-function subdivide_cuboid8(c::Cuboid{T}) where {T<:Real}
-    a, b = c.low_corner, c.high_corner
-    m = (a + b) / 2
-    return (
-        Cuboid{T}(a, m),
-        Cuboid{T}(SVector(m[1], a[2], a[3]), SVector(b[1], m[2], m[3])),
-        Cuboid{T}(SVector(a[1], m[2], a[3]), SVector(m[1], b[2], m[3])),
-        Cuboid{T}(SVector(a[1], a[2], m[3]), SVector(m[1], m[2], b[3])),
-        Cuboid{T}(SVector(a[1], m[2], m[3]), SVector(m[1], b[2], b[3])),
-        Cuboid{T}(SVector(m[1], a[2], m[3]), SVector(b[1], m[2], b[3])),
-        Cuboid{T}(SVector(m[1], m[2], a[3]), SVector(b[1], b[2], m[3])),
-        Cuboid{T}(m, b),
-    )
-end
-
 const LIST_SUBDIVISION_ALGO = [
-    "segment" => ["subdivide_segment2", "subdivide_segment3"],
+    "segment" => ["subdivide_segment2"],
     "rectangle" => ["subdivide_rectangle4"],
     "triangle" => ["subdivide_triangle2", "subdivide_triangle4"],
     "cuboid" => ["subdivide_cuboid8"],

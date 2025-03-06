@@ -78,7 +78,6 @@ end
     @testset "segment" begin
         s = HAI.segment(-0.81, 0.48)
         @test isnothing(HAI.check_subdivision(s, HAI.subdivide_segment2))
-        @test isnothing(HAI.check_subdivision(s, HAI.subdivide_segment3))
     end
 
     @testset "triangle" begin

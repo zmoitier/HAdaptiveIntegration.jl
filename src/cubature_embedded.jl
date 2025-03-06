@@ -114,7 +114,7 @@ function embedded_cubature(
     @assert length(nodes) == length(weights_high) "nodes and weights_high should have the same length."
     H = length(weights_high)
 
-    @assert length(weights_high) > length(weights_low) "weights_high length should be greater than weights_low length."
+    @assert length(weights_high) ≥ length(weights_low) "weights_high length should be greater than weights_low length."
     L = length(weights_low)
 
     return EmbeddedCubature(
@@ -141,11 +141,18 @@ function embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
     )
 end
 
-struct GrundmannMoeller end
+"""
+   struct GrundmannMoeller
 
-function embedded_cubature(
-    ::GrundmannMoeller, dimension::Int, degree::Int, T::DataType=Float64
-)
+Cubature rule for a `dim`-simplex of degree `deg`.
+"""
+struct GrundmannMoeller
+    dim::Int
+    deg::Int
+end
+
+function embedded_cubature(gm::GrundmannMoeller, T::DataType=Float64)
+    dimension, degree = gm.dim, gm.deg
     vol = 1 / T(factorial(dimension)) # volume of the reference simplex
 
     # high order cubature
@@ -163,7 +170,7 @@ function embedded_cubature(
 end
 
 function (ec::EmbeddedCubature{H,L,D,T})(
-    fct::Function, domain::Domain{D,T}, norm=LinearAlgebra.norm
+    fct::Function, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
 ) where {H,L,D,T<:Real}
     μ = abs_det_jacobian(domain)
     Φ = map_from_reference(domain)
@@ -181,5 +188,5 @@ function (ec::EmbeddedCubature{H,L,D,T})(
         I_high += fct(Φ(ec.nodes[i])) * ec.weights_high[i]
     end
 
-    return μ * I_high, μ * norm(I_high - I_low, Inf)
+    return μ * I_high, μ * norm(I_high - I_low)
 end
