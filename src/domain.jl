@@ -136,7 +136,6 @@ const LIST_DOMAIN = [
     "dimension D" => ["orthotope", "simplex"],
 ]
 
-# TODO: move to utils
 """
     reference_domain(domain_type::DataType)
 
@@ -229,18 +228,6 @@ end
 
 function abs_det_jacobian(s::Simplex{D,T,N}) where {D,T<:Real,N}
     v = s.points
-    return abs(det(SMatrix{D,D}(reinterpret(reshape, T, [x - v[1] for x in v[2:N]]))))
-end
-
-function abs_det_jacobian(t::Triangle{T}) where {T<:Real}
-    e1 = t.points[2] - t.points[1]
-    e2 = t.points[3] - t.points[1]
-    return abs(e1[1] * e2[2] - e1[2] * e2[1])
-end
-
-function abs_det_jacobian(t::Tetrahedron{T}) where {T<:Real}
-    e1 = t.points[2] - t.points[1]
-    e2 = t.points[3] - t.points[1]
-    e3 = t.points[4] - t.points[1]
-    return abs(dot(e1, cross(e2, e3)))
+    mat = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
+    return abs(det(mat))
 end
