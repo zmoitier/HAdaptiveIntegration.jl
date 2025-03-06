@@ -1,6 +1,6 @@
-const TRIANGLE_RL19 = tabulated_embedded_cubature(;
+const TRIANGLE_RL19 = TabulatedEmbeddedCubature(;
     name="Laurie Radon (TRIANGLE_RL19)",
-    domain=triangle((0, 0), (1, 0), (0, 1)),
+    domain="reference triangle",
     reference="""https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/radon/set_radon_standard.m
     https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/laurie/set_laurie_standard.m""",
     nb_significant_digits=15,
@@ -59,9 +59,9 @@ const TRIANGLE_RL19 = tabulated_embedded_cubature(;
     order_low=5,
 )
 
-const TRIANGLE_GM20 = tabulated_embedded_cubature(;
+const TRIANGLE_GM20 = TabulatedEmbeddedCubature(;
     name="Grundmann and Möller (TRIANGLE_GM20)",
-    domain=triangle((0, 0), (1, 0), (0, 1)),
+    domain="reference triangle",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
     nb_significant_digits=33,
     nodes=[
@@ -184,9 +184,9 @@ const TRIANGLE_GM20 = tabulated_embedded_cubature(;
     order_low=5,
 )
 
-const TETRAHEDRON_GM35 = tabulated_embedded_cubature(;
+const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature(;
     name="Grundmann and Möller (TETRAHEDRON_GM35)",
-    domain=tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)),
+    domain="reference tetrahedron",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
     nb_significant_digits=33,
     nodes=[

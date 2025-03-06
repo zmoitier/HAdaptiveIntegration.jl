@@ -157,13 +157,13 @@ function combinations(n, k)
 end
 
 """
-    _subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64)
+    subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64)
 
 Like `subdivide_simplex`, but operates on the reference simplex. Since the
 output depends only on the dimension `D`, and the type `T` used to represent coordinates,
 this function is generated for each combination of `D` and `T`.
 """
-@generated function _subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
+@generated function subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
     # vertices of the reference simplex
     vertices = [zeros(T, D)]
     for i in 1:D
@@ -233,7 +233,7 @@ algorithm and the optimal number of congruence
 classes](https://link.springer.com/article/10.1007/s002110050475).
 """
 function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
-    refs = _subdivide_reference_simplex(Val(D), T)
+    refs = subdivide_reference_simplex(Val(D), T)
     f = map_from_reference(s)
     map(refs) do ref
         Simplex(f.(ref.points))

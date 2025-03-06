@@ -1,6 +1,6 @@
-const SEGMENT_GK15 = tabulated_embedded_cubature(;
+const SEGMENT_GK15 = TabulatedEmbeddedCubature(;
     name="Gauss-Kronrod (SEGMENT_GK15)",
-    domain=segment(0, 1),
+    domain="reference segment",
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=34,
     nodes=[
@@ -50,9 +50,9 @@ const SEGMENT_GK15 = tabulated_embedded_cubature(;
     order_low=13,
 )
 
-const SEGMENT_GK31 = tabulated_embedded_cubature(;
+const SEGMENT_GK31 = TabulatedEmbeddedCubature(;
     name="Gauss-Kronrod (SEGMENT_GK31)",
-    domain=segment(0, 1),
+    domain="reference segment",
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=33,
     nodes=[
@@ -142,9 +142,9 @@ const SEGMENT_GK31 = tabulated_embedded_cubature(;
     order_low=29,
 )
 
-const SQUARE_CHG25 = tabulated_embedded_cubature(;
+const SQUARE_CHG25 = TabulatedEmbeddedCubature(;
     name="Cools and Haegemans (SQUARE_CHG25)",
-    domain=rectangle((0, 0), (1, 1)),
+    domain="reference rectangle",
     reference="https://link.springer.com/article/10.1007/BF01389339",
     nb_significant_digits=19,
     nodes=[
@@ -228,9 +228,9 @@ const SQUARE_CHG25 = tabulated_embedded_cubature(;
     order_low=7,
 )
 
-const CUBE_BE65 = tabulated_embedded_cubature(;
+const CUBE_BE65 = TabulatedEmbeddedCubature(;
     name="Berntsen and Espelid (CUBE_BE65)",
-    domain=cuboid((0, 0, 0), (1, 1, 1)),
+    domain="reference cuboid",
     reference="https://epubs.siam.org/doi/10.1137/0725016",
     nb_significant_digits=15,
     nodes=[

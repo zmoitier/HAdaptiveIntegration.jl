@@ -166,7 +166,7 @@ function reference_domain(domain_type::DataType)
         return Orthotope(low_corner, high_corner)
     end
 
-    @assert false "no reference domain implemented for $domain_type."
+    throw("no reference domain implemented for $domain_type.")
 end
 
 """
