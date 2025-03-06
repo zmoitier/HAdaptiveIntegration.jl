@@ -4,7 +4,6 @@ authors = ["Zois Moitier", "Luiz M. Faria"]
 version = "0.1.0"
 
 [deps]
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 GrundmannMoeller = "36aa67b7-9d79-4e90-bbc0-05abd90a007e"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
