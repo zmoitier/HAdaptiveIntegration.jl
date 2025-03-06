@@ -27,7 +27,7 @@ const LIST_EMBEDDED_CUBATURE = [
     "triangle" => ["TRIANGLE_RL19", "TRIANGLE_GM20"],
     "cuboid" => ["CUBE_BE65"],
     "tetrahedron" => ["TETRAHEDRON_GM35"],
-    "d-simplex" => ["GrundmannMoeller(D, 7)"],
+    "d-simplex" => ["GrundmannMoeller(d, 7)"],
 ]
 
 function default_embedded_cubature(d::Domain)
