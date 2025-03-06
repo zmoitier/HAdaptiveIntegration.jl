@@ -18,11 +18,8 @@ include("cubature_embedded.jl")
 include("cubature_check.jl")
 
 # Tabulated cubature rule for supported domains
-include("rule_segment.jl")
-include("rule_triangle.jl")
-include("rule_square.jl")
-include("rule_tetrahedron.jl")
-include("rule_cube.jl")
+include("rule_orthotope.jl")
+include("rule_simplex.jl")
 
 const LIST_EMBEDDED_CUBATURE = [
     "segment" => ["SEGMENT_GK15", "SEGMENT_GK31"],
@@ -30,7 +27,7 @@ const LIST_EMBEDDED_CUBATURE = [
     "triangle" => ["TRIANGLE_RL19", "TRIANGLE_GM20"],
     "cuboid" => ["CUBE_BE65"],
     "tetrahedron" => ["TETRAHEDRON_GM35"],
-    "d-simplex" => ["GrundmannMoeller()"],
+    "d-simplex" => ["SIMPLEX_GM"],
 ]
 
 function default_embedded_cubature(d::Domain)
@@ -57,7 +54,7 @@ end
     return :($ec)
 end
 @generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(GrundmannMoeller(), D, 7, T)
+    ec = embedded_cubature(SIMPLEX_GM, D, 7, T)
     return :($ec)
 end
 
