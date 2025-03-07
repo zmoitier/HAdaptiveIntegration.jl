@@ -30,6 +30,11 @@ const LIST_EMBEDDED_CUBATURE = [
     "d-simplex" => ["GrundmannMoeller(d, 7)"],
 ]
 
+"""
+    default_embedded_cubature(domain::Domain)
+
+Return the default embedded cubature for the given domain.
+"""
 function default_embedded_cubature(d::Domain)
     @error "no default embedded cubature for $(typeof(d))."
 end

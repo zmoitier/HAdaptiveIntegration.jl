@@ -249,6 +249,11 @@ const LIST_SUBDIVISION_ALGO = [
     "d-simplex" => ["subdivide_simplex"],
 ]
 
+"""
+    default_subdivision(domain::Domain)
+
+Default algorithm to subdivide the `domain`.
+"""
 function default_subdivision(d::Domain)
     @error "no default subdivision for $(typeof(d))."
 end

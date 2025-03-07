@@ -4,98 +4,92 @@ CurrentModule = HAdaptiveIntegration
 
 # HAdaptiveIntegration
 
-Documentation for
-[HAdaptiveIntegration](https://github.com/zmoitier/HAdaptiveIntegration.jl).
+## Overview
+
+`HAdaptiveIntegration.jl` is a Julia package for for approximating integrals of functions
+over various predefined [`Domain`](@ref)s. It uses *embedded quadrature* rules to build
+error estimates, and refines the integration domain by splitting its mesh elements until a
+certain tolerance is reached. Features include:
+
+- Adaptive integration over **simplices of any dimension**
+- Use of **efficient (tabulated) cubatures** for low-dimensional cuboids and simplices
+- Support for custom cubature rules
+- Arbitrary precision arithmetic
+
+## Installation
+
+The package can be installed with the Julia package manager. From the Julia REPL, type `]` to enter the Pkg REPL mode and run
+
+```julia
+pkg> add HAdaptiveIntegration
+```
+
+Or, equivalently, via the Julia Pkg API
+
+```julia
+julia> import Pkg; Pkg.add("HAdaptiveIntegration")
+```
 
 ## Basic usage
 
-The main function of this package is `integrate`, which computes the integral of a
-[`Domain`](@ref)
+The main function exported by this package is [`integrate(f,Ω)`](@ref), which is used to approximate
 
-```@example
-using InteractiveUtils # hide
+```math
+I = \int_{\Omega} f(x) \, dx
+```
+
+where ``\Omega \subset \mathbb{R}^d`` is a [`Domain`](@ref) object, and ``f : \mathbb{R}^d
+\to \mathbb{F}`` is a function/functor. Here is a simple example:
+
+```@example quickstart
 using HAdaptiveIntegration
-HAdaptiveIntegration.LIST_DOMAIN
+domain = triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+f      = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
+I, E   = integrate(f, domain)
 ```
 
-## Comparison with `HCubature.jl`
+The result `I` is the integral of `f` over a triangle with vertices `(0,0)`,
+`(1,0)`, and `(0,1)`, and `E` is an error estimate.
 
-This package shares many similarities with `HCubature.jl`; there are, however, a few
-important differences:
+!!! warning "Function signature"
+    The function `f` must accept a single argument `x` which is an abstract vector of length
+    `d`, the dimension of the domain (concretely, `f` is called through `f(::SVector)`). The
+    return type `T` of `f` can be any type that supports the operations `+(T,T)`, `norm(T)`, and
+    multiplication by a scalar (e.g. vectors or matrices).
 
-- `HAdaptiveIntegration.jl` uses tabulated embedded cubature rules such as the ones
-  found in [Cubature.jl](https://www.google.com/?client=safari), whereas `HCubature.jl`
-  implemented the Genz-Malik algorithm valid axis-aligned rectangles in any dimension.
-- `HAdaptiveIntegration.jl` supports simplicies in low dimensions, whereas
-  `HCubature.jl` supports axis-aligned rectangles in any dimension.
+The keyword arguments `atol` and `rtol` can be used to control the desired absolute and
+relative error tolerances, respectively:
 
-Let's start with a simple example using `HCubature`:
-
-```@example hcubature-square
-using HCubature, LinearAlgebra
-a, b = (0.0, 0.0), (1.0,1.0)
-const counter = Ref(0)
-# f = x -> (counter[]+=1; 1 / (norm(x) + 1e-0))
-f = x -> (counter[]+=1; cos(20*prod(x)))
-I, E = hcubature(f, a, b)
-println("I = $I, E = $E, counter = $(counter[])")
+```@example quickstart
+I, E   = integrate(f, domain; rtol = 1e-12)
 ```
 
-Now, let's do the same with `HAdaptiveIntegration`:
+Finally, to integrate the same function over a three-dimensional axis-aligned cuboid we can
+use
 
-```@example hcubature-square
-using HAdaptiveIntegration
-domain = rectangle(a, b)
-counter[] = 0
-I, E = integrate(f, domain)
-println("I = $I, E = $E, counter = $(counter[])")
+```@example quickstart
+domain = cuboid((0.0, 0.0, 0.0), (1.0, 1.0, 1.0))
+I, E   = integrate(f, domain)
 ```
 
-Lets look at performance now:
+`Domain`s are constructed using the following functions (see their respective docstrings for
+more details):
 
-```@example hcubature-square
-using BenchmarkTools
-counter[] = 0
-b1 = @benchmark hcubature($f, $a, $b)
-```
+- [`triangle`](@ref): a triangle in 2D
+- [`tetrahedron`](@ref): a tetrahedron in 3D
+- [`simplex`](@ref): a simplex in arbitrary dimension
+- [`rectangle`](@ref): a rectangle in 2D
+- [`cuboid`](@ref): a cuboid in 3D
 
-```@example hcubature-square
-ec = HAdaptiveIntegration.embedded_cubature(HAdaptiveIntegration.SQUARE_CHG25, Float64)
-counter[] = 0
-b2 = @benchmark integrate($f, $domain, $ec)
-```
+!!! tip "N-cuboids and `HCubature.jl`"
+    If you are looking for a package that supports adaptive integration over artbitrarily
+    high-dimensional axis-aligned cuboids, you may want to check out
+    [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl).
 
-Let's do the same comparison for the 3d-cube.
+## Going further
 
-```@example hcubature-cube
-using HCubature, LinearAlgebra
-a, b = (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)
-const counter = Ref(0)
-f = x -> (counter[]+=1; cos(5*prod(x)))
-I, E = hcubature(f, a, b)
-println("I = $I, E = $E, counter = $(counter[])")
-```
-
-```@example hcubature-cube
-using HAdaptiveIntegration
-domain = cuboid(a, b)
-counter[] = 0
-I, E = integrate(f, domain)
-println("I = $I, E = $E, counter = $(counter[])")
-```
-
-```@example hcubature-cube
-using BenchmarkTools
-counter[] = 0
-b1 = @benchmark hcubature($f, $a, $b)
-```
-
-```@example hcubature-cube
-ec = HAdaptiveIntegration.embedded_cubature(HAdaptiveIntegration.CUBE_BE65, Float64)
-counter[] = 0
-b2 = @benchmark integrate($f, $domain, $ec)
-```
-
-<!-- function Base.parse(T::Type{MultiFloat{Float64,N}}, str::String) where {N}
-    return T(str)
-end -->
+In the previous examples we covered the basic usage of the [`integrate`](@ref) function.
+There are, however, other options that can be passed to `integrate` in order to customize
+various aspects of the underlying algorithm (e.g. passing a different cubature rule, using a
+buffer to avoid memory allocations, etc.). For more details, see the docstring of the
+[`integrate`](@ref) function, as well as the next section on [advanced usage](advanced-usage).

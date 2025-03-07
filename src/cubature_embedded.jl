@@ -142,7 +142,7 @@ function embedded_cubature(gm::GrundmannMoeller, T::DataType=Float64)
 end
 
 function (ec::EmbeddedCubature{H,L,D,T})(
-    fct::Function, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
+    fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
 ) where {H,L,D,T<:Real}
     μ = abs_det_jacobian(domain)
     Φ = map_from_reference(domain)

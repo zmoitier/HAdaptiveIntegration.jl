@@ -2,8 +2,8 @@
     integrate(
         fct,
         domain::Domain{D,T},
-        ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
-        subdiv_algo=default_subdivision(domain);
+        ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain);
+        subdiv_algo=default_subdivision(domain),
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
         maxsplit=D * 1024,
@@ -16,8 +16,8 @@ TBW
 function integrate(
     fct,
     domain::Domain{D,T},
-    ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
-    subdiv_algo=default_subdivision(domain);
+    ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain);
+    subdiv_algo=default_subdivision(domain),
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsplit=D * 1024,
