@@ -1,15 +1,30 @@
 """
     abstract type Domain{D,T<:Real}
 
-Abstract type for integration domains in `D` dimensions with type `T<:Real`.
+Abstract type for integration domains in `D` dimensions with type `T`.
 """
 abstract type Domain{D,T<:Real} end
 
-dimension(::Domain{D,T}) where {D,T<:Real} = D
-value_type(::Domain{D,T}) where {D,T<:Real} = T
+"""
+    dimension(domain::Domain{D,T}) where {D,T<:Real}
+
+Return the dimension `D` of `domain`.
+"""
+function dimension(::Domain{D,T}) where {D,T<:Real}
+    return D
+end
 
 """
-    struct Orthotope{D,T}
+    value_type(domain::Domain{D,T}) where {D,T<:Real}
+
+Return the type `T` of `domain`.
+"""
+function value_type(::Domain{D,T}) where {D,T<:Real}
+    return T
+end
+
+"""
+    struct Orthotope{D,T} <: Domain{D,T}
 
 Axes-aligned Orthotope in `D` dimensions given by two points `low_corner` and `high_corner`.
 """
@@ -32,6 +47,8 @@ function orthotope(low_corner, high_corner)
 end
 
 """
+    Segment{T} = Orthotope{1,T}
+
 A segment in 1 dimensions given by two value `xmin` and `xmax`.
 """
 const Segment{T} = Orthotope{1,T}
@@ -46,6 +63,8 @@ function segment(xmin::T, xmax::T) where {T<:Real}
 end
 
 """
+    Rectangle{T} = Orthotope{2,T}
+
 An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
 """
 const Rectangle{T} = Orthotope{2,T}
@@ -61,6 +80,8 @@ function rectangle(low_corner, high_corner)
 end
 
 """
+    Cuboid{T} = Orthotope{3,T}
+
 A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
 """
 const Cuboid{T} = Orthotope{3,T}
@@ -76,9 +97,9 @@ function cuboid(low_corner, high_corner)
 end
 
 """
-    struct Simplex{D,T,N}
+    struct Simplex{D,T,N} <: Domain{D,T}
 
-A simplex in `D` dimensions with N=D+1 points of type `T`.
+A simplex in `D` dimensions with `N=D+1` points of element type `T`.
 """
 struct Simplex{D,T,N} <: Domain{D,T}
     points::SVector{N,SVector{D,T}}
