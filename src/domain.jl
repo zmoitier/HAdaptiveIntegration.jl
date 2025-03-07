@@ -27,6 +27,7 @@ end
     struct Orthotope{D,T} <: Domain{D,T}
 
 Axes-aligned Orthotope in `D` dimensions given by two points `low_corner` and `high_corner`.
+Note that, we must have `low_corner .≤ high_corner`.
 """
 struct Orthotope{D,T} <: Domain{D,T}
     low_corner::SVector{D,T}
@@ -37,35 +38,33 @@ end
     orthotope(low_corner, high_corner)
 
 An axes-aligned orthotope in `D` dimensions given by two vectors `low_corner` and `high_corner`.
+Note that, we must have `low_corner .≤ high_corner`.
 """
 function orthotope(low_corner, high_corner)
     @assert (length(low_corner) == length(high_corner))
-    @assert all(a < b for (a, b) in zip(low_corner, high_corner))
+    @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner))
 
     D = length(low_corner)
-    return Orthotope(SVector{D}(low_corner), SVector{D}(high_corner))
+    T = promote_type(eltype(low_corner), eltype(high_corner))
+    return Orthotope(SVector{D,T}(low_corner), SVector{D,T}(high_corner))
 end
 
 """
     Segment{T} = Orthotope{1,T}
-
-A segment in 1 dimensions given by two value `xmin` and `xmax`.
 """
 const Segment{T} = Orthotope{1,T}
 
 """
-    segment(xmin, xmax)
+    segment(xmin::T, xmax::T) where {T<:Real}
 
-A segment in 1 dimensions representing `[xmin, xmax]`.
+A segment in 1 dimensions representing the interval `[xmin, xmax]` with `xmin ≤ xmax`.
 """
 function segment(xmin::T, xmax::T) where {T<:Real}
-    return orthotope([xmin], [xmax])
+    return orthotope(SVector(xmin), SVector(xmax))
 end
 
 """
     Rectangle{T} = Orthotope{2,T}
-
-An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
 """
 const Rectangle{T} = Orthotope{2,T}
 
@@ -73,16 +72,15 @@ const Rectangle{T} = Orthotope{2,T}
     rectangle(low_corner, high_corner)
 
 An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
+Note that, we must have `low_corner .≤ high_corner`.
 """
 function rectangle(low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 2 "must be 2d-vector."
-    return orthotope(low_corner, high_corner)
+    @assert length(low_corner) == length(high_corner) == 2 "`low_corner` and `high_corner` must be 2d-vector."
+    return orthotope(SVector{2}(low_corner), SVector{2}(high_corner))
 end
 
 """
     Cuboid{T} = Orthotope{3,T}
-
-A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
 """
 const Cuboid{T} = Orthotope{3,T}
 
@@ -90,10 +88,11 @@ const Cuboid{T} = Orthotope{3,T}
     cuboid(low_corner, high_corner)
 
 A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
+Note that, we must have `low_corner .≤ high_corner`.
 """
 function cuboid(low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 3 "must be 3d-vector."
-    return orthotope(low_corner, high_corner)
+    @assert length(low_corner) == length(high_corner) == 3 "`low_corner` and `high_corner` must be 3d-vector."
+    return orthotope(SVector{3}(low_corner), SVector{3}(high_corner))
 end
 
 """
@@ -112,41 +111,43 @@ end
 """
     simplex(points...)
 
-A simplex in `D` dimensions with N=D+1 points of type `T`.
+A simplex in `D` dimensions with `N=D+1` points of element type `T`.
 """
 function simplex(points...)
     N = length(points)
     D = N - 1
-    @assert all(pt -> length(pt) == D, points)
+    @assert all(p -> length(p) == D, points)
 
     return Simplex(SVector{N}(SVector{D}.(points)))
 end
 
 """
-A triangle in 2 dimensions with 3 vertices of type `T`.
+    Triangle{T} = Simplex{2,T,3}
 """
 const Triangle{T} = Simplex{2,T,3}
 
 """
     triangle(a, b, c)
 
-A triangle in 2 dimensions given by the 2d-points `a`, `b`, and `c`.
+A triangle in 2 dimensions given by three 2d-points `a`, `b`, and `c`.
 """
 function triangle(a, b, c)
+    @assert length(a) == length(b) == length(c) == 2 "`a`, `b`, and `c` must be 2d-vector."
     return simplex(a, b, c)
 end
 
 """
-A tetrahedron in 3 dimensions with 4 points of type `T`.
+    Tetrahedron{T} = Simplex{3,T,4}
 """
 const Tetrahedron{T} = Simplex{3,T,4}
 
 """
     tetrahedron(a, b, c, d)
 
-A tetrahedron in 3 dimensions given by the 3d-points `a`, `b`, `c`, and `d`.
+A tetrahedron in 3 dimensions given by four 3d-points `a`, `b`, `c`, and `d`.
 """
 function tetrahedron(a, b, c, d)
+    @assert length(a) == length(b) == length(c) == length(d) == 2 "`a`, `b`, `c`, and `d` must be 2d-vector."
     return simplex(a, b, c, d)
 end
 

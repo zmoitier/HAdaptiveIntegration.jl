@@ -4,7 +4,7 @@ import HAdaptiveIntegration as HAI
 @testset "Orthotope" begin
     @testset "Orthotope construction" begin
         @test typeof(HAI.orthotope((0,), (1,))) <: HAI.Orthotope
-        @test typeof(HAI.orthotope([0], [1])) <: HAI.Orthotope
+        @test typeof(HAI.orthotope([0], [1.0])) <: HAI.Orthotope
         @test typeof(HAI.orthotope(SVector(0), SVector(1))) <: HAI.Orthotope
     end
 
