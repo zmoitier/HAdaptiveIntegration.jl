@@ -15,21 +15,31 @@ TBW
 """
 function integrate(
     fct,
-    domain::Domain{D,T},
-    ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain);
+    domain::Domain{D,T};
+    embedded_cubature::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
+    buffer=nothing,
+    norm=x -> LinearAlgebra.norm(x, Inf),
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsplit=D * 1024,
-    norm=x -> LinearAlgebra.norm(x, Inf),
-    buffer=nothing,
 ) where {H,L,D,T<:Real}
-    return _integrate(fct, domain, ec, subdiv_algo, atol, rtol, maxsplit, norm, buffer)
+    return _integrate(
+        fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsplit
+    )
 end
 
 function _integrate(
-    fct::F, domain::D, ec::EmbeddedCubature, subdiv_algo, atol, rtol, maxsplit, norm, buffer
-) where {F,D}
+    fct::FCT,
+    domain::DOM,
+    ec::EmbeddedCubature,
+    subdiv_algo,
+    buffer,
+    norm,
+    atol,
+    rtol,
+    maxsplit,
+) where {FCT,DOM}
     nsplit = 0
     I, E = ec(fct, domain, norm)
 

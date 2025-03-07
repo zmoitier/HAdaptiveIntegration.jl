@@ -20,7 +20,7 @@ import HAdaptiveIntegration as HAI
     R = 2
     @test abs(I - R) ≤ E * abs(R)
 
-    I, E = HAI.integrate(x -> 1 / √x[1], segment, ec)
+    I, E = HAI.integrate(x -> 1 / √x[1], segment; embedded_cubature=ec)
     R = 2
     @test abs(I - R) ≤ E * abs(R)
 end
@@ -40,7 +40,7 @@ end
     R = 1 / 2 * log(17 + 12 * sqrt(2))
     @test abs(I - R) ≤ E * abs(R)
 
-    I, E = HAI.integrate(x -> 1 / norm(x), square, ec)
+    I, E = HAI.integrate(x -> 1 / norm(x), square; embedded_cubature=ec)
     @test abs(I - R) < 1e-8
     @test abs(I - R) ≤ E * abs(R)
 end
@@ -61,7 +61,7 @@ end
     @test abs(I - R) ≤ E * abs(R)
 
     triangle = HAI.triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    I, E = HAI.integrate(x -> 1 / norm(x), triangle, ec)
+    I, E = HAI.integrate(x -> 1 / norm(x), triangle; embedded_cubature=ec)
     R = sqrt(2) * asinh(1)
     @test abs(I - R) ≤ E * abs(R)
 end
@@ -85,7 +85,7 @@ end
     R = π^2 / 32
     @test abs(I - R) ≤ E * abs(R)
 
-    I, E = HAI.integrate(x -> 1 / norm(x), cube, ec)
+    I, E = HAI.integrate(x -> 1 / norm(x), cube; embedded_cubature=ec)
     @test E ≤ √eps(Float64) * I
 end
 
@@ -98,17 +98,21 @@ end
         rtol = 1e-8
 
         triangle = HAI.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
-        I, E = HAI.integrate(x -> exp(x[1] + 3 * x[2]), triangle, ec; rtol)
+        I, E = HAI.integrate(
+            x -> exp(x[1] + 3 * x[2]), triangle; embedded_cubature=ec, rtol=rtol
+        )
         R = (exp(6) - 3 * exp(2) + 2) / 6
         @test abs(I - R) ≤ rtol * abs(R)
 
         triangle = HAI.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
-        I, E = HAI.integrate(x -> cos(7 * x[1] + 3 * x[2]), triangle, ec; rtol)
+        I, E = HAI.integrate(
+            x -> cos(7 * x[1] + 3 * x[2]), triangle; embedded_cubature=ec, rtol=rtol
+        )
         R = (-3 * cos(14) + 7 * cos(6) - 4) / 84
         @test abs(I - R) ≤ rtol * abs(R)
 
         triangle = HAI.triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-        I, E = HAI.integrate(x -> 1 / norm(x), triangle, ec; rtol)
+        I, E = HAI.integrate(x -> 1 / norm(x), triangle; embedded_cubature=ec, rtol=rtol)
         R = sqrt(2) * asinh(1)
         @test abs(I - R) ≤ rtol * abs(R)
     end
@@ -127,15 +131,20 @@ end
             (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
         )
 
-        I, E = HAI.integrate(x -> 1, tetrahedron, ec; rtol)
+        I, E = HAI.integrate(x -> 1, tetrahedron; embedded_cubature=ec, rtol=rtol)
         R = 1 / 6
         @test abs(I - R) ≤ rtol * abs(R)
 
-        I, E = HAI.integrate(x -> exp(x[1] + 3 * x[2] + 5 * x[3]), tetrahedron, ec; rtol)
+        I, E = HAI.integrate(
+            x -> exp(x[1] + 3 * x[2] + 5 * x[3]),
+            tetrahedron;
+            embedded_cubature=ec,
+            rtol=rtol,
+        )
         R = (3 * exp(5) - 10 * exp(3) + 15 * exp(1) - 8) / 120
         @test abs(I - R) ≤ rtol * abs(R)
 
-        I, E = HAI.integrate(x -> 1 / norm(x), tetrahedron, ec; rtol)
+        I, E = HAI.integrate(x -> 1 / norm(x), tetrahedron; embedded_cubature=ec, rtol=rtol)
         R = 0.361426 # not sure if an analytic solution exists... this was from WolframAlpha
         @test abs(I - R) ≤ 1e-4
     end

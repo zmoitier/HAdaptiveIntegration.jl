@@ -14,10 +14,10 @@ makedocs(;
         canonical="https://zmoitier.github.io/HAdaptiveIntegration.jl"
     ),
     pages=[
-        "Home" => "index.md"
-        "Advanced usage" => "advanced.md"
-        "Examples and benchmarks" => "examples.md"
-        "docstrings.md"
+        "Home" => "index.md",
+        "Advanced usage" => "advanced.md",
+        "Examples and benchmarks" => "examples.md",
+        "docstrings.md",
     ],
 )
 
