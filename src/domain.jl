@@ -6,24 +6,6 @@ Abstract type for integration domains in `D` dimensions with type `T`.
 abstract type Domain{D,T<:Real} end
 
 """
-    dimension(domain::Domain{D,T}) where {D,T<:Real}
-
-Return the dimension `D` of `domain`.
-"""
-function dimension(::Domain{D,T}) where {D,T<:Real}
-    return D
-end
-
-"""
-    value_type(domain::Domain{D,T}) where {D,T<:Real}
-
-Return the type `T` of `domain`.
-"""
-function value_type(::Domain{D,T}) where {D,T<:Real}
-    return T
-end
-
-"""
     struct Orthotope{D,T} <: Domain{D,T}
 
 Axes-aligned Orthotope in `D` dimensions given by two points `low_corner` and `high_corner`.
@@ -37,7 +19,7 @@ end
 """
     orthotope(low_corner, high_corner)
 
-An axes-aligned orthotope in `D` dimensions given by two vectors `low_corner` and `high_corner`.
+Return an axes-aligned orthotope in `D` dimensions given by two points `low_corner` and `high_corner`.
 Note that, we must have `low_corner .≤ high_corner`.
 """
 function orthotope(low_corner, high_corner)
@@ -55,9 +37,9 @@ end
 const Segment{T} = Orthotope{1,T}
 
 """
-    segment(xmin::T, xmax::T) where {T<:Real}
+    segment(xmin, xmax)
 
-A segment in 1 dimensions representing the interval `[xmin, xmax]` with `xmin ≤ xmax`.
+Return a segment in 1 dimensions representing the interval `[xmin, xmax]` with `xmin ≤ xmax`.
 """
 function segment(xmin::T, xmax::T) where {T<:Real}
     return orthotope(SVector(xmin), SVector(xmax))
@@ -71,7 +53,7 @@ const Rectangle{T} = Orthotope{2,T}
 """
     rectangle(low_corner, high_corner)
 
-An axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
+Return an axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
 Note that, we must have `low_corner .≤ high_corner`.
 """
 function rectangle(low_corner, high_corner)
@@ -87,7 +69,7 @@ const Cuboid{T} = Orthotope{3,T}
 """
     cuboid(low_corner, high_corner)
 
-A axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
+Return an axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
 Note that, we must have `low_corner .≤ high_corner`.
 """
 function cuboid(low_corner, high_corner)
@@ -111,7 +93,8 @@ end
 """
     simplex(points...)
 
-A simplex in `D` dimensions with `N=D+1` points of element type `T`.
+Return a `D`-simplex from a collection of points.
+Note that all points must have the same length `D` and there must be `N=D+1` points.
 """
 function simplex(points...)
     N = length(points)
@@ -129,7 +112,7 @@ const Triangle{T} = Simplex{2,T,3}
 """
     triangle(a, b, c)
 
-A triangle in 2 dimensions given by three 2d-points `a`, `b`, and `c`.
+Return a triangle in 2 dimensions given by three 2d-points `a`, `b`, and `c`.
 """
 function triangle(a, b, c)
     @assert length(a) == length(b) == length(c) == 2 "`a`, `b`, and `c` must be 2d-vector."
@@ -144,70 +127,75 @@ const Tetrahedron{T} = Simplex{3,T,4}
 """
     tetrahedron(a, b, c, d)
 
-A tetrahedron in 3 dimensions given by four 3d-points `a`, `b`, `c`, and `d`.
+Return a tetrahedron in 3 dimensions given by four 3d-points `a`, `b`, `c`, and `d`.
 """
 function tetrahedron(a, b, c, d)
-    @assert length(a) == length(b) == length(c) == length(d) == 2 "`a`, `b`, `c`, and `d` must be 2d-vector."
+    @assert length(a) == length(b) == length(c) == length(d) == 3 "`a`, `b`, `c`, and `d` must be 3d-vector."
     return simplex(a, b, c, d)
 end
 
-const LIST_DOMAIN = [
-    "dimension 1" => ["segment"],
-    "dimension 2" => ["rectangle", "triangle"],
-    "dimension 3" => ["cuboid", "tetrahedron"],
-    "dimension D" => ["orthotope", "simplex"],
-]
+"""
+    dimension(::Domain{D,T}) where {D,T}
+
+Return the dimension `D` of `domain`.
+"""
+dimension(::Domain{D,T}) where {D,T} = D
+dimension(::Type{Orthotope{D,T}}) where {D,T} = D
+dimension(::Type{Simplex{D,T,N}}) where {D,T,N} = D
+
+"""
+    value_type(::Domain{D,T}) where {D,T}
+
+Return the type `T` of `domain`.
+"""
+value_type(::Domain{D,T}) where {D,T} = T
+value_type(::Type{Orthotope{D,T}}) where {D,T} = T
+value_type(::Type{Simplex{D,T,N}}) where {D,T,N} = T
 
 """
     reference_domain(domain_type::DataType)
 
-Return the reference domain for `domain_type`.
-
-Return the reference D-simplex given by the vertices `(0,...,0), (1,0,...,0), (0,1,0,...,0), (0,...,0,1)`.
-
-Return the reference orthotope in `D` dimensions, representing `[0, 1]ᴰ`.
+Return the reference domain for `domain_type <: Domain{D,T}`.
+- The reference `D`-simplex is the convex hull of the points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
+- The reference orthotope in `D` dimensions is `[0, 1]ᴰ`.
 """
 function reference_domain(domain_type::DataType)
     @assert (domain_type <: Domain) "only subtype of `Domain` are allowed."
-    D = domain_type.parameters[1]
-    T = domain_type.parameters[2]
+
+    D = dimension(domain_type)
     @assert D ≥ 1 "D = $D must be greater than 1."
+
+    T = value_type(domain_type)
+
+    if domain_type <: Orthotope
+        return Orthotope(zeros(SVector{D,T}), ones(SVector{D,T}))
+    end
 
     if domain_type <: Simplex
         N = D + 1
-        points = [zeros(T, D) for _ in 1:N]
-        for i in 1:D
-            points[i + 1][i] = 1
-        end
-        return Simplex(SVector{N,SVector{D,T}}(SVector{D,T}.(points)))
-    end
-
-    if domain_type <: Orthotope
-        low_corner = SVector{D,T}(zeros(T, D))
-        high_corner = SVector{D,T}(ones(T, D))
-        return Orthotope(low_corner, high_corner)
+        points = [zeros(SVector{D,T})]
+        append!(points, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
+        return Simplex(SVector{N}(points))
     end
 
     throw("no reference domain implemented for $domain_type.")
 end
 
 """
-    map_from_reference(d::Domain)::Function
+    map_from_reference(domain::Domain)
 
-Return an anonymous function that maps the reference domain to the physical domain `d`.
+Return an anonymous function that maps the reference domain to the physical domain `domain`.
 """
-function map_from_reference(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_from_reference` is not implemented for type $(typeof(d))."
+function map_from_reference(domain::Domain)
+    throw("`map_from_reference` is not implemented for type $(typeof(domain)).")
 end
 
-function map_from_reference(h::Orthotope{D,T}) where {D,T<:Real}
+function map_from_reference(h::Orthotope{D,T}) where {D,T}
     return u -> h.low_corner + u .* (h.high_corner - h.low_corner)
 end
 
-function map_from_reference(s::Simplex{D,T,N}) where {D,T<:Real,N}
-    # return u -> (1 - sum(u)) * s.points[1] + sum(u[i - 1] * s.points[i] for i in 2:N)
-    # NOTE: for loop is faster than the above expression
-    u -> begin
+function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
+    return u -> begin
         v = (1 - sum(u)) * s.points[1]
         for i in 2:N
             v += u[i - 1] * s.points[i]
@@ -217,38 +205,38 @@ function map_from_reference(s::Simplex{D,T,N}) where {D,T<:Real,N}
 end
 
 """
-    map_to_reference(d::Domain)::Function
+    map_to_reference(domain::Domain)
 
-Return an anonymous function that maps the physical domain `d` to the reference domain.
+Return an anonymous function that maps the physical domain `domain` to the reference domain.
 """
-function map_to_reference(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_to_reference` is not implemented for type $(typeof(d))."
+function map_to_reference(domain::Domain)
+    throw("`map_to_reference` is not implemented for type $(typeof(domain)).")
 end
 
-function map_to_reference(h::Orthotope{D,T}) where {D,T<:Real}
+function map_to_reference(h::Orthotope{D,T}) where {D,T}
     return u -> (u - h.low_corner) ./ (h.high_corner - h.low_corner)
 end
 
-function map_to_reference(s::Simplex{D,T,N}) where {D,T<:Real,N}
+function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
     v = s.points
-    M = inv(SMatrix{D,D}(reinterpret(reshape, T, [x - v[1] for x in v[2:N]])))
+    M = inv(hcat(ntuple(i -> v[i + 1] - v[1], D)...))
     return u -> M * (u - v[1])
 end
 
 """
-    abs_det_jacobian(d::Domain)
+    abs_det_jacobian(domain::Domain)
 
-The absolute value of the Jacobian's determinant of the map from the reference domain to the physical domain `d`.
+Return the absolute value of the Jacobian's determinant of the map from the reference domain to the physical domain `domain`.
 """
-function abs_det_jacobian(d::Domain{D,T}) where {D,T<:Real}
-    @error "`map_from_reference` is not implemented for $(typeof(d))."
+function abs_det_jacobian(domain::Domain)
+    throw("`map_from_reference` is not implemented for $(typeof(domain)).")
 end
 
-function abs_det_jacobian(s::Orthotope{D,T}) where {D,T<:Real}
-    return prod(s.high_corner - s.low_corner)
+function abs_det_jacobian(h::Orthotope{D,T}) where {D,T}
+    return prod(h.high_corner - h.low_corner)
 end
 
-function abs_det_jacobian(s::Simplex{D,T,N}) where {D,T<:Real,N}
+function abs_det_jacobian(s::Simplex{D,T,N}) where {D,T,N}
     v = s.points
     mat = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
     return abs(det(mat))
