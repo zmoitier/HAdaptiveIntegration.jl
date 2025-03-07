@@ -46,7 +46,7 @@ using HAdaptiveIntegration: GrundmannMoeller, embedded_cubature, integrate, tria
 t = triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 ec = embedded_cubature(GrundmannMoeller(2,13), Float64)
-I,E = integrate(f, t, ec)
+I,E = integrate(f, t; embedded_cubature = ec)
 ```
 
 !!! tip "Available embedded cubature formulas"

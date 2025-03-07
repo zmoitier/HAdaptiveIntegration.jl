@@ -37,7 +37,7 @@ b1 = @benchmark hcubature($f, $a, $b)
 ```@example hcubature-square
 ec = HAdaptiveIntegration.embedded_cubature(HAdaptiveIntegration.SQUARE_CHG25, Float64)
 counter[] = 0
-b2 = @benchmark integrate($f, $domain, $ec)
+b2 = @benchmark integrate($f, $domain; embedded_cubature = $ec)
 ```
 
 Let's do the same comparison for the 3d-cube.
@@ -68,5 +68,5 @@ b1 = @benchmark hcubature($f, $a, $b)
 ```@example hcubature-cube
 ec = HAdaptiveIntegration.embedded_cubature(HAdaptiveIntegration.CUBE_BE65, Float64)
 counter[] = 0
-b2 = @benchmark integrate($f, $domain, $ec)
+b2 = @benchmark integrate($f, $domain; embedded_cubature = $ec)
 ```

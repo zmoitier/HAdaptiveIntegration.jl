@@ -92,4 +92,4 @@ In the previous examples we covered the basic usage of the [`integrate`](@ref) f
 There are, however, other options that can be passed to `integrate` in order to customize
 various aspects of the underlying algorithm (e.g. passing a different cubature rule, using a
 buffer to avoid memory allocations, etc.). For more details, see the docstring of the
-[`integrate`](@ref) function, as well as the next section on [advanced usage](advanced-usage).
+[`integrate`](@ref) function, as well as the next section on [advanced usage](@ref advanced-usage).
