@@ -138,8 +138,7 @@ for (name, cbt, n) in [("BE_9_65", ruleA, 16), ("BE_7_65", ruleB, 16)]
 
     local Φ = HAI.map_to_reference(cube)
     local j =
-        HAI.abs_det_jacobian(HAI.reference_domain(HAI.Cuboid{BigFloat})) /
-        HAI.abs_det_jacobian(cube)
+        HAI.abs_det_jac(HAI.reference_domain(HAI.Cuboid{BigFloat})) / HAI.abs_det_jac(cube)
 
     fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\", \"%.$(n)e\"],")
     for x in cbt[:nodes]

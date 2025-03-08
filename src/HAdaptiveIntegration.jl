@@ -21,15 +21,6 @@ include("cubature_check.jl")
 include("rule_orthotope.jl")
 include("rule_simplex.jl")
 
-const LIST_EMBEDDED_CUBATURE = [
-    "segment" => ["SEGMENT_GK15", "SEGMENT_GK31"],
-    "rectangle" => ["SQUARE_CHG25"],
-    "triangle" => ["TRIANGLE_RL19", "TRIANGLE_GM20"],
-    "cuboid" => ["CUBE_BE65"],
-    "tetrahedron" => ["TETRAHEDRON_GM35"],
-    "d-simplex" => ["GrundmannMoeller(d, 7)"],
-]
-
 """
     default_embedded_cubature(domain::Domain)
 

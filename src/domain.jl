@@ -224,19 +224,19 @@ function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
 end
 
 """
-    abs_det_jacobian(domain::Domain)
+    abs_det_jac(domain::Domain)
 
 Return the absolute value of the Jacobian's determinant of the map from the reference domain to the physical domain `domain`.
 """
-function abs_det_jacobian(domain::Domain)
+function abs_det_jac(domain::Domain)
     throw("`map_from_reference` is not implemented for $(typeof(domain)).")
 end
 
-function abs_det_jacobian(h::Orthotope{D,T}) where {D,T}
+function abs_det_jac(h::Orthotope{D,T}) where {D,T}
     return prod(h.high_corner - h.low_corner)
 end
 
-function abs_det_jacobian(s::Simplex{D,T,N}) where {D,T,N}
+function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
     v = s.points
     mat = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
     return abs(det(mat))
