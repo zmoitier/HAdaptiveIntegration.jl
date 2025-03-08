@@ -144,7 +144,7 @@ end
 function (ec::EmbeddedCubature{H,L,D,T})(
     fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
 ) where {H,L,D,T<:Real}
-    μ = abs_det_jacobian(domain)
+    μ = abs_det_jac(domain)
     Φ = map_from_reference(domain)
 
     v = fct(Φ(ec.nodes[1]))

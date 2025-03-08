@@ -1,28 +1,27 @@
 """
     check_subdivision(
-        domain::Domain{D,T},
-        subdiv_algo;
-        atol::T=zero(T),
-        rtol::T=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-    ) where {D,T<:Real}
+        subdiv_algo,
+        domain::Domain{D,T};
+        atol=zero(T),
+        rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+    ) where {D,T}
 
-Return `nothing` if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the volume of the domain else throw an error.
+Return 0 if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the volume of the domain else return 1.
 """
 function check_subdivision(
-    domain::Domain{D,T},
-    subdiv_algo;
+    subdiv_algo,
+    domain::Domain{D,T};
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-) where {D,T<:Real}
-    subdomains = subdiv_algo(domain)
-    if isapprox(
-        sum(abs_det_jacobian.(subdomains)), abs_det_jacobian(domain); atol=atol, rtol=rtol
-    )
-        @info "`$(Symbol(subdiv_algo))` pass volume test."
-        return nothing
-    else
-        @error "`$(Symbol(subdiv_algo))` do not partition the domain."
+) where {D,T}
+    sub_domains = subdiv_algo(domain)
+    if !isapprox(sum(abs_det_jac.(sub_domains)), abs_det_jac(domain); atol=atol, rtol=rtol)
+        @error "`$(Symbol(subdiv_algo))` do not partition the domain within the tolerance."
+        return 1
     end
+
+    @info "`$(Symbol(subdiv_algo))` pass volume test."
+    return 0
 end
 
 """
@@ -30,7 +29,7 @@ end
 
 Divide the segment `s` into two segments of equal length.
 """
-function subdivide_segment2(s::Segment{T}) where {T<:Real}
+function subdivide_segment2(s::Segment{T}) where {T}
     a, b = s.low_corner, s.high_corner
     m = (a + b) / 2
     return (Segment{T}(a, m), Segment{T}(m, b))
@@ -39,10 +38,9 @@ end
 """
     subdivide_rectangle4(r::Rectangle)
 
-Divide the rectangle `r` into four squares by connecting the center of the square to the midpoints
-of the edges.
+Divide the rectangle `r` into four squares by connecting the center of the square to the midpoints of the edges.
 """
-function subdivide_rectangle4(r::Rectangle{T}) where {T<:Real}
+function subdivide_rectangle4(r::Rectangle{T}) where {T}
     a, b = r.low_corner, r.high_corner
     m = (a + b) / 2
     return (
@@ -56,10 +54,9 @@ end
 """
     subdivide_cuboid8(c::Cuboid)
 
-Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the
-edges.
+Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the edges.
 """
-function subdivide_cuboid8(c::Cuboid{T}) where {T<:Real}
+function subdivide_cuboid8(c::Cuboid{T}) where {T}
     a, b = c.low_corner, c.high_corner
     m = (a + b) / 2
     return (
@@ -77,10 +74,9 @@ end
 """
     subdivide_triangle2(s::Triangle)
 
-Divide the triangle `t` into two triangles by connecting the first point of `t` to the midpoints of
-the two other points.
+Divide the triangle `t` into two triangles by connecting the first point of `t` to the midpoints of the two other points.
 """
-function subdivide_triangle2(t::Triangle{T}) where {T<:Real}
+function subdivide_triangle2(t::Triangle{T}) where {T}
     a, b, c = t.points
     bc = (b + c) / 2
     return (Triangle{T}(bc, a, b), Triangle{T}(bc, c, a))
@@ -91,7 +87,7 @@ end
 
 Divide the triangle `t` into four triangles by connecting the midpoints of the edges.
 """
-function subdivide_triangle4(t::Triangle{T}) where {T<:Real}
+function subdivide_triangle4(t::Triangle{T}) where {T}
     a, b, c = t.points
     ab = (a + b) / 2
     ac = (c + a) / 2
@@ -109,7 +105,7 @@ end
 
 Divide the tetrahedron `t` into eight tetrahedra by connecting the midpoints of the edges.
 """
-function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T<:Real}
+function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T}
     a, b, c, d = t.points
     ab = (a + b) / 2
     ac = (a + c) / 2
@@ -124,21 +120,20 @@ function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T<:Real}
         Tetrahedron{T}(ac, bc, c, cd),
         Tetrahedron{T}(ad, bd, cd, d),
         # octahedron splitting
-        Tetrahedron{T}(ab, bc, bd, ad),
-        Tetrahedron{T}(ac, bc, cd, ad),
-        Tetrahedron{T}(ad, cd, bd, bc),
-        Tetrahedron{T}(bc, ac, ab, ad),
+        Tetrahedron{T}(ab, ac, ad, bd),
+        Tetrahedron{T}(ab, ac, bc, bd),
+        Tetrahedron{T}(ac, ad, bd, cd),
+        Tetrahedron{T}(ac, bc, bd, cd),
     )
 end
 
 """
-    combinations(n, k)
+    combinations(n::Int, k::Int)
 
-Helper function to generate all combinations of `k` elements from `1:n`, similar to calling
-`combinations(1:n, k)` from `Combinatorics.jl`.
+Helper function to generate all combinations of `k` elements from `1:n`, similar to calling `combinations(1:n, k)` from `Combinatorics.jl`.
 """
-function combinations(n, k)
-    function combinations_helper(start, end_, k_)
+function combinations(n::Int, k::Int)
+    function combinations_helper(start::Int, end_::Int, k_::Int)
         if k_ == 0
             return Vector{Int}[[]]
         elseif k_ > (end_ - start + 1)
@@ -157,23 +152,18 @@ function combinations(n, k)
 end
 
 """
-    subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64)
+    subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
 
-Like `subdivide_simplex`, but operates on the reference simplex. Since the
-output depends only on the dimension `D`, and the type `T` used to represent coordinates,
-this function is generated for each combination of `D` and `T`.
+Like `subdivide_simplex`, but operates on the reference simplex.
+Since the output depends only on the dimension `D`, and the type `T` used to represent coordinates, this function is generated for each combination of `D` and `T`.
 """
 @generated function subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
     # vertices of the reference simplex
-    vertices = [zeros(T, D)]
-    for i in 1:D
-        v = zeros(T, D)
-        v[i] = 1
-        push!(vertices, v)
-    end
+    vertices = [zeros(SVector{D,T})]
+    append!(vertices, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
 
     # valid permutations of the vertices
-    function generate_valid_permutations(n, k)
+    function generate_valid_permutations(n::Int, k::Int)
         valid_perms = []
         # Generate all combinations of k positions from 1:n
         for positions in combinations(n, k)
@@ -189,19 +179,18 @@ this function is generated for each combination of `D` and `T`.
         return valid_perms
     end
 
-    n = length(vertices) - 1  # T is an n-simplex with (n+1) vertices
-    subsimplices = []
-    for k in 0:n
+    sub_simplices = []
+    for k in 0:D
         # Compute initial vertex v₀ = (x⁰ + xᵏ) / 2
         x₀ = vertices[1]
         xₖ = vertices[k + 1]
         v₀ = (x₀ .+ xₖ) ./ 2
         # Generate valid permutations for this k
-        perms = generate_valid_permutations(n, k)
+        perms = generate_valid_permutations(D, k)
         for π in perms
             new_vertices = [v₀]
             current_v = v₀
-            for ℓ in 1:n
+            for ℓ in 1:D
                 edge_num = π[ℓ]  # Edge between x^{edge_num-1} and x^{edge_num}
                 edge_start = vertices[edge_num]
                 edge_end = vertices[edge_num + 1]
@@ -209,28 +198,25 @@ this function is generated for each combination of `D` and `T`.
                 current_v = current_v .+ 0.5 .* edge_vector
                 push!(new_vertices, current_v)
             end
-            push!(subsimplices, new_vertices)
+            push!(sub_simplices, new_vertices)
         end
     end
-    # convert to an efficient format with known sizes
 
-    static_subsimplices = ntuple(2^D) do i
-        pts = SVector{D + 1,SVector{D,T}}(subsimplices[i])
+    # convert to an efficient format with known sizes
+    static_sub_simplices = ntuple(2^D) do i
+        pts = SVector{D + 1,SVector{D,T}}(sub_simplices[i])
         Simplex(pts)
     end
 
-    return :($static_subsimplices)
+    return :($static_sub_simplices)
 end
 
 """
     subdivide_simplex(s::Simplex)
 
-Subdivide a `D`-dimensional simplex into `2ᴰ` simplices by using the Freudenthal
-triangulation.
+Subdivide a `D`-simplex into `2ᴰ` simplices by using the Freudenthal triangulation.
 
-Implements the `RedRefinementND`` algorithm in [Simplicial grid refinement: on Freudenthal's
-algorithm and the optimal number of congruence
-classes](https://link.springer.com/article/10.1007/s002110050475).
+Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Freudenthal's algorithm and the optimal number of congruence classes](https://link.springer.com/article/10.1007/s002110050475).
 """
 function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     refs = subdivide_reference_simplex(Val(D), T)
@@ -240,19 +226,20 @@ function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     end
 end
 
-const LIST_SUBDIVISION_ALGO = [
-    "segment" => ["subdivide_segment2"],
-    "rectangle" => ["subdivide_rectangle4"],
-    "triangle" => ["subdivide_triangle2", "subdivide_triangle4"],
-    "cuboid" => ["subdivide_cuboid8"],
-    "tetrahedron" => ["subdivide_tetrahedron8"],
-    "d-simplex" => ["subdivide_simplex"],
-]
-
 """
     default_subdivision(domain::Domain)
 
-Default algorithm to subdivide the `domain`.
+Return the default algorithm to subdivide `domain`.
+- dimension 1:
+    - `Segment`: `subdivide_segment2`
+- dimension 2:
+    - `Rectangle`: `subdivide_rectangle4`
+    - `Triangle`: `subdivide_triangle4`
+- dimension 3:
+    - `Cuboid`: `subdivide_cuboid8`
+    - `Tetrahedron`: `subdivide_tetrahedron8`
+- dimension `d`:
+    - `simplex`: `subdivide_simplex`
 """
 function default_subdivision(d::Domain)
     @error "no default subdivision for $(typeof(d))."
