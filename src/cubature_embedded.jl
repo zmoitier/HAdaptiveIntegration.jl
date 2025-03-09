@@ -3,20 +3,20 @@
 
 An embedded cubature rule consisting of a high order cubature rule and a low order cubature rule.
 Note that the low order cubature uses `nodes[1:L]` as its nodes where `L` is the length of the `weights_low`.
-The cubature nodes and weights are assume to be for the reference simplex or orthotope.
+The cubature nodes and weights are assume to be for the reference domain.
 
 ## Fields:
-- `name::String`: name of the embedded cubature;
-- `domain::String`: domain of the cubature.
-- `reference::String`: where the values are found;
-- `nb_significant_digits::Int`: number of significant digits on the node and weight values, `10^-nb_significant_digits` give the relative precision of the values;
-- `nodes::Vector{Vector{String}}`: the cubature nodes;
-- `weights_high::Vector{String}`: the cubature weights for the high order cubature;
-- `order_high::Int`: order of the high order cubature;
-- `weights_low::Vector{String}`: the cubature weights for the low order cubature;
+- `name::String`: name of the embedded cubature.
+- `domain::String`: domain of the cubature, the possible values are "reference segment", "reference rectangle", "reference cuboid", "reference triangle", and "reference tetrahedron".
+- `reference::String`: where the values are found.
+- `nb_significant_digits::Int`: number of significant digits on the node and weight values, `10^-nb_significant_digits` give the relative precision of the values.
+- `nodes::Vector{Vector{String}}`: the cubature nodes.
+- `weights_high::Vector{String}`: the cubature weights for the high order cubature.
+- `order_high::Int`: order of the high order cubature.
+- `weights_low::Vector{String}`: the cubature weights for the low order cubature.
 - `order_low::Int`: order of the low order cubature.
 """
-struct TabulatedEmbeddedCubature
+@kwdef struct TabulatedEmbeddedCubature
     name::String
     domain::String
     reference::String
@@ -26,44 +26,18 @@ struct TabulatedEmbeddedCubature
     order_high::Int
     weights_low::Vector{String}
     order_low::Int
-
-    function TabulatedEmbeddedCubature(;
-        name::String,
-        domain::String,
-        reference::String,
-        nb_significant_digits::Int,
-        nodes::Vector{Vector{String}},
-        weights_high::Vector{String},
-        order_high::Int,
-        weights_low::Vector{String},
-        order_low::Int,
-    )
-        @assert allequal(length, nodes) "all nodes must have the same length"
-
-        return new(
-            name,
-            domain,
-            reference,
-            nb_significant_digits,
-            nodes,
-            weights_high,
-            order_high,
-            weights_low,
-            order_low,
-        )
-    end
 end
 
 """
     struct EmbeddedCubature{H,L,D,T}
 
 An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low order cubature rule with `L` nodes.
-The cubature nodes and weights are assume to be for the reference simplex or orthotope.
 Note that the low order cubature uses `nodes[1:L]` as its nodes.
+The cubature nodes and weights are assume to be for the reference domain.
 
 ## Fields:
-- `nodes::SVector{H,SVector{D,T}}`: the cubature nodes;
-- `weights_high::SVector{H,T}`: the cubature weights for the high order cubature;
+- `nodes::SVector{H,SVector{D,T}}`: the cubature nodes.
+- `weights_high::SVector{H,T}`: the cubature weights for the high order cubature.
 - `weights_low::SVector{L,T}`: the cubature weights for the low order cubature.
 """
 struct EmbeddedCubature{H,L,D,T}
@@ -73,13 +47,15 @@ struct EmbeddedCubature{H,L,D,T}
 end
 
 """
-    embedded_cubature(nodes, weights_high, weights_low)
+    embedded_cubature(
+        nodes::Vector{VT}, weights_high::VT, weights_low::VT
+    ) where {VT<:AbstractVector{<:Real}}
 
 Return an embedded cubature form a vector of nodes and two vector of weights for the high order and low order cubature.
 """
 function embedded_cubature(
-    nodes::Vector{Vector{T}}, weights_high::Vector{T}, weights_low::Vector{T}
-) where {T<:Real}
+    nodes::Vector{VT}, weights_high::VT, weights_low::VT
+) where {VT<:AbstractVector{<:Real}}
     @assert allequal(length, nodes) "all nodes should have the same length."
     D = length(first(nodes))
 
@@ -90,16 +66,14 @@ function embedded_cubature(
     L = length(weights_low)
 
     return EmbeddedCubature(
-        SVector{H,SVector{D,T}}(SVector{D,T}.(nodes)),
-        SVector{H,T}(weights_high),
-        SVector{L,T}(weights_low),
+        SVector{H}(SVector{D}.(nodes)), SVector{H}(weights_high), SVector{L}(weights_low)
     )
 end
 
 """
-    embedded_cubature(tec::TabulatedEmbeddedCubature, T=Float64)
+    embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
 
-Return the `EmbeddedCubature` with type `T` from an `TabulatedEmbeddedCubature`.
+Return the embedded cubature with value type `T` from a `TabulatedEmbeddedCubature`.
 """
 function embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
     if 10 * eps(T) < 10.0^(-tec.nb_significant_digits)
@@ -123,6 +97,11 @@ struct GrundmannMoeller
     deg::Int
 end
 
+"""
+    embedded_cubature(gm::GrundmannMoeller, T::DataType=Float64)
+
+Return the embedded cubature of Grundmann and Möller.
+"""
 function embedded_cubature(gm::GrundmannMoeller, T::DataType=Float64)
     dimension, degree = gm.dim, gm.deg
     vol = 1 / T(factorial(dimension)) # volume of the reference simplex
@@ -141,9 +120,18 @@ function embedded_cubature(gm::GrundmannMoeller, T::DataType=Float64)
     return EmbeddedCubature(nodes_high, weights_high, weights_low)
 end
 
+"""
+    (ec::EmbeddedCubature{H,L,D,T})(
+        fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
+    ) where {H,L,D,T}
+
+Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the high order cubature and the low order cubature on `domain`.
+The function `fct` must take a `SVector{D,T}` to a return type `K`, and `K` must support the multiplication by a scalar and the addition.
+Note that there is no check, beyond compatibility of dimension and type, that the embedded cubature is for the right domain.
+"""
 function (ec::EmbeddedCubature{H,L,D,T})(
     fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
-) where {H,L,D,T<:Real}
+) where {H,L,D,T}
     μ = abs_det_jac(domain)
     Φ = map_from_reference(domain)
 

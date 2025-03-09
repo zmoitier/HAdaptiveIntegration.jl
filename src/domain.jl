@@ -10,6 +10,10 @@ abstract type Domain{D,T<:Real} end
 
 Axes-aligned Orthotope in `D` dimensions given by two points `low_corner` and `high_corner`.
 Note that, we must have `low_corner .≤ high_corner`.
+
+## Fields:
+- `low_corner::SVector{D,T}`: the low corner.
+- `high_corner::SVector{D,T}`: the high corner.
 """
 struct Orthotope{D,T} <: Domain{D,T}
     low_corner::SVector{D,T}
@@ -89,28 +93,31 @@ end
 """
     struct Simplex{D,T,N} <: Domain{D,T}
 
-A simplex in `D` dimensions with `N=D+1` points of value type `T`.
+A simplex in `D` dimensions with `N=D+1` vertices of value type `T`.
+
+## Fields:
+- `vertices::SVector{N,SVector{D,T}}`: vertices of the simplex.
 """
 struct Simplex{D,T,N} <: Domain{D,T}
-    points::SVector{N,SVector{D,T}}
+    vertices::SVector{N,SVector{D,T}}
 end
 
-function Simplex{D,T,N}(points::SVector{D,T}...) where {D,T<:Real,N}
-    return Simplex(SVector{N}(points...))
+function Simplex{D,T,N}(vertices::SVector{D,T}...) where {D,T,N}
+    return Simplex(SVector{N}(vertices...))
 end
 
 """
-    simplex(points...)
+    simplex(vertices...)
 
-Return a `D`-simplex from a collection of points.
+Return a `D`-simplex from a collection of vertices.
 Note that all points must have the same length `D` and there must be `N=D+1` points.
 """
-function simplex(points...)
-    N = length(points)
+function simplex(vertices...)
+    N = length(vertices)
     D = N - 1
-    @assert all(p -> length(p) == D, points)
+    @assert all(p -> length(p) == D, vertices)
 
-    return Simplex(SVector{N}(SVector{D}.(points)))
+    return Simplex(SVector{N}(SVector{D}.(vertices)))
 end
 
 """
@@ -189,9 +196,9 @@ end
 
 function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
     return u -> begin
-        v = (1 - sum(u)) * s.points[1]
+        v = (1 - sum(u)) * s.vertices[1]
         for i in 2:N
-            v += u[i - 1] * s.points[i]
+            v += u[i - 1] * s.vertices[i]
         end
         return v
     end
@@ -211,7 +218,7 @@ function map_to_reference(h::Orthotope{D,T}) where {D,T}
 end
 
 function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
-    v = s.points
+    v = s.vertices
     M = inv(hcat(ntuple(i -> v[i + 1] - v[1], D)...))
     return u -> M * (u - v[1])
 end
@@ -230,7 +237,7 @@ function abs_det_jac(h::Orthotope{D,T}) where {D,T}
 end
 
 function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
-    v = s.points
+    v = s.vertices
     mat = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
     return abs(det(mat))
 end
