@@ -1,3 +1,14 @@
+"""
+    check_order(
+        tec::TabulatedEmbeddedCubature,
+        domain_type::DataType;
+        atol::Union{Real,Nothing}=nothing,
+        rtol::Union{Real,Nothing}=nothing,
+    )
+
+Return 0 if the tabulated embedded cubature on `domain_type` integrate exactly (within tolerance) the monomials up to degree `order_high` for the high oder cubature and `order_low` for the low order cubature.
+Else return 1.
+"""
 function check_order(
     tec::TabulatedEmbeddedCubature,
     domain_type::DataType;
@@ -5,7 +16,7 @@ function check_order(
     rtol::Union{Real,Nothing}=nothing,
 )
     T = value_type(domain_type)
-    check_order(
+    return check_order(
         embedded_cubature(tec, T),
         tec.order_high,
         tec.order_low,
@@ -13,29 +24,40 @@ function check_order(
         atol=atol,
         rtol=rtol,
     )
-
-    return nothing
 end
 
+"""
+    check_order(
+        ec::EmbeddedCubature{H,L,D,T},
+        degree_high::Int,
+        degree_low::Int,
+        domain_type::DataType;
+        atol::Union{Real,Nothing}=nothing,
+        rtol::Union{Real,Nothing}=nothing,
+    ) where {H,L,D,T<:Real}
+
+Return 0 if the embedded cubature on `domain_type` integrate exactly (within tolerance) the monomials up to degree `order_high` for the high oder cubature and `order_low` for the low order cubature.
+Else return 1.
+"""
 function check_order(
     ec::EmbeddedCubature{H,L,D,T},
-    degree_high::Int,
-    degree_low::Int,
+    order_high::Int,
+    order_low::Int,
     domain_type::DataType;
     atol::Union{Real,Nothing}=nothing,
     rtol::Union{Real,Nothing}=nothing,
 ) where {H,L,D,T<:Real}
     if domain_type <: Simplex
-        val_ref = simplex_int_val(D, degree_high)
+        val_ref = integral_monomial_simplex(D, order_high)
     elseif domain_type <: Orthotope
-        val_ref = orthotope_int_val(D, degree_high)
+        val_ref = integral_monomial_orthotope(D, order_high)
     else
         @error "unknown monomial's integrals on the reference domain of $domain_type."
     end
 
     val_lo::Vector{Vector{T}} = []
     val_hi::Vector{Vector{T}} = []
-    for i in 1:(degree_low + 1)
+    for i in 1:(order_low + 1)
         tmp_lo = Vector{T}()
         tmp_hi = Vector{T}()
         for (idx, _) in val_ref[i]
@@ -47,7 +69,7 @@ function check_order(
         push!(val_lo, tmp_lo)
         push!(val_hi, tmp_hi)
     end
-    for i in (degree_low + 2):(degree_high + 1)
+    for i in (order_low + 2):(order_high + 1)
         tmp_hi = Vector{T}()
         for (idx, _) in val_ref[i]
             fct = x -> prod(xᵢ^eᵢ for (xᵢ, eᵢ) in zip(x, idx))
@@ -64,12 +86,18 @@ function check_order(
         rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T)
     end
 
-    _isapprox(val_ref, val_hi, atol, rtol)
-    _isapprox(val_ref, val_lo, atol, rtol)
-    return nothing
+    if _isapprox(val_ref, val_hi, atol, rtol) == 1
+        @error "integration fail for high order cubature"
+        return 1
+    end
+    if _isapprox(val_ref, val_lo, atol, rtol) == 1
+        @error "integration fail for low order cubature"
+        return 1
+    end
+    return 0
 end
 
-function (ec::EmbeddedCubature{H,L,D,T})(fct::Function) where {H,L,D,T<:Real}
+function (ec::EmbeddedCubature{H,L,D,T})(fct::Function) where {H,L,D,T}
     v = fct(ec.nodes[1])
     I_low = v * ec.weights_low[1]
     I_high = v * ec.weights_high[1]
@@ -93,16 +121,24 @@ function _isapprox(
     for (i, (idx_ref, num)) in enumerate(zip(val_ref, val_num))
         for ((_, vr), vn) in zip(idx_ref, num)
             if !isapprox(vn, vr; atol=atol, rtol=rtol)
-                @show vr vn abs(vn - vr) (rtol * vr)
-                @assert false "fail to integrate within tolerance at total degree = $(i-1)"
+                @error "fail to integrate within tolerance at total degree = $(i-1)"
+                return 1
             end
         end
     end
     @info "integrate within tolerance up to total degree = $(length(val_num) - 1)"
-    return nothing
+    return 0
 end
 
-function orthotope_int_val(dim::Int, tot_deg_max::Int)
+"""
+    integral_monomial_orthotope(dim::Int, tot_deg_max::Int)
+
+Return the values of monomial's integral over the reference orthotope.
+It return a `Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`.
+The outer vector is index by the `total degree + 1`, for the total degree form 0 to `tot_deg_max`.
+The inner vector contain `Pair{ Ntuple{dim,Int}, Rational{Int} }` where the `Ntuple{D,Int}` is the multi-index of the monomial and `Rational{Int}` is the value of the integral. 
+"""
+function integral_monomial_orthotope(dim::Int, tot_deg_max::Int)
     if dim ≤ 0
         return Vector{Vector{Pair{Tuple{},Rational{Int}}}}()
     end
@@ -128,7 +164,15 @@ function orthotope_int_val(dim::Int, tot_deg_max::Int)
     return indexes
 end
 
-function simplex_int_val(dim::Int, tot_deg_max::Int)
+"""
+    integral_monomial_simplex(dim::Int, tot_deg_max::Int)
+
+Return the values of monomial's integral over the reference simplex.
+It return a `Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`.
+The outer vector is index by the `total degree + 1`, for the total degree form 0 to `tot_deg_max`.
+The inner vector contain `Pair{ Ntuple{dim,Int}, Rational{Int} }` where the `Ntuple{D,Int}` is the multi-index of the monomial and `Rational{Int}` is the value of the integral.
+"""
+function integral_monomial_simplex(dim::Int, tot_deg_max::Int)
     if dim ≤ 0
         return Vector{Vector{Pair{Tuple{},Rational{Int}}}}()
     end
