@@ -77,7 +77,7 @@ end
 Divide the triangle `t` into two triangles by connecting the first point of `t` to the midpoints of the two other points.
 """
 function subdivide_triangle2(t::Triangle{T}) where {T}
-    a, b, c = t.points
+    a, b, c = t.vertices
     bc = (b + c) / 2
     return (Triangle{T}(bc, a, b), Triangle{T}(bc, c, a))
 end
@@ -88,7 +88,7 @@ end
 Divide the triangle `t` into four triangles by connecting the midpoints of the edges.
 """
 function subdivide_triangle4(t::Triangle{T}) where {T}
-    a, b, c = t.points
+    a, b, c = t.vertices
     ab = (a + b) / 2
     ac = (c + a) / 2
     bc = (b + c) / 2
@@ -106,7 +106,7 @@ end
 Divide the tetrahedron `t` into eight tetrahedra by connecting the midpoints of the edges.
 """
 function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T}
-    a, b, c, d = t.points
+    a, b, c, d = t.vertices
     ab = (a + b) / 2
     ac = (a + c) / 2
     ad = (a + d) / 2
@@ -222,7 +222,7 @@ function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     refs = subdivide_reference_simplex(Val(D), T)
     f = map_from_reference(s)
     map(refs) do ref
-        Simplex(f.(ref.points))
+        Simplex(f.(ref.vertices))
     end
 end
 

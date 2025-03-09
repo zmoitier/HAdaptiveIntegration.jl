@@ -25,11 +25,11 @@ import HAdaptiveIntegration as hai
 
         r = hai.reference_simplex(4, Int)
         @test typeof(r) <: hai.Simplex{4,Int,5}
-        @test r.points[1] == SVector(0, 0, 0, 0)
-        @test r.points[2] == SVector(1, 0, 0, 0)
-        @test r.points[3] == SVector(0, 1, 0, 0)
-        @test r.points[4] == SVector(0, 0, 1, 0)
-        @test r.points[5] == SVector(0, 0, 0, 1)
+        @test r.vertices[1] == SVector(0, 0, 0, 0)
+        @test r.vertices[2] == SVector(1, 0, 0, 0)
+        @test r.vertices[3] == SVector(0, 1, 0, 0)
+        @test r.vertices[4] == SVector(0, 0, 1, 0)
+        @test r.vertices[5] == SVector(0, 0, 0, 1)
 
         @test typeof(hai.triangle((2, 0), (0, 2), (0, 0))) <: hai.Simplex{2,Int,3}
         @test typeof(hai.tetrahedron((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
