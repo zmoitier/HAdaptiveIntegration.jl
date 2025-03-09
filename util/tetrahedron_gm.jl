@@ -1,11 +1,11 @@
 using StaticArrays
 import Printf: Format, format
 
-import HAdaptiveIntegration as HAI
+import HAdaptiveIntegration as hai
 
 setprecision(40; base=10)
 
-ec = HAI.embedded_cubature(HAI.GrundmannMoeller(), 3, 7, BigFloat)
+ec = hai.embedded_cubature(hai.GrundmannMoeller(), 3, 7, BigFloat)
 n = 33
 
 fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\", \"%.$(n)e\"],")

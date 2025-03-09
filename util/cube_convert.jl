@@ -1,7 +1,7 @@
 using StaticArrays
 import Printf: Format, format
 
-import HAdaptiveIntegration as HAI
+import HAdaptiveIntegration as hai
 
 setprecision(20; base=10)
 
@@ -106,7 +106,7 @@ function deorbit(orbits)
     return (nodes=nodes, weights=weights)
 end
 
-cube = HAI.cuboid([big"-1.0", big"-1.0", big"-1.0"], [big"1.0", big"1.0", big"1.0"])
+cube = hai.cuboid([big"-1.0", big"-1.0", big"-1.0"], [big"1.0", big"1.0", big"1.0"])
 
 # https://epubs.siam.org/doi/10.1137/0725016
 
@@ -136,9 +136,8 @@ ruleB = (nodes=ruleN[:nodes], weights=ruleA[:weights] - ruleN[:weights])
 for (name, cbt, n) in [("BE_9_65", ruleA, 16), ("BE_7_65", ruleB, 16)]
     println(">> $name <<")
 
-    local Φ = HAI.map_to_reference(cube)
-    local j =
-        HAI.abs_det_jac(HAI.reference_domain(HAI.Cuboid{BigFloat})) / HAI.abs_det_jac(cube)
+    local Φ = hai.map_to_reference(cube)
+    local j = hai.abs_det_jac(hai.reference_orthotope(3, BigFloat)) / hai.abs_det_jac(cube)
 
     fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\", \"%.$(n)e\"],")
     for x in cbt[:nodes]

@@ -1,11 +1,11 @@
 using StaticArrays
 import Printf: Format, format
 
-import HAdaptiveIntegration as HAI
+import HAdaptiveIntegration as hai
 
 setprecision(30; base=10)
 
-square = HAI.rectangle([big"-1.0", big"-1.0"], [big"1.0", big"1.0"])
+square = hai.rectangle([big"-1.0", big"-1.0"], [big"1.0", big"1.0"])
 
 # https://link.springer.com/article/10.1007/BF01389339
 
@@ -139,10 +139,9 @@ g25 = (
 for (name, cbt, n) in [("CH21", ch21, 19), ("G25", g25, 19)]
     println(">> $name <<")
 
-    local Φ = HAI.map_to_reference(square)
+    local Φ = hai.map_to_reference(square)
     local j =
-        HAI.abs_det_jac(HAI.reference_domain(HAI.Rectangle{BigFloat})) /
-        HAI.abs_det_jac(square)
+        hai.abs_det_jac(hai.reference_orthotope(2, BigFloat)) / hai.abs_det_jac(square)
 
     fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\"],")
     for x in cbt[:nodes]

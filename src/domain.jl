@@ -1,7 +1,7 @@
 """
     abstract type Domain{D,T<:Real}
 
-Abstract type for integration domains in `D` dimensions with type `T`.
+Abstract type for integration domains in `D` dimensions with value type `T`.
 """
 abstract type Domain{D,T<:Real} end
 
@@ -29,6 +29,15 @@ function orthotope(low_corner, high_corner)
     D = length(low_corner)
     T = promote_type(eltype(low_corner), eltype(high_corner))
     return Orthotope(SVector{D,T}(low_corner), SVector{D,T}(high_corner))
+end
+
+"""
+    reference_orthotope(D::Int, T::DataType=Float64)
+
+Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with value type `T`.
+"""
+function reference_orthotope(D::Int, T::DataType=Float64)
+    return Orthotope(zeros(SVector{D,T}), ones(SVector{D,T}))
 end
 
 """
@@ -80,7 +89,7 @@ end
 """
     struct Simplex{D,T,N} <: Domain{D,T}
 
-A simplex in `D` dimensions with `N=D+1` points of element type `T`.
+A simplex in `D` dimensions with `N=D+1` points of value type `T`.
 """
 struct Simplex{D,T,N} <: Domain{D,T}
     points::SVector{N,SVector{D,T}}
@@ -102,6 +111,17 @@ function simplex(points...)
     @assert all(p -> length(p) == D, points)
 
     return Simplex(SVector{N}(SVector{D}.(points)))
+end
+
+"""
+    reference_simplex(D::Int, T::DataType=Float64)
+
+Return the reference `D`-dimensional simplex with value type `T`, which is the convex hull of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
+"""
+function reference_simplex(D::Int, T::DataType=Float64)
+    points = [zeros(SVector{D,T})]
+    append!(points, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
+    return Simplex(SVector{D + 1}(points))
 end
 
 """
@@ -142,6 +162,7 @@ Return the dimension `D` of `domain`.
 dimension(::Domain{D,T}) where {D,T} = D
 dimension(::Type{Orthotope{D,T}}) where {D,T} = D
 dimension(::Type{Simplex{D,T,N}}) where {D,T,N} = D
+dimension(::Type{Simplex{D,T}}) where {D,T} = D
 
 """
     value_type(::Domain{D,T}) where {D,T}
@@ -151,35 +172,7 @@ Return the type `T` of `domain`.
 value_type(::Domain{D,T}) where {D,T} = T
 value_type(::Type{Orthotope{D,T}}) where {D,T} = T
 value_type(::Type{Simplex{D,T,N}}) where {D,T,N} = T
-
-"""
-    reference_domain(domain_type::DataType)
-
-Return the reference domain for `domain_type <: Domain{D,T}`.
-- The reference `D`-simplex is the convex hull of the points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
-- The reference orthotope in `D` dimensions is `[0, 1]ᴰ`.
-"""
-function reference_domain(domain_type::DataType)
-    @assert (domain_type <: Domain) "only subtype of `Domain` are allowed."
-
-    D = dimension(domain_type)
-    @assert D ≥ 1 "D = $D must be greater than 1."
-
-    T = value_type(domain_type)
-
-    if domain_type <: Orthotope
-        return Orthotope(zeros(SVector{D,T}), ones(SVector{D,T}))
-    end
-
-    if domain_type <: Simplex
-        N = D + 1
-        points = [zeros(SVector{D,T})]
-        append!(points, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
-        return Simplex(SVector{N}(points))
-    end
-
-    throw("no reference domain implemented for $domain_type.")
-end
+value_type(::Type{Simplex{D,T}}) where {D,T} = T
 
 """
     map_from_reference(domain::Domain)
