@@ -34,7 +34,7 @@ end
 
 @testset "Integrate over a segment" begin
     # Test on Float64 precision
-    @test isnothing(hai.check_order(hai.SEGMENT_GK15, hai.Segment{Float64}))
+    @test hai.check_order(hai.SEGMENT_GK15, hai.Segment{Float64}) == 0
 
     ec = hai.embedded_cubature(hai.SEGMENT_GK15, Float64)
     segment = hai.segment(0.0, 1.0)
@@ -57,7 +57,7 @@ end
 end
 
 @testset "Integrate over a rectangle" begin
-    @test isnothing(hai.check_order(hai.SQUARE_CHG25, hai.Rectangle{Float64}))
+    @test hai.check_order(hai.SQUARE_CHG25, hai.Rectangle{Float64}) == 0
 
     ec = hai.embedded_cubature(hai.SQUARE_CHG25, Float64)
     square = hai.rectangle((0.0, 0.0), (1.0, 1.0))
@@ -77,7 +77,7 @@ end
 end
 
 @testset "Integrate over a triangle" begin
-    @test isnothing(hai.check_order(hai.TRIANGLE_RL19, hai.Triangle{Float64}))
+    @test hai.check_order(hai.TRIANGLE_RL19, hai.Triangle{Float64}) == 0
 
     ec = hai.embedded_cubature(hai.TRIANGLE_RL19, Float64)
 
@@ -98,7 +98,7 @@ end
 end
 
 @testset "Integrate over a Cuboid" begin
-    @test isnothing(hai.check_order(hai.CUBE_BE65, hai.Cuboid{Float64}))
+    @test hai.check_order(hai.CUBE_BE65, hai.Cuboid{Float64}) == 0
 
     ec = hai.embedded_cubature(hai.CUBE_BE65, Float64)
     cube = hai.cuboid((0.0, 0.0, 0.0), (1.0, 1.0, 1.0))
@@ -122,7 +122,7 @@ end
 
 @testset "GrundmannMoeller quadrature" begin
     @testset "Triangle" begin
-        @test isnothing(hai.check_order(hai.TRIANGLE_GM20, hai.Triangle{Float64}))
+        @test hai.check_order(hai.TRIANGLE_GM20, hai.Triangle{Float64}) == 0
 
         ec = hai.embedded_cubature(hai.TRIANGLE_GM20, Float64)
 
@@ -149,11 +149,9 @@ end
     end
 
     @testset "Tetrahedron" begin
-        @test isnothing(
-            hai.check_order(
-                hai.TETRAHEDRON_GM35, hai.Tetrahedron{Float64}; rtol=12 * eps(Float64)
-            ),
-        )
+        @test hai.check_order(
+            hai.TETRAHEDRON_GM35, hai.Tetrahedron{Float64}; rtol=12 * eps(Float64)
+        ) == 0
 
         ec = hai.embedded_cubature(hai.TETRAHEDRON_GM35, Float64)
 
@@ -183,10 +181,8 @@ end
     @testset "4-Simplex" begin
         degree = 7 # must be odd
         ec = hai.embedded_cubature(hai.GrundmannMoeller(4, degree), Float64)
-        @test isnothing(
-            hai.check_order(
-                ec, degree, degree - 2, hai.Simplex{4,Float64,5}; rtol=50 * eps(Float64)
-            ),
-        )
+        @test hai.check_order(
+            ec, degree, degree - 2, hai.Simplex{4,Float64,5}; rtol=50 * eps(Float64)
+        ) == 0
     end
 end
