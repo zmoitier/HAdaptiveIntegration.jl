@@ -1,7 +1,7 @@
 using StaticArrays
 import Printf: Format, format
 
-import HAdaptiveIntegration as HAI
+import HAdaptiveIntegration as hai
 
 setprecision(30; base=10)
 

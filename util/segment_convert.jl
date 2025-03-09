@@ -1,11 +1,11 @@
 using StaticArrays
 import Printf: Format, format
 
-import HAdaptiveIntegration as HAI
+import HAdaptiveIntegration as hai
 
 setprecision(40; base=10)
 
-segment = HAI.segment(big"-1.0", big"1.0")
+segment = hai.segment(big"-1.0", big"1.0")
 
 # https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/
 
@@ -180,10 +180,9 @@ k31 = (
 for (name, cbt, n) in [("G7", g7, 34), ("K15", k15, 34), ("G15", g15, 33), ("K31", k31, 33)]
     println(">> $name <<")
 
-    local Φ = HAI.map_to_reference(segment)
+    local Φ = hai.map_to_reference(segment)
     local j =
-        HAI.abs_det_jac(HAI.reference_domain(HAI.Segment{BigFloat})) /
-        HAI.abs_det_jac(segment)
+        hai.abs_det_jac(hai.reference_orthotope(1, BigFloat)) / hai.abs_det_jac(segment)
 
     fmt_node = Format("[\"%.$(n)e\"],")
     for x in cbt[:nodes]

@@ -4,7 +4,7 @@ function check_order(
     atol::Union{Real,Nothing}=nothing,
     rtol::Union{Real,Nothing}=nothing,
 )
-    T = value_type(reference_domain(domain_type))
+    T = value_type(domain_type)
     check_order(
         embedded_cubature(tec, T),
         tec.order_high,
