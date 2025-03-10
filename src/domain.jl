@@ -1,7 +1,7 @@
 """
     abstract type Domain{D,T<:Real}
 
-Abstract type for integration domains in `D` dimensions with value type `T`.
+Abstract type for integration on domains in `D` dimensions with value type `T`.
 """
 abstract type Domain{D,T<:Real} end
 
@@ -167,38 +167,10 @@ function tetrahedron(a, b, c, d)
 end
 
 """
-    dimension(::Type{Domain{D,T}}) where {D,T}
-    dimension(::Type{Orthotope{D,T}}) where {D,T}
-    dimension(::Type{Simplex{D,T}}) where {D,T}
-
-Return the dimension `D` of `domain`.
-"""
-dimension(::Type{Domain{D,T}}) where {D,T} = D
-dimension(::Type{Orthotope{D,T}}) where {D,T} = D
-dimension(::Type{Simplex{D,T,N}}) where {D,T,N} = D
-dimension(::Type{Simplex{D,T}}) where {D,T} = D
-
-"""
-    value_type(::Type{Domain{D,T}}) where {D,T}
-    value_type(::Type{Orthotope{D,T}}) where {D,T}
-    value_type(::Type{Simplex{D,T}}) where {D,T}
-
-Return the type `T` of `domain`.
-"""
-value_type(::Type{Domain{D,T}}) where {D,T} = T
-value_type(::Type{Orthotope{D,T}}) where {D,T} = T
-value_type(::Type{Simplex{D,T,N}}) where {D,T,N} = T
-value_type(::Type{Simplex{D,T}}) where {D,T} = T
-
-"""
     map_from_reference(domain::Domain)
 
 Return an anonymous function that maps the reference domain to the physical domain `domain`.
 """
-function map_from_reference(domain::Domain)
-    throw("`map_from_reference` is not implemented for type $(typeof(domain)).")
-end
-
 function map_from_reference(h::Orthotope{D,T}) where {D,T}
     return u -> h.low_corner + u .* (h.high_corner - h.low_corner)
 end
@@ -218,10 +190,6 @@ end
 
 Return an anonymous function that maps the physical domain `domain` to the reference domain.
 """
-function map_to_reference(domain::Domain)
-    throw("`map_to_reference` is not implemented for type $(typeof(domain)).")
-end
-
 function map_to_reference(h::Orthotope{D,T}) where {D,T}
     return u -> (u - h.low_corner) ./ (h.high_corner - h.low_corner)
 end
@@ -238,10 +206,6 @@ end
 Return the absolute value of the Jacobian's determinant of the map from the reference domain
 to the physical domain `domain`.
 """
-function abs_det_jac(domain::Domain)
-    throw("`map_from_reference` is not implemented for $(typeof(domain)).")
-end
-
 function abs_det_jac(h::Orthotope{D,T}) where {D,T}
     return prod(h.high_corner - h.low_corner)
 end

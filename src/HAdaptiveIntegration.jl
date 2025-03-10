@@ -26,19 +26,16 @@ include("rule_simplex.jl")
 
 Return a default embedded cubature for the domains:
 - dimension 1:
-    - `Segment`: `SEGMENT_GK15`
+    - [`segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
-    - `Rectangle`: `SQUARE_CHG25`
-    - `Triangle`: `TRIANGLE_RL19`
+    - [`rectangle`](@ref): [`SQUARE_CHG25`](@ref)
+    - [`triangle`](@ref): [`TRIANGLE_RL19`](@ref)
 - dimension 3:
-    - `Cuboid`: `CUBE_BE65`
-    - `Tetrahedron`: `TETRAHEDRON_GM35`
+    - [`cuboid`](@ref): [`CUBE_BE65`](@ref)
+    - [`tetrahedron`](@ref): [`TETRAHEDRON_GM35`](@ref)
 - dimension `d`:
-    - `simplex`: `GrundmannMoeller(d, 7)`
+    - [`simplex`](@ref): `[GrundmannMoeller](@ref)(d, 7)`
 """
-function default_embedded_cubature(domain::Domain)
-    @error "no default embedded cubature for $(typeof(domain))."
-end
 @generated function default_embedded_cubature(::Segment{T}) where {T}
     ec = embedded_cubature(SEGMENT_GK15, T)
     return :($ec)

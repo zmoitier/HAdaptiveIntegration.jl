@@ -173,8 +173,8 @@ generated for each combination of `D` and `T`.
         valid_perms = []
         # Generate all combinations of k positions from 1:n
         for positions in combinations(n, k)
-            # Create a permutation where the first k elements (1:k) are placed
-            # at the selected positions in order, and the rest (k+1:n) follow.
+            # Create a permutation where the first k elements (1:k) are placed at the
+            # selected positions in order, and the rest (k+1:n) follow.
             perm = zeros(Int, n)
             selected_pos = sort(positions)
             remaining_pos = setdiff(1:n, selected_pos)
@@ -239,19 +239,16 @@ end
 
 Return the default algorithm to subdivide `domain`.
 - dimension 1:
-    - `Segment`: `subdivide_segment2`
+    - [`segment`](@ref): [`subdivide_segment2`](@ref)
 - dimension 2:
-    - `Rectangle`: `subdivide_rectangle4`
-    - `Triangle`: `subdivide_triangle4`
+    - [`rectangle`](@ref): [`subdivide_rectangle4`](@ref)
+    - [`triangle`](@ref): [`subdivide_triangle4`](@ref)
 - dimension 3:
-    - `Cuboid`: `subdivide_cuboid8`
-    - `Tetrahedron`: `subdivide_tetrahedron8`
+    - [`cuboid`](@ref): [`subdivide_cuboid8`](@ref)
+    - [`tetrahedron`](@ref): [`subdivide_tetrahedron8`](@ref)
 - dimension `d`:
-    - `simplex`: `subdivide_simplex`
+    - [`simplex`](@ref): [`subdivide_simplex`](@ref)
 """
-function default_subdivision(d::Domain)
-    @error "no default subdivision for $(typeof(d))."
-end
 default_subdivision(::Segment) = subdivide_segment2
 default_subdivision(::Rectangle) = subdivide_rectangle4
 default_subdivision(::Triangle) = subdivide_triangle4
