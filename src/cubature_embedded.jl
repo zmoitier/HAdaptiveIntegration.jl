@@ -1,15 +1,19 @@
 """
     struct TabulatedEmbeddedCubature
 
-An embedded cubature rule consisting of a high order cubature rule and a low order cubature rule.
-Note that the low order cubature uses `nodes[1:L]` as its nodes where `L` is the length of the `weights_low`.
-The cubature nodes and weights are assume to be for the reference domain.
+An embedded cubature rule consisting of a high order cubature rule and a low order cubature
+rule. Note that the low order cubature uses `nodes[1:L]` as its nodes where `L` is the
+length of the `weights_low`. The cubature nodes and weights are assume to be for the
+reference domain.
 
 ## Fields:
-- `name::String`: name of the embedded cubature.
-- `domain::String`: domain of the cubature, the possible values are "reference segment", "reference rectangle", "reference cuboid", "reference triangle", and "reference tetrahedron".
+- `description::String`: description of the embedded cubature.
+- `domain::String`: domain of the cubature, the possible values are "reference segment",
+  "reference rectangle", "reference cuboid", "reference triangle", and "reference
+  tetrahedron".
 - `reference::String`: where the values are found.
-- `nb_significant_digits::Int`: number of significant digits on the node and weight values, `10^-nb_significant_digits` give the relative precision of the values.
+- `nb_significant_digits::Int`: number of significant digits on the node and weight values,
+  `10^-nb_significant_digits` give the relative precision of the values.
 - `nodes::Vector{Vector{String}}`: the cubature nodes.
 - `weights_high::Vector{String}`: the cubature weights for the high order cubature.
 - `order_high::Int`: order of the high order cubature.
@@ -17,7 +21,7 @@ The cubature nodes and weights are assume to be for the reference domain.
 - `order_low::Int`: order of the low order cubature.
 """
 @kwdef struct TabulatedEmbeddedCubature
-    name::String
+    description::String
     domain::String
     reference::String
     nb_significant_digits::Int
@@ -31,9 +35,9 @@ end
 """
     struct EmbeddedCubature{H,L,D,T}
 
-An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low order cubature rule with `L` nodes.
-Note that the low order cubature uses `nodes[1:L]` as its nodes.
-The cubature nodes and weights are assume to be for the reference domain.
+An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low
+order cubature rule with `L` nodes. Note that the low order cubature uses `nodes[1:L]` as
+its nodes. The cubature nodes and weights are assume to be for the reference domain.
 
 ## Fields:
 - `nodes::SVector{H,SVector{D,T}}`: the cubature nodes.
@@ -51,7 +55,8 @@ end
         nodes::Vector{VT}, weights_high::VT, weights_low::VT
     ) where {VT<:AbstractVector{<:Real}}
 
-Return an embedded cubature form a vector of nodes and two vector of weights for the high order and low order cubature.
+Return an embedded cubature form a vector of nodes and two vector of weights for the high
+order and low order cubature.
 """
 function embedded_cubature(
     nodes::Vector{VT}, weights_high::VT, weights_low::VT
@@ -59,10 +64,12 @@ function embedded_cubature(
     @assert allequal(length, nodes) "all nodes should have the same length."
     D = length(first(nodes))
 
-    @assert length(nodes) == length(weights_high) "nodes and weights_high should have the same length."
+    @assert length(nodes) == length(weights_high) "nodes and weights_high should have the
+    same length."
     H = length(weights_high)
 
-    @assert length(weights_high) ≥ length(weights_low) "weights_high length should be greater than weights_low length."
+    @assert length(weights_high) ≥ length(weights_low) "weights_high length should be
+    greater than weights_low length."
     L = length(weights_low)
 
     return EmbeddedCubature(
@@ -77,7 +84,7 @@ Return the embedded cubature with value type `T` from a `TabulatedEmbeddedCubatu
 """
 function embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
     if 10 * eps(T) < 10.0^(-tec.nb_significant_digits)
-        @warn "the embedded cubature `$(tec.name)` has less precision than type $T."
+        @warn "the embedded cubature `$(tec.description)` has less precision than type $T."
     end
 
     return embedded_cubature(
@@ -125,9 +132,11 @@ end
         fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
     ) where {H,L,D,T}
 
-Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the high order cubature and the low order cubature on `domain`.
-The function `fct` must take a `SVector{D,T}` to a return type `K`, and `K` must support the multiplication by a scalar and the addition.
-Note that there is no check, beyond compatibility of dimension and type, that the embedded cubature is for the right domain.
+Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the
+high order cubature and the low order cubature on `domain`. The function `fct` must take a
+`SVector{D,T}` to a return type `K`, and `K` must support the multiplication by a scalar and
+the addition. Note that there is no check, beyond compatibility of dimension and type, that
+the embedded cubature is for the right domain.
 """
 function (ec::EmbeddedCubature{H,L,D,T})(
     fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)

@@ -6,7 +6,8 @@
         rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
     ) where {D,T}
 
-Return 0 if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the volume of the domain else return 1.
+Return 0 if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the
+volume of the domain else return 1.
 """
 function check_subdivision(
     subdiv_algo,
@@ -38,7 +39,8 @@ end
 """
     subdivide_rectangle4(r::Rectangle)
 
-Divide the rectangle `r` into four squares by connecting the center of the square to the midpoints of the edges.
+Divide the rectangle `r` into four squares by connecting the center of the square to the
+midpoints of the edges.
 """
 function subdivide_rectangle4(r::Rectangle{T}) where {T}
     a, b = r.low_corner, r.high_corner
@@ -54,7 +56,8 @@ end
 """
     subdivide_cuboid8(c::Cuboid)
 
-Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints of the edges.
+Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints
+of the edges.
 """
 function subdivide_cuboid8(c::Cuboid{T}) where {T}
     a, b = c.low_corner, c.high_corner
@@ -74,7 +77,8 @@ end
 """
     subdivide_triangle2(s::Triangle)
 
-Divide the triangle `t` into two triangles by connecting the first point of `t` to the midpoints of the two other points.
+Divide the triangle `t` into two triangles by connecting the first point of `t` to the
+midpoints of the two other points.
 """
 function subdivide_triangle2(t::Triangle{T}) where {T}
     a, b, c = t.vertices
@@ -130,7 +134,8 @@ end
 """
     combinations(n::Int, k::Int)
 
-Helper function to generate all combinations of `k` elements from `1:n`, similar to calling `combinations(1:n, k)` from `Combinatorics.jl`.
+Helper function to generate all combinations of `k` elements from `1:n`, similar to calling
+`combinations(1:n, k)` from `Combinatorics.jl`.
 """
 function combinations(n::Int, k::Int)
     function combinations_helper(start::Int, end_::Int, k_::Int)
@@ -154,8 +159,9 @@ end
 """
     subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
 
-Like `subdivide_simplex`, but operates on the reference simplex.
-Since the output depends only on the dimension `D`, and the type `T` used to represent coordinates, this function is generated for each combination of `D` and `T`.
+Like `subdivide_simplex`, but operates on the reference simplex. Since the output depends
+only on the dimension `D`, and the type `T` used to represent coordinates, this function is
+generated for each combination of `D` and `T`.
 """
 @generated function subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
     # vertices of the reference simplex
@@ -216,7 +222,9 @@ end
 
 Subdivide a `D`-simplex into `2ᴰ` simplices by using the Freudenthal triangulation.
 
-Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Freudenthal's algorithm and the optimal number of congruence classes](https://link.springer.com/article/10.1007/s002110050475).
+Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Freudenthal's
+algorithm and the optimal number of congruence
+classes](https://link.springer.com/article/10.1007/s002110050475).
 """
 function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     refs = subdivide_reference_simplex(Val(D), T)

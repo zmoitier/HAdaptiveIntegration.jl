@@ -1,5 +1,8 @@
+"""
+Gauss-Kronrod with 15 nodes.
+"""
 const SEGMENT_GK15 = TabulatedEmbeddedCubature(;
-    name="Gauss-Kronrod (SEGMENT_GK15)",
+    description="Gauss-Kronrod with 15 nodes",
     domain="reference segment",
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=34,
@@ -50,8 +53,11 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature(;
     order_low=13,
 )
 
+"""
+Gauss-Kronrod with 31 nodes.
+"""
 const SEGMENT_GK31 = TabulatedEmbeddedCubature(;
-    name="Gauss-Kronrod (SEGMENT_GK31)",
+    description="Gauss-Kronrod with 31 nodes",
     domain="reference segment",
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=33,
@@ -142,8 +148,11 @@ const SEGMENT_GK31 = TabulatedEmbeddedCubature(;
     order_low=29,
 )
 
+"""
+Cools and Haegemans with 25 nodes.
+"""
 const SQUARE_CHG25 = TabulatedEmbeddedCubature(;
-    name="Cools and Haegemans (SQUARE_CHG25)",
+    description="Cools and Haegemans with 25 nodes",
     domain="reference rectangle",
     reference="https://link.springer.com/article/10.1007/BF01389339",
     nb_significant_digits=19,
@@ -228,8 +237,11 @@ const SQUARE_CHG25 = TabulatedEmbeddedCubature(;
     order_low=7,
 )
 
+"""
+Berntsen and Espelid with 65 nodes.
+"""
 const CUBE_BE65 = TabulatedEmbeddedCubature(;
-    name="Berntsen and Espelid (CUBE_BE65)",
+    description="Berntsen and Espelid with 65 nodes",
     domain="reference cuboid",
     reference="https://epubs.siam.org/doi/10.1137/0725016",
     nb_significant_digits=15,

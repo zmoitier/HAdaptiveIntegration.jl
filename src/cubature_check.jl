@@ -6,8 +6,9 @@
         rtol::Union{Real,Nothing}=nothing,
     )
 
-Return 0 if the tabulated embedded cubature on `domain_type` integrate exactly (within tolerance) the monomials up to degree `order_high` for the high oder cubature and `order_low` for the low order cubature.
-Else return 1.
+Return 0 if the tabulated embedded cubature on `domain_type` integrate exactly (within
+tolerance) the monomials up to degree `order_high` for the high oder cubature and
+`order_low` for the low order cubature. Else return 1.
 """
 function check_order(
     tec::TabulatedEmbeddedCubature,
@@ -36,8 +37,9 @@ end
         rtol::Union{Real,Nothing}=nothing,
     ) where {H,L,D,T<:Real}
 
-Return 0 if the embedded cubature on `domain_type` integrate exactly (within tolerance) the monomials up to degree `order_high` for the high oder cubature and `order_low` for the low order cubature.
-Else return 1.
+Return 0 if the embedded cubature on `domain_type` integrate exactly (within tolerance) the
+monomials up to degree `order_high` for the high oder cubature and `order_low` for the low
+order cubature. Else return 1.
 """
 function check_order(
     ec::EmbeddedCubature{H,L,D,T},
@@ -133,10 +135,11 @@ end
 """
     integral_monomial_orthotope(dim::Int, tot_deg_max::Int)
 
-Return the values of monomial's integral over the reference orthotope.
-It return a `Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`.
-The outer vector is index by the `total degree + 1`, for the total degree form 0 to `tot_deg_max`.
-The inner vector contain `Pair{ Ntuple{dim,Int}, Rational{Int} }` where the `Ntuple{D,Int}` is the multi-index of the monomial and `Rational{Int}` is the value of the integral. 
+Return the values of monomial's integral over the reference orthotope. It return a
+`Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`. The outer vector is index by
+the `total degree + 1`, for the total degree form 0 to `tot_deg_max`. The inner vector
+contain `Pair{ Ntuple{dim,Int}, Rational{Int} }` where the `Ntuple{D,Int}` is the
+multi-index of the monomial and `Rational{Int}` is the value of the integral. 
 """
 function integral_monomial_orthotope(dim::Int, tot_deg_max::Int)
     if dim ≤ 0
@@ -167,10 +170,11 @@ end
 """
     integral_monomial_simplex(dim::Int, tot_deg_max::Int)
 
-Return the values of monomial's integral over the reference simplex.
-It return a `Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`.
-The outer vector is index by the `total degree + 1`, for the total degree form 0 to `tot_deg_max`.
-The inner vector contain `Pair{ Ntuple{dim,Int}, Rational{Int} }` where the `Ntuple{D,Int}` is the multi-index of the monomial and `Rational{Int}` is the value of the integral.
+Return the values of monomial's integral over the reference simplex. It return a
+`Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`. The outer vector is index by
+the `total degree + 1`, for the total degree form 0 to `tot_deg_max`. The inner vector
+contain `Pair{ Ntuple{dim,Int}, Rational{Int} }` where the `Ntuple{D,Int}` is the
+multi-index of the monomial and `Rational{Int}` is the value of the integral.
 """
 function integral_monomial_simplex(dim::Int, tot_deg_max::Int)
     if dim ≤ 0
