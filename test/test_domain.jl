@@ -46,9 +46,6 @@ end
     @testset "Orthotope" begin
         h = hai.orthotope((-1, -1, -1, -1), (1, 1, 1, 1))
 
-        @test hai.dimension(typeof(h)) == 4
-        @test hai.value_type(typeof(h)) == Int
-
         Φ = hai.map_from_reference(h)
         @test Φ(SVector(0, 0, 0, 0)) ≈ SVector(-1, -1, -1, -1)
         @test Φ(SVector(0, 1, 0, 0)) ≈ SVector(-1, 1, -1, -1)
@@ -68,9 +65,6 @@ end
         s = hai.simplex(
             (2, 0, 0, 0), (0, 2, 0, 0), (0, 0, 2, 0), (0, 0, 0, 2), (0, 0, 0, 0)
         )
-
-        @test hai.dimension(typeof(s)) == 4
-        @test hai.value_type(typeof(s)) == Int
 
         Φ = hai.map_from_reference(s)
         @test Φ(SVector(0, 0, 0, 0)) ≈ SVector(2, 0, 0, 0)

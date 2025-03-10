@@ -77,6 +77,10 @@ function embedded_cubature(
     )
 end
 
+macro Name(arg)
+    return string(arg)
+end
+
 """
     embedded_cubature(tec::TabulatedEmbeddedCubature, T::DataType=Float64)
 

@@ -2,7 +2,7 @@
 Gauss-Kronrod with 15 nodes.
 """
 const SEGMENT_GK15 = TabulatedEmbeddedCubature(;
-    description="Gauss-Kronrod with 15 nodes",
+    description="Gauss-Kronrod with 15 nodes (SEGMENT_GK15)",
     domain="reference segment",
     reference="https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/",
     nb_significant_digits=34,
