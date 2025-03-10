@@ -125,7 +125,7 @@ Return the values of monomial's integral over the **reference** domain. It retur
 `Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`. The outer vector is index by
 the `total degree + 1`, for the total degree form 0 to `tot_deg_max`. The inner vector
 contain `Pair{ Ntuple{dim,Int}, Rational{Int} }` where the `Ntuple{D,Int}` is the
-multi-index of the monomial and `Rational{Int}` is the value of the integral. 
+multi-index of the monomial and `Rational{Int}` is the value of the integral.
 """
 function integral_monomial(::Orthotope{D,T}, total_degree_max::Int) where {D,T}
     return integral_monomial_orthotope(D, total_degree_max)
