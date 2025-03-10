@@ -23,8 +23,8 @@ end
 """
     orthotope(low_corner, high_corner)
 
-Return an axes-aligned orthotope in `D` dimensions given by two points `low_corner` and `high_corner`.
-Note that, we must have `low_corner .≤ high_corner`.
+Return an axes-aligned orthotope in `D` dimensions given by two points `low_corner` and
+`high_corner`. Note that, we must have `low_corner .≤ high_corner`.
 """
 function orthotope(low_corner, high_corner)
     @assert (length(low_corner) == length(high_corner))
@@ -52,7 +52,8 @@ const Segment{T} = Orthotope{1,T}
 """
     segment(xmin, xmax)
 
-Return a segment in 1 dimensions representing the interval `[xmin, xmax]` with `xmin ≤ xmax`.
+Return a segment in 1 dimensions representing the interval `[xmin, xmax]` with
+`xmin ≤ xmax`.
 """
 function segment(xmin::T, xmax::T) where {T<:Real}
     return orthotope(SVector(xmin), SVector(xmax))
@@ -66,11 +67,12 @@ const Rectangle{T} = Orthotope{2,T}
 """
     rectangle(low_corner, high_corner)
 
-Return an axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`.
-Note that, we must have `low_corner .≤ high_corner`.
+Return an axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`. Note
+that, we must have `low_corner .≤ high_corner`.
 """
 function rectangle(low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 2 "`low_corner` and `high_corner` must be 2d-vector."
+    @assert length(low_corner) == length(high_corner) == 2 "`low_corner` and `high_corner`
+    must be 2d-vector."
     return orthotope(SVector{2}(low_corner), SVector{2}(high_corner))
 end
 
@@ -86,7 +88,8 @@ Return an axes-aligned cuboid given by two 3d-points `low_corner` and `high_corn
 Note that, we must have `low_corner .≤ high_corner`.
 """
 function cuboid(low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 3 "`low_corner` and `high_corner` must be 3d-vector."
+    @assert length(low_corner) == length(high_corner) == 3 "`low_corner` and `high_corner`
+    must be 3d-vector."
     return orthotope(SVector{3}(low_corner), SVector{3}(high_corner))
 end
 
@@ -123,7 +126,8 @@ end
 """
     reference_simplex(D::Int, T::DataType=Float64)
 
-Return the reference `D`-dimensional simplex with value type `T`, which is the convex hull of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
+Return the reference `D`-dimensional simplex with value type `T`, which is the convex hull
+of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
 """
 function reference_simplex(D::Int, T::DataType=Float64)
     points = [zeros(SVector{D,T})]
@@ -157,26 +161,31 @@ const Tetrahedron{T} = Simplex{3,T,4}
 Return a tetrahedron in 3 dimensions given by four 3d-points `a`, `b`, `c`, and `d`.
 """
 function tetrahedron(a, b, c, d)
-    @assert length(a) == length(b) == length(c) == length(d) == 3 "`a`, `b`, `c`, and `d` must be 3d-vector."
+    @assert length(a) == length(b) == length(c) == length(d) == 3 "`a`, `b`, `c`, and `d`
+    must be 3d-vector."
     return simplex(a, b, c, d)
 end
 
 """
-    dimension(::Domain{D,T}) where {D,T}
+    dimension(::Type{Domain{D,T}}) where {D,T}
+    dimension(::Type{Orthotope{D,T}}) where {D,T}
+    dimension(::Type{Simplex{D,T}}) where {D,T}
 
 Return the dimension `D` of `domain`.
 """
-dimension(::Domain{D,T}) where {D,T} = D
+dimension(::Type{Domain{D,T}}) where {D,T} = D
 dimension(::Type{Orthotope{D,T}}) where {D,T} = D
 dimension(::Type{Simplex{D,T,N}}) where {D,T,N} = D
 dimension(::Type{Simplex{D,T}}) where {D,T} = D
 
 """
-    value_type(::Domain{D,T}) where {D,T}
+    value_type(::Type{Domain{D,T}}) where {D,T}
+    value_type(::Type{Orthotope{D,T}}) where {D,T}
+    value_type(::Type{Simplex{D,T}}) where {D,T}
 
 Return the type `T` of `domain`.
 """
-value_type(::Domain{D,T}) where {D,T} = T
+value_type(::Type{Domain{D,T}}) where {D,T} = T
 value_type(::Type{Orthotope{D,T}}) where {D,T} = T
 value_type(::Type{Simplex{D,T,N}}) where {D,T,N} = T
 value_type(::Type{Simplex{D,T}}) where {D,T} = T
@@ -226,7 +235,8 @@ end
 """
     abs_det_jac(domain::Domain)
 
-Return the absolute value of the Jacobian's determinant of the map from the reference domain to the physical domain `domain`.
+Return the absolute value of the Jacobian's determinant of the map from the reference domain
+to the physical domain `domain`.
 """
 function abs_det_jac(domain::Domain)
     throw("`map_from_reference` is not implemented for $(typeof(domain)).")

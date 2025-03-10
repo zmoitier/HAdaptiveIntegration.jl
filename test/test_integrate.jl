@@ -3,7 +3,7 @@ import HAdaptiveIntegration as hai
 
 @testset "Embedded cubature" begin
     tec = hai.TabulatedEmbeddedCubature(;
-        name="Gauss (SEGMENT_G3)",
+        description="Gauss (SEGMENT_G3)",
         domain="reference segment",
         reference="",
         nb_significant_digits=16,
