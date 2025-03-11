@@ -16,7 +16,7 @@ I = \int_{\Omega} f(x) \, dx
 
 where $f$ is any Julia function and $\Omega$ represents domains such as simplices and cuboids. The package employs an adaptive approach, dynamically refining the integration domain as needed. It uses embedded quadrature rules to provide error estimates, aiming to achieve high accuracy while minimizing function evaluations.
 
-## Features
+Features include:
 
 - Adaptive integration over **simplices of any dimension**
 - Utilization of **efficient tabulated cubatures** for low-dimensional cuboids and simplices
@@ -24,6 +24,9 @@ where $f$ is any Julia function and $\Omega$ represents domains such as simplice
 - Arbitrary precision arithmetic
 
 ## Quick Example
+
+Here is a simple example of how to use `HAdaptiveIntegration` to compute an integral over a
+triangle:
 
 ```julia
 using HAdaptiveIntegration
