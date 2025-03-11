@@ -233,25 +233,3 @@ function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
         Simplex(f.(ref.vertices))
     end
 end
-
-"""
-    default_subdivision(domain::Domain)
-
-Return the default algorithm to subdivide `domain`.
-- dimension 1:
-    - [`segment`](@ref): [`subdivide_segment2`](@ref)
-- dimension 2:
-    - [`rectangle`](@ref): [`subdivide_rectangle4`](@ref)
-    - [`triangle`](@ref): [`subdivide_triangle4`](@ref)
-- dimension 3:
-    - [`cuboid`](@ref): [`subdivide_cuboid8`](@ref)
-    - [`tetrahedron`](@ref): [`subdivide_tetrahedron8`](@ref)
-- dimension `d`:
-    - [`simplex`](@ref): [`subdivide_simplex`](@ref)
-"""
-default_subdivision(::Segment) = subdivide_segment2
-default_subdivision(::Rectangle) = subdivide_rectangle4
-default_subdivision(::Triangle) = subdivide_triangle4
-default_subdivision(::Cuboid) = subdivide_cuboid8
-default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
-default_subdivision(::Simplex) = subdivide_simplex
