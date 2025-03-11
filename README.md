@@ -8,38 +8,49 @@
 [![Coverage](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl)
 [![BestieTemplate](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/JuliaBesties/BestieTemplate.jl/main/docs/src/assets/badge.json)](https://github.com/JuliaBesties/BestieTemplate.jl)
 
-* list of schemes:
-  * <https://github.com/sigma-py/quadpy>
-  * <https://github.com/zfergus/legacy-quadpy>
+`HAdaptiveIntegration` is a Julia package designed for numerical integration over multi-dimensional domains. It computes integrals of the form
 
-* Possibly relevant Julia packages:
-  * <https://github.com/JuliaMath/Cubature.jl>
-  * <https://github.com/JuliaMath/HCubature.jl>
-  * <https://github.com/JuliaMath/QuadGK.jl>
+```math
+I = \int_{\Omega} f(x) \, dx
+```
 
-  * <https://github.com/SciML/Integrals.jl>
+where $f$ is any Julia function and $\Omega$ represents domains such as simplices and cuboids. The package employs an adaptive approach, dynamically refining the integration domain as needed. It uses embedded quadrature rules to provide error estimates, aiming to achieve high accuracy while minimizing function evaluations.
 
-  * <https://github.com/stevengj/cubature>
-  * <https://github.com/eschnett/GrundmannMoeller.jl>
-  * <https://github.com/eschnett/SimplexQuad.jl>
+## Features
 
-## To-Do
+- Adaptive integration over **simplices of any dimension**
+- Utilization of **efficient tabulated cubatures** for low-dimensional cuboids and simplices
+- Support for custom cubature rules
+- Arbitrary precision arithmetic
 
-1. Make it work!
-2. Make it right!
-3. Make it fast!
+## Quick Example
 
-* 2-simplex (a.k.a. triangle):
-  * try log singularity and nearly singular
+```julia
+using HAdaptiveIntegration
 
-* 3-simplex (a.k.a. tetrahedron):
-  * try to do something
+# Define a triangle domain and function to integrate
+tri = triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 
-* n-simplex:
-  * hope for the best
+# Compute the integral and error estimate over the triangle
+I, E = integrate(f, tri)
+```
 
-## Remark
+The result `I` is the integral value, and `E` the error estimate.
 
-* If you show the measure of the simplex in the integrate function, they seem to be way smaller than the `rtol`. Might need to add a test on the size which could speed up the computation.
+There are many options available for the `integrate` function, as well as other supported
+integration domains. For more information, see the [stable
+documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable/) or the [latest
+development documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev/).
 
 ## Related packages
+
+`HAdaptiveIntegration` draws inspiration from the
+[`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) package, which offers a similar
+approach for integrating over hyperrectangles in any dimension. The key differences are:
+
+- `HAdaptiveIntegration` supports integration over simplices of any dimension, whereas
+  `HCubature` is focused on hyperrectangles.
+- For low-dimensional domains such as squares, cubes, and triangles, `HAdaptiveIntegration`
+  employs tabulated cubatures for enhanced efficiency. This allows it to achieve precision
+  comparable to `HCubature` with fewer function evaluations for these domains.
