@@ -1,4 +1,4 @@
-using Test, StaticArrays, LinearAlgebra
+using Test, StaticArrays, LinearAlgebra, DataStructures
 import HAdaptiveIntegration as hai
 
 @testset "Embedded cubature" begin
@@ -32,8 +32,35 @@ import HAdaptiveIntegration as hai
     @test typeof(hai.embedded_cubature(hai.GrundmannMoeller(2, 5))) <: hai.EmbeddedCubature
 end
 
+@testset "Default embedded cubature" begin
+    for domain in (
+        hai.reference_orthotope(1),
+        hai.reference_orthotope(2),
+        hai.reference_orthotope(3),
+        hai.reference_simplex(2),
+        hai.reference_simplex(3),
+        hai.reference_simplex(4),
+    )
+        @test typeof(hai.default_embedded_cubature(domain)) <: hai.EmbeddedCubature
+    end
+end
+
+@testset "Integrate" begin
+    domain = hai.reference_orthotope(1)
+
+    buffer = hai.allocate_buffer(x -> sum(x), domain)
+    @test typeof(buffer) <: BinaryHeap
+
+    I, E = hai.integrate(x -> sin(10 * x[1]), domain; buffer=buffer)
+    R = sin(5)^2 / 5
+    @test abs(I - R) ≤ E * abs(R)
+
+    I, E = hai.integrate(x -> cos(7.5 * x[1]), domain; buffer=buffer)
+    R = 2 * sin(7.5) / 15
+    @test abs(I - R) ≤ E * abs(R)
+end
+
 @testset "Integrate over a segment" begin
-    # Test on Float64 precision
     @test hai.check_order(hai.SEGMENT_GK15, hai.reference_orthotope(1)) == 0
 
     ec = hai.embedded_cubature(hai.SEGMENT_GK15, Float64)
@@ -51,7 +78,7 @@ end
     R = 2
     @test abs(I - R) ≤ E * abs(R)
 
-    I, E = hai.integrate(x -> 1 / √x[1], segment; embedded_cubature=ec)
+    I, E = hai.integrate(x -> 1 / √x[1], segment)
     R = 2
     @test abs(I - R) ≤ E * abs(R)
 end
@@ -62,7 +89,6 @@ end
     ec = hai.embedded_cubature(hai.SQUARE_CHG25, Float64)
     square = hai.rectangle((0.0, 0.0), (1.0, 1.0))
 
-    # Works for two-dimensional integrands
     I, E = ec(x -> exp(x[1] + x[2]), square)
     R = (exp(1) - exp(0))^2
     @test abs(I - R) ≤ E * abs(R)
@@ -71,7 +97,7 @@ end
     R = 1 / 2 * log(17 + 12 * sqrt(2))
     @test abs(I - R) ≤ E * abs(R)
 
-    I, E = hai.integrate(x -> 1 / norm(x), square; embedded_cubature=ec)
+    I, E = hai.integrate(x -> 1 / norm(x), square)
     @test abs(I - R) < 1e-8
     @test abs(I - R) ≤ E * abs(R)
 end
@@ -92,7 +118,7 @@ end
     @test abs(I - R) ≤ E * abs(R)
 
     triangle = hai.triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    I, E = hai.integrate(x -> 1 / norm(x), triangle; embedded_cubature=ec)
+    I, E = hai.integrate(x -> 1 / norm(x), triangle)
     R = sqrt(2) * asinh(1)
     @test abs(I - R) ≤ E * abs(R)
 end
@@ -116,7 +142,7 @@ end
     R = π^2 / 32
     @test abs(I - R) ≤ E * abs(R)
 
-    I, E = hai.integrate(x -> 1 / norm(x), cube; embedded_cubature=ec)
+    I, E = hai.integrate(x -> 1 / norm(x), cube)
     @test E ≤ √eps(Float64) * I
 end
 
@@ -153,36 +179,33 @@ end
             hai.TETRAHEDRON_GM35, hai.reference_simplex(3); rtol=12 * eps(Float64)
         ) == 0
 
-        ec = hai.embedded_cubature(hai.TETRAHEDRON_GM35, Float64)
-
-        rtol = 1e-8
         tetrahedron = hai.tetrahedron(
             (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
         )
+        rtol = 1e-8
 
-        I, E = hai.integrate(x -> 1, tetrahedron; embedded_cubature=ec, rtol=rtol)
+        I, E = hai.integrate(x -> 1, tetrahedron; rtol=rtol)
         R = 1 / 6
         @test abs(I - R) ≤ rtol * abs(R)
 
-        I, E = hai.integrate(
-            x -> exp(x[1] + 3 * x[2] + 5 * x[3]),
-            tetrahedron;
-            embedded_cubature=ec,
-            rtol=rtol,
-        )
+        I, E = hai.integrate(x -> exp(x[1] + 3 * x[2] + 5 * x[3]), tetrahedron; rtol=rtol)
         R = (3 * exp(5) - 10 * exp(3) + 15 * exp(1) - 8) / 120
         @test abs(I - R) ≤ rtol * abs(R)
 
-        I, E = hai.integrate(x -> 1 / norm(x), tetrahedron; embedded_cubature=ec, rtol=rtol)
-        R = 0.361426 # not sure if an analytic solution exists... this was from WolframAlpha
-        @test abs(I - R) ≤ 1e-4
+        I, E = hai.integrate(x -> 1 / norm(x), tetrahedron; rtol=rtol)
+        R = 0.3614258523411 # reference computed using BigFloat
+        @test abs(I - R) ≤ rtol * abs(R)
     end
 
     @testset "4-Simplex" begin
-        degree = 7 # must be odd
-        ec = hai.embedded_cubature(hai.GrundmannMoeller(4, degree), Float64)
-        @test hai.check_order(
-            ec, hai.reference_simplex(4), degree, degree - 2; rtol=50 * eps(Float64)
-        ) == 0
+        ec = hai.embedded_cubature(hai.GrundmannMoeller(4, 7), Float64)
+
+        @test hai.check_order(ec, hai.reference_simplex(4), 7, 5; rtol=50 * eps(Float64)) ==
+            0
+
+        rtol = 1e-8
+        I, E = hai.integrate(x -> 1 / norm(x), hai.reference_simplex(4); rtol=rtol)
+        R = 0.089876019011 # reference computed using BigFloat
+        @test abs(I - R) ≤ rtol * abs(R)
     end
 end

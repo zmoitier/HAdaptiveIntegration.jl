@@ -66,7 +66,6 @@ function _integrate(
 
     # a quick check to see if splitting is really needed
     if (E < atol) || (E < rtol * norm(I)) || (nbsubdiv ≥ maxsubdiv)
-        (nbsubdiv ≥ maxsubdiv) && @warn "maximum number of subdivide reached"
         return I, E
     end
 
@@ -93,7 +92,8 @@ function _integrate(
         nbsubdiv += 1
     end
 
-    (nbsubdiv ≥ maxsubdiv) && @warn "maximum number of subdivide reached"
+    (nbsubdiv ≥ maxsubdiv) &&
+        @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
 
     return I, E
 end
