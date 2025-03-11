@@ -8,8 +8,8 @@ abstract type Domain{D,T<:Real} end
 """
     struct Orthotope{D,T} <: Domain{D,T}
 
-Axes-aligned Orthotope in `D` dimensions given by two points `low_corner` and `high_corner`.
-Note that, we must have `low_corner .≤ high_corner`.
+Axes-aligned Orthotope in `D` dimensions, with value type `T`, given by two points
+`low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
 
 ## Fields:
 - `low_corner::SVector{D,T}`: the low corner.
@@ -21,28 +21,30 @@ struct Orthotope{D,T} <: Domain{D,T}
 end
 
 """
-    orthotope(low_corner, high_corner)
+    orthotope([T=Float64,] low_corner, high_corner)
 
-Return an axes-aligned orthotope in `D` dimensions given by two points `low_corner` and
-`high_corner`. Note that, we must have `low_corner .≤ high_corner`.
+Return an axes-aligned orthotope in `D` dimensions, with value type `T`, given by two points
+`low_corner` and `high_corner` with value type `T`. Note that, we must have
+`low_corner .≤ high_corner`.
 """
-function orthotope(low_corner, high_corner)
+function orthotope(T::DataType, low_corner, high_corner)
     @assert (length(low_corner) == length(high_corner))
     @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner))
 
     D = length(low_corner)
-    T = promote_type(eltype(low_corner), eltype(high_corner))
     return Orthotope(SVector{D,T}(low_corner), SVector{D,T}(high_corner))
 end
+orthotope(low_corner, high_corner) = orthotope(Float64, low_corner, high_corner)
 
 """
-    reference_orthotope(D::Int, T::DataType=Float64)
+    reference_orthotope([T=Float64,] D::Int)
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with value type `T`.
 """
-function reference_orthotope(D::Int, T::DataType=Float64)
+function reference_orthotope(T::DataType, D::Int)
     return Orthotope(zeros(SVector{D,T}), ones(SVector{D,T}))
 end
+reference_orthotope(D::Int) = reference_orthotope(Float64, D)
 
 """
     Segment{T} = Orthotope{1,T}
@@ -50,14 +52,15 @@ end
 const Segment{T} = Orthotope{1,T}
 
 """
-    segment(xmin, xmax)
+    segment([T=Float64,] xmin, xmax)
 
-Return a segment in 1 dimensions representing the interval `[xmin, xmax]` with
-`xmin ≤ xmax`.
+Return a segment in 1 dimensions with value type `T` representing the interval
+`[xmin, xmax]` with `xmin ≤ xmax`.
 """
-function segment(xmin::T, xmax::T) where {T<:Real}
-    return orthotope(SVector(xmin), SVector(xmax))
+function segment(T::DataType, xmin, xmax)
+    return orthotope(T, xmin, xmax)
 end
+segment(xmin, xmax) = segment(Float64, xmin, xmax)
 
 """
     Rectangle{T} = Orthotope{2,T}
@@ -65,16 +68,16 @@ end
 const Rectangle{T} = Orthotope{2,T}
 
 """
-    rectangle(low_corner, high_corner)
+    rectangle([T=Float64,] low_corner, high_corner)
 
-Return an axes-aligned rectangle given by two 2d-points `low_corner` and `high_corner`. Note
-that, we must have `low_corner .≤ high_corner`.
+Return an axes-aligned rectangle, with value type `T`, given by two 2d-points `low_corner`
+and `high_corner` with. Note that, we must have `low_corner .≤ high_corner`.
 """
-function rectangle(low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 2 "`low_corner` and `high_corner`
-    must be 2d-vector."
-    return orthotope(SVector{2}(low_corner), SVector{2}(high_corner))
+function rectangle(T::DataType, low_corner, high_corner)
+    @assert length(low_corner) == length(high_corner) == 2 "`low_corner` and `high_corner` must be 2d-vector."
+    return orthotope(T, low_corner, high_corner)
 end
+rectangle(low_corner, high_corner) = rectangle(Float64, low_corner, high_corner)
 
 """
     Cuboid{T} = Orthotope{3,T}
@@ -82,16 +85,16 @@ end
 const Cuboid{T} = Orthotope{3,T}
 
 """
-    cuboid(low_corner, high_corner)
+    cuboid([T=Float64,] low_corner, high_corner)
 
-Return an axes-aligned cuboid given by two 3d-points `low_corner` and `high_corner`.
-Note that, we must have `low_corner .≤ high_corner`.
+Return an axes-aligned cuboid, with value type `T`, given by two 3d-points `low_corner` and
+`high_corner`. Note that, we must have `low_corner .≤ high_corner`.
 """
-function cuboid(low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 3 "`low_corner` and `high_corner`
-    must be 3d-vector."
-    return orthotope(SVector{3}(low_corner), SVector{3}(high_corner))
+function cuboid(T::DataType, low_corner, high_corner)
+    @assert length(low_corner) == length(high_corner) == 3 "`low_corner` and `high_corner` must be 3d-vector."
+    return orthotope(T, low_corner, high_corner)
 end
+cuboid(low_corner, high_corner) = cuboid(Float64, low_corner, high_corner)
 
 """
     struct Simplex{D,T,N} <: Domain{D,T}
@@ -110,30 +113,32 @@ function Simplex{D,T,N}(vertices::SVector{D,T}...) where {D,T,N}
 end
 
 """
-    simplex(vertices...)
+    simplex([T=Float64,] vertices...)
 
-Return a `D`-simplex from a collection of vertices.
-Note that all points must have the same length `D` and there must be `N=D+1` points.
+Return a `D`-simplex with value type `T` from a collection of vertices. Note that all points
+must have the same length `D` and there must be `N=D+1` points.
 """
-function simplex(vertices...)
+function simplex(T::DataType, vertices...)
     N = length(vertices)
     D = N - 1
     @assert all(p -> length(p) == D, vertices)
 
-    return Simplex(SVector{N}(SVector{D}.(vertices)))
+    return Simplex(SVector{N}(SVector{D,T}.(vertices)))
 end
+simplex(vertices...) = simplex(Float64, vertices...)
 
 """
-    reference_simplex(D::Int, T::DataType=Float64)
+    reference_simplex([T=Float64,] D::Int)
 
 Return the reference `D`-dimensional simplex with value type `T`, which is the convex hull
 of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
 """
-function reference_simplex(D::Int, T::DataType=Float64)
+function reference_simplex(T::DataType, D::Int)
     points = [zeros(SVector{D,T})]
     append!(points, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
     return Simplex(SVector{D + 1}(points))
 end
+reference_simplex(D::Int) = reference_simplex(Float64, D)
 
 """
     Triangle{T} = Simplex{2,T,3}
@@ -141,14 +146,16 @@ end
 const Triangle{T} = Simplex{2,T,3}
 
 """
-    triangle(a, b, c)
+    triangle([T=Float64,] a, b, c)
 
-Return a triangle in 2 dimensions given by three 2d-points `a`, `b`, and `c`.
+Return a triangle in 2 dimensions, with value type `T`, given by three 2d-points `a`, `b`,
+and `c`.
 """
-function triangle(a, b, c)
+function triangle(T::DataType, a, b, c)
     @assert length(a) == length(b) == length(c) == 2 "`a`, `b`, and `c` must be 2d-vector."
-    return simplex(a, b, c)
+    return simplex(T, a, b, c)
 end
+triangle(a, b, c) = triangle(Float64, a, b, c)
 
 """
     Tetrahedron{T} = Simplex{3,T,4}
@@ -156,15 +163,17 @@ end
 const Tetrahedron{T} = Simplex{3,T,4}
 
 """
-    tetrahedron(a, b, c, d)
+    tetrahedron([T=Float64,] a, b, c, d)
 
-Return a tetrahedron in 3 dimensions given by four 3d-points `a`, `b`, `c`, and `d`.
+Return a tetrahedron in 3 dimensions, with value type `T`, given by four 3d-points `a`, `b`,
+`c`, and `d`.
 """
-function tetrahedron(a, b, c, d)
+function tetrahedron(T::DataType, a, b, c, d)
     @assert length(a) == length(b) == length(c) == length(d) == 3 "`a`, `b`, `c`, and `d`
     must be 3d-vector."
-    return simplex(a, b, c, d)
+    return simplex(T, a, b, c, d)
 end
+tetrahedron(a, b, c, d) = tetrahedron(Float64, a, b, c, d)
 
 """
     map_from_reference(domain::Domain)

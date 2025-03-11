@@ -12,7 +12,7 @@ import HAdaptiveIntegration as hai
             "4.444444444444444e-1", "2.777777777777778e-1", "2.777777777777778e-1"
         ],
         order_high=5,
-        weights_low=["1.0"],
+        weights_low=["1"],
         order_low=1,
     )
     @test typeof(tec) <: hai.TabulatedEmbeddedCubature
@@ -64,7 +64,7 @@ end
     @test hai.check_order(hai.SEGMENT_GK15, hai.reference_orthotope(1)) == 0
 
     ec = hai.embedded_cubature(hai.SEGMENT_GK15, Float64)
-    segment = hai.segment(0.0, 1.0)
+    segment = hai.segment(0, 1)
 
     I, E = ec(x -> exp(x[1]), segment)
     R = exp(1) - exp(0)
@@ -87,7 +87,7 @@ end
     @test hai.check_order(hai.SQUARE_CHG25, hai.reference_orthotope(2)) == 0
 
     ec = hai.embedded_cubature(hai.SQUARE_CHG25, Float64)
-    square = hai.rectangle((0.0, 0.0), (1.0, 1.0))
+    square = hai.rectangle((0, 0), (1, 1))
 
     I, E = ec(x -> exp(x[1] + x[2]), square)
     R = (exp(1) - exp(0))^2
@@ -107,17 +107,16 @@ end
 
     ec = hai.embedded_cubature(hai.TRIANGLE_RL19, Float64)
 
-    triangle = hai.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
+    triangle = hai.triangle((0, 0), (2, 0), (0, 2))
     I, E = ec(x -> exp(x[1] + 3 * x[2]), triangle)
     R = (exp(6) - 3 * exp(2) + 2) / 6
     @test abs(I - R) ≤ E * abs(R)
 
-    triangle = hai.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
     I, E = ec(x -> cos(7 * x[1] + 3 * x[2]), triangle)
     R = (-3 * cos(14) + 7 * cos(6) - 4) / 84
     @test abs(I - R) ≤ E * abs(R)
 
-    triangle = hai.triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+    triangle = hai.triangle((0, 0), (1, 0), (0, 1))
     I, E = hai.integrate(x -> 1 / norm(x), triangle)
     R = sqrt(2) * asinh(1)
     @test abs(I - R) ≤ E * abs(R)
@@ -127,7 +126,7 @@ end
     @test hai.check_order(hai.CUBE_BE65, hai.reference_orthotope(3)) == 0
 
     ec = hai.embedded_cubature(hai.CUBE_BE65, Float64)
-    cube = hai.cuboid((0.0, 0.0, 0.0), (1.0, 1.0, 1.0))
+    cube = hai.cuboid((0, 0, 0), (1, 1, 1))
 
     I, E = ec(x -> exp(x[1]), cube)
     R = exp(1) - exp(0)
@@ -154,21 +153,20 @@ end
 
         rtol = 1e-8
 
-        triangle = hai.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
+        triangle = hai.triangle((0, 0), (2, 0), (0, 2))
         I, E = hai.integrate(
             x -> exp(x[1] + 3 * x[2]), triangle; embedded_cubature=ec, rtol=rtol
         )
         R = (exp(6) - 3 * exp(2) + 2) / 6
         @test abs(I - R) ≤ rtol * abs(R)
 
-        triangle = hai.triangle((0.0, 0.0), (2.0, 0.0), (0.0, 2.0))
         I, E = hai.integrate(
             x -> cos(7 * x[1] + 3 * x[2]), triangle; embedded_cubature=ec, rtol=rtol
         )
         R = (-3 * cos(14) + 7 * cos(6) - 4) / 84
         @test abs(I - R) ≤ rtol * abs(R)
 
-        triangle = hai.triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+        triangle = hai.triangle((0, 0), (1, 0), (0, 1))
         I, E = hai.integrate(x -> 1 / norm(x), triangle; embedded_cubature=ec, rtol=rtol)
         R = sqrt(2) * asinh(1)
         @test abs(I - R) ≤ rtol * abs(R)
@@ -179,9 +177,7 @@ end
             hai.TETRAHEDRON_GM35, hai.reference_simplex(3); rtol=12 * eps(Float64)
         ) == 0
 
-        tetrahedron = hai.tetrahedron(
-            (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
-        )
+        tetrahedron = hai.tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
         rtol = 1e-8
 
         I, E = hai.integrate(x -> 1, tetrahedron; rtol=rtol)

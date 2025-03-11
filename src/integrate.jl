@@ -103,7 +103,8 @@ end
         fct, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
     ) where {DOM<:Domain}
 
-TBW
+Return a buffer which can be pass to the [`integrate`](@ref) function for improve allocation
+if called multiple times.
 """
 function allocate_buffer(
     fct, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)

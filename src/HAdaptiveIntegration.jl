@@ -1,10 +1,9 @@
 module HAdaptiveIntegration
 
 using DataStructures
+using GrundmannMoeller: grundmann_moeller
 using LinearAlgebra
 using StaticArrays
-
-using GrundmannMoeller: grundmann_moeller
 
 # Supported integration domains
 include("domain.jl")

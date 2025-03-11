@@ -3,27 +3,28 @@ import HAdaptiveIntegration as hai
 
 @testset "Domain construction" begin
     @testset "Orthotope" begin
-        @test typeof(hai.orthotope((0,), (1.0,))) <: hai.Orthotope
-        @test typeof(hai.orthotope([0], [1.0])) <: hai.Orthotope
-        @test typeof(hai.orthotope(SVector(0), SVector(1.0))) <: hai.Orthotope
+        @test typeof(hai.orthotope((0,), (1.0,))) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.orthotope([0], [1.0])) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.orthotope(SVector(0), SVector(1.0))) <: hai.Orthotope{1,Float64}
 
-        r = hai.reference_orthotope(4, Int)
+        r = hai.reference_orthotope(Int, 4)
         @test typeof(r) <: hai.Orthotope{4,Int}
         @test r.low_corner == SVector(0, 0, 0, 0)
         @test r.high_corner == SVector(1, 1, 1, 1)
 
-        @test typeof(hai.segment(-1, 1)) <: hai.Orthotope{1,Int}
-        @test typeof(hai.rectangle((-1, -1), (1, 1))) <: hai.Orthotope{2,Int}
-        @test typeof(hai.cuboid((-1, -1, -1), (1, 1, 1))) <: hai.Orthotope{3,Int}
-        @test typeof(hai.orthotope((-1, -1, -1, -1), (1, 1, 1, 1))) <: hai.Orthotope{4,Int}
+        @test typeof(hai.segment(-1, 1)) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.rectangle((-1, -1), (1, 1))) <: hai.Orthotope{2,Float64}
+        @test typeof(hai.cuboid((-1, -1, -1), (1, 1, 1))) <: hai.Orthotope{3,Float64}
+        @test typeof(hai.orthotope((-1, -1, -1, -1), (1, 1, 1, 1))) <:
+            hai.Orthotope{4,Float64}
     end
 
     @testset "Simplex" begin
-        @test typeof(hai.simplex((0,), (1.0,))) <: hai.Simplex
-        @test typeof(hai.simplex([0], [1.0])) <: hai.Simplex
-        @test typeof(hai.simplex(SVector(0), SVector(1.0))) <: hai.Simplex
+        @test typeof(hai.simplex((0,), (1.0,))) <: hai.Simplex{1,Float64,2}
+        @test typeof(hai.simplex([0], [1.0])) <: hai.Simplex{1,Float64,2}
+        @test typeof(hai.simplex(SVector(0), SVector(1.0))) <: hai.Simplex{1,Float64,2}
 
-        r = hai.reference_simplex(4, Int)
+        r = hai.reference_simplex(Int, 4)
         @test typeof(r) <: hai.Simplex{4,Int,5}
         @test r.vertices[1] == SVector(0, 0, 0, 0)
         @test r.vertices[2] == SVector(1, 0, 0, 0)
@@ -31,14 +32,14 @@ import HAdaptiveIntegration as hai
         @test r.vertices[4] == SVector(0, 0, 1, 0)
         @test r.vertices[5] == SVector(0, 0, 0, 1)
 
-        @test typeof(hai.triangle((2, 0), (0, 2), (0, 0))) <: hai.Simplex{2,Int,3}
+        @test typeof(hai.triangle((2, 0), (0, 2), (0, 0))) <: hai.Simplex{2,Float64,3}
         @test typeof(hai.tetrahedron((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
-            hai.Simplex{3,Int,4}
+            hai.Simplex{3,Float64,4}
         @test typeof(
             hai.simplex(
                 (2, 0, 0, 0), (0, 2, 0, 0), (0, 0, 2, 0), (0, 0, 0, 2), (0, 0, 0, 0)
             ),
-        ) <: hai.Simplex{4,Int,5}
+        ) <: hai.Simplex{4,Float64,5}
     end
 end
 

@@ -35,7 +35,7 @@ triangle:
 using HAdaptiveIntegration
 
 # Define a triangle domain and a function to integrate
-tri = triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+tri = triangle((0, 0), (1, 0), (0, 1))
 f = x -> exp(im * x[1]) / (x[1]^2 + x[2]^2 + 1e-2)
 
 # Compute the integral and error estimate over the triangle
@@ -46,7 +46,7 @@ The result `I` is the integral value, and `E` the error estimate.
 And for an integral over a tetrahedron:
 
 ```julia
-tetra = tetrahedron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+tetra = tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
 I, E = integrate(f, tetra)
 ```
 
