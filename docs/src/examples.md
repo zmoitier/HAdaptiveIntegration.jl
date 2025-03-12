@@ -8,10 +8,9 @@ Let's start with a simple example using `HCubature`:
 
 ```@example hcubature-square
 using HCubature, LinearAlgebra
-a, b = (0, 0), (1,1)
+a, b = (0, 0), (1, 1)
 const counter = Ref(0)
-f = x -> (counter[]+=1; 1 / (norm(x) + 1e-0))
-# f = x -> (counter[]+=1; cos(20*prod(x)))
+f = x -> (counter[]+=1; 1 / (norm(x) + 1))
 I, E = hcubature(f, a, b)
 println("I = $I, E = $E, counter = $(counter[])")
 ```
@@ -26,7 +25,7 @@ I, E = integrate(f, domain)
 println("I = $I, E = $E, counter = $(counter[])")
 ```
 
-Lets look at performance now:
+Let's look at performance now:
 
 ```@example hcubature-square
 using BenchmarkTools

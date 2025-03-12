@@ -4,7 +4,7 @@ CurrentModule = HAdaptiveIntegration
 
 # [Advanced usage](@id advanced-usage)
 
-We now cover the options available for the `integrate` function.
+We now cover the options available for the [`integrate`](@ref) function.
 
 ## Buffering
 
@@ -21,8 +21,8 @@ f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 ```
 
 While the overhead associated to these (small) allocations are usually negligible, there are
-circumstances where one may want to avoid allocations altogether. This can achieved by
-passing a buffer to the `integrate` using [`allocate_buffer`](@ref):
+circumstances where one may want to avoid allocations altogether. This can be achieved by
+passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
 
 ```@example buffering
 using HAdaptiveIntegration: allocate_buffer, integrate, triangle
@@ -36,10 +36,11 @@ integrate(f,t; buffer)
 By default, when calling `integrate(f, domain)`, the package uses a default embedded
 cubature formula for the given `domain` by calling [`default_embedded_cubature`](@ref).
 Although these are generally good choices, you can also specify a custom embedded
-cubature formula by passing it as the third argument to `integrate`. For example, in the
+cubature formula by passing it as a keyword argument to `integrate`. For example, in the
 case of a triangle, the package defaults to a Radon-Laurie embedded cubature formula of
-orders 5 and 8 (see the `rules_simplex.jl` file for more details). If you want e.g. to use an
-embedded cubature based on the [`GrundmannMoeller`](@ref) rule of order 13, you can do
+orders 5 and 7 (see the `rules_simplex.jl` file for more details). If you want
+*e.g.* to use an embedded cubature based on the [`GrundmannMoeller`](@ref) rule of order 13,
+you can do
 
 ```@example embedded-cubature
 using HAdaptiveIntegration: GrundmannMoeller, embedded_cubature, integrate, triangle
@@ -50,19 +51,23 @@ I, E = integrate(f, t; embedded_cubature = ec)
 ```
 
 !!! tip "Available embedded cubature formulas"
-    You can find a list of available embedded cubature formulas in the `rule_simplex.jl`
-    file and `rule_orthotope.jl` files.
+    You can find a list of available embedded cubature formulas in the
+    [`rule_simplex.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/rule_simplex.jl)
+    file and
+    [`rule_orthotope.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/rule_orthotope.jl)
+    files.
 
-To add a custom embedded quadrature for a given domain, you must write a constructor e.g.
+To add a custom embedded quadrature for a given domain, you must write a constructor *e.g.*
 `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref) object (see
-`embedded_cubature.jl` for some examples on how this is done). PRs with new schemes are more
-than welcome!
+the function [`embedded_cubature`](@ref) in the file
+[`embedded_cubature.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/cubature_embedded.jl)
+for some examples on how this is done). PRs with new schemes are more than welcome!
 
 ## Subdivision strategies
 
 The package uses a default subdivision strategy for the given `domain` by calling
-[`default_subdivision`](@ref). For example, by default triangles are subidivided
-into 4 smaller triangles by connecting the midpoints of the edges:
+[`default_subdivision`](@ref). For example, by default triangles are subdivided into 4
+smaller triangles by connecting the midpoints of the edges:
 
 ```@example default-subdivision
 using HAdaptiveIntegration
@@ -76,7 +81,7 @@ Here are the subdivided triangles:
 subdiv_algo(t)
 ```
 
-But is is also possible (and maybe desirable) to split the triangle into 2 smaller triangles
+But is also possible (and maybe desirable) to split the triangle into 2 smaller triangles
 instead. The following function accomplishes this:
 
 ```@example default-subdivision
