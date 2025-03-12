@@ -15,7 +15,7 @@ like in practice:
 ```@example buffering
 using HAdaptiveIntegration
 using BenchmarkTools
-t = triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+t = triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 @benchmark integrate($f, $t)
 ```
@@ -43,10 +43,10 @@ embedded cubature based on the [`GrundmannMoeller`](@ref) rule of order 13, you 
 
 ```@example embedded-cubature
 using HAdaptiveIntegration: GrundmannMoeller, embedded_cubature, integrate, triangle
-t = triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+t = triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
-ec = embedded_cubature(GrundmannMoeller(2,13), Float64)
-I,E = integrate(f, t; embedded_cubature = ec)
+ec = embedded_cubature(Float64, GrundmannMoeller(2,13))
+I, E = integrate(f, t; embedded_cubature = ec)
 ```
 
 !!! tip "Available embedded cubature formulas"
@@ -66,7 +66,7 @@ into 4 smaller triangles by connecting the midpoints of the edges:
 
 ```@example default-subdivision
 using HAdaptiveIntegration
-t = triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+t = triangle((0, 0), (1, 0), (0, 1))
 subdiv_algo = HAdaptiveIntegration.default_subdivision(t)
 ```
 

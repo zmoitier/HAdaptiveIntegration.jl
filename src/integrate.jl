@@ -99,9 +99,7 @@ function _integrate(
 end
 
 """
-    allocate_buffer(
-        fct, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
-    ) where {DOM<:Domain}
+    allocate_buffer(fct, domain, ec=default_embedded_cubature(domain))
 
 Return a buffer which can be pass to the [`integrate`](@ref) function for improve allocation
 if called multiple times.
