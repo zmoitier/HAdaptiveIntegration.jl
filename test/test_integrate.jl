@@ -17,7 +17,7 @@ import HAdaptiveIntegration as hai
     )
     @test typeof(tec) <: hai.TabulatedEmbeddedCubature
 
-    ec = hai.embedded_cubature(tec, Float64)
+    ec = hai.embedded_cubature(Float64, tec)
     @test typeof(ec) <: hai.EmbeddedCubature{3,1,1,Float64}
 
     ec_ref = hai.embedded_cubature(
@@ -63,7 +63,7 @@ end
 @testset "Integrate over a segment" begin
     @test hai.check_order(hai.SEGMENT_GK15, hai.reference_orthotope(1)) == 0
 
-    ec = hai.embedded_cubature(hai.SEGMENT_GK15, Float64)
+    ec = hai.embedded_cubature(Float64, hai.SEGMENT_GK15)
     segment = hai.segment(0, 1)
 
     I, E = ec(x -> exp(x[1]), segment)
@@ -86,7 +86,7 @@ end
 @testset "Integrate over a rectangle" begin
     @test hai.check_order(hai.SQUARE_CHG25, hai.reference_orthotope(2)) == 0
 
-    ec = hai.embedded_cubature(hai.SQUARE_CHG25, Float64)
+    ec = hai.embedded_cubature(Float64, hai.SQUARE_CHG25)
     square = hai.rectangle((0, 0), (1, 1))
 
     I, E = ec(x -> exp(x[1] + x[2]), square)
@@ -105,7 +105,7 @@ end
 @testset "Integrate over a triangle" begin
     @test hai.check_order(hai.TRIANGLE_RL19, hai.reference_simplex(2)) == 0
 
-    ec = hai.embedded_cubature(hai.TRIANGLE_RL19, Float64)
+    ec = hai.embedded_cubature(Float64, hai.TRIANGLE_RL19)
 
     triangle = hai.triangle((0, 0), (2, 0), (0, 2))
     I, E = ec(x -> exp(x[1] + 3 * x[2]), triangle)
@@ -125,7 +125,7 @@ end
 @testset "Integrate over a Cuboid" begin
     @test hai.check_order(hai.CUBE_BE65, hai.reference_orthotope(3)) == 0
 
-    ec = hai.embedded_cubature(hai.CUBE_BE65, Float64)
+    ec = hai.embedded_cubature(Float64, hai.CUBE_BE65)
     cube = hai.cuboid((0, 0, 0), (1, 1, 1))
 
     I, E = ec(x -> exp(x[1]), cube)
@@ -149,7 +149,7 @@ end
     @testset "Triangle" begin
         @test hai.check_order(hai.TRIANGLE_GM20, hai.reference_simplex(2)) == 0
 
-        ec = hai.embedded_cubature(hai.TRIANGLE_GM20, Float64)
+        ec = hai.embedded_cubature(Float64, hai.TRIANGLE_GM20)
 
         rtol = 1e-8
 
@@ -194,7 +194,7 @@ end
     end
 
     @testset "4-Simplex" begin
-        ec = hai.embedded_cubature(hai.GrundmannMoeller(4, 7), Float64)
+        ec = hai.embedded_cubature(Float64, hai.GrundmannMoeller(4, 7))
 
         @test hai.check_order(ec, hai.reference_simplex(4), 7, 5; rtol=50 * eps(Float64)) ==
             0

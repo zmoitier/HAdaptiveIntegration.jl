@@ -3,9 +3,10 @@ import HAdaptiveIntegration as hai
 
 @testset "Domain construction" begin
     @testset "Orthotope" begin
-        @test typeof(hai.orthotope((0,), (1.0,))) <: hai.Orthotope{1,Float64}
-        @test typeof(hai.orthotope([0], [1.0])) <: hai.Orthotope{1,Float64}
-        @test typeof(hai.orthotope(SVector(0), SVector(1.0))) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.orthotope((0,), (1,))) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.orthotope([0], [1])) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.orthotope(SVector(0), SVector(1))) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.orthotope((big"0",), (big"1",))) <: hai.Orthotope{1,BigFloat}
 
         r = hai.reference_orthotope(Int, 4)
         @test typeof(r) <: hai.Orthotope{4,Int}
@@ -20,9 +21,10 @@ import HAdaptiveIntegration as hai
     end
 
     @testset "Simplex" begin
-        @test typeof(hai.simplex((0,), (1.0,))) <: hai.Simplex{1,Float64,2}
-        @test typeof(hai.simplex([0], [1.0])) <: hai.Simplex{1,Float64,2}
-        @test typeof(hai.simplex(SVector(0), SVector(1.0))) <: hai.Simplex{1,Float64,2}
+        @test typeof(hai.simplex((0,), (1,))) <: hai.Simplex{1,Float64,2}
+        @test typeof(hai.simplex([0], [1])) <: hai.Simplex{1,Float64,2}
+        @test typeof(hai.simplex(SVector(0), SVector(1))) <: hai.Simplex{1,Float64,2}
+        @test typeof(hai.simplex((big"0",), (big"1",))) <: hai.Simplex{1,BigFloat,2}
 
         r = hai.reference_simplex(Int, 4)
         @test typeof(r) <: hai.Simplex{4,Int,5}

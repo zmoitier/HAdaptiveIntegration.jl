@@ -17,7 +17,7 @@ function check_order(
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
 ) where {D,T}
     return check_order(
-        embedded_cubature(tec, T),
+        embedded_cubature(T, tec),
         domain,
         tec.order_high,
         tec.order_low;

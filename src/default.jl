@@ -36,26 +36,26 @@ Return a default embedded cubature for the domains:
     - [`simplex`](@ref): `[GrundmannMoeller](@ref)(d, 7)`
 """
 @generated function default_embedded_cubature(::Segment{T}) where {T}
-    ec = embedded_cubature(SEGMENT_GK15, T)
+    ec = embedded_cubature(T, SEGMENT_GK15)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Rectangle{T}) where {T}
-    ec = embedded_cubature(SQUARE_CHG25, T)
+    ec = embedded_cubature(T, SQUARE_CHG25)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Triangle{T}) where {T}
-    ec = embedded_cubature(TRIANGLE_RL19, T)
+    ec = embedded_cubature(T, TRIANGLE_RL19)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Cuboid{T}) where {T}
-    ec = embedded_cubature(CUBE_BE65, T)
+    ec = embedded_cubature(T, CUBE_BE65)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    ec = embedded_cubature(TETRAHEDRON_GM35, T)
+    ec = embedded_cubature(T, TETRAHEDRON_GM35)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(GrundmannMoeller(D, 7), T)
+    ec = embedded_cubature(T, GrundmannMoeller(D, 7))
     return :($ec)
 end
