@@ -3,7 +3,7 @@ import Printf: Format, format
 
 import HAdaptiveIntegration as hai
 
-setprecision(40; base=10)
+setprecision(BigFloat, 40; base=10)
 
 segment = hai.segment(big"-1.0", big"1.0")
 
@@ -182,7 +182,7 @@ for (name, cbt, n) in [("G7", g7, 34), ("K15", k15, 34), ("G15", g15, 33), ("K31
 
     local Φ = hai.map_to_reference(segment)
     local j =
-        hai.abs_det_jac(hai.reference_orthotope(1, BigFloat)) / hai.abs_det_jac(segment)
+        hai.abs_det_jac(hai.reference_orthotope(BigFloat, 1)) / hai.abs_det_jac(segment)
 
     fmt_node = Format("[\"%.$(n)e\"],")
     for x in cbt[:nodes]

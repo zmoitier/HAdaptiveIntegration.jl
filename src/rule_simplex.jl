@@ -2,7 +2,7 @@
 Laurie Radon with 19 nodes.
 """
 const TRIANGLE_RL19 = TabulatedEmbeddedCubature(;
-    description="Laurie Radon with 19 nodes",
+    description="Laurie Radon with 19 nodes (TRIANGLE_RL19)",
     domain="reference triangle",
     reference="""https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/radon/set_radon_standard.m
     https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/laurie/set_laurie_standard.m""",
@@ -66,7 +66,7 @@ const TRIANGLE_RL19 = TabulatedEmbeddedCubature(;
 Grundmann and Möller with 20 nodes.
 """
 const TRIANGLE_GM20 = TabulatedEmbeddedCubature(;
-    description="Grundmann and Möller with 20 nodes",
+    description="Grundmann and Möller with 20 nodes (TRIANGLE_GM20)",
     domain="reference triangle",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
     nb_significant_digits=33,
@@ -194,7 +194,7 @@ const TRIANGLE_GM20 = TabulatedEmbeddedCubature(;
 Grundmann and Möller with 35 nodes.
 """
 const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature(;
-    description="Grundmann and Möller with 35 nodes",
+    description="Grundmann and Möller with 35 nodes (TETRAHEDRON_GM35)",
     domain="reference tetrahedron",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
     nb_significant_digits=33,

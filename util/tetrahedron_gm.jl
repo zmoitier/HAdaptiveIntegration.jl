@@ -3,9 +3,9 @@ import Printf: Format, format
 
 import HAdaptiveIntegration as hai
 
-setprecision(40; base=10)
+setprecision(BigFloat, 40; base=10)
 
-ec = hai.embedded_cubature(hai.GrundmannMoeller(), 3, 7, BigFloat)
+ec = hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(3, 7))
 n = 33
 
 fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\", \"%.$(n)e\"],")

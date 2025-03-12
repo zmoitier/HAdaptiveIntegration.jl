@@ -5,7 +5,7 @@ import HAdaptiveIntegration as hai
 
 setprecision(40; base=10)
 
-ec = hai.embedded_cubature(hai.GrundmannMoeller(), 2, 7, BigFloat)
+ec = hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(2, 7))
 n = 33
 
 fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\"],")

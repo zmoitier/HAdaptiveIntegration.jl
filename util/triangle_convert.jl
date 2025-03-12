@@ -3,7 +3,7 @@ import Printf: Format, format
 
 import HAdaptiveIntegration as hai
 
-setprecision(30; base=10)
+setprecision(BigFloat, 30; base=10)
 
 r7 = (
     nodes=[

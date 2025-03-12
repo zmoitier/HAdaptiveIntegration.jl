@@ -3,7 +3,7 @@ import Printf: Format, format
 
 import HAdaptiveIntegration as hai
 
-setprecision(20; base=10)
+setprecision(BigFloat, 20; base=10)
 
 function orbit(x::T, y::T, z::T) where {T}
     list = []
@@ -137,7 +137,7 @@ for (name, cbt, n) in [("BE_9_65", ruleA, 16), ("BE_7_65", ruleB, 16)]
     println(">> $name <<")
 
     local Φ = hai.map_to_reference(cube)
-    local j = hai.abs_det_jac(hai.reference_orthotope(3, BigFloat)) / hai.abs_det_jac(cube)
+    local j = hai.abs_det_jac(hai.reference_orthotope(BigFloat, 3)) / hai.abs_det_jac(cube)
 
     fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\", \"%.$(n)e\"],")
     for x in cbt[:nodes]

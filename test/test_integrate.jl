@@ -85,6 +85,7 @@ end
 
 @testset "Integrate over a rectangle" begin
     @test hai.check_order(hai.SQUARE_CHG25, hai.reference_orthotope(2)) == 0
+    @test hai.check_order(hai.SQUARE_CHG21, hai.reference_orthotope(2)) == 0
 
     ec = hai.embedded_cubature(Float64, hai.SQUARE_CHG25)
     square = hai.rectangle((0, 0), (1, 1))
