@@ -6,10 +6,8 @@ CurrentModule = HAdaptiveIntegration
 
 ## Overview
 
-`HAdaptiveIntegration.jl` is a Julia package for for approximating integrals of functions
-over various predefined [`Domain`](@ref)s. It uses *embedded quadrature* rules to build
-error estimates, and refines the integration domain by splitting its mesh elements until a
-certain tolerance is reached. Features include:
+`HAdaptiveIntegration.jl` is a Julia package for approximating integrals of functions over various predefined [`Domain`](@ref)s.
+It uses *embedded cubature* rules to build error estimates, and refines the integration domain by splitting its mesh elements until a certain tolerance is reached. Features include:
 
 - Adaptive integration over **simplices of any dimension**
 - Use of **efficient (tabulated) cubatures** for low-dimensional cuboids and simplices

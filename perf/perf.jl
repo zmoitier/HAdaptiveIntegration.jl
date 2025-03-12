@@ -11,16 +11,28 @@ function measure_perf(
 )
     println(">> $name <<")
 
+    rtol = 1e-8
+
     counter = Ref(0)
     fct_count = x -> (counter[] += 1; fct(x))
     I, E = hai.integrate(
-        fct_count, domain; embedded_cubature=ec, subdiv_algo=subdiv_algo, buffer=buffer
+        fct_count,
+        domain;
+        embedded_cubature=ec,
+        subdiv_algo=subdiv_algo,
+        buffer=buffer,
+        rtol=rtol,
     )
     @show I E counter[]
     println()
 
     bm = @benchmark hai.integrate(
-        $fct, $domain, embedded_cubature=$ec, subdiv_algo=$subdiv_algo, buffer=$buffer
+        $fct,
+        $domain,
+        embedded_cubature=$ec,
+        subdiv_algo=$subdiv_algo,
+        buffer=$buffer,
+        rtol=$rtol,
     )
     display(bm)
     println()
@@ -86,21 +98,24 @@ function triangle_duffy(case::Int=0)
         println("-- Nearly-singular --")
         x₀ = SVector(-0.1, 0)
         f_tr = x -> norm(x - x₀)^(-3)
+        f_sq = u -> f_tr(SVector(u[1], u[1] * u[2])) * u[1]
         I_ref = 3.51460795210773207
     elseif case == 2
         println("-- Singular --")
-        f_tr = x -> 1 / norm(x)
-        I_ref = 8.81373587019543025e-1
+        f_tr = x -> cos(sum(x) + prod(x)) / norm(x)
+        f_sq = u -> u[1] * f_tr(SVector(u[1], u[1] * u[2]))
+        I_ref = 4.70961690636928440e-1
     else
         println("-- Regular --")
         e = exp(1)
         f_tr = x -> cos(e * sum(x) + prod(x))
+        f_sq = u -> f_tr(SVector(u[1], u[1] * u[2])) * u[1]
         I_ref = -1.8612872839611775e-1
     end
-    f_sq = u -> f_tr(SVector(u[1], u[1] * u[2])) * u[1]
+    # f_sq = u -> f_tr(SVector(u[1], u[1] * u[2])) * u[1]
 
     # I, E = hai.integrate(
-    #     fct,
+    #     f_tr,
     #     hai.triangle(BigFloat, (0, 0), (1, 0), (1, 1));
     #     embedded_cubature=hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(2, 7)),
     #     maxsubdiv=2e4,
