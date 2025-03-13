@@ -20,7 +20,7 @@ f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 @benchmark integrate($f, $t)
 ```
 
-While the overhead associated to these (small) allocations are usually negligible, there are
+While the overhead associated to these (small) allocations is usually negligible, there are
 circumstances where one may want to avoid allocations altogether. This can be achieved by
 passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
 
@@ -28,8 +28,14 @@ passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
 using HAdaptiveIntegration: allocate_buffer, integrate, triangle
 buffer = allocate_buffer(f, t)
 integrate(f,t; buffer)
-@benchmark integrate($f, $t; buffer = $buffer)
+b = @benchmark integrate($f, $t; buffer = $buffer)
+@assert b.allocs == 0 # hide
+b # hide
 ```
+
+Provided evaluating `f` does not allocate, and the `buffer` has a sufficiently large
+capacity, `integrate` will not allocate memory during the integration process, as shown in
+the benchmark above.
 
 ## Embedded cubature formulas
 
@@ -49,6 +55,34 @@ f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 ec = embedded_cubature(Float64, GrundmannMoeller(2,13))
 I, E = integrate(f, t; embedded_cubature = ec)
 ```
+
+Which cubature rule is best depends on the function being integrated, as well as on the
+desired accuracy; as a rule of thumb, higher-order cubature rules will perform better for
+globally smooth functions `f` or higher accuracy requirements. Here is a short study on the
+number of function evaluations required to achieve a given accuracy for the default
+Laurie-Radon cubature and the `GrundmannMoeller` cubature rule above:
+
+```@example embedded-cubature
+const cc = Ref(0) # a counter for the number of function evaluations
+g = x -> (cc[] += 1; f(x))
+rtol = 1e-2
+cc[] = 0; integrate(g, t; rtol); counter_default = cc[]
+cc[] = 0; integrate(g, t; embedded_cubature = ec, rtol); counter_custom = cc[]
+counter_default, counter_custom
+```
+
+For `rtol = 1e-2`, we see that the default cubature rule requires fewer function
+evaluations. However, decreasing `rtol` changes the balance:
+
+```@example embedded-cubature
+rtol = 1e-8
+cc[] = 0; integrate(g, t; rtol); counter_default = cc[]
+cc[] = 0; integrate(g, t; embedded_cubature = ec, rtol); counter_custom = cc[]
+counter_default, counter_custom
+```
+
+This example illustrates that testing is necessary to determine which cubature rule is best
+for your specific application!
 
 !!! tip "Available embedded cubature formulas"
     You can find a list of available embedded cubature formulas in the

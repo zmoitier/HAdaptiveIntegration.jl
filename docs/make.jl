@@ -16,9 +16,10 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Advanced usage" => "advanced.md",
-        "Examples and benchmarks" => "examples.md",
+        # "Examples and benchmarks" => "examples.md",
         "docstrings.md",
     ],
+    pagesonly=true,
 )
 
 deploydocs(; repo="github.com/zmoitier/HAdaptiveIntegration.jl", devbranch="main")

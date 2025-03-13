@@ -22,7 +22,7 @@ an error estimate.
   d-dimensional [`simplex`](@ref).
 
 ## Optional arguments
-- `ec::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain)`: the embedded cubature,
+- `embedded_cubature::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain)`: the embedded cubature,
    each supported domain has a [`default_embedded_cubature`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
