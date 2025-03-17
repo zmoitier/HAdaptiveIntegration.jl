@@ -29,6 +29,9 @@ Axes-aligned Orthotope in `D` dimensions, with value type `T`, given by two poin
 ## Fields:
 - `low_corner::SVector{D,T}`: the low corner.
 - `high_corner::SVector{D,T}`: the high corner.
+
+## Invariants (**not** check at construction):
+- `low_corner .≤ high_corner`
 """
 struct Orthotope{D,T} <: AbstractDomain{D,T}
     low_corner::SVector{D,T}
@@ -131,6 +134,9 @@ A simplex in `D` dimensions with `N=D+1` vertices of value type `T`.
 
 ## Fields:
 - `vertices::SVector{N,SVector{D,T}}`: vertices of the simplex.
+
+## Invariants (**not** check at construction):
+- `N = D+1`
 """
 struct Simplex{D,T,N} <: AbstractDomain{D,T}
     vertices::SVector{N,SVector{D,T}}
@@ -227,6 +233,22 @@ function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
 end
 
 """
+    abs_det_jac(domain::Domain)
+
+Return the absolute value of the Jacobian's determinant of the map from the reference domain
+to the physical domain `domain`.
+"""
+function abs_det_jac(h::Orthotope{D,T}) where {D,T}
+    return prod(h.high_corner - h.low_corner)
+end
+
+function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
+    v = s.vertices
+    mat = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
+    return abs(det(mat))
+end
+
+"""
     map_to_reference(domain::Domain)
 
 Return an anonymous function that maps the physical domain `domain` to the reference domain.
@@ -242,17 +264,14 @@ function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
 end
 
 """
-    abs_det_jac(domain::Domain)
+    reference_domain(::Type{<:AbstractDomain})
 
-Return the absolute value of the Jacobian's determinant of the map from the reference domain
-to the physical domain `domain`.
+Return the reference domain for the given domain type.
 """
-function abs_det_jac(h::Orthotope{D,T}) where {D,T}
-    return prod(h.high_corner - h.low_corner)
-end
-
-function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
-    v = s.vertices
-    mat = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
-    return abs(det(mat))
-end
+reference_domain(::Type{Orthotope{D,T}}) where {D,T} = reference_orthotope(T, D)
+reference_domain(::Type{Orthotope{D}}) where {D} = reference_orthotope(float(Int), D)
+reference_domain(::Type{Simplex{D,T,N}}) where {D,T,N} = reference_simplex(T, D)
+reference_domain(::Type{Simplex{D,T}}) where {D,T} = reference_simplex(T, D)
+reference_domain(::Type{Simplex{D}}) where {D} = reference_simplex(float(Int), D)
+reference_domain(::Type{Triangle}) = reference_simplex(float(Int), 2)
+reference_domain(::Type{Tetrahedron}) = reference_simplex(float(Int), 3)

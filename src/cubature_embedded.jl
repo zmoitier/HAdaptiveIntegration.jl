@@ -1,19 +1,31 @@
 """
-    struct EmbeddedCubature{H,L,D,T}
+    struct EmbeddedCubature{D,T}
 
 An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low
 order cubature rule with `L` nodes. Note that the low order cubature uses `nodes[1:L]` as
 its nodes. The cubature nodes and weights are assume to be for the reference domain.
 
 ## Fields:
-- `nodes::SVector{H,SVector{D,T}}`: the cubature nodes.
-- `weights_high::SVector{H,T}`: the cubature weights for the high order cubature.
-- `weights_low::SVector{L,T}`: the cubature weights for the low order cubature.
+- `nodes::Vector{SVector{D,T}}`: the cubature nodes.
+- `weights_high::Vector{T}`: the cubature weights for the high order cubature.
+- `weights_low::Vector{T}`: the cubature weights for the low order cubature.
+
+## Invariants (check at construction):
+- `length(nodes) == length(weights_high)`
+- `length(weights_high) ≥ length(weights_low)`
 """
-struct EmbeddedCubature{H,L,D,T}
-    nodes::SVector{H,SVector{D,T}}
-    weights_high::SVector{H,T}
-    weights_low::SVector{L,T}
+struct EmbeddedCubature{D,T}
+    nodes::Vector{SVector{D,T}}
+    weights_high::Vector{T}
+    weights_low::Vector{T}
+
+    function EmbeddedCubature(
+        nodes::Vector{SVector{D,T}}, weights_high::Vector{T}, weights_low::Vector{T}
+    ) where {D,T}
+        @assert length(nodes) == length(weights_high)
+        @assert length(weights_high) ≥ length(weights_low)
+        return new{D,T}(nodes, weights_high, weights_low)
+    end
 end
 
 """
@@ -37,19 +49,7 @@ function embedded_cubature(T::DataType, nodes, weights_high, weights_low)
     @assert allequal(length, nodes) "all nodes should have the same length."
     D = length(first(nodes))
 
-    @assert length(nodes) == length(weights_high) "nodes and weights_high should have the
-    same length."
-    H = length(weights_high)
-
-    @assert length(weights_high) ≥ length(weights_low) "weights_high length should be
-    greater than weights_low length."
-    L = length(weights_low)
-
-    return EmbeddedCubature(
-        SVector{H}(SVector{D,T}.(nodes)),
-        SVector{H,T}(weights_high),
-        SVector{L,T}(weights_low),
-    )
+    return EmbeddedCubature(SVector{D,T}.(nodes), weights_high, weights_low)
 end
 function embedded_cubature(nodes, weights_high, weights_low)
     T_nodes = _type_float(nodes...)
@@ -63,9 +63,8 @@ function embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
         @warn "the embedded cubature `$(tec.description)` has less precision than type $T."
     end
 
-    return embedded_cubature(
-        T,
-        [parse.(T, x) for x in tec.nodes],
+    return EmbeddedCubature(
+        [SVector(parse.(T, x)) for x in tec.nodes],
         parse.(T, tec.weights_high),
         parse.(T, tec.weights_low),
     )
@@ -87,23 +86,24 @@ function embedded_cubature(T::DataType, gm::GrundmannMoeller)
 
     # high order cubature
     Tn = grundmann_moeller(T, Val(gm.dim), gm.deg)
+
     H = length(Tn.points)
-    nodes_high = SVector(ntuple(i -> SVector{gm.dim}(Tn.points[H - i + 1][2:end]), H))
-    weights_high = SVector(ntuple(i -> Tn.weights[H - i + 1] * vol, H))
+    nodes_high = [SVector{gm.dim}(Tn.points[H - i + 1][2:end]) for i in 1:H]
+    weights_high = [Tn.weights[H - i + 1] * vol for i in 1:H]
 
     # low order cubature
     Tn_low = grundmann_moeller(T, Val(gm.dim), gm.deg - 2)
     L = length(Tn_low.points)
-    weights_low = SVector(ntuple(i -> Tn_low.weights[L - i + 1] * vol, L))
+    weights_low = [Tn_low.weights[L - i + 1] * vol for i in 1:L]
 
     return EmbeddedCubature(nodes_high, weights_high, weights_low)
 end
 embedded_cubature(gm::GrundmannMoeller) = embedded_cubature(float(Int), gm)
 
 """
-    (ec::EmbeddedCubature{H,L,D,T})(
+    (ec::EmbeddedCubature{D,T})(
         fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
-    ) where {H,L,D,T}
+    ) where {D,T}
 
 Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the
 high order cubature and the low order cubature on `domain`. The function `fct` must take a
@@ -111,9 +111,10 @@ high order cubature and the low order cubature on `domain`. The function `fct` m
 the addition. Note that there is no check, beyond compatibility of dimension and type, that
 the embedded cubature is for the right domain.
 """
-function (ec::EmbeddedCubature{H,L,D,T})(
+function (ec::EmbeddedCubature{D,T})(
     fct, domain::AbstractDomain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
-) where {H,L,D,T}
+) where {D,T}
+    H, L = length(ec.weights_high), length(ec.weights_low)
     μ = abs_det_jac(domain)
     Φ = map_from_reference(domain)
 

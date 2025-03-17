@@ -16,6 +16,11 @@ reference domain (use the [`reference_domain`](@ref) function to get the referen
 - `order_high::Int`: order of the high order cubature.
 - `weights_low::Vector{String}`: the cubature weights for the low order cubature.
 - `order_low::Int`: order of the low order cubature.
+
+## Invariants (check at construction):
+- `length(nodes) == length(weights_high)`
+- `length(weights_high) ≥ length(weights_low)`
+- `order_high ≥ order_low`
 """
 struct TabulatedEmbeddedCubature{D}
     description::String

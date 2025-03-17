@@ -2,7 +2,7 @@
     integrate(
         fct,
         domain::Domain{D,T};
-        embedded_cubature::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
+        embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
         subdiv_algo=default_subdivision(domain),
         buffer=nothing,
         norm=x -> LinearAlgebra.norm(x, Inf),
@@ -22,7 +22,7 @@ an error estimate.
   d-dimensional [`simplex`](@ref).
 
 ## Optional arguments
-- `embedded_cubature::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain)`: the embedded cubature,
+- `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded cubature,
    each supported domain has a [`default_embedded_cubature`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
@@ -37,14 +37,14 @@ an error estimate.
 function integrate(
     fct,
     domain::AbstractDomain{D,T};
-    embedded_cubature::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
+    embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
     norm=x -> LinearAlgebra.norm(x, Inf),
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
-) where {H,L,D,T}
+) where {D,T}
     return _integrate(
         fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
     )

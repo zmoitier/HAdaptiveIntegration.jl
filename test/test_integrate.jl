@@ -17,12 +17,12 @@ import HAdaptiveIntegration as hai
     @test typeof(tec) <: hai.TabulatedEmbeddedCubature
 
     ec = hai.embedded_cubature(Float64, tec)
-    @test typeof(ec) <: hai.EmbeddedCubature{3,1,1,Float64}
+    @test typeof(ec) <: hai.EmbeddedCubature{1,Float64}
 
     ec_ref = hai.embedded_cubature(
         [[0.5], [(1 - √(3 / 5)) / 2], [(1 + √(3 / 5)) / 2]], [4 / 9, 5 / 18, 5 / 18], [1.0]
     )
-    @test typeof(ec_ref) <: hai.EmbeddedCubature{3,1,1,Float64}
+    @test typeof(ec_ref) <: hai.EmbeddedCubature{1,Float64}
 
     @test ec.nodes ≈ ec_ref.nodes
     @test ec.weights_high ≈ ec_ref.weights_high

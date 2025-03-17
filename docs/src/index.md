@@ -7,7 +7,7 @@ CurrentModule = HAdaptiveIntegration
 ## Overview
 
 `HAdaptiveIntegration.jl` is a Julia package for approximating integrals of functions over
-various predefined [`Domain`](@ref)s. It uses *embedded cubature* rules to build error
+various predefined [`AbstractDomain`](@ref)s. It uses *embedded cubature* rules to build error
 estimates, and refines the integration domain by splitting its mesh elements until a certain
 tolerance is reached. Features include:
 
@@ -40,7 +40,7 @@ approximate
 I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
 
-where ``\Omega \subset \mathbb{R}^d`` is a [`Domain`](@ref) object, and
+where ``\Omega \subset \mathbb{R}^d`` is a [`AbstractDomain`](@ref) object, and
 ``f \colon \mathbb{R}^d \to \mathbb{F}`` is a function. Here is a simple example:
 
 ```@example quickstart

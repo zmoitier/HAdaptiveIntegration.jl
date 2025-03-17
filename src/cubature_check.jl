@@ -28,7 +28,7 @@ end
 
 """
     check_order(
-        ec::EmbeddedCubature{H,L,D,T},
+        ec::EmbeddedCubature{D,T},
         domain::Domain{D,T},
         order_high::Int,
         order_low::Int;
@@ -41,13 +41,13 @@ Return 0 if the embedded cubature on the **reference** domain of `domain` integr
 `order_low` for the low order cubature. Else return 1.
 """
 function check_order(
-    ec::EmbeddedCubature{H,L,D,T},
+    ec::EmbeddedCubature{D,T},
     domain::AbstractDomain{D,T},
     order_high::Int,
     order_low::Int;
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-) where {H,L,D,T}
+) where {D,T}
     val_ref = integral_monomial(domain, order_high)
 
     val_lo::Vector{Vector{T}} = []
@@ -85,7 +85,9 @@ function check_order(
     return 0
 end
 
-function (ec::EmbeddedCubature{H,L,D,T})(fct) where {H,L,D,T}
+function (ec::EmbeddedCubature{D,T})(fct) where {D,T}
+    H, L = length(ec.weights_high), length(ec.weights_low)
+
     v = fct(ec.nodes[1])
     I_low = v * ec.weights_low[1]
     I_high = v * ec.weights_high[1]
