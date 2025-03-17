@@ -43,7 +43,7 @@ function integrate(
     norm=x -> LinearAlgebra.norm(x, Inf),
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
-    maxsubdiv=512 * 2^D,
+    maxsubdiv=8192 * 2^D,
 ) where {H,L,D,T}
     return _integrate(
         fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
