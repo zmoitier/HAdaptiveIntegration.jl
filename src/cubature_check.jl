@@ -142,16 +142,12 @@ function integral_monomial_orthotope(d::Int, tdm::Int)
 
     indexes = [[(i,) => 1//(i + 1)] for i in 0:tdm]
 
-    if d == 1
-        return indexes
-    end
-
     for n in 2:d
-        tmp::Vector{Vector{Pair{NTuple{n,Int},Rational{Int}}}} = [[] for _ in 0:tdm]
-        for (i, vec) in enumerate(indexes)
-            for (idx, val) in vec
-                for k in 0:(tdm - i + 1)
-                    push!(tmp[i + k], (k, idx...) => val//(k + 1))
+        tmp = [Vector{Pair{NTuple{n,Int},Rational{Int}}}() for _ in 0:tdm]
+        for (td, idx_val) in zip(Iterators.countfrom(0), indexes)
+            for (idx, val) in idx_val
+                for k in 0:(tdm - td)
+                    push!(tmp[td + 1 + k], (k, idx...) => val//(k + 1))
                 end
             end
         end
@@ -168,19 +164,15 @@ function integral_monomial_simplex(d::Int, tdm::Int)
 
     indexes = [[(i,) => 1//prod((i + 1):(i + d))] for i in 0:tdm]
 
-    if d == 1
-        return indexes
-    end
-
     for n in 2:d
-        tmp::Vector{Vector{Pair{NTuple{n,Int},Rational{Int}}}} = [[] for _ in 0:tdm]
-        for (i, vec) in enumerate(indexes)
-            for (idx, val) in vec
-                push!(tmp[i], (0, idx...) => val)
+        tmp = [Vector{Pair{NTuple{n,Int},Rational{Int}}}() for _ in 0:tdm]
+        for (td, idx_val) in zip(Iterators.countfrom(0), indexes)
+            for (idx, val) in idx_val
+                push!(tmp[td + 1], (0, idx...) => val)
                 v = 1
-                for k in 1:(tdm - i + 1)
-                    v *= k//(k + i - 1 + d)
-                    push!(tmp[i + k], (k, idx...) => val * v)
+                for k in 1:(tdm - td)
+                    v *= k//(k + td + d)
+                    push!(tmp[td + 1 + k], (k, idx...) => val * v)
                 end
             end
         end
