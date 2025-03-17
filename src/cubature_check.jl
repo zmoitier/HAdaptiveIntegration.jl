@@ -12,7 +12,7 @@ oder cubature and `order_low` for the low order cubature. Else return 1.
 """
 function check_order(
     tec::TabulatedEmbeddedCubature,
-    domain::Domain{D,T};
+    domain::AbstractDomain{D,T};
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
 ) where {D,T}
@@ -42,7 +42,7 @@ Return 0 if the embedded cubature on the **reference** domain of `domain` integr
 """
 function check_order(
     ec::EmbeddedCubature{H,L,D,T},
-    domain::Domain{D,T},
+    domain::AbstractDomain{D,T},
     order_high::Int,
     order_low::Int;
     atol=zero(T),

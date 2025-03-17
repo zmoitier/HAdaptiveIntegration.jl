@@ -6,11 +6,19 @@ function _type_float(containers...)
 end
 
 """
-    abstract type Domain{D,T<:Real}
+    abstract type AbstractDomain{D,T<:Real}
 
-Abstract type for integration on domains in `D` dimensions with value type `T`.
+Abstract type for domain's integration in `D` dimensions.
+
+## Mandatory methods:
+- [`map_from_reference`](@ref)
+- [`abs_det_jac`](@ref)
+
+## Useful (but non-mandatory) methods:
+- [`reference_domain`](@ref)
+- [`map_to_reference`](@ref)
 """
-abstract type Domain{D,T<:Real} end
+abstract type AbstractDomain{D,T<:Real} end
 
 """
     struct Orthotope{D,T} <: Domain{D,T}
@@ -22,7 +30,7 @@ Axes-aligned Orthotope in `D` dimensions, with value type `T`, given by two poin
 - `low_corner::SVector{D,T}`: the low corner.
 - `high_corner::SVector{D,T}`: the high corner.
 """
-struct Orthotope{D,T} <: Domain{D,T}
+struct Orthotope{D,T} <: AbstractDomain{D,T}
     low_corner::SVector{D,T}
     high_corner::SVector{D,T}
 end
@@ -124,7 +132,7 @@ A simplex in `D` dimensions with `N=D+1` vertices of value type `T`.
 ## Fields:
 - `vertices::SVector{N,SVector{D,T}}`: vertices of the simplex.
 """
-struct Simplex{D,T,N} <: Domain{D,T}
+struct Simplex{D,T,N} <: AbstractDomain{D,T}
     vertices::SVector{N,SVector{D,T}}
 end
 

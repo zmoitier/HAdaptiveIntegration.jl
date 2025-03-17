@@ -11,7 +11,7 @@ volume of the domain else return 1.
 """
 function check_subdivision(
     subdiv_algo,
-    domain::Domain{D,T};
+    domain::AbstractDomain{D,T};
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
 ) where {D,T}

@@ -1,38 +1,4 @@
 """
-    struct TabulatedEmbeddedCubature
-
-An embedded cubature rule consisting of a high order cubature rule and a low order cubature
-rule. Note that the low order cubature uses `nodes[1:L]` as its nodes where `L` is the
-length of the `weights_low`. The cubature nodes and weights are assume to be for the
-reference domain.
-
-## Fields:
-- `description::String`: description of the embedded cubature.
-- `domain::String`: domain of the cubature, the possible values are "reference segment",
-  "reference rectangle", "reference cuboid", "reference triangle", and "reference
-  tetrahedron".
-- `reference::String`: where the values are found.
-- `nb_significant_digits::Int`: number of significant digits on the node and weight values,
-  `10^-nb_significant_digits` give the relative precision of the values.
-- `nodes::Vector{Vector{String}}`: the cubature nodes.
-- `weights_high::Vector{String}`: the cubature weights for the high order cubature.
-- `order_high::Int`: order of the high order cubature.
-- `weights_low::Vector{String}`: the cubature weights for the low order cubature.
-- `order_low::Int`: order of the low order cubature.
-"""
-@kwdef struct TabulatedEmbeddedCubature
-    description::String
-    domain::String
-    reference::String
-    nb_significant_digits::Int
-    nodes::Vector{Vector{String}}
-    weights_high::Vector{String}
-    order_high::Int
-    weights_low::Vector{String}
-    order_low::Int
-end
-
-"""
     struct EmbeddedCubature{H,L,D,T}
 
 An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low
@@ -146,7 +112,7 @@ the addition. Note that there is no check, beyond compatibility of dimension and
 the embedded cubature is for the right domain.
 """
 function (ec::EmbeddedCubature{H,L,D,T})(
-    fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
+    fct, domain::AbstractDomain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
 ) where {H,L,D,T}
     μ = abs_det_jac(domain)
     Φ = map_from_reference(domain)

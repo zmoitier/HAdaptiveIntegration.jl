@@ -36,7 +36,7 @@ an error estimate.
 """
 function integrate(
     fct,
-    domain::Domain{D,T};
+    domain::AbstractDomain{D,T};
     embedded_cubature::EmbeddedCubature{H,L,D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
@@ -106,7 +106,7 @@ if called multiple times.
 """
 function allocate_buffer(
     fct, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
-) where {DOM<:Domain}
+) where {DOM<:AbstractDomain}
     # Type of element that will be returned by the cubature. Pay the cost of single call to
     # figure this out.
     I, E = ec(fct, domain)
