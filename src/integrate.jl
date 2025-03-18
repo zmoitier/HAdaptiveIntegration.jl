@@ -8,7 +8,7 @@
         norm=x -> LinearAlgebra.norm(x, Inf),
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
-        maxsubdiv=512 * 2^D,
+        maxsubdiv=8192 * 2^D,
     ) where {H,L,D,T}
 
 Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
@@ -32,7 +32,7 @@ an error estimate.
 - `norm=x -> LinearAlgebra.norm(x, Inf)`: norm used to estimate the error.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
-- `maxsubdiv=512 * 2^D`: maximum number of subdivision.
+- `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
 """
 function integrate(
     fct,
