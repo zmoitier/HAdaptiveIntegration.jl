@@ -29,7 +29,7 @@ struct EmbeddedCubature{D,T}
 end
 
 """
-    embedded_cubature(tex::TabulatedEmbeddedCubature)
+    embedded_cubature(tec::TabulatedEmbeddedCubature)
     embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
 
     embedded_cubature(gm::GrundmannMoeller)
@@ -38,12 +38,9 @@ end
     embedded_cubature(nodes, weights_high, weights_low)
     embedded_cubature(T::DataType, nodes, weights_high, weights_low)
 
-- Return the embedded cubature with value type `T` from a `TabulatedEmbeddedCubature`.
-
-- Return the embedded cubature of Grundmann and Möller.
-
-- Return an embedded cubature form a vector of nodes and two vector of weights for the high
-order and low order cubature.
+Construct an embedded cubature from a [`TabulatedEmbeddedCubature`](@ref), a
+[`GrundmannMoeller`](@ref), cubature, or from a vector of nodes and two vectors of weights
+for the high and low order cubature, with element type `T`.
 """
 function embedded_cubature(T::DataType, nodes, weights_high, weights_low)
     @assert allequal(length, nodes) "all nodes should have the same length."
