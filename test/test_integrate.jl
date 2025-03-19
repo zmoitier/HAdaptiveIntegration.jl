@@ -16,7 +16,7 @@ import HAdaptiveIntegration as hai
     )
     @test typeof(tec) <: hai.TabulatedEmbeddedCubature{hai.Segment}
 
-    ec = hai.embedded_cubature(Float64, tec)
+    ec = hai.embedded_cubature(tec)
     @test typeof(ec) <: hai.EmbeddedCubature{1,Float64}
 
     ec_ref = hai.embedded_cubature(
