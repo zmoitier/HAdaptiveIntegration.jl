@@ -1,10 +1,13 @@
 """
     abstract type AbstractDomain{D,T}
 
-Abstract type for integration domains' in `D` dimensions with element type `T`.
+Abstract type for integration domains' in `D` dimensions with element type `T`. 
+
+## Type Parameters:
+- `D`: dimension of the domain. 
+- `T`: element type of the domain.
 
 ## Mandatory methods:
-- [`element_type`](@ref)
 - [`map_from_reference`](@ref)
 - [`abs_det_jac`](@ref)
 
@@ -13,6 +16,15 @@ Abstract type for integration domains' in `D` dimensions with element type `T`.
 - [`map_to_reference`](@ref)
 """
 abstract type AbstractDomain{D,T} end
+
+"""
+    dimension(::Type{DOM}) where {DOM<:AbstractDomain{D}}
+
+Return the dimension `D` of the given domain `DOM`.
+"""
+dimension(::Type{AbstractDomain{D,T}}) where {D,T} = D
+dimension(::Type{AbstractDomain{D}}) where {D} = D
+dimension(::Type{DOM}) where {DOM<:AbstractDomain} = dimension(supertype(DOM))
 
 """
     struct Orthotope{D,T} <: AbstractDomain{D,T}
@@ -172,10 +184,10 @@ Return the reference `D`-dimensional simplex with element type `T`, which is the
 of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
 """
 function reference_simplex(T::DataType, D::Int)
-    points = [
+    vertices = [
         zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
     ]
-    return Simplex(SVector{D + 1}(points))
+    return Simplex(SVector{D + 1}(vertices))
 end
 reference_simplex(D::Int) = reference_simplex(float(Int), D)
 
@@ -218,17 +230,6 @@ function tetrahedron(T::DataType, a, b, c, d)
     return simplex(T, a, b, c, d)
 end
 tetrahedron(a, b, c, d) = tetrahedron(promote_to_float(a, b, c, d), a, b, c, d)
-
-"""
-    dimension(::Type{DOM}) where {DOM<:AbstractDomain{D}}
-
-Return the dimensionality `D` of the given domain type `DOM`.
-"""
-dimension(::Type{Orthotope{D,T}}) where {D,T} = D
-dimension(::Type{Orthotope{D}}) where {D} = D
-dimension(::Type{Simplex{D,N,T}}) where {D,N,T} = D
-dimension(::Type{Simplex{D,N}}) where {D,N} = D
-dimension(::Type{Simplex{D}}) where {D} = D
 
 """
     map_from_reference(domain::DOM) where {DOM<:AbstractDomain}

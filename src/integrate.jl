@@ -61,11 +61,11 @@ function _integrate(
     rtol,
     maxsubdiv,
 ) where {FCT,DOM}
-    nbsubdiv = 0
+    nb_subdiv = 0
     I, E = ec(fct, domain, norm)
 
     # a quick check to see if splitting is really needed
-    if (E < atol) || (E < rtol * norm(I)) || (nbsubdiv ≥ maxsubdiv)
+    if (E < atol) || (E < rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
         return I, E
     end
 
@@ -80,21 +80,22 @@ function _integrate(
     end
 
     push!(heap, (domain, I, E))
-    while (E > atol) && (E > rtol * norm(I)) && (nbsubdiv < maxsubdiv)
-        sc, Ic, Ec = pop!(heap)
-        I -= Ic
-        E -= Ec
-        for child in subdiv_algo(sc)
-            I_new, E_new = ec(fct, child, norm)
-            I += I_new
-            E += E_new
-            push!(heap, (child, I_new, E_new))
+    while (E > atol) && (E > rtol * norm(I)) && (nb_subdiv < maxsubdiv)
+        domain, I_dom, E_dom = pop!(heap)
+        I -= I_dom
+        E -= E_dom
+        for child in subdiv_algo(domain)
+            I_child, E_child = ec(fct, child, norm)
+            I += I_child
+            E += E_child
+            push!(heap, (child, I_child, E_child))
         end
-        nbsubdiv += 1
+        nb_subdiv += 1
     end
 
-    (nbsubdiv ≥ maxsubdiv) &&
+    if nb_subdiv ≥ maxsubdiv
         @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
+    end
 
     return I, E
 end

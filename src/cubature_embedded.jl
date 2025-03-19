@@ -3,7 +3,7 @@
 
 An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low
 order cubature rule with `L` nodes. Note that the low order cubature uses `nodes[1:L]` as
-its nodes. The cubature nodes and weights are assume to be for the reference domain.
+its nodes. The cubature nodes and weights are assumed to be for the reference domain.
 
 ## Fields:
 - `nodes::Vector{SVector{D,T}}`: the cubature nodes.
@@ -22,8 +22,8 @@ struct EmbeddedCubature{D,T}
     function EmbeddedCubature(
         nodes::Vector{SVector{D,T}}, weights_high::Vector{T}, weights_low::Vector{T}
     ) where {D,T}
-        @assert length(nodes) == length(weights_high)
-        @assert length(weights_high) ≥ length(weights_low)
+        @assert length(nodes) == length(weights_high) "The number of nodes must match the number of high-order weights."
+        @assert length(weights_high) ≥ length(weights_low) "weights_high must have a length greater than or equal to weights_low."
         return new{D,T}(nodes, weights_high, weights_low)
     end
 end
@@ -56,7 +56,7 @@ function embedded_cubature(
     T::DataType, tec::TabulatedEmbeddedCubature{DOM}
 ) where {DOM<:AbstractDomain}
     if 10 * eps(T) < 10.0^(-tec.nb_significant_digits)
-        @warn "the embedded cubature `$(tec.description)` has less precision than type $T."
+        @warn "The embedded cubature `$(tec.description)` has fewer significant digits than type $T, which may lead to numerical inaccuracies in computations."
     end
     D = dimension(DOM)
     return EmbeddedCubature(

@@ -165,8 +165,9 @@ generated for each combination of `D` and `T`.
 """
 @generated function subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
     # vertices of the reference simplex
-    vertices = [zeros(SVector{D,T})]
-    append!(vertices, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
+    vertices = [
+        zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
+    ]
 
     # valid permutations of the vertices
     function generate_valid_permutations(n::Int, k::Int)

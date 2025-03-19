@@ -8,7 +8,7 @@
 
 Return 0 if the tabulated embedded cubature on the **reference** domain of `domain`
 integrate exactly (within tolerance) the monomials up to degree `order_high` for the high
-oder cubature and `order_low` for the low order cubature. Else return 1.
+order cubature and `order_low` for the low order cubature. Else return 1.
 """
 function check_order(
     tec::TabulatedEmbeddedCubature,
@@ -37,7 +37,7 @@ end
     ) where {D,T}
 
 Return 0 if the embedded cubature on the **reference** domain of `domain` integrate exactly
-(within tolerance) the monomials up to degree `order_high` for the high oder cubature and
+(within tolerance) the monomials up to degree `order_high` for the high order cubature and
 `order_low` for the low order cubature. Else return 1.
 """
 function check_order(
@@ -111,12 +111,12 @@ function _isapprox(
     for (i, (idx_ref, num)) in enumerate(zip(val_ref, val_num))
         for ((_, vr), vn) in zip(idx_ref, num)
             if !isapprox(vn, vr; atol=atol, rtol=rtol)
-                @error "fail to integrate within tolerance at total degree = $(i-1)"
+                @error "fail to integrate within tolerance at total degree = $(i-1). Computed value: $vn, Reference value: $vr"
                 return 1
             end
         end
     end
-    @info "integrate within tolerance up to total degree = $(length(val_num) - 1)"
+    @info "Integration results are within the specified tolerances (atol=$(atol), rtol=$(rtol)) for all monomials up to total degree $(length(val_num) - 1)"
     return 0
 end
 
@@ -132,7 +132,6 @@ multi-index of the monomial and `Rational{Int}` is the value of the integral.
 function integral_monomial(::Orthotope{D,T}, total_degree_max::Int) where {D,T}
     return integral_monomial_orthotope(D, total_degree_max)
 end
-
 function integral_monomial(::Simplex{D,N,T}, total_degree_max::Int) where {D,N,T}
     return integral_monomial_simplex(D, total_degree_max)
 end
