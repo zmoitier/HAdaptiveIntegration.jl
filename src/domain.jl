@@ -140,7 +140,7 @@ function cuboid(low_corner, high_corner)
 end
 
 """
-    struct Simplex{D,N,T} <: AbstractDomain{D}
+    struct Simplex{D,N,T} <: AbstractDomain{D,T}
 
 A simplex in `D` dimensions with `N=D+1` vertices of element type `T`.
 
