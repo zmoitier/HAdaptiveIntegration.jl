@@ -1,20 +1,20 @@
 """
-    check_subdivision(
-        subdiv_algo,
-        domain::Domain{D,T};
-        atol=zero(T),
-        rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-    ) where {D,T}
+    check_subdivision(subdiv_algo, domain::AbstractDomain; atol=nothing, rtol=nothing)
 
 Return 0 if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the
 volume of the domain else return 1.
 """
-function check_subdivision(
-    subdiv_algo,
-    domain::AbstractDomain{D,T};
-    atol=zero(T),
-    rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-) where {D,T}
+function check_subdivision(subdiv_algo, domain::AbstractDomain; atol=nothing, rtol=nothing)
+    T = element_type(domain)
+
+    if isnothing(atol)
+        atol = zero(T)
+    end
+
+    if isnothing(rtol)
+        rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T)
+    end
+
     sub_domains = subdiv_algo(domain)
     if !isapprox(sum(abs_det_jac.(sub_domains)), abs_det_jac(domain); atol=atol, rtol=rtol)
         @error "`$(Symbol(subdiv_algo))` do not partition the domain within the tolerance."
@@ -226,7 +226,7 @@ Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Fr
 algorithm and the optimal number of congruence
 classes](https://link.springer.com/article/10.1007/s002110050475).
 """
-function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
+function subdivide_simplex(s::Simplex{D,N,T}) where {D,N,T}
     refs = subdivide_reference_simplex(Val(D), T)
     f = map_from_reference(s)
     map(refs) do ref

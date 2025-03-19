@@ -28,6 +28,8 @@ struct EmbeddedCubature{D,T}
     end
 end
 
+element_type(::EmbeddedCubature{D,T}) where {D,T} = T
+
 """
     embedded_cubature(tec::TabulatedEmbeddedCubature)
     embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
@@ -49,8 +51,8 @@ function embedded_cubature(T::DataType, nodes, weights_high, weights_low)
     return EmbeddedCubature(SVector{D,T}.(nodes), weights_high, weights_low)
 end
 function embedded_cubature(nodes, weights_high, weights_low)
-    T_nodes = _type_float(nodes...)
-    T_weights = _type_float(weights_high, weights_low)
+    T_nodes = promote_to_float(nodes...)
+    T_weights = promote_to_float(weights_high, weights_low)
     T = promote_type(T_nodes, T_weights)
     return embedded_cubature(float(T), nodes, weights_high, weights_low)
 end
@@ -67,16 +69,6 @@ function embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
     )
 end
 embedded_cubature(tec::TabulatedEmbeddedCubature) = embedded_cubature(float(Int), tec)
-
-"""
-   struct GrundmannMoeller
-
-Cubature rule for a `dim`-simplex of degree `deg`.
-"""
-struct GrundmannMoeller
-    dim::Int
-    deg::Int
-end
 
 function embedded_cubature(T::DataType, gm::GrundmannMoeller)
     vol = 1 / T(factorial(gm.dim)) # volume of the reference simplex
@@ -109,7 +101,7 @@ the addition. Note that there is no check, beyond compatibility of dimension and
 the embedded cubature is for the right domain.
 """
 function (ec::EmbeddedCubature{D,T})(
-    fct, domain::AbstractDomain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
+    fct, domain::AbstractDomain{D}, norm=x -> LinearAlgebra.norm(x, Inf)
 ) where {D,T}
     H, L = length(ec.weights_high), length(ec.weights_low)
     μ = abs_det_jac(domain)

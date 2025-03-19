@@ -21,27 +21,27 @@ import HAdaptiveIntegration as hai
     end
 
     @testset "Simplex" begin
-        @test typeof(hai.simplex((0,), (1,))) <: hai.Simplex{1,Float64,2}
-        @test typeof(hai.simplex([0], [1])) <: hai.Simplex{1,Float64,2}
-        @test typeof(hai.simplex(SVector(0), SVector(1))) <: hai.Simplex{1,Float64,2}
-        @test typeof(hai.simplex((big"0",), (big"1",))) <: hai.Simplex{1,BigFloat,2}
+        @test typeof(hai.simplex((0,), (1,))) <: hai.Simplex{1,2,Float64}
+        @test typeof(hai.simplex([0], [1])) <: hai.Simplex{1,2,Float64}
+        @test typeof(hai.simplex(SVector(0), SVector(1))) <: hai.Simplex{1,2,Float64}
+        @test typeof(hai.simplex((big"0",), (big"1",))) <: hai.Simplex{1,2,BigFloat}
 
         r = hai.reference_simplex(Int, 4)
-        @test typeof(r) <: hai.Simplex{4,Int,5}
+        @test typeof(r) <: hai.Simplex{4,5,Int}
         @test r.vertices[1] == SVector(0, 0, 0, 0)
         @test r.vertices[2] == SVector(1, 0, 0, 0)
         @test r.vertices[3] == SVector(0, 1, 0, 0)
         @test r.vertices[4] == SVector(0, 0, 1, 0)
         @test r.vertices[5] == SVector(0, 0, 0, 1)
 
-        @test typeof(hai.triangle((2, 0), (0, 2), (0, 0))) <: hai.Simplex{2,Float64,3}
+        @test typeof(hai.triangle((2, 0), (0, 2), (0, 0))) <: hai.Simplex{2,3,Float64}
         @test typeof(hai.tetrahedron((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
-            hai.Simplex{3,Float64,4}
+            hai.Simplex{3,4,Float64}
         @test typeof(
             hai.simplex(
                 (2, 0, 0, 0), (0, 2, 0, 0), (0, 0, 2, 0), (0, 0, 0, 2), (0, 0, 0, 0)
             ),
-        ) <: hai.Simplex{4,Float64,5}
+        ) <: hai.Simplex{4,5,Float64}
     end
 end
 
@@ -62,6 +62,15 @@ end
         @test Ψ(SVector(-1, -1, -1, 1)) ≈ SVector(0, 0, 0, 1)
 
         @test hai.abs_det_jac(h) ≈ 16
+
+        @test typeof(hai.reference_domain(hai.Segment)) <: hai.Orthotope{1,Float64}
+        @test typeof(hai.reference_domain(hai.Segment{Int})) <: hai.Orthotope{1,Int}
+        @test typeof(hai.reference_domain(hai.Rectangle)) <: hai.Orthotope{2,Float64}
+        @test typeof(hai.reference_domain(hai.Rectangle{Int})) <: hai.Orthotope{2,Int}
+        @test typeof(hai.reference_domain(hai.Cuboid)) <: hai.Orthotope{3,Float64}
+        @test typeof(hai.reference_domain(hai.Cuboid{Int})) <: hai.Orthotope{3,Int}
+        @test typeof(hai.reference_domain(hai.Orthotope{4})) <: hai.Orthotope{4,Float64}
+        @test typeof(hai.reference_domain(hai.Orthotope{4,Int})) <: hai.Orthotope{4,Int}
     end
 
     @testset "Simplex" begin
@@ -84,6 +93,15 @@ end
         @test Ψ(SVector(0, 0, 0, 0)) ≈ SVector(0, 0, 0, 1)
 
         @test hai.abs_det_jac(s) ≈ 16
+
+        @test typeof(hai.reference_domain(hai.Triangle)) <: hai.Simplex{2,3,Float64}
+        @test typeof(hai.reference_domain(hai.Triangle{Int})) <: hai.Simplex{2,3,Int}
+        @test typeof(hai.reference_domain(hai.Tetrahedron)) <: hai.Simplex{3,4,Float64}
+        @test typeof(hai.reference_domain(hai.Tetrahedron{Int})) <: hai.Simplex{3,4,Int}
+        @test typeof(hai.reference_domain(hai.Simplex{4})) <: hai.Simplex{4,5,Float64}
+        @test typeof(hai.reference_domain(hai.Simplex{4,Int})) <: hai.Simplex{4,5,Int}
+        @test typeof(hai.reference_domain(hai.Simplex{4,5,Float64})) <:
+            hai.Simplex{4,5,Float64}
     end
 end
 

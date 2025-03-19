@@ -1,4 +1,14 @@
 """
+    abstract type AbstractRule{DOM<:AbstractDomain}
+
+Abstract type for a cubature rule on a domain `DOM`.
+
+## Mandatory methods:
+- [`embedded_cubature`](@ref)
+"""
+abstract type AbstractRule{DOM<:AbstractDomain} end
+
+"""
     @kwdef struct TabulatedEmbeddedCubature
 
 An embedded cubature rule consisting of a high order cubature rule and a low order cubature
@@ -22,7 +32,7 @@ reference domain (use the [`reference_domain`](@ref) function to get the referen
 - `length(weights_high) ≥ length(weights_low)`
 - `order_high ≥ order_low`
 """
-struct TabulatedEmbeddedCubature{D}
+struct TabulatedEmbeddedCubature{D} # {D,DOM<:AbstractDomain{D,T}} <: AbstractRule{DOM}
     description::String
     reference::String
     nb_significant_digits::Int
@@ -41,7 +51,7 @@ struct TabulatedEmbeddedCubature{D}
         order_high::Int,
         weights_low::Vector{String},
         order_low::Int,
-    ) where {D}
+    ) where {D} # {DOM<:AbstractDomain}
         @assert length(nodes) == length(weights_high)
         @assert length(weights_high) ≥ length(weights_low)
         @assert order_high ≥ order_low
@@ -56,4 +66,14 @@ struct TabulatedEmbeddedCubature{D}
             order_low,
         )
     end
+end
+
+"""
+   struct GrundmannMoeller
+
+Cubature rule for a `dim`-simplex of degree `deg`.
+"""
+struct GrundmannMoeller # {D,N,T} <: AbstractRule{Simplex{D,N,T}}
+    dim::Int
+    deg::Int
 end

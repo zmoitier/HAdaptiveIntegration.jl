@@ -1,7 +1,7 @@
 """
     integrate(
         fct,
-        domain::Domain{D,T};
+        domain::AbstractDomain{D};
         embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
         subdiv_algo=default_subdivision(domain),
         buffer=nothing,
@@ -17,9 +17,9 @@ an error estimate.
 ## Arguments
 - `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
    support the multiplication by a scalar of type `T` and the addition.
-- `domain::Domain{D,T}`: the integration domain. Currently, we support [`segment`](@ref),
-  [`triangle`](@ref), [`rectangle`](@ref), [`tetrahedron`](@ref), [`cuboid`](@ref), and
-  d-dimensional [`simplex`](@ref).
+- `domain::AbstractDomain{D}`: the integration domain. Currently, we support
+  [`segment`](@ref), [`triangle`](@ref), [`rectangle`](@ref), [`tetrahedron`](@ref),
+  [`cuboid`](@ref), and d-dimensional [`simplex`](@ref).
 
 ## Optional arguments
 - `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded cubature,
@@ -36,15 +36,25 @@ an error estimate.
 """
 function integrate(
     fct,
-    domain::AbstractDomain{D,T};
-    embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
+    domain::AbstractDomain{D};
+    embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
     norm=x -> LinearAlgebra.norm(x, Inf),
-    atol=zero(T),
-    rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+    atol=nothing,
+    rtol=nothing,
     maxsubdiv=8192 * 2^D,
-) where {D,T}
+) where {D}
+    T = element_type(embedded_cubature)
+
+    if isnothing(atol)
+        atol = zero(T)
+    end
+
+    if isnothing(rtol)
+        rtol = (atol > zero(T)) ? zero(T) : √eps(T)
+    end
+
     return _integrate(
         fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
     )
@@ -71,8 +81,9 @@ function _integrate(
 
     # split is needed, so initialize the heap
     heap = if isnothing(buffer)
-        ord = Base.Order.By(el -> -el[3])
-        BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(ord)
+        BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(
+            Base.Order.By(last, Base.Order.Reverse)
+        )
     else
         empty!(buffer.valtree)
         buffer
@@ -101,18 +112,24 @@ end
 """
     allocate_buffer(fct, domain, ec=default_embedded_cubature(domain))
 
-Return a buffer which can be pass to the [`integrate`](@ref) function for improve allocation
-if called multiple times.
+Allocate and return a buffer that can be passed to the [`integrate`](@ref) function 
+to improve performance by reducing memory allocations when `integrate` is called 
+multiple times.
 """
 function allocate_buffer(
     fct, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
 ) where {DOM<:AbstractDomain}
-    # Type of element that will be returned by the cubature. Pay the cost of single call to
-    # figure this out.
+    # Determine the type of elements returned by the embedded cubature.
     I, E = ec(fct, domain)
-    # The heap of adaptive cubature have elements of the form (domain,I,E), where I and E
-    # are the value and error estimate over `domain`. The ordering used is based on the
-    # maximum error.
-    heap = BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(el -> -el[3]))
+
+    # Create a binary heap to store elements of the form (domain, I, E), where:
+    # - `domain` is the current subdomain being processed.
+    # - `I` is the integral value over the subdomain.
+    # - `E` is the error estimate over the subdomain.
+    # The heap is ordered by the maximum error (E) in descending order.
+    heap = BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(
+        Base.Order.By(last, Base.Order.Reverse)
+    )
+
     return heap
 end

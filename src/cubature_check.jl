@@ -1,21 +1,25 @@
 """
     check_order(
-        tec::TabulatedEmbeddedCubature,
-        domain::Domain{D,T};
-        atol=zero(T),
-        rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-    ) where {D,T}
+        tec::TabulatedEmbeddedCubature, domain::AbstractDomain; atol=nothing, rtol=nothing
+    )
 
 Return 0 if the tabulated embedded cubature on the **reference** domain of `domain`
 integrate exactly (within tolerance) the monomials up to degree `order_high` for the high
 oder cubature and `order_low` for the low order cubature. Else return 1.
 """
 function check_order(
-    tec::TabulatedEmbeddedCubature,
-    domain::AbstractDomain{D,T};
-    atol=zero(T),
-    rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-) where {D,T}
+    tec::TabulatedEmbeddedCubature, domain::AbstractDomain; atol=nothing, rtol=nothing
+)
+    T = element_type(domain)
+
+    if isnothing(atol)
+        atol = zero(T)
+    end
+
+    if isnothing(rtol)
+        rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T)
+    end
+
     return check_order(
         embedded_cubature(T, tec),
         domain,
@@ -29,12 +33,12 @@ end
 """
     check_order(
         ec::EmbeddedCubature{D,T},
-        domain::Domain{D,T},
+        domain::AbstractDomain{D},
         order_high::Int,
         order_low::Int;
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-    ) where {H,L,D,T}
+    ) where {D,T}
 
 Return 0 if the embedded cubature on the **reference** domain of `domain` integrate exactly
 (within tolerance) the monomials up to degree `order_high` for the high oder cubature and
@@ -42,7 +46,7 @@ Return 0 if the embedded cubature on the **reference** domain of `domain` integr
 """
 function check_order(
     ec::EmbeddedCubature{D,T},
-    domain::AbstractDomain{D,T},
+    domain::AbstractDomain{D},
     order_high::Int,
     order_low::Int;
     atol=zero(T),
@@ -121,7 +125,7 @@ function _isapprox(
 end
 
 """
-    integral_monomial(domain::Domain{D,T}, tot_deg_max::Int) where {D,T}
+    integral_monomial(domain::DOM, tot_deg_max::Int) where {DOM<:AbstractDomain}
 
 Return the values of monomial's integral over the **reference** domain. It return a
 `Vector{ Vector{ Pair{ Ntuple{dim,Int}, Rational{Int} } } }`. The outer vector is index by
@@ -133,7 +137,7 @@ function integral_monomial(::Orthotope{D,T}, total_degree_max::Int) where {D,T}
     return integral_monomial_orthotope(D, total_degree_max)
 end
 
-function integral_monomial(::Simplex{D,T,N}, total_degree_max::Int) where {D,T,N}
+function integral_monomial(::Simplex{D,N,T}, total_degree_max::Int) where {D,N,T}
     return integral_monomial_simplex(D, total_degree_max)
 end
 
