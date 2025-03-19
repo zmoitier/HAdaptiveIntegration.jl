@@ -1,10 +1,10 @@
 """
     abstract type AbstractDomain{D,T}
 
-Abstract type for integration domains' in `D` dimensions with element type `T`. 
+Abstract type for integration domains' in `D` dimensions with element type `T`.
 
 ## Type Parameters:
-- `D`: dimension of the domain. 
+- `D`: dimension of the domain.
 - `T`: element type of the domain.
 
 ## Mandatory methods:

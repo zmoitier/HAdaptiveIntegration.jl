@@ -103,8 +103,8 @@ end
 """
     allocate_buffer(fct, domain, ec=default_embedded_cubature(domain))
 
-Allocate and return a buffer that can be passed to the [`integrate`](@ref) function 
-to improve performance by reducing memory allocations when `integrate` is called 
+Allocate and return a buffer that can be passed to the [`integrate`](@ref) function
+to improve performance by reducing memory allocations when `integrate` is called
 multiple times.
 """
 function allocate_buffer(
