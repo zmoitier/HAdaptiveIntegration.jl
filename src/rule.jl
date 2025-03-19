@@ -32,30 +32,32 @@ reference domain (use the [`reference_domain`](@ref) function to get the referen
 - `length(weights_high) ≥ length(weights_low)`
 - `order_high ≥ order_low`
 """
-struct TabulatedEmbeddedCubature{D} # {D,DOM<:AbstractDomain{D,T}} <: AbstractRule{DOM}
+struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
     description::String
     reference::String
     nb_significant_digits::Int
-    nodes::Vector{NTuple{D,String}}
+    nodes::Vector{Vector{String}}
     weights_high::Vector{String}
     order_high::Int
     weights_low::Vector{String}
     order_low::Int
 
-    function TabulatedEmbeddedCubature{D}(;
+    function TabulatedEmbeddedCubature{DOM}(;
         description::String,
         reference::String,
         nb_significant_digits::Int,
-        nodes::Vector{NTuple{D,String}},
+        nodes::Vector{Vector{String}},
         weights_high::Vector{String},
         order_high::Int,
         weights_low::Vector{String},
         order_low::Int,
-    ) where {D} # {DOM<:AbstractDomain}
+    ) where {DOM<:AbstractDomain}
+        D = dimension(DOM)
+        @assert all(n -> length(n) == D, nodes)
         @assert length(nodes) == length(weights_high)
         @assert length(weights_high) ≥ length(weights_low)
         @assert order_high ≥ order_low
-        return new{D}(
+        return new{DOM}(
             description,
             reference,
             nb_significant_digits,
@@ -69,11 +71,10 @@ struct TabulatedEmbeddedCubature{D} # {D,DOM<:AbstractDomain{D,T}} <: AbstractRu
 end
 
 """
-   struct GrundmannMoeller
+   struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
 
-Cubature rule for a `dim`-simplex of degree `deg`.
+Cubature rule for a `D`-simplex of degree `deg`.
 """
-struct GrundmannMoeller # {D,N,T} <: AbstractRule{Simplex{D,N,T}}
-    dim::Int
+struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
     deg::Int
 end

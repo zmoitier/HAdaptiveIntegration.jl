@@ -29,7 +29,7 @@ end
 """
     check_order(
         ec::EmbeddedCubature{D,T},
-        domain::AbstractDomain{D},
+        domain::AbstractDomain{D,T},
         order_high::Int,
         order_low::Int;
         atol=zero(T),

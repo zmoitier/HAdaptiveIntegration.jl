@@ -2,7 +2,7 @@ using BenchmarkTools
 using DataStructures
 using LinearAlgebra
 using StaticArrays
-import HAdaptiveIntegration as hai
+# import HAdaptiveIntegration as hai
 
 abstract type AbstractDomain{D,T} end
 
@@ -32,3 +32,6 @@ end
 dom = Triangle{Float64}()
 rule = TabulatedRule{Triangle}()
 fct(dom, rule)
+
+dimension(::Type{Orthotope{D}}) where {D} = D
+dimension(::Type{Simplex{D}}) where {D} = D

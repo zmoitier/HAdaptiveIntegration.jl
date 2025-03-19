@@ -220,6 +220,17 @@ end
 tetrahedron(a, b, c, d) = tetrahedron(promote_to_float(a, b, c, d), a, b, c, d)
 
 """
+    dimension(::Type{DOM}) where {DOM<:AbstractDomain{D}}
+
+Return the dimensionality `D` of the given domain type `DOM`.
+"""
+dimension(::Type{Orthotope{D,T}}) where {D,T} = D
+dimension(::Type{Orthotope{D}}) where {D} = D
+dimension(::Type{Simplex{D,N,T}}) where {D,N,T} = D
+dimension(::Type{Simplex{D,N}}) where {D,N} = D
+dimension(::Type{Simplex{D}}) where {D} = D
+
+"""
     map_from_reference(domain::DOM) where {DOM<:AbstractDomain}
 
 Return an anonymous function that maps the reference domain to the physical domain `domain`.

@@ -56,6 +56,6 @@ end
     return :($ec)
 end
 @generated function default_embedded_cubature(::Simplex{D,N,T}) where {D,N,T}
-    ec = embedded_cubature(T, GrundmannMoeller(D, 7))
+    ec = embedded_cubature(T, GrundmannMoeller{D}(7))
     return :($ec)
 end

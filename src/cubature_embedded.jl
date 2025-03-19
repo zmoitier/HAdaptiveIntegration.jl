@@ -29,18 +29,15 @@ struct EmbeddedCubature{D,T}
 end
 
 """
-    embedded_cubature(tec::TabulatedEmbeddedCubature)
-    embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
-
-    embedded_cubature(gm::GrundmannMoeller)
-    embedded_cubature(T::DataType, gm::GrundmannMoeller)
+    embedded_cubature(ar::AbstractRule)
+    embedded_cubature(T::DataType, ar::AbstractRule)
 
     embedded_cubature(nodes, weights_high, weights_low)
     embedded_cubature(T::DataType, nodes, weights_high, weights_low)
 
-Construct an embedded cubature from a [`TabulatedEmbeddedCubature`](@ref), a
-[`GrundmannMoeller`](@ref), cubature, or from a vector of nodes and two vectors of weights
-for the high and low order cubature, with element type `T`.
+Construct the embedded cubature with element type `T` from an `AbstractRule`
+([`TabulatedEmbeddedCubature`](@ref) or [`GrundmannMoeller`](@ref)), or from a vector of
+nodes and two vectors of weights for the high and low order cubature, with element type `T`.
 """
 function embedded_cubature(T::DataType, nodes, weights_high, weights_low)
     @assert allequal(length, nodes) "all nodes should have the same length."
@@ -55,31 +52,33 @@ function embedded_cubature(nodes, weights_high, weights_low)
     return embedded_cubature(float(T), nodes, weights_high, weights_low)
 end
 
-function embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
+function embedded_cubature(
+    T::DataType, tec::TabulatedEmbeddedCubature{DOM}
+) where {DOM<:AbstractDomain}
     if 10 * eps(T) < 10.0^(-tec.nb_significant_digits)
         @warn "the embedded cubature `$(tec.description)` has less precision than type $T."
     end
-
+    D = dimension(DOM)
     return EmbeddedCubature(
-        [SVector(parse.(T, x)) for x in tec.nodes],
+        [SVector{D,T}(parse.(T, x)) for x in tec.nodes],
         parse.(T, tec.weights_high),
         parse.(T, tec.weights_low),
     )
 end
 embedded_cubature(tec::TabulatedEmbeddedCubature) = embedded_cubature(float(Int), tec)
 
-function embedded_cubature(T::DataType, gm::GrundmannMoeller)
-    vol = 1 / T(factorial(gm.dim)) # volume of the reference simplex
+function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
+    vol = 1 / T(factorial(D)) # volume of the reference simplex
 
     # high order cubature
-    Tn = grundmann_moeller(T, Val(gm.dim), gm.deg)
+    Tn = grundmann_moeller(T, Val(D), gm.deg)
 
     H = length(Tn.points)
-    nodes_high = [SVector{gm.dim}(Tn.points[H - i + 1][2:end]) for i in 1:H]
+    nodes_high = [SVector{D}(Tn.points[H - i + 1][2:end]) for i in 1:H]
     weights_high = [Tn.weights[H - i + 1] * vol for i in 1:H]
 
     # low order cubature
-    Tn_low = grundmann_moeller(T, Val(gm.dim), gm.deg - 2)
+    Tn_low = grundmann_moeller(T, Val(D), gm.deg - 2)
     L = length(Tn_low.points)
     weights_low = [Tn_low.weights[L - i + 1] * vol for i in 1:L]
 
@@ -99,7 +98,7 @@ the addition. Note that there is no check, beyond compatibility of dimension and
 the embedded cubature is for the right domain.
 """
 function (ec::EmbeddedCubature{D,T})(
-    fct, domain::AbstractDomain{D}, norm=x -> LinearAlgebra.norm(x, Inf)
+    fct, domain::AbstractDomain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
 ) where {D,T}
     H, L = length(ec.weights_high), length(ec.weights_low)
     μ = abs_det_jac(domain)
