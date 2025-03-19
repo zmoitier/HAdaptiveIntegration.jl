@@ -71,6 +71,9 @@ end
         @test typeof(hai.reference_domain(hai.Cuboid{Int})) <: hai.Orthotope{3,Int}
         @test typeof(hai.reference_domain(hai.Orthotope{4})) <: hai.Orthotope{4,Float64}
         @test typeof(hai.reference_domain(hai.Orthotope{4,Int})) <: hai.Orthotope{4,Int}
+
+        @test hai.dimension(hai.Orthotope{4,Int}) == 4
+        @test hai.dimension(hai.Orthotope{4}) == 4
     end
 
     @testset "Simplex" begin
@@ -102,6 +105,10 @@ end
         @test typeof(hai.reference_domain(hai.Simplex{4,5})) <: hai.Simplex{4,5,Float64}
         @test typeof(hai.reference_domain(hai.Simplex{4,5,Float64})) <:
             hai.Simplex{4,5,Float64}
+
+        @test hai.dimension(hai.Simplex{4,5,Int}) == 4
+        @test hai.dimension(hai.Simplex{4,5}) == 4
+        @test hai.dimension(hai.Simplex{4}) == 4
     end
 end
 
