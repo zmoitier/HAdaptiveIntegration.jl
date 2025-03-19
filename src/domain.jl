@@ -303,6 +303,3 @@ reference_domain(::Type{Orthotope{D}}) where {D} = reference_orthotope(float(Int
 reference_domain(::Type{Simplex{D,N,T}}) where {D,N,T} = reference_simplex(T, D)
 reference_domain(::Type{Simplex{D,N}}) where {D,N} = reference_simplex(float(Int), D)
 reference_domain(::Type{Simplex{D}}) where {D} = reference_simplex(float(Int), D)
-
-reference_domain(::Type{Triangle}) = reference_simplex(float(Int), 2)
-reference_domain(::Type{Tetrahedron}) = reference_simplex(float(Int), 3)
