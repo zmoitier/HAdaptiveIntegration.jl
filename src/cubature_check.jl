@@ -1,25 +1,21 @@
 """
     check_order(
-        tec::TabulatedEmbeddedCubature, domain::AbstractDomain; atol=nothing, rtol=nothing
-    )
+        tec::TabulatedEmbeddedCubature,
+        domain::AbstractDomain{D,T};
+        atol=zero(T),
+        rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+    ) where {D,T}
 
 Return 0 if the tabulated embedded cubature on the **reference** domain of `domain`
 integrate exactly (within tolerance) the monomials up to degree `order_high` for the high
 oder cubature and `order_low` for the low order cubature. Else return 1.
 """
 function check_order(
-    tec::TabulatedEmbeddedCubature, domain::AbstractDomain; atol=nothing, rtol=nothing
-)
-    T = element_type(domain)
-
-    if isnothing(atol)
-        atol = zero(T)
-    end
-
-    if isnothing(rtol)
-        rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T)
-    end
-
+    tec::TabulatedEmbeddedCubature,
+    domain::AbstractDomain{D,T};
+    atol=zero(T),
+    rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+) where {D,T}
     return check_order(
         embedded_cubature(T, tec),
         domain,
@@ -46,7 +42,7 @@ Return 0 if the embedded cubature on the **reference** domain of `domain` integr
 """
 function check_order(
     ec::EmbeddedCubature{D,T},
-    domain::AbstractDomain{D},
+    domain::AbstractDomain{D,T},
     order_high::Int,
     order_low::Int;
     atol=zero(T),

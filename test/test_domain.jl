@@ -99,7 +99,7 @@ end
         @test typeof(hai.reference_domain(hai.Tetrahedron)) <: hai.Simplex{3,4,Float64}
         @test typeof(hai.reference_domain(hai.Tetrahedron{Int})) <: hai.Simplex{3,4,Int}
         @test typeof(hai.reference_domain(hai.Simplex{4})) <: hai.Simplex{4,5,Float64}
-        @test typeof(hai.reference_domain(hai.Simplex{4,Int})) <: hai.Simplex{4,5,Int}
+        @test typeof(hai.reference_domain(hai.Simplex{4,5})) <: hai.Simplex{4,5,Float64}
         @test typeof(hai.reference_domain(hai.Simplex{4,5,Float64})) <:
             hai.Simplex{4,5,Float64}
     end

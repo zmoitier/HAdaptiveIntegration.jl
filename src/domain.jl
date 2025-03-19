@@ -1,7 +1,7 @@
 """
-    abstract type AbstractDomain{D}
+    abstract type AbstractDomain{D,T}
 
-Abstract type for integration domains' in `D` dimensions.
+Abstract type for integration domains' in `D` dimensions with element type `T`.
 
 ## Mandatory methods:
 - [`element_type`](@ref)
@@ -12,10 +12,10 @@ Abstract type for integration domains' in `D` dimensions.
 - [`reference_domain`](@ref)
 - [`map_to_reference`](@ref)
 """
-abstract type AbstractDomain{D} end
+abstract type AbstractDomain{D,T} end
 
 """
-    struct Orthotope{D,T} <: AbstractDomain{D}
+    struct Orthotope{D,T} <: AbstractDomain{D,T}
 
 Axes-aligned Orthotope in `D` dimensions, with element type `T`, given by two points
 `low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
@@ -27,19 +27,17 @@ Axes-aligned Orthotope in `D` dimensions, with element type `T`, given by two po
 ## Invariants (**not** check at construction):
 - `low_corner .≤ high_corner`
 """
-struct Orthotope{D,T} <: AbstractDomain{D}
+struct Orthotope{D,T} <: AbstractDomain{D,T}
     low_corner::SVector{D,T}
     high_corner::SVector{D,T}
 end
-
-element_type(::Orthotope{D,T}) where {D,T} = T
 
 """
     orthotope(low_corner, high_corner)
     orthotope(T::DataType, low_corner, high_corner)
 
-Return an axes-aligned orthotope in `D` dimensions, with element type `T`, given by two points
-`low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
+Return an axes-aligned orthotope in `D` dimensions, with element type `T`, given by two
+points `low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
 """
 function orthotope(T::DataType, low_corner, high_corner)
     @assert (length(low_corner) == length(high_corner))
@@ -66,7 +64,7 @@ reference_orthotope(D::Int) = reference_orthotope(float(Int), D)
 """
     Segment{T} = Orthotope{1,T}
 
-Alias for a 1-dimensional segment of value type `T`.
+Alias for a 1-dimensional segment of element type `T`.
 """
 const Segment{T} = Orthotope{1,T}
 
@@ -88,7 +86,7 @@ end
 """
     Rectangle{T} = Orthotope{2,T}
 
-Alias for a 2-dimensional rectangle of value type `T`.
+Alias for a 2-dimensional rectangle of element type `T`.
 """
 const Rectangle{T} = Orthotope{2,T}
 
@@ -140,7 +138,7 @@ A simplex in `D` dimensions with `N=D+1` vertices of element type `T`.
 ## Invariants (**not** check at construction):
 - `N = D+1`
 """
-struct Simplex{D,N,T} <: AbstractDomain{D}
+struct Simplex{D,N,T} <: AbstractDomain{D,T}
     vertices::SVector{N,SVector{D,T}}
 end
 
@@ -148,14 +146,12 @@ function Simplex{D,N,T}(vertices::Vararg{SVector{D,T},N}) where {D,N,T}
     return Simplex(SVector{N}(vertices...))
 end
 
-element_type(::Simplex{D,N,T}) where {D,N,T} = T
-
 """
     simplex(vertices...)
     simplex(T::DataType, vertices...)
 
-Return a `D`-simplex with element type `T` from a collection of vertices. Note that all
-points must have the same length `D` and there must be `N=D+1` points.
+Return a `D`-simplex with element type `T` from a collection of `N=D+1` vertices. Note that
+all vertices must have the same length `D`.
 """
 function simplex(T::DataType, vertices...)
     @assert allequal(length, vertices) "all `vertices` must have the same length."
@@ -206,7 +202,7 @@ triangle(a, b, c) = triangle(promote_to_float(a, b, c), a, b, c)
 """
     Tetrahedron{T} = Simplex{3,4,T}
 
-Alias for a 3-dimensional tetrahedron with 4 vertices of value type `T`.
+Alias for a 3-dimensional tetrahedron with 4 vertices of element type `T`.
 """
 const Tetrahedron{T} = Simplex{3,4,T}
 
@@ -291,8 +287,10 @@ Return the reference domain for the given domain type.
 """
 reference_domain(::Type{Orthotope{D,T}}) where {D,T} = reference_orthotope(T, D)
 reference_domain(::Type{Orthotope{D}}) where {D} = reference_orthotope(float(Int), D)
+
 reference_domain(::Type{Simplex{D,N,T}}) where {D,N,T} = reference_simplex(T, D)
-reference_domain(::Type{Simplex{D,T}}) where {D,T} = reference_simplex(T, D)
+reference_domain(::Type{Simplex{D,N}}) where {D,N} = reference_simplex(float(Int), D)
 reference_domain(::Type{Simplex{D}}) where {D} = reference_simplex(float(Int), D)
+
 reference_domain(::Type{Triangle}) = reference_simplex(float(Int), 2)
 reference_domain(::Type{Tetrahedron}) = reference_simplex(float(Int), 3)

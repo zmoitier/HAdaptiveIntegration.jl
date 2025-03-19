@@ -1,7 +1,7 @@
 """
     integrate(
         fct,
-        domain::AbstractDomain{D};
+        domain::AbstractDomain{D,T};
         embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
         subdiv_algo=default_subdivision(domain),
         buffer=nothing,
@@ -9,7 +9,7 @@
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
         maxsubdiv=8192 * 2^D,
-    ) where {H,L,D,T}
+    ) where {D,T}
 
 Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
 an error estimate.
@@ -17,7 +17,7 @@ an error estimate.
 ## Arguments
 - `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
    support the multiplication by a scalar of type `T` and the addition.
-- `domain::AbstractDomain{D}`: the integration domain. Currently, we support
+- `domain::AbstractDomain{D,T}`: the integration domain. Currently, we support
   [`segment`](@ref), [`triangle`](@ref), [`rectangle`](@ref), [`tetrahedron`](@ref),
   [`cuboid`](@ref), and d-dimensional [`simplex`](@ref).
 
@@ -36,25 +36,15 @@ an error estimate.
 """
 function integrate(
     fct,
-    domain::AbstractDomain{D};
-    embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
+    domain::AbstractDomain{D,T};
+    embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
     norm=x -> LinearAlgebra.norm(x, Inf),
-    atol=nothing,
-    rtol=nothing,
+    atol=zero(T),
+    rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
-) where {D}
-    T = element_type(embedded_cubature)
-
-    if isnothing(atol)
-        atol = zero(T)
-    end
-
-    if isnothing(rtol)
-        rtol = (atol > zero(T)) ? zero(T) : √eps(T)
-    end
-
+) where {D,T}
     return _integrate(
         fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
     )
@@ -95,10 +85,10 @@ function _integrate(
         I -= Ic
         E -= Ec
         for child in subdiv_algo(sc)
-            Inew, Enew = ec(fct, child, norm)
-            I += Inew
-            E += Enew
-            push!(heap, (child, Inew, Enew))
+            I_new, E_new = ec(fct, child, norm)
+            I += I_new
+            E += E_new
+            push!(heap, (child, I_new, E_new))
         end
         nbsubdiv += 1
     end

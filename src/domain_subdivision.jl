@@ -1,20 +1,20 @@
 """
-    check_subdivision(subdiv_algo, domain::AbstractDomain; atol=nothing, rtol=nothing)
+    check_subdivision(
+        subdiv_algo,
+        domain::AbstractDomain{D,T};
+        atol=zero(T),
+        rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+    ) where {D,T}
 
 Return 0 if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the
 volume of the domain else return 1.
 """
-function check_subdivision(subdiv_algo, domain::AbstractDomain; atol=nothing, rtol=nothing)
-    T = element_type(domain)
-
-    if isnothing(atol)
-        atol = zero(T)
-    end
-
-    if isnothing(rtol)
-        rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T)
-    end
-
+function check_subdivision(
+    subdiv_algo,
+    domain::AbstractDomain{D,T};
+    atol=zero(T),
+    rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
+) where {D,T}
     sub_domains = subdiv_algo(domain)
     if !isapprox(sum(abs_det_jac.(sub_domains)), abs_det_jac(domain); atol=atol, rtol=rtol)
         @error "`$(Symbol(subdiv_algo))` do not partition the domain within the tolerance."

@@ -28,8 +28,6 @@ struct EmbeddedCubature{D,T}
     end
 end
 
-element_type(::EmbeddedCubature{D,T}) where {D,T} = T
-
 """
     embedded_cubature(tec::TabulatedEmbeddedCubature)
     embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
