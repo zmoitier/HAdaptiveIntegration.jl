@@ -12,31 +12,6 @@ using HAdaptiveIntegration:
 using LinearAlgebra
 using StaticArrays
 
-function integral_monomial_simplex(d::Int, tdm::Int)
-    if d ≤ 0
-        return Vector{Vector{Pair{Tuple{},Rational{Int}}}}()
-    end
-
-    indexes = [[(i,) => 1//prod((i + 1):(i + d))] for i in 0:tdm]
-
-    for n in 2:d
-        tmp = [Vector{Pair{NTuple{n,Int},Rational{Int}}}() for _ in 0:tdm]
-        for (td, idx_val) in zip(countfrom(0), indexes)
-            for (idx, val) in idx_val
-                push!(tmp[td + 1], (0, idx...) => val)
-                v = 1
-                for k in 1:(tdm - td)
-                    v *= k//(k + td + d)
-                    push!(tmp[td + 1 + k], (k, idx...) => val * v)
-                end
-            end
-        end
-        indexes = tmp
-    end
-
-    return indexes
-end
-
 function pack(S::DataType, nodes, weights)
     U = Vector{S}()
     for (x, w) in zip(nodes, weights)
