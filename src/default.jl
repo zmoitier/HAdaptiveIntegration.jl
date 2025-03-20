@@ -1,5 +1,5 @@
 """
-    default_subdivision(domain::Domain)
+    default_subdivision(domain::DOM) where {DOM<:AbstractDomain}
 
 Return the default algorithm to subdivide `domain`.
 - dimension 1:
@@ -21,7 +21,7 @@ default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
 default_subdivision(::Simplex) = subdivide_simplex
 
 """
-    default_embedded_cubature(domain::Domain)
+    default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
 
 Return a default embedded cubature for the domains:
 - dimension 1:
@@ -55,7 +55,7 @@ end
     ec = embedded_cubature(T, TETRAHEDRON_GM35)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(T, GrundmannMoeller(D, 7))
+@generated function default_embedded_cubature(::Simplex{D,N,T}) where {D,N,T}
+    ec = embedded_cubature(T, GrundmannMoeller{D}(7))
     return :($ec)
 end

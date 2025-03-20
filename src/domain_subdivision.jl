@@ -1,7 +1,7 @@
 """
     check_subdivision(
         subdiv_algo,
-        domain::Domain{D,T};
+        domain::AbstractDomain{D,T};
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
     ) where {D,T}
@@ -165,8 +165,9 @@ generated for each combination of `D` and `T`.
 """
 @generated function subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
     # vertices of the reference simplex
-    vertices = [zeros(SVector{D,T})]
-    append!(vertices, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
+    vertices = [
+        zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
+    ]
 
     # valid permutations of the vertices
     function generate_valid_permutations(n::Int, k::Int)
@@ -226,7 +227,7 @@ Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Fr
 algorithm and the optimal number of congruence
 classes](https://link.springer.com/article/10.1007/s002110050475).
 """
-function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
+function subdivide_simplex(s::Simplex{D,N,T}) where {D,N,T}
     refs = subdivide_reference_simplex(Val(D), T)
     f = map_from_reference(s)
     map(refs) do ref

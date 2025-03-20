@@ -3,7 +3,7 @@
 
 An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low
 order cubature rule with `L` nodes. Note that the low order cubature uses `nodes[1:L]` as
-its nodes. The cubature nodes and weights are assume to be for the reference domain.
+its nodes. The cubature nodes and weights are assumed to be for the reference domain.
 
 ## Fields:
 - `nodes::Vector{SVector{D,T}}`: the cubature nodes.
@@ -22,25 +22,22 @@ struct EmbeddedCubature{D,T}
     function EmbeddedCubature(
         nodes::Vector{SVector{D,T}}, weights_high::Vector{T}, weights_low::Vector{T}
     ) where {D,T}
-        @assert length(nodes) == length(weights_high)
-        @assert length(weights_high) ≥ length(weights_low)
+        @assert length(nodes) == length(weights_high) "The number of nodes must match the number of high-order weights."
+        @assert length(weights_high) ≥ length(weights_low) "weights_high must have a length greater than or equal to weights_low."
         return new{D,T}(nodes, weights_high, weights_low)
     end
 end
 
 """
-    embedded_cubature(tec::TabulatedEmbeddedCubature)
-    embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
-
-    embedded_cubature(gm::GrundmannMoeller)
-    embedded_cubature(T::DataType, gm::GrundmannMoeller)
+    embedded_cubature(ar::AbstractRule)
+    embedded_cubature(T::DataType, ar::AbstractRule)
 
     embedded_cubature(nodes, weights_high, weights_low)
     embedded_cubature(T::DataType, nodes, weights_high, weights_low)
 
-Construct an embedded cubature from a [`TabulatedEmbeddedCubature`](@ref), a
-[`GrundmannMoeller`](@ref), cubature, or from a vector of nodes and two vectors of weights
-for the high and low order cubature, with element type `T`.
+Construct the embedded cubature with element type `T` from an `AbstractRule`
+([`TabulatedEmbeddedCubature`](@ref) or [`GrundmannMoeller`](@ref)), or from a vector of
+nodes and two vectors of weights for the high and low order cubature, with element type `T`.
 """
 function embedded_cubature(T::DataType, nodes, weights_high, weights_low)
     @assert allequal(length, nodes) "all nodes should have the same length."
@@ -49,47 +46,39 @@ function embedded_cubature(T::DataType, nodes, weights_high, weights_low)
     return EmbeddedCubature(SVector{D,T}.(nodes), weights_high, weights_low)
 end
 function embedded_cubature(nodes, weights_high, weights_low)
-    T_nodes = _type_float(nodes...)
-    T_weights = _type_float(weights_high, weights_low)
+    T_nodes = promote_to_float(nodes...)
+    T_weights = promote_to_float(weights_high, weights_low)
     T = promote_type(T_nodes, T_weights)
     return embedded_cubature(float(T), nodes, weights_high, weights_low)
 end
 
-function embedded_cubature(T::DataType, tec::TabulatedEmbeddedCubature)
+function embedded_cubature(
+    T::DataType, tec::TabulatedEmbeddedCubature{DOM}
+) where {DOM<:AbstractDomain}
     if 10 * eps(T) < 10.0^(-tec.nb_significant_digits)
-        @warn "the embedded cubature `$(tec.description)` has less precision than type $T."
+        @warn "The embedded cubature `$(tec.description)` has fewer significant digits than type $T, which may lead to numerical inaccuracies in computations."
     end
-
+    D = dimension(DOM)
     return EmbeddedCubature(
-        [SVector(parse.(T, x)) for x in tec.nodes],
+        [SVector{D,T}(parse.(T, x)) for x in tec.nodes],
         parse.(T, tec.weights_high),
         parse.(T, tec.weights_low),
     )
 end
 embedded_cubature(tec::TabulatedEmbeddedCubature) = embedded_cubature(float(Int), tec)
 
-"""
-   struct GrundmannMoeller
-
-Cubature rule for a `dim`-simplex of degree `deg`.
-"""
-struct GrundmannMoeller
-    dim::Int
-    deg::Int
-end
-
-function embedded_cubature(T::DataType, gm::GrundmannMoeller)
-    vol = 1 / T(factorial(gm.dim)) # volume of the reference simplex
+function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
+    vol = 1 / T(factorial(D)) # volume of the reference simplex
 
     # high order cubature
-    Tn = grundmann_moeller(T, Val(gm.dim), gm.deg)
+    Tn = grundmann_moeller(T, Val(D), gm.deg)
 
     H = length(Tn.points)
-    nodes_high = [SVector{gm.dim}(Tn.points[H - i + 1][2:end]) for i in 1:H]
+    nodes_high = [SVector{D}(Tn.points[H - i + 1][2:end]) for i in 1:H]
     weights_high = [Tn.weights[H - i + 1] * vol for i in 1:H]
 
     # low order cubature
-    Tn_low = grundmann_moeller(T, Val(gm.dim), gm.deg - 2)
+    Tn_low = grundmann_moeller(T, Val(D), gm.deg - 2)
     L = length(Tn_low.points)
     weights_low = [Tn_low.weights[L - i + 1] * vol for i in 1:L]
 

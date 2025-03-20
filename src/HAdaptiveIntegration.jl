@@ -5,6 +5,18 @@ using GrundmannMoeller: grundmann_moeller
 using LinearAlgebra
 using StaticArrays
 
+# This function is intended for internal use to determine the floating-point type.
+function promote_to_float(containers...)
+    # Determine the type of each container
+    container_types = map(eltype, containers)
+
+    # Promote the types of all containers to a common type
+    promoted_type = reduce(promote_type, container_types)
+
+    # Convert the promoted type to a floating-point type
+    return float(promoted_type)
+end
+
 # Supported integration domains
 include("domain.jl")
 export orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron

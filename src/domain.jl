@@ -1,14 +1,11 @@
-function _type_float(containers...)
-    T = reduce(
-        promote_type, mapreduce(typeof, promote_type, container) for container in containers
-    )
-    return float(T)
-end
-
 """
-    abstract type AbstractDomain{D,T<:Real}
+    abstract type AbstractDomain{D,T}
 
-Abstract type for domain's integration in `D` dimensions.
+Abstract type for integration domains' in `D` dimensions with element type `T`.
+
+## Type Parameters:
+- `D`: dimension of the domain.
+- `T`: element type of the domain.
 
 ## Mandatory methods:
 - [`map_from_reference`](@ref)
@@ -18,10 +15,19 @@ Abstract type for domain's integration in `D` dimensions.
 - [`reference_domain`](@ref)
 - [`map_to_reference`](@ref)
 """
-abstract type AbstractDomain{D,T<:Real} end
+abstract type AbstractDomain{D,T} end
 
 """
-    struct Orthotope{D,T} <: Domain{D,T}
+    dimension(::Type{DOM}) where {DOM<:AbstractDomain{D}}
+
+Return the dimension `D` of the given domain `DOM`.
+"""
+dimension(::Type{AbstractDomain{D,T}}) where {D,T} = D
+dimension(::Type{AbstractDomain{D}}) where {D} = D
+dimension(::Type{DOM}) where {DOM<:AbstractDomain} = dimension(supertype(DOM))
+
+"""
+    struct Orthotope{D,T} <: AbstractDomain{D,T}
 
 Axes-aligned Orthotope in `D` dimensions, with element type `T`, given by two points
 `low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
@@ -42,8 +48,8 @@ end
     orthotope(low_corner, high_corner)
     orthotope(T::DataType, low_corner, high_corner)
 
-Return an axes-aligned orthotope in `D` dimensions, with element type `T`, given by two points
-`low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
+Return an axes-aligned orthotope in `D` dimensions, with element type `T`, given by two
+points `low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
 """
 function orthotope(T::DataType, low_corner, high_corner)
     @assert (length(low_corner) == length(high_corner))
@@ -53,7 +59,7 @@ function orthotope(T::DataType, low_corner, high_corner)
     return Orthotope(SVector{D,T}(low_corner), SVector{D,T}(high_corner))
 end
 function orthotope(low_corner, high_corner)
-    return orthotope(_type_float(low_corner, high_corner), low_corner, high_corner)
+    return orthotope(promote_to_float(low_corner, high_corner), low_corner, high_corner)
 end
 
 """
@@ -69,6 +75,8 @@ reference_orthotope(D::Int) = reference_orthotope(float(Int), D)
 
 """
     Segment{T} = Orthotope{1,T}
+
+Alias for a 1-dimensional segment of element type `T`.
 """
 const Segment{T} = Orthotope{1,T}
 
@@ -89,6 +97,8 @@ end
 
 """
     Rectangle{T} = Orthotope{2,T}
+
+Alias for a 2-dimensional rectangle of element type `T`.
 """
 const Rectangle{T} = Orthotope{2,T}
 
@@ -104,11 +114,13 @@ function rectangle(T::DataType, low_corner, high_corner)
     return orthotope(T, low_corner, high_corner)
 end
 function rectangle(low_corner, high_corner)
-    return rectangle(_type_float(low_corner, high_corner), low_corner, high_corner)
+    return rectangle(promote_to_float(low_corner, high_corner), low_corner, high_corner)
 end
 
 """
     Cuboid{T} = Orthotope{3,T}
+
+Alias for a 3-dimensional cuboid of value type `T`.
 """
 const Cuboid{T} = Orthotope{3,T}
 
@@ -124,11 +136,11 @@ function cuboid(T::DataType, low_corner, high_corner)
     return orthotope(T, low_corner, high_corner)
 end
 function cuboid(low_corner, high_corner)
-    return cuboid(_type_float(low_corner, high_corner), low_corner, high_corner)
+    return cuboid(promote_to_float(low_corner, high_corner), low_corner, high_corner)
 end
 
 """
-    struct Simplex{D,T,N} <: Domain{D,T}
+    struct Simplex{D,N,T} <: AbstractDomain{D,T}
 
 A simplex in `D` dimensions with `N=D+1` vertices of element type `T`.
 
@@ -138,11 +150,11 @@ A simplex in `D` dimensions with `N=D+1` vertices of element type `T`.
 ## Invariants (**not** check at construction):
 - `N = D+1`
 """
-struct Simplex{D,T,N} <: AbstractDomain{D,T}
+struct Simplex{D,N,T} <: AbstractDomain{D,T}
     vertices::SVector{N,SVector{D,T}}
 end
 
-function Simplex{D,T,N}(vertices::SVector{D,T}...) where {D,T,N}
+function Simplex{D,N,T}(vertices::Vararg{SVector{D,T},N}) where {D,N,T}
     return Simplex(SVector{N}(vertices...))
 end
 
@@ -150,17 +162,19 @@ end
     simplex(vertices...)
     simplex(T::DataType, vertices...)
 
-Return a `D`-simplex with element type `T` from a collection of vertices. Note that all
-points must have the same length `D` and there must be `N=D+1` points.
+Return a `D`-simplex with element type `T` from a collection of `N=D+1` vertices. Note that
+all vertices must have the same length `D`.
 """
 function simplex(T::DataType, vertices...)
-    N = length(vertices)
-    D = N - 1
-    @assert all(p -> length(p) == D, vertices)
+    @assert allequal(length, vertices) "all `vertices` must have the same length."
+    D = length(first(vertices))
+
+    N = D + 1
+    @assert length(vertices) == N "Expected $N vertices, but got $(length(vertices))."
 
     return Simplex(SVector{N}(SVector{D,T}.(vertices)))
 end
-simplex(vertices...) = simplex(_type_float(vertices...), vertices...)
+simplex(vertices...) = simplex(promote_to_float(vertices...), vertices...)
 
 """
     reference_simplex(D::Int)
@@ -170,16 +184,19 @@ Return the reference `D`-dimensional simplex with element type `T`, which is the
 of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
 """
 function reference_simplex(T::DataType, D::Int)
-    points = [zeros(SVector{D,T})]
-    append!(points, setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)
-    return Simplex(SVector{D + 1}(points))
+    vertices = [
+        zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
+    ]
+    return Simplex(SVector{D + 1}(vertices))
 end
 reference_simplex(D::Int) = reference_simplex(float(Int), D)
 
 """
-    Triangle{T} = Simplex{2,T,3}
+    Triangle{T} = Simplex{2,3,T}
+
+Alias for a 2-dimensional triangle with 3 vertices of value type `T`.
 """
-const Triangle{T} = Simplex{2,T,3}
+const Triangle{T} = Simplex{2,3,T}
 
 """
     triangle(a, b, c)
@@ -192,12 +209,14 @@ function triangle(T::DataType, a, b, c)
     @assert length(a) == length(b) == length(c) == 2 "`a`, `b`, and `c` must be 2d-vector."
     return simplex(T, a, b, c)
 end
-triangle(a, b, c) = triangle(_type_float(a, b, c), a, b, c)
+triangle(a, b, c) = triangle(promote_to_float(a, b, c), a, b, c)
 
 """
-    Tetrahedron{T} = Simplex{3,T,4}
+    Tetrahedron{T} = Simplex{3,4,T}
+
+Alias for a 3-dimensional tetrahedron with 4 vertices of element type `T`.
 """
-const Tetrahedron{T} = Simplex{3,T,4}
+const Tetrahedron{T} = Simplex{3,4,T}
 
 """
     tetrahedron(a, b, c, d)
@@ -207,14 +226,13 @@ Return a tetrahedron in 3 dimensions, with element type `T`, given by four 3d-po
 `b`, `c`, and `d`.
 """
 function tetrahedron(T::DataType, a, b, c, d)
-    @assert length(a) == length(b) == length(c) == length(d) == 3 "`a`, `b`, `c`, and `d`
-    must be 3d-vector."
+    @assert length(a) == length(b) == length(c) == length(d) == 3 "`a`, `b`, `c`, and `d` must be 3d-vector."
     return simplex(T, a, b, c, d)
 end
-tetrahedron(a, b, c, d) = tetrahedron(_type_float(a, b, c, d), a, b, c, d)
+tetrahedron(a, b, c, d) = tetrahedron(promote_to_float(a, b, c, d), a, b, c, d)
 
 """
-    map_from_reference(domain::Domain)
+    map_from_reference(domain::DOM) where {DOM<:AbstractDomain}
 
 Return an anonymous function that maps the reference domain to the physical domain `domain`.
 """
@@ -222,7 +240,7 @@ function map_from_reference(h::Orthotope{D,T}) where {D,T}
     return u -> h.low_corner + u .* (h.high_corner - h.low_corner)
 end
 
-function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
+function map_from_reference(s::Simplex{D,N,T}) where {D,N,T}
     return u -> begin
         v = (1 - sum(u)) * s.vertices[1]
         for i in 2:N
@@ -233,7 +251,7 @@ function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
 end
 
 """
-    abs_det_jac(domain::Domain)
+    abs_det_jac(domain::DOM) where {DOM<:AbstractDomain}
 
 Return the absolute value of the Jacobian's determinant of the map from the reference domain
 to the physical domain `domain`.
@@ -242,24 +260,35 @@ function abs_det_jac(h::Orthotope{D,T}) where {D,T}
     return prod(h.high_corner - h.low_corner)
 end
 
-function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
-    v = s.vertices
-    mat = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
-    return abs(det(mat))
+function abs_det_jac(s::Simplex{D,N,T}) where {D,N,T}
+    vertices = s.vertices
+    jacobian_matrix = hcat(ntuple(i -> vertices[i + 1] - vertices[1], D)...)
+    return abs(det(jacobian_matrix))
 end
 
 """
-    map_to_reference(domain::Domain)
+    map_to_reference(domain::DOM) where {DOM<:AbstractDomain}
 
 Return an anonymous function that maps the physical domain `domain` to the reference domain.
+
+## Constraints:
+- For `Orthotope`, must have `high_corner .> low_corner`.
+- For `Simplex{D}`, the vertices must form a valid `D`-dimensional simplex with non-zero
+  volume).
 """
 function map_to_reference(h::Orthotope{D,T}) where {D,T}
-    return u -> (u - h.low_corner) ./ (h.high_corner - h.low_corner)
+    diff = h.high_corner - h.low_corner
+    @assert all(x -> x > √eps(float(T)), diff) "degenerate $D-dimensional Orthotope: must have `high_corner .> low_corner`."
+
+    return p -> (p - h.low_corner) ./ diff
 end
 
-function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
+function map_to_reference(s::Simplex{D,N,T}) where {D,N,T}
     v = s.vertices
-    M = inv(hcat(ntuple(i -> v[i + 1] - v[1], D)...))
+    jacobian_matrix = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
+    @assert !isapprox(det(jacobian_matrix), 0; atol=√eps(float(T))) "degenerate $D-dimensional Simplex: the Jacobian matrix is not invertible."
+
+    M = inv(jacobian_matrix)
     return u -> M * (u - v[1])
 end
 
@@ -270,8 +299,7 @@ Return the reference domain for the given domain type.
 """
 reference_domain(::Type{Orthotope{D,T}}) where {D,T} = reference_orthotope(T, D)
 reference_domain(::Type{Orthotope{D}}) where {D} = reference_orthotope(float(Int), D)
-reference_domain(::Type{Simplex{D,T,N}}) where {D,T,N} = reference_simplex(T, D)
-reference_domain(::Type{Simplex{D,T}}) where {D,T} = reference_simplex(T, D)
+
+reference_domain(::Type{Simplex{D,N,T}}) where {D,N,T} = reference_simplex(T, D)
+reference_domain(::Type{Simplex{D,N}}) where {D,N} = reference_simplex(float(Int), D)
 reference_domain(::Type{Simplex{D}}) where {D} = reference_simplex(float(Int), D)
-reference_domain(::Type{Triangle}) = reference_simplex(float(Int), 2)
-reference_domain(::Type{Tetrahedron}) = reference_simplex(float(Int), 3)

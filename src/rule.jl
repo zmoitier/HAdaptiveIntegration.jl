@@ -1,9 +1,23 @@
 """
-    @kwdef struct TabulatedEmbeddedCubature
+    abstract type AbstractRule{DOM<:AbstractDomain}
+
+Abstract type for a cubature rule on a domain `DOM`.
+
+## Type Parameters:
+- `DOM`: `[reference_domain](@ref)(DOM)` gives the reference domain on which the embedded
+   cubature is assume to be set.
+
+## Mandatory methods:
+- [`embedded_cubature`](@ref)
+"""
+abstract type AbstractRule{DOM<:AbstractDomain} end
+
+"""
+    @kwdef struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
 
 An embedded cubature rule consisting of a high order cubature rule and a low order cubature
 rule. Note that the low order cubature uses `nodes[1:L]` as its nodes where `L` is the
-length of the `weights_low`. The cubature nodes and weights are assume to be for the
+length of the `weights_low`. The cubature nodes and weights are assumed to be for the
 reference domain (use the [`reference_domain`](@ref) function to get the reference domain).
 
 ## Fields:
@@ -20,32 +34,36 @@ reference domain (use the [`reference_domain`](@ref) function to get the referen
 ## Invariants (check at construction):
 - `length(nodes) == length(weights_high)`
 - `length(weights_high) ≥ length(weights_low)`
-- `order_high ≥ order_low`
+- `order_high ≥ order_low` ≥ 0
+- `nb_significant_digits ≥ 0`
 """
-struct TabulatedEmbeddedCubature{D}
+struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
     description::String
     reference::String
     nb_significant_digits::Int
-    nodes::Vector{NTuple{D,String}}
+    nodes::Vector{Vector{String}}
     weights_high::Vector{String}
     order_high::Int
     weights_low::Vector{String}
     order_low::Int
 
-    function TabulatedEmbeddedCubature{D}(;
+    function TabulatedEmbeddedCubature{DOM}(;
         description::String,
         reference::String,
         nb_significant_digits::Int,
-        nodes::Vector{NTuple{D,String}},
+        nodes::Vector{Vector{String}},
         weights_high::Vector{String},
         order_high::Int,
         weights_low::Vector{String},
         order_low::Int,
-    ) where {D}
-        @assert length(nodes) == length(weights_high)
-        @assert length(weights_high) ≥ length(weights_low)
-        @assert order_high ≥ order_low
-        return new{D}(
+    ) where {DOM<:AbstractDomain}
+        D = dimension(DOM)
+        @assert all(n -> length(n) == D, nodes) "Each node must have length equal to the dimension D"
+        @assert length(nodes) == length(weights_high) "The number of nodes must match the number of high-order weights"
+        @assert length(weights_high) ≥ length(weights_low) "The length of high order weights must be greater or equal to the length of low-order weights"
+        @assert order_high ≥ order_low ≥ 0 "order_high must be greater than or equal to order_low and orders must be non-negative"
+        @assert nb_significant_digits ≥ 0
+        return new{DOM}(
             description,
             reference,
             nb_significant_digits,
@@ -55,5 +73,25 @@ struct TabulatedEmbeddedCubature{D}
             weights_low,
             order_low,
         )
+    end
+end
+
+"""
+   struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
+
+Embedded cubature rule for a `D`-simplex of degree `deg`.
+
+## Type Parameters:
+- `D`: The dimension of the simplex.
+
+## Fields:
+- `deg::Int`: The degree of the cubature rule.
+"""
+struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
+    deg::Int
+
+    function GrundmannMoeller{D}(deg::Int) where {D}
+        @assert deg ≥ 0 "Degree must be non-negative"
+        return new{D}(deg)
     end
 end
