@@ -8,7 +8,8 @@ using HAdaptiveIntegration:
     TRIANGLE_GM20,
     TRIANGLE_RL19,
     TabulatedEmbeddedCubature,
-    embedded_cubature
+    embedded_cubature,
+    integral_monomial_simplex
 using LinearAlgebra
 using StaticArrays
 
@@ -31,10 +32,12 @@ function unpack(U::Vector{T}, D::Int) where {T}
 end
 
 function increase_precision(
-    S::DataType, ec::EmbeddedCubature{H,L,D,T}, order_high::Int, order_low::Int
-) where {H,L,D,T}
+    S::DataType, ec::EmbeddedCubature{D,T}, order_high::Int, order_low::Int
+) where {D,T}
     # n, w = increase_precision(S, ec.nodes, ec.weights_high, order_high)
-    n, w = increase_precision(S, ec.nodes[1:L], ec.weights_low, order_low)
+    n, w = increase_precision(
+        S, ec.nodes[1:length(ec.weights_low)], ec.weights_low, order_low
+    )
 
     return n, w
 end
