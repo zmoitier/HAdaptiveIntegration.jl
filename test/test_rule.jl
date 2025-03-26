@@ -1,4 +1,5 @@
 using Test
+
 import HAdaptiveIntegration as hai
 
 @testset "Embedded cubature" begin
@@ -33,15 +34,20 @@ import HAdaptiveIntegration as hai
 end
 
 @testset "Tabulated rules" begin
+    setprecision(BigFloat, 128)
+    rtol = big"1e-34"
+
     @testset "Segment" begin
-        @test hai.check_order(hai.SEGMENT_GK7, hai.reference_orthotope(1)) == 0
-        @test hai.check_order(hai.SEGMENT_GK15, hai.reference_orthotope(1)) == 0
-        @test hai.check_order(hai.SEGMENT_GK31, hai.reference_orthotope(1)) == 0
+        domain = hai.reference_orthotope(BigFloat, 1)
+        @test hai.check_order(hai.SEGMENT_GK7, domain; rtol=rtol) == 0
+        @test hai.check_order(hai.SEGMENT_GK15, domain; rtol=rtol) == 0
+        @test hai.check_order(hai.SEGMENT_GK31, domain; rtol=rtol) == 0
     end
 
     @testset "Square" begin
-        @test hai.check_order(hai.SQUARE_CHG25, hai.reference_orthotope(2)) == 0
-        @test hai.check_order(hai.SQUARE_CHG21, hai.reference_orthotope(2)) == 0
+        domain = hai.reference_orthotope(BigFloat, 2)
+        @test hai.check_order(hai.SQUARE_CHG25, domain; rtol=rtol) == 0
+        @test hai.check_order(hai.SQUARE_CHG21, domain; rtol=rtol) == 0
     end
 
     @testset "Triangle" begin

@@ -1,7 +1,6 @@
 using Base.Iterators: countfrom, partition
 using BenchmarkTools
 using ForwardDiff: jacobian
-using GenericLinearAlgebra
 using HAdaptiveIntegration:
     CUBE_BE65,
     EmbeddedCubature,
@@ -18,7 +17,6 @@ using HAdaptiveIntegration:
     integral_monomial_simplex
 using LinearAlgebra
 using Optim
-using SparseArrays
 using StaticArrays
 
 function integral_chebyshev_orthotope(d::Int, tdm::Int)

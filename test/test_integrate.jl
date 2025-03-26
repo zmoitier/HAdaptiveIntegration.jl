@@ -1,4 +1,7 @@
-using Test, StaticArrays, LinearAlgebra, DataStructures
+using DataStructures
+using LinearAlgebra
+using Test
+
 import HAdaptiveIntegration as hai
 
 @testset "Default embedded cubature" begin
