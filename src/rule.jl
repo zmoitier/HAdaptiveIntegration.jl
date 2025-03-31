@@ -79,14 +79,14 @@ end
 """
    struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
 
-Embedded cubature rule for a `D`-simplex of degree `deg`.
+Embedded cubature rule for a `D`-simplex.
 
 ## Type Parameters:
 - `D`: The dimension of the simplex.
 
 ## Fields:
-- `order_high::Int`: the high order of the embedded cubature rule.
-- `order_low::Int`: the low order of the embedded cubature rule.
+- `order_high::Int`: the high order of the rule.
+- `order_low::Int`: the low order of the rule.
 
 ## Invariants (check at construction):
 - `order_high` and `order_low` must be odd.
