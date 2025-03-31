@@ -136,49 +136,45 @@ function integral_monomial(::Simplex{D,N,T}, total_degree_max::Int) where {D,N,T
     return integral_monomial_simplex(D, total_degree_max)
 end
 
-function integral_monomial_orthotope(d::Int, tdm::Int)
-    if d ≤ 0
-        return Vector{Vector{Pair{Tuple{},Rational{Int}}}}()
-    end
+function integral_monomial_orthotope(dim::Int, k_max::Int)
+    @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
 
-    indexes = [[(i,) => 1//(i + 1)] for i in 0:tdm]
+    mlt_idx_val = [[(i,) => 1//(i + 1)] for i in 0:k_max]
 
-    for n in 2:d
-        tmp = [Vector{Pair{NTuple{n,Int},Rational{Int}}}() for _ in 0:tdm]
-        for (td, idx_val) in zip(Iterators.countfrom(0), indexes)
-            for (idx, val) in idx_val
-                for k in 0:(tdm - td)
-                    push!(tmp[td + 1 + k], (k, idx...) => val//(k + 1))
+    for d in 2:dim
+        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:k_max]
+        for (k, mi_val) in zip(Iterators.countfrom(0), mlt_idx_val)
+            for (mi, val) in mi_val
+                for n in 0:(k_max - k)
+                    push!(new[k + 1 + n], (n, mi...) => val//(n + 1))
                 end
             end
         end
-        indexes = tmp
+        mlt_idx_val = new
     end
 
-    return indexes
+    return mlt_idx_val
 end
 
-function integral_monomial_simplex(d::Int, tdm::Int)
-    if d ≤ 0
-        return Vector{Vector{Pair{Tuple{},Rational{Int}}}}()
-    end
+function integral_monomial_simplex(dim::Int, k_max::Int)
+    @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
 
-    indexes = [[(i,) => 1//prod((i + 1):(i + d))] for i in 0:tdm]
+    mlt_idx_val = [[(i,) => 1//prod((i + 1):(i + dim))] for i in 0:k_max]
 
-    for n in 2:d
-        tmp = [Vector{Pair{NTuple{n,Int},Rational{Int}}}() for _ in 0:tdm]
-        for (td, idx_val) in zip(Iterators.countfrom(0), indexes)
-            for (idx, val) in idx_val
-                push!(tmp[td + 1], (0, idx...) => val)
+    for d in 2:dim
+        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:k_max]
+        for (k, mi_val) in zip(Iterators.countfrom(0), mlt_idx_val)
+            for (mi, val) in mi_val
+                push!(new[k + 1], (0, mi...) => val)
                 v = 1
-                for k in 1:(tdm - td)
-                    v *= k//(k + td + d)
-                    push!(tmp[td + 1 + k], (k, idx...) => val * v)
+                for n in 1:(k_max - k)
+                    v *= n//(n + k + dim)
+                    push!(new[k + 1 + n], (n, mi...) => val * v)
                 end
             end
         end
-        indexes = tmp
+        mlt_idx_val = new
     end
 
-    return indexes
+    return mlt_idx_val
 end

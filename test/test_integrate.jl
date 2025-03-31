@@ -148,9 +148,9 @@ end
 
 @testset "GrundmannMoeller quadrature" begin
     @testset "Triangle" begin
-        @test hai.check_order(hai.TRIANGLE_GM20, hai.reference_simplex(2)) == 0
+        @test hai.check_order(hai.TRIANGLE_GM19, hai.reference_simplex(2)) == 0
 
-        ec = hai.embedded_cubature(Float64, hai.TRIANGLE_GM20)
+        ec = hai.embedded_cubature(Float64, hai.TRIANGLE_GM19)
 
         rtol = 1e-8
 
