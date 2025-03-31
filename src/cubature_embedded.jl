@@ -89,12 +89,12 @@ function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
     weights_high = Vector{T}()
     weights_low = Vector{T}()
 
-    count = 1
+    count = 0
     node_to_idx = Dict{NTuple{D,Rational{Int}},Int}()
 
     mlt_idx = _multi_indexes(D + 1, sh)
     for i in 0:sh
-        dem = (D + 1 + 2 * i)
+        dem = D + 1 + 2 * i
         for idx in mlt_idx[i + 1]
             node = (2 .* idx[2:end] .+ 1) .// dem
 
@@ -105,8 +105,8 @@ function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
                     weights_low[j] += gm_wl[sl - i + 1]
                 end
             else
-                node_to_idx[node] = count
                 count += 1
+                node_to_idx[node] = count
 
                 push!(nodes, SVector{D,T}(node))
                 push!(weights_high, gm_wh[sh - i + 1])
