@@ -76,7 +76,7 @@ function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
 
     # Grundmann-Möller weights computed iteratively instead of using the formula for
     # numerical stability at higher degree.
-    gm_wl = [foldl(/, 1:D; init=T(1))]
+    gm_wl = [1 / reduce(*, 1:D; init=T(1))]
     for _ in 1:sl
         gm_wl = _gm_weight_next(gm_wl, D)
     end
@@ -129,8 +129,8 @@ function _gm_weight_next(weight::Vector{T}, dim::Int) where {T}
         v = dim + 1 + 2 * s - i
         weight_next[i + 1] = -weight[i] * (v - i)^2 / (4 * i * v)
     end
-    v = dim + 1 + 2 * s
-    weight_next[1] = -weight_next[2] * (T(v) / (v - 2))^(2 * s) / (v - 2)
+    v = dim + 2 * s - 1
+    weight_next[1] = -weight_next[2] * (T(v + 2) / v)^(2 * s) / v
 
     return weight_next
 end
