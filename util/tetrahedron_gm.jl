@@ -1,33 +1,23 @@
-using StaticArrays
-import Printf: Format, format
+using HAdaptiveIntegration: GrundmannMoeller, embedded_cubature
+using Printf: Format, format
 
-import HAdaptiveIntegration as hai
+ec = embedded_cubature(BigFloat, GrundmannMoeller{3}(7))
 
-setprecision(BigFloat, 40; base=10)
+display(length(ec.nodes))
 
-ec = hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(3, 7))
-n = 33
-
-fmt_node = Format("[\"%.$(n)e\", \"%.$(n)e\", \"%.$(n)e\"],")
+fmt_node = Format("[\"%.36e\", \"%.36e\", \"%.36e\"],")
 for x in ec.nodes
-    println(
-        format(
-            fmt_node,
-            round(x[1]; sigdigits=n + 1, base=10),
-            round(x[2]; sigdigits=n + 1, base=10),
-            round(x[3]; sigdigits=n + 1, base=10),
-        ),
-    )
+    println(format(fmt_node, x[1], x[2], x[3]))
 end
 println()
 
-fmt_weight = Format("\"%.$(n)e\",")
+fmt_weight = Format("\"%.36e\",")
 for w in ec.weights_high
-    println(format(fmt_weight, round(w; sigdigits=n + 1, base=10)))
+    println(format(fmt_weight, w))
 end
 println()
 
 for w in ec.weights_low
-    println(format(fmt_weight, round(w; sigdigits=n + 1, base=10)))
+    println(format(fmt_weight, w))
 end
 println()

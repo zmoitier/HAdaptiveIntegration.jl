@@ -67,24 +67,93 @@ function embedded_cubature(
 end
 embedded_cubature(tec::TabulatedEmbeddedCubature) = embedded_cubature(float(Int), tec)
 
+# Based on Eq. (4.1) in the article:
+#   A. Grundmann and H. M. Möller, Invariant integration formulas for the n-simplex by
+#   combinatorial methods, SIAM Journal on Numerical Analysis, volume 15, 1978,
+#   https://doi.org/10.1137/0715019.
 function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
-    vol = 1 / T(factorial(D)) # volume of the reference simplex
+    sh, sl = (gm.order_high - 1) ÷ 2, (gm.order_low - 1) ÷ 2
 
-    # high order cubature
-    Tn = grundmann_moeller(T, Val(D), gm.deg)
+    # Grundmann-Möller weights computed iteratively instead of using the formula for
+    # numerical stability at higher degree.
+    gm_wl = [foldl(/, 1:D; init=T(1))]
+    for _ in 1:sl
+        gm_wl = _gm_weight_next(gm_wl, D)
+    end
+    gm_wh = copy(gm_wl)
+    for _ in (sl + 1):sh
+        gm_wh = _gm_weight_next(gm_wh, D)
+    end
 
-    H = length(Tn.points)
-    nodes_high = [SVector{D}(Tn.points[H - i + 1][2:end]) for i in 1:H]
-    weights_high = [Tn.weights[H - i + 1] * vol for i in 1:H]
+    nodes = Vector{SVector{D,T}}()
+    weights_high = Vector{T}()
+    weights_low = Vector{T}()
 
-    # low order cubature
-    Tn_low = grundmann_moeller(T, Val(D), gm.deg - 2)
-    L = length(Tn_low.points)
-    weights_low = [Tn_low.weights[L - i + 1] * vol for i in 1:L]
+    count = 0
+    node_to_idx = Dict{NTuple{D,Rational{Int}},Int}()
 
-    return EmbeddedCubature(nodes_high, weights_high, weights_low)
+    mlt_idx = _multi_indexes(D + 1, sh)
+    for i in 0:sh
+        dem = D + 1 + 2 * i
+        for idx in mlt_idx[i + 1]
+            node = (2 .* idx[2:end] .+ 1) .// dem
+
+            if node in keys(node_to_idx)
+                j = node_to_idx[node]
+                weights_high[j] += gm_wh[sh - i + 1]
+                if i ≤ sl
+                    weights_low[j] += gm_wl[sl - i + 1]
+                end
+            else
+                count += 1
+                node_to_idx[node] = count
+
+                push!(nodes, SVector{D,T}(node))
+                push!(weights_high, gm_wh[sh - i + 1])
+                if i ≤ sl
+                    push!(weights_low, gm_wl[sl - i + 1])
+                end
+            end
+        end
+    end
+
+    return EmbeddedCubature(nodes, weights_high, weights_low)
 end
 embedded_cubature(gm::GrundmannMoeller) = embedded_cubature(float(Int), gm)
+
+function _gm_weight_next(weight::Vector{T}, dim::Int) where {T}
+    s = length(weight)
+
+    weight_next = Vector{T}(undef, s + 1)
+    for i in s:-1:1
+        v = dim + 1 + 2 * s - i
+        weight_next[i + 1] = -weight[i] * (v - i)^2 / (4 * i * v)
+    end
+    v = dim + 1 + 2 * s
+    weight_next[1] = -weight_next[2] * (T(v) / (v - 2))^(2 * s) / (v - 2)
+
+    return weight_next
+end
+
+function _multi_indexes(dim::Int, k_max::Int)
+    @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
+
+    mlt_idx = [[tuple(k)] for k in 0:k_max]
+
+    for d in 2:dim
+        new = [Vector{NTuple{d,Int}}() for _ in 0:k_max]
+        for (k, mis) in zip(Iterators.countfrom(0), mlt_idx)
+            for mi in mis
+                for n in 0:(k_max - k)
+                    push!(new[k + 1 + n], (mi..., n))
+                end
+            end
+        end
+        mlt_idx = new
+    end
+
+    return mlt_idx
+end
 
 """
     (ec::EmbeddedCubature{D,T})(

@@ -79,19 +79,32 @@ end
 """
    struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
 
-Embedded cubature rule for a `D`-simplex of degree `deg`.
+Embedded cubature rule for a `D`-simplex.
 
 ## Type Parameters:
 - `D`: The dimension of the simplex.
 
 ## Fields:
-- `deg::Int`: The degree of the cubature rule.
+- `order_high::Int`: the high order of the rule.
+- `order_low::Int`: the low order of the rule.
+
+## Invariants (check at construction):
+- `order_high` and `order_low` must be odd.
+- must have `order_high > order_low ≥ 1`.
 """
 struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
-    deg::Int
+    order_high::Int
+    order_low::Int
 
-    function GrundmannMoeller{D}(deg::Int) where {D}
-        @assert deg ≥ 0 "Degree must be non-negative"
-        return new{D}(deg)
+    function GrundmannMoeller{D}(order_high::Int, order_low::Int) where {D}
+        @assert isodd(order_high) && isodd(order_low)
+        @assert order_high > order_low ≥ 1
+        return new{D}(order_high, order_low)
+    end
+
+    function GrundmannMoeller{D}(order_high::Int) where {D}
+        @assert isodd(order_high)
+        @assert order_high ≥ 3
+        return new{D}(order_high, order_high - 2)
     end
 end

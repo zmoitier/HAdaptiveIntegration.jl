@@ -88,7 +88,7 @@ function triangle_rule(case::Int=0)
     end
 
     measure_perf("TRIANGLE_RL19", domain, fct; ec=hai.embedded_cubature(hai.TRIANGLE_RL19))
-    measure_perf("TRIANGLE_GM20", domain, fct; ec=hai.embedded_cubature(hai.TRIANGLE_GM20))
+    measure_perf("TRIANGLE_GM19", domain, fct; ec=hai.embedded_cubature(hai.TRIANGLE_GM19))
 
     return nothing
 end
