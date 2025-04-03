@@ -155,6 +155,34 @@ function _multi_indexes(dim::Int, k_max::Int)
     return mlt_idx
 end
 
+# Based on the article:
+#   A. C. Genz and A. A. Malik, Remarks on algorithm 006: An adaptive algorithm for
+#   numerical integration over an N-dimensional rectangular region, Journal of Computational
+#   and Applied Mathematics, Volume 6, Issue 4, 1980,
+#   https://doi.org/10.1016/0771-050X(80)90039-X.
+function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
+    # λ₁                 # (0, ..., 0)
+    λ₂ = sqrt(T(9) / 70) # (λ₂, 0, ..., 0)
+    λ₃ = sqrt(T(9) / 10) # (λ₃, 0, ..., 0)
+    λ₄ = λ₃              # (λ₄, λ₄, 0, ..., 0)
+    λ₅ = sqrt(T(9) / 19) # (λ₅, ..., λ₅)
+
+    t = T(2)^D
+    w₁ = t * (12_824 - 9_120 * D + 400 * D^2) / 19_683
+    w₂ = t * 980 / 6_561
+    w₃ = t * (1_820 - 400 * D) / 19_683
+    w₄ = t * 200 / 19_683
+    w₅ = T(6_859) / 19_683
+
+    v₁ = t * (729 - 950 * D + 50 * D^2) / 729
+    v₂ = t * 245 / 486
+    v₃ = t * (265 - 100 * D) / 1_458
+    v₄ = t * 25 / 729
+
+    return nothing
+end
+embedded_cubature(gm::GenzMalik{D}) where {D} = embedded_cubature(float(Int), gm)
+
 """
     (ec::EmbeddedCubature{D,T})(
         fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
