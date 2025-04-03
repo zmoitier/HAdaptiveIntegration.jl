@@ -7,9 +7,9 @@ CurrentModule = HAdaptiveIntegration
 ## Overview
 
 `HAdaptiveIntegration.jl` is a Julia package for approximating integrals of functions over
-various predefined [`AbstractDomain`](@ref)s. It uses *embedded cubature* rules to build error
-estimates, and refines the integration domain by splitting its mesh elements until a certain
-tolerance is reached. Features include:
+various predefined [`AbstractDomain`](@ref)s. It uses *embedded cubature* rules to build
+error estimates, and refines the integration domain by splitting its mesh elements until a
+certain tolerance is reached. Features include:
 
 - Adaptive integration over **simplices of any dimension**
 - Use of **efficient (tabulated) cubatures** for low-dimensional cuboids and simplices
@@ -81,11 +81,12 @@ more details):
 - [`tetrahedron`](@ref): a tetrahedron in 3D,
 - [`simplex`](@ref): a simplex in arbitrary dimension,
 - [`rectangle`](@ref): a rectangle in 2D,
-- [`cuboid`](@ref): a cuboid in 3D.
+- [`cuboid`](@ref): a cuboid in 3D,
+- [`orthotope`](@ref): an orthotope in arbitrary dimension.
 
 !!! tip "N-cuboids and `HCubature.jl`"
     If you are looking for a package that supports adaptive integration over arbitrarily
-    high-dimensional axis-aligned cuboids, you may want to check out
+    high-dimensional axis-aligned orthotope, you may want to check out
     [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl).
 
 ## Going further
