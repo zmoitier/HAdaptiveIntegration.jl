@@ -9,6 +9,7 @@ import HAdaptiveIntegration as hai
         hai.reference_orthotope(1),
         hai.reference_orthotope(2),
         hai.reference_orthotope(3),
+        hai.reference_orthotope(4),
         hai.reference_simplex(2),
         hai.reference_simplex(3),
         hai.reference_simplex(4),

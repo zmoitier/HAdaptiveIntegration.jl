@@ -1,15 +1,15 @@
 """
-    check_subdivision(
+    validate_subdivision(
         subdiv_algo,
         domain::AbstractDomain{D,T};
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
     ) where {D,T}
 
-Return 0 if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the
-volume of the domain else return 1.
+Return true if the sum of the volume of the subdomain by the `subdiv_algo` is equal to the
+volume of the domain else return false.
 """
-function check_subdivision(
+function validate_subdivision(
     subdiv_algo,
     domain::AbstractDomain{D,T};
     atol=zero(T),
@@ -18,11 +18,11 @@ function check_subdivision(
     sub_domains = subdiv_algo(domain)
     if !isapprox(sum(abs_det_jac.(sub_domains)), abs_det_jac(domain); atol=atol, rtol=rtol)
         @error "`$(Symbol(subdiv_algo))` do not partition the domain within the tolerance."
-        return 1
+        return false
     end
 
     @info "`$(Symbol(subdiv_algo))` pass volume test."
-    return 0
+    return true
 end
 
 """
@@ -66,10 +66,10 @@ function subdivide_cuboid8(c::Cuboid{T}) where {T}
         Cuboid{T}(a, m),
         Cuboid{T}(SVector(m[1], a[2], a[3]), SVector(b[1], m[2], m[3])),
         Cuboid{T}(SVector(a[1], m[2], a[3]), SVector(m[1], b[2], m[3])),
-        Cuboid{T}(SVector(a[1], a[2], m[3]), SVector(m[1], m[2], b[3])),
-        Cuboid{T}(SVector(a[1], m[2], m[3]), SVector(m[1], b[2], b[3])),
-        Cuboid{T}(SVector(m[1], a[2], m[3]), SVector(b[1], m[2], b[3])),
         Cuboid{T}(SVector(m[1], m[2], a[3]), SVector(b[1], b[2], m[3])),
+        Cuboid{T}(SVector(a[1], a[2], m[3]), SVector(m[1], m[2], b[3])),
+        Cuboid{T}(SVector(m[1], a[2], m[3]), SVector(b[1], m[2], b[3])),
+        Cuboid{T}(SVector(a[1], m[2], m[3]), SVector(m[1], b[2], b[3])),
         Cuboid{T}(m, b),
     )
 end
@@ -233,4 +233,45 @@ function subdivide_simplex(s::Simplex{D,N,T}) where {D,N,T}
     map(refs) do ref
         Simplex(f.(ref.vertices))
     end
+end
+
+@generated function subdivide_reference_orthotope(::Val{D}, ::Type{T}=Float64) where {D,T}
+    a, b = zeros(SVector{D,T}), ones(SVector{D,T})
+    m = SVector{D}(fill(T(1) / 2, D))
+
+    sub_orthotopes = Vector{Orthotope{D,T}}()
+    for (cl, ch) in zip(Base.product(zip(a, m)...), Base.product(zip(m, b)...))
+        push!(sub_orthotopes, Orthotope(SVector{D,T}(cl), SVector{D,T}(ch)))
+    end
+
+    # Convert to an efficient format with known sizes
+    static_orthotopes = ntuple(2^D) do i
+        sub_orthotopes[i]
+    end
+
+    return :($static_orthotopes)
+end
+
+"""
+    subdivide_orthotope(h::Orthotope)
+
+Subdivide the `D`-orthotope `h` into `2ᴰ` smaller orthotopes by splitting each dimension at
+its midpoint.
+"""
+function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
+    # refs = subdivide_reference_orthotope(Val(D), T)
+    # f = map_from_reference(h)
+    # map(refs) do ref
+    #     Orthotope(f(ref.low_corner), f(ref.high_corner))
+    # end
+
+    a, b = h.low_corner, h.high_corner
+    m = (a + b) ./ 2
+
+    sub_orthotopes = Vector{Orthotope{D,T}}()
+    for (cₗ, cₕ) in zip(Base.product(zip(a, m)...), Base.product(zip(m, b)...))
+        sub_orthotopes[i] = Orthotope(SVector{D,T}(cₗ), SVector{D,T}(cₕ))
+    end
+
+    return sub_orthotopes
 end
