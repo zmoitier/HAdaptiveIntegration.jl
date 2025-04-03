@@ -8,22 +8,22 @@
 [![Coverage](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl)
 [![BestieTemplate](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/JuliaBesties/BestieTemplate.jl/main/docs/src/assets/badge.json)](https://github.com/JuliaBesties/BestieTemplate.jl)
 
-`HAdaptiveIntegration` is a Julia package designed for numerical integration over multidimensional domains.
-It computes integrals of the form
-
+`HAdaptiveIntegration` is a Julia package designed for numerical integration over
+multidimensional domains. It computes integrals of the form
 ```math
 I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
-
-where $f$ is any Julia function and $\Omega$ represents domains such as simplices and cuboids.
-The package employs an adaptive approach, dynamically refining the integration domain as needed.
-It uses embedded quadrature rules to provide error estimates, aiming to achieve high accuracy while minimizing function evaluations.
+where $f$ is any Julia function and $\Omega$ represents domains such as simplices and
+cuboids. The package employs an adaptive approach, dynamically refining the integration
+domain as needed. It uses embedded quadrature rules to provide error estimates, aiming to
+achieve high accuracy while minimizing function evaluations.
 
 Features include:
 
-- Adaptive integration over **simplices of any dimension**
-- Utilization of **efficient tabulated cubatures** for low-dimensional cuboids and simplices
-- Support for custom cubature rules
+- Adaptive integration over simplices and orthotope of **any dimension**
+- Utilization of **efficient tabulated cubatures** for low-dimensional orthotopes and
+  simplices
+- Support for custom embedded cubature rules
 - Arbitrary precision arithmetic
 
 ## Quick Example
@@ -51,14 +51,18 @@ I, E = integrate(f, tetra)
 ```
 
 There are many options available for the `integrate` function, as well as other supported
-integration domains.
-For more information, see the [stable documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable/) or the [latest development documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev/).
+integration domains. For more information, see the
+[stable documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable/) or the
+[latest development documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev/).
 
 ## Related packages
 
-`HAdaptiveIntegration` draws inspiration from the [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) package, which offers a similar approach for integrating over hyperrectangles in any dimension.
-The key differences are:
+`HAdaptiveIntegration` draws inspiration from the
+[`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) package, which offers a similar
+approach for integrating over orthotope in any dimension. The key differences are:
 
-- `HAdaptiveIntegration` supports integration over simplices of any dimension, whereas `HCubature` is focused on hyperrectangles.
-- For low-dimensional domains such as squares, cubes, and triangles, `HAdaptiveIntegration` employs tabulated cubatures for enhanced efficiency.
-  This allows it to achieve precision comparable to `HCubature` with fewer function evaluations for these domains.
+- `HAdaptiveIntegration` supports integration over simplices of any dimension, whereas
+`HCubature` is focused on orthotopes.
+- For low-dimensional orthotopes such as squares and cubes, `HAdaptiveIntegration` employs
+  tabulated cubatures for enhanced efficiency. This allows it to achieve precision
+  comparable to `HCubature` with fewer function evaluations for these domains.
