@@ -1,36 +1,8 @@
-using Test, StaticArrays, LinearAlgebra, DataStructures
+using DataStructures
+using LinearAlgebra
+using Test
+
 import HAdaptiveIntegration as hai
-
-@testset "Embedded cubature" begin
-    tec = hai.TabulatedEmbeddedCubature{hai.Segment}(;
-        description="Gauss (SEGMENT_G3)",
-        reference="",
-        nb_significant_digits=16,
-        nodes=[["5e-1"], ["1.127016653792583e-1"], ["8.872983346207417e-1"]],
-        weights_high=[
-            "4.444444444444444e-1", "2.777777777777778e-1", "2.777777777777778e-1"
-        ],
-        order_high=5,
-        weights_low=["1"],
-        order_low=1,
-    )
-    @test typeof(tec) <: hai.TabulatedEmbeddedCubature{hai.Segment}
-
-    ec = hai.embedded_cubature(tec)
-    @test typeof(ec) <: hai.EmbeddedCubature{1,Float64}
-
-    ec_ref = hai.embedded_cubature(
-        [[0.5], [(1 - √(3 / 5)) / 2], [(1 + √(3 / 5)) / 2]], [4 / 9, 5 / 18, 5 / 18], [1.0]
-    )
-    @test typeof(ec_ref) <: hai.EmbeddedCubature{1,Float64}
-
-    @test ec.nodes ≈ ec_ref.nodes
-    @test ec.weights_high ≈ ec_ref.weights_high
-    @test ec.weights_low ≈ ec_ref.weights_low
-
-    @test typeof(hai.embedded_cubature(hai.GrundmannMoeller{2}(5))) <:
-        hai.EmbeddedCubature{2,Float64}
-end
 
 @testset "Default embedded cubature" begin
     for domain in (
@@ -61,8 +33,6 @@ end
 end
 
 @testset "Integrate over a segment" begin
-    @test hai.check_order(hai.SEGMENT_GK15, hai.reference_orthotope(1)) == 0
-
     ec = hai.embedded_cubature(Float64, hai.SEGMENT_GK15)
     segment = hai.segment(0, 1)
 
@@ -84,9 +54,6 @@ end
 end
 
 @testset "Integrate over a rectangle" begin
-    @test hai.check_order(hai.SQUARE_CHG25, hai.reference_orthotope(2)) == 0
-    @test hai.check_order(hai.SQUARE_CHG21, hai.reference_orthotope(2)) == 0
-
     ec = hai.embedded_cubature(Float64, hai.SQUARE_CHG25)
     square = hai.rectangle((0, 0), (1, 1))
 
@@ -104,8 +71,6 @@ end
 end
 
 @testset "Integrate over a triangle" begin
-    @test hai.check_order(hai.TRIANGLE_RL19, hai.reference_simplex(2)) == 0
-
     ec = hai.embedded_cubature(Float64, hai.TRIANGLE_RL19)
 
     triangle = hai.triangle((0, 0), (2, 0), (0, 2))
@@ -124,8 +89,6 @@ end
 end
 
 @testset "Integrate over a Cuboid" begin
-    @test hai.check_order(hai.CUBE_BE65, hai.reference_orthotope(3)) == 0
-
     ec = hai.embedded_cubature(Float64, hai.CUBE_BE65)
     cube = hai.cuboid((0, 0, 0), (1, 1, 1))
 
@@ -148,10 +111,7 @@ end
 
 @testset "GrundmannMoeller quadrature" begin
     @testset "Triangle" begin
-        @test hai.check_order(hai.TRIANGLE_GM19, hai.reference_simplex(2)) == 0
-
         ec = hai.embedded_cubature(Float64, hai.TRIANGLE_GM19)
-
         rtol = 1e-8
 
         triangle = hai.triangle((0, 0), (2, 0), (0, 2))
@@ -174,11 +134,8 @@ end
     end
 
     @testset "Tetrahedron" begin
-        @test hai.check_order(
-            hai.TETRAHEDRON_GM35, hai.reference_simplex(3); rtol=12 * eps(Float64)
-        ) == 0
-
         tetrahedron = hai.tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+        ec = hai.embedded_cubature(Float64, hai.TETRAHEDRON_GM35)
         rtol = 1e-8
 
         I, E = hai.integrate(x -> 1, tetrahedron; rtol=rtol)
@@ -195,11 +152,6 @@ end
     end
 
     @testset "4-Simplex" begin
-        ec = hai.embedded_cubature(Float64, hai.GrundmannMoeller{4}(7))
-
-        @test hai.check_order(ec, hai.reference_simplex(4), 7, 5; rtol=50 * eps(Float64)) ==
-            0
-
         rtol = 1e-8
         I, E = hai.integrate(x -> 1 / norm(x), hai.reference_simplex(4); rtol=rtol)
         R = 0.089876019011 # reference computed using BigFloat

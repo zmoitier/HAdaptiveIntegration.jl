@@ -1,4 +1,6 @@
-using Test, StaticArrays
+using StaticArrays
+using Test
+
 import HAdaptiveIntegration as hai
 
 @testset "Domain construction" begin
