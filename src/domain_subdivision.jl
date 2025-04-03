@@ -235,18 +235,28 @@ function subdivide_simplex(s::Simplex{D,N,T}) where {D,N,T}
     end
 end
 
+"""
+    subdivide_reference_orthotope(::Val{D}, ::Type{T}=Float64) where {D,T}
+
+Like `subdivide_orthotope`, but operates on the reference orthotope. Since the output
+depends only on the dimension `D`, and the type `T` used to represent coordinates, this
+function is generated for each combination of `D` and `T`.
+"""
 @generated function subdivide_reference_orthotope(::Val{D}, ::Type{T}=Float64) where {D,T}
     a, b = zeros(SVector{D,T}), ones(SVector{D,T})
-    m = SVector{D}(fill(T(1) / 2, D))
+    m = SVector{D}(fill(T(1//2), D))
 
-    sub_orthotopes = Vector{Orthotope{D,T}}()
-    for (cl, ch) in zip(Base.product(zip(a, m)...), Base.product(zip(m, b)...))
-        push!(sub_orthotopes, Orthotope(SVector{D,T}(cl), SVector{D,T}(ch)))
+    sub_corners = Vector{NTuple{2,SVector{D,T}}}()
+    for choices in Base.product([(true, false) for _ in 1:D]...)
+        # Compute the low and high corners of the sub-orthotope
+        low_corner = SVector{D,T}(cᵢ ? aᵢ : mᵢ for (cᵢ, aᵢ, mᵢ) in zip(choices, a, m))
+        high_corner = SVector{D,T}(cᵢ ? mᵢ : bᵢ for (cᵢ, mᵢ, bᵢ) in zip(choices, m, b))
+        push!(sub_corners, (low_corner, high_corner))
     end
 
     # Convert to an efficient format with known sizes
     static_orthotopes = ntuple(2^D) do i
-        sub_orthotopes[i]
+        Orthotope(sub_corners[i][1], sub_corners[i][2])
     end
 
     return :($static_orthotopes)
