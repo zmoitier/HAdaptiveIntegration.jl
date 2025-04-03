@@ -121,19 +121,20 @@ end
 @testset "Subdivision" begin
     @testset "segment" begin
         s = hai.segment(-0.81, 0.48)
-        @test hai.check_subdivision(hai.subdivide_segment2, s) == 0
+        @test hai.validate_subdivision(hai.subdivide_segment2, s)
     end
 
     @testset "triangle" begin
         t = hai.triangle((-0.86, -0.19), (0.97, -0.84), (-0.05, 0.74))
-        @test hai.check_subdivision(hai.subdivide_triangle2, t) == 0
-        @test hai.check_subdivision(hai.subdivide_triangle4, t) == 0
-        @test hai.check_subdivision(hai.subdivide_simplex, t) == 0
+        @test hai.validate_subdivision(hai.subdivide_triangle2, t)
+        @test hai.validate_subdivision(hai.subdivide_triangle4, t)
+        @test hai.validate_subdivision(hai.subdivide_simplex, t)
     end
 
     @testset "rectangle" begin
         r = hai.rectangle((-0.07, 0.42), (0.35, 0.71))
-        @test hai.check_subdivision(hai.subdivide_rectangle4, r) == 0
+        @test hai.validate_subdivision(hai.subdivide_rectangle4, r)
+        @test hai.validate_subdivision(hai.subdivide_orthotope, r)
     end
 
     @testset "tetrahedron" begin
@@ -143,8 +144,14 @@ end
             (-0.06, 0.57, -0.34),
             (-0.27, -0.12, 0.14),
         )
-        @test hai.check_subdivision(hai.subdivide_tetrahedron8, t) == 0
-        @test hai.check_subdivision(hai.subdivide_simplex, t) == 0
+        @test hai.validate_subdivision(hai.subdivide_tetrahedron8, t)
+        @test hai.validate_subdivision(hai.subdivide_simplex, t)
+    end
+
+    @testset "cuboid" begin
+        c = hai.cuboid((-0.38, -0.92, -0.43), (0.15, 0.30, 0.51))
+        @test hai.validate_subdivision(hai.subdivide_cuboid8, c)
+        @test hai.validate_subdivision(hai.subdivide_orthotope, c)
     end
 
     @testset "4-simplex" begin
@@ -155,11 +162,11 @@ end
             (-0.27, -0.12, 0.14, 0.0),
             (-0.27, -0.12, 0.14, 1.0),
         )
-        @test hai.check_subdivision(hai.subdivide_simplex, s) == 0
+        @test hai.validate_subdivision(hai.subdivide_simplex, s)
     end
 
-    @testset "cuboid" begin
-        c = hai.cuboid((-0.38, -0.92, -0.43), (0.15, 0.30, 0.51))
-        @test hai.check_subdivision(hai.subdivide_cuboid8, c) == 0
+    @testset "4-orthotope" begin
+        h = hai.orthotope((-2.12, -0.37, -0.86, 0.09), (-1.57, 0.11, 0.49, 0.66))
+        @test hai.validate_subdivision(hai.subdivide_orthotope, h)
     end
 end
