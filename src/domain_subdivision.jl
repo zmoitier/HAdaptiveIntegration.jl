@@ -259,19 +259,9 @@ Subdivide the `D`-orthotope `h` into `2ᴰ` smaller orthotopes by splitting each
 its midpoint.
 """
 function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
-    # refs = subdivide_reference_orthotope(Val(D), T)
-    # f = map_from_reference(h)
-    # map(refs) do ref
-    #     Orthotope(f(ref.low_corner), f(ref.high_corner))
-    # end
-
-    a, b = h.low_corner, h.high_corner
-    m = (a + b) ./ 2
-
-    sub_orthotopes = Vector{Orthotope{D,T}}()
-    for (cₗ, cₕ) in zip(Base.product(zip(a, m)...), Base.product(zip(m, b)...))
-        sub_orthotopes[i] = Orthotope(SVector{D,T}(cₗ), SVector{D,T}(cₕ))
+    refs = subdivide_reference_orthotope(Val(D), T)
+    f = map_from_reference(h)
+    map(refs) do ref
+        Orthotope(f(ref.low_corner), f(ref.high_corner))
     end
-
-    return sub_orthotopes
 end
