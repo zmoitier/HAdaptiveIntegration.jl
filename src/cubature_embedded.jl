@@ -168,18 +168,59 @@ function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
     λ₅ = sqrt(T(9) / 19) # (λ₅, ..., λ₅)
 
     t = T(2)^D
-    w₁ = t * (12_824 - 9_120 * D + 400 * D^2) / 19_683
-    w₂ = t * 980 / 6_561
-    w₃ = t * (1_820 - 400 * D) / 19_683
-    w₄ = t * 200 / 19_683
-    w₅ = T(6_859) / 19_683
+    wh = (
+        t * (12_824 - 9_120 * D + 400 * D^2) / 19_683,
+        t * 980 / 6_561,
+        t * (1_820 - 400 * D) / 19_683,
+        t * 200 / 19_683,
+        T(6_859) / 19_683,
+    )
+    # w' weights
+    wl = (
+        t * (729 - 950 * D + 50 * D^2) / 729,
+        t * 245 / 486,
+        t * (265 - 100 * D) / 1_458,
+        t * 25 / 729,
+    )
 
-    v₁ = t * (729 - 950 * D + 50 * D^2) / 729
-    v₂ = t * 245 / 486
-    v₃ = t * (265 - 100 * D) / 1_458
-    v₄ = t * 25 / 729
+    nodes = [zero(SVector{D,T})]
+    weights_high = [wh[1]]
+    weights_low = [wl[1]]
 
-    return nothing
+    node = zero(MVector{D,T})
+    for i in 1:D
+        for (λ, wₕ, wₗ) in zip((λ₂, λ₃), wh[2:3], wl[2:3])
+            for s in (1, -1)
+                node[i] = s * λ
+                push!(nodes, SVector{D,T}(node))
+                push!(weights_high, wₕ)
+                push!(weights_low, wₗ)
+            end
+        end
+        node[i] = 0
+    end
+
+    for i in 1:(D - 1)
+        for j in (i + 1):D
+            for (s₁, s₂) in Iterators.product((1, -1), (1, -1))
+                node[i] = s₁ * λ₄
+                node[j] = s₂ * λ₄
+                push!(nodes, SVector{D,T}(node))
+                push!(weights_high, wh[4])
+                push!(weights_low, wl[4])
+            end
+            node[j] = 0
+        end
+        node[i] = 0
+    end
+
+    node .= λ₅
+    for signs in Iterators.product([(1, -1) for _ in 1:D]...)
+        push!(nodes, SVector{D,T}(signs .* node))
+        push!(weights_high, wh[5])
+    end
+
+    return EmbeddedCubature(nodes, weights_high, weights_low)
 end
 embedded_cubature(gm::GenzMalik{D}) where {D} = embedded_cubature(float(Int), gm)
 
