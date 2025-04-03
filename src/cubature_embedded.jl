@@ -167,20 +167,16 @@ function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
     λ₄ = λ₃              # (λ₄, λ₄, 0, ..., 0)
     λ₅ = sqrt(T(9) / 19) # (λ₅, ..., λ₅)
 
-    t = T(2)^D
-    wh = (
-        t * (12_824 - 9_120 * D + 400 * D^2) / 19_683,
-        t * 980 / 6_561,
-        t * (1_820 - 400 * D) / 19_683,
-        t * 200 / 19_683,
-        T(6_859) / 19_683,
+    wh = SVector{5,T}(
+        (12_824 - 9_120 * D + 400 * D^2)//19_683,
+        980//6_561,
+        (1_820 - 400 * D)//19_683,
+        200//19_683,
+        6_859//(19_683 * 2^D),
     )
     # w' weights
-    wl = (
-        t * (729 - 950 * D + 50 * D^2) / 729,
-        t * 245 / 486,
-        t * (265 - 100 * D) / 1_458,
-        t * 25 / 729,
+    wl = SVector{4,T}(
+        (729 - 950 * D + 50 * D^2)//729, 245//486, (265 - 100 * D)//1_458, 25//729
     )
 
     nodes = [zero(SVector{D,T})]
@@ -220,7 +216,8 @@ function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
         push!(weights_high, wh[5])
     end
 
-    return EmbeddedCubature(nodes, weights_high, weights_low)
+    Φ = x -> (x .+ 1) ./ 2
+    return EmbeddedCubature(Φ.(nodes), weights_high, weights_low)
 end
 embedded_cubature(gm::GenzMalik{D}) where {D} = embedded_cubature(float(Int), gm)
 

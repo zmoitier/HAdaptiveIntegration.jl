@@ -9,6 +9,9 @@ Abstract type for a cubature rule on a domain `DOM`.
 
 ## Mandatory methods:
 - [`embedded_cubature`](@ref)
+
+## Useful (but non-mandatory) methods:
+- [`orders`](@ref)
 """
 abstract type AbstractRule{DOM<:AbstractDomain} end
 
@@ -118,3 +121,20 @@ Embedded cubature rule for a `D`-orthotope of high order `7` and low order 5.
 - `D`: The dimension of the orthotope.
 """
 struct GenzMalik{D} <: AbstractRule{Orthotope{D}} end
+
+"""
+    orders(rule::AR) where {AR<:AbstractRule}
+
+Return the high and low order of the embedded cubature `rule`.
+"""
+function orders(tec::TabulatedEmbeddedCubature)
+    return tec.order_high, tec.order_low
+end
+
+function orders(gm::GrundmannMoeller)
+    return gm.order_high, gm.order_low
+end
+
+function orders(::GenzMalik)
+    return 7, 5
+end
