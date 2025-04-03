@@ -78,7 +78,7 @@ end
     end
 
     @testset "Square" begin
-        for tec in (hai.SQUARE_CHG25, hai.SQUARE_CHG21)
+        for tec in (hai.SQUARE_CH25, hai.SQUARE_CH21, hai.SQUARE_GM17)
             ec = hai.embedded_cubature(T, tec)
             @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...)
         end
@@ -92,9 +92,10 @@ end
     end
 
     @testset "Cube" begin
-        tec = hai.CUBE_BE65
-        ec = hai.embedded_cubature(T, tec)
-        @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...)
+        for tec in (hai.CUBE_BE65, hai.CUBE_GM33)
+            ec = hai.embedded_cubature(T, tec)
+            @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...)
+        end
     end
 
     @testset "Tetrahedron" begin
