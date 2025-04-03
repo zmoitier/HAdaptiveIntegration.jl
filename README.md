@@ -10,9 +10,11 @@
 
 `HAdaptiveIntegration` is a Julia package designed for numerical integration over
 multidimensional domains. It computes integrals of the form
+
 ```math
 I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
+
 where $f$ is any Julia function and $\Omega$ represents domains such as simplices and
 cuboids. The package employs an adaptive approach, dynamically refining the integration
 domain as needed. It uses embedded quadrature rules to provide error estimates, aiming to

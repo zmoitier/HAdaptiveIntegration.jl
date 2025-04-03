@@ -177,7 +177,7 @@ function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
         (729 - 950 * D + 50 * D^2)//729, 245//486, (265 - 100 * D)//1_458, 25//729
     )
 
-    # start with the node (0, ..., 0) 
+    # start with the node (0, ..., 0)
     node = zeros(T, D)
     nodes = [Φ(SVector{D,T}(node))]
     weights_high = [wh[1]]
