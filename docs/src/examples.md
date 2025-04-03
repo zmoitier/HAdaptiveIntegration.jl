@@ -34,7 +34,7 @@ b1 = @benchmark hcubature($f, $a, $b)
 ```
 
 ```@example hcubature-square
-ec = HAdaptiveIntegration.embedded_cubature(Float64, HAdaptiveIntegration.SQUARE_CHG25)
+ec = HAdaptiveIntegration.embedded_cubature(Float64, HAdaptiveIntegration.SQUARE_CH25)
 counter[] = 0
 b2 = @benchmark integrate($f, $domain; embedded_cubature = $ec)
 ```

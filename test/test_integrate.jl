@@ -54,7 +54,7 @@ end
 end
 
 @testset "Integrate over a rectangle" begin
-    ec = hai.embedded_cubature(Float64, hai.SQUARE_CHG25)
+    ec = hai.embedded_cubature(Float64, hai.SQUARE_CH25)
     square = hai.rectangle((0, 0), (1, 1))
 
     I, E = ec(x -> exp(x[1] + x[2]), square)

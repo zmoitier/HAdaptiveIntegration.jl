@@ -27,7 +27,7 @@ Return a default embedded cubature for the domains:
 - dimension 1:
     - [`segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
-    - [`rectangle`](@ref): [`SQUARE_CHG25`](@ref)
+    - [`rectangle`](@ref): [`SQUARE_CH25`](@ref)
     - [`triangle`](@ref): [`TRIANGLE_RL19`](@ref)
 - dimension 3:
     - [`cuboid`](@ref): [`CUBE_BE65`](@ref)
@@ -40,7 +40,7 @@ Return a default embedded cubature for the domains:
     return :($ec)
 end
 @generated function default_embedded_cubature(::Rectangle{T}) where {T}
-    ec = embedded_cubature(T, SQUARE_CHG25)
+    ec = embedded_cubature(T, SQUARE_CH25)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Triangle{T}) where {T}

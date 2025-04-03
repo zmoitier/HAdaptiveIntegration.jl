@@ -183,7 +183,7 @@ function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
     weights_high = [wh[1]]
     weights_low = [wl[1]]
 
-    node = zero(MVector{D,T})
+    node = zeros(T, D)
     for i in 1:D
         for (λ, wₕ, wₗ) in zip((λ₂, λ₃), wh[2:3], wl[2:3])
             for s in (1, -1)
