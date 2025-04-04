@@ -85,13 +85,13 @@ ec = hai.embedded_cubature(Float64, hai.TRIANGLE_RL19)
 H, L = length(ec.weights_high), length(ec.weights_low)
 
 # Example usage for k=1 (adjust as needed)
-k = 5
-x, y = [n[1] for n in ec.nodes[1:L]], [n[2] for n in ec.nodes[1:L]]
-w = ec.weights_low
+# k = 5
+# x, y = [n[1] for n in ec.nodes[1:L]], [n[2] for n in ec.nodes[1:L]]
+# w = ec.weights_low
 
-# k = 7
-# x, y = [n[1] for n in ec.nodes], [n[2] for n in ec.nodes]
-# w = ec.weights_high
+k = 7
+x, y = [n[1] for n in ec.nodes], [n[2] for n in ec.nodes]
+w = ec.weights_high
 
 N = div((k + 1) * (k + 2), 6)  # Ensure 3N equals number of monomials
 
