@@ -5,28 +5,24 @@ using HAdaptiveIntegration:
     EmbeddedCubature,
     GrundmannMoeller,
     Orthotope,
+    Rectangle,
     SEGMENT_GK15,
     SEGMENT_GK31,
-    SQUARE_CHG21,
-    SQUARE_CHG25,
+    SQUARE_CH21,
+    SQUARE_CH25,
+    SQUARE_GM17,
     Segment,
     Simplex,
-    TRIANGLE_GM20,
+    TRIANGLE_GM19,
     TRIANGLE_RL19,
     TabulatedEmbeddedCubature,
+    Triangle,
     embedded_cubature,
     map_from_reference,
+    orders,
     rectangle,
     triangle
 using StaticArrays
-
-function degree(tec::TabulatedEmbeddedCubature)
-    return (tec.order_high, tec.order_low)
-end
-
-function degree(gm::GrundmannMoeller)
-    return (gm.deg, gm.deg - 2)
-end
 
 function vertices(domain::Triangle)
     return Vector(domain.vertices)
@@ -53,7 +49,7 @@ end
 function plot_rule(rule::AbstractRule{Segment})
     ec = embedded_cubature(rule)
     H, L = length(ec.weights_high), length(ec.weights_low)
-    dh, dl = degree(rule)
+    dh, dl = orders(rule)
 
     nodes = reinterpret(Float64, ec.nodes)
 
@@ -116,7 +112,7 @@ function plot(
         axs[1],
         nodes[(L + 1):end];
         color=color_weighs(ec.weights_high[(L + 1):end]),
-        marker=:diamond,
+        marker=:xcross,
         markersize=size_weights(ec.weights_high[(L + 1):end], W),
     )
     scatter!(
@@ -129,27 +125,32 @@ function plot(
     return fig
 end
 
-function plot_rule(rule::AbstractRule{Simplex{2}})
+function plot_rule(rule::AbstractRule{Simplex{2,3}})
     ec = embedded_cubature(rule)
-    dh, dl = degree(rule)
+    oh, ol = orders(rule)
     domain = triangle((1, 0), (-0.5, √3 / 2), (-0.5, -√3 / 2))
 
-    return plot(ec, domain, dh, dl)
+    return plot(ec, domain, oh, ol)
 end
 
 function plot_rule(rule::AbstractRule{Orthotope{2}})
     ec = embedded_cubature(rule)
-    dh, dl = degree(rule)
+    oh, ol = orders(rule)
     domain = rectangle((-1, -1), (1, 1))
 
-    return plot(ec, domain, dh, dl)
+    return plot(ec, domain, oh, ol)
 end
 
 function main()
     # fig = plot_rule(SEGMENT_GK15)
-    # fig = plot_rule(SQUARE_CHG21)
+    # fig = plot_rule(SEGMENT_GK31)
+
+    # fig = plot_rule(SQUARE_CH25)
+    # fig = plot_rule(SQUARE_CH21)
+    # fig = plot_rule(SQUARE_GM17)
+
     # fig = plot_rule(TRIANGLE_RL19)
-    fig = plot_rule(GrundmannMoeller{2}(9))
+    # fig = plot_rule(TRIANGLE_GM19)
 
     display(fig)
 
