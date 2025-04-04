@@ -1,9 +1,12 @@
+using Base.Iterators: countfrom, partition
 using BenchmarkTools
+using ForwardDiff: jacobian
 using HAdaptiveIntegration:
     EmbeddedCubature,
     SEGMENT_GK15,
     TETRAHEDRON_GM35,
     TRIANGLE_GM20,
+    TRIANGLE_RL19,
     TabulatedEmbeddedCubature,
     embedded_cubature
 using LinearAlgebra
@@ -18,7 +21,7 @@ function integral_monomial_simplex(d::Int, tdm::Int)
 
     for n in 2:d
         tmp = [Vector{Pair{NTuple{n,Int},Rational{Int}}}() for _ in 0:tdm]
-        for (td, idx_val) in zip(Iterators.countfrom(0), indexes)
+        for (td, idx_val) in zip(countfrom(0), indexes)
             for (idx, val) in idx_val
                 push!(tmp[td + 1], (0, idx...) => val)
                 v = 1
@@ -34,26 +37,20 @@ function integral_monomial_simplex(d::Int, tdm::Int)
     return indexes
 end
 
-function pack(
-    S::DataType, nodes::SVector{N,SVector{D,T}}, weights::SVector{N,T}
-) where {N,D,T}
-    # U = [x₁..., ..., xₙ..., w...] where n = D
-    U = Vector{S}(undef, (D + 1) * N)
-    for (i, (x, w)) in enumerate(zip(nodes, weights))
-        for n in 1:D
-            U[(n - 1) * N + i] = S(x[n])
-        end
-        U[D * N + i] = S(w)
+function pack(S::DataType, nodes, weights)
+    U = Vector{S}()
+    for (x, w) in zip(nodes, weights)
+        append!(U, S.(x))
+        push!(U, S(w))
     end
     return U
 end
 
 function unpack(U::Vector{T}, D::Int) where {T}
-    N = length(U) ÷ (D + 1)
     nodes, weights = Vector{SVector{D,T}}(), Vector{T}()
-    for i in 1:N
-        push!(nodes, SVector{D}(U[(n - 1) * N + i] for n in 1:D))
-        push!(weights, U[D * N + i])
+    for t in partition(U, D + 1)
+        push!(nodes, SVector{D}(t[1:D]))
+        push!(weights, t[D + 1])
     end
     return nodes, weights
 end
@@ -61,15 +58,15 @@ end
 function increase_precision(
     S::DataType, ec::EmbeddedCubature{H,L,D,T}, order_high::Int, order_low::Int
 ) where {H,L,D,T}
-    increase_precision(S, ec.nodes, ec.weights_high, order_high)
-    # increase_precision(S, ec.nodes[1:L], ec.weights_low, order_low)
+    # n, w = increase_precision(S, ec.nodes, ec.weights_high, order_high)
+    n, w = increase_precision(S, ec.nodes[1:L], ec.weights_low, order_low)
 
-    return nothing
+    return n, w
 end
 
-function increase_precision(
-    S::DataType, nodes::SVector{N,SVector{D,T}}, weights::SVector{N,T}, order::Int
-) where {N,D,T}
+function increase_precision(S::DataType, nodes, weights, order::Int)
+    D = length(first(nodes))
+
     monomials, values = Vector{NTuple{D,Int}}(), Vector{S}()
     for pairs in integral_monomial_simplex(D, order)
         for (multi_index, value) in pairs
@@ -80,10 +77,35 @@ function increase_precision(
 
     U = pack(S, nodes, weights)
 
-    # n, w = unpack(U, D)
-    return nothing
+    function F(u)
+        v = zeros(eltype(u), length(monomials))
+        for (i, mi) in enumerate(monomials)
+            v[i] += sum(prod(t[1:D] .^ mi) * t[D + 1] for t in partition(u, D + 1))
+        end
+        v -= values
+        return v
+    end
+
+    display(maximum(abs.(jacobian(F, U) \ F(U))))
+    for _ in 1:10
+        U -= jacobian(F, U) \ F(U)
+        display(maximum(abs.(jacobian(F, U) \ F(U))))
+    end
+
+    println()
+    display(U[1])
+    display(abs(U[1] - 1 / 3))
+    n, w = unpack(U, D)
+    return n, w
 end
 
 # increase_precision(Float64, embedded_cubature(Float32, SEGMENT_GK15), 23, 13)
-increase_precision(Float64, embedded_cubature(Float32, TRIANGLE_GM20), 7, 5)
+
+ec = embedded_cubature(Float64, TRIANGLE_RL19)
+n, w = increase_precision(Float64, embedded_cubature(Float32, TRIANGLE_RL19), 7, 5)
+
+println()
+display(norm(norm.(n - ec.nodes[1:7], Inf), Inf))
+display(norm(w - ec.weights_low, Inf))
+
 # increase_precision(Float64, embedded_cubature(Float32, TETRAHEDRON_GM35), 7, 5)
