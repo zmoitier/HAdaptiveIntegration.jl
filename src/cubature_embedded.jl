@@ -55,7 +55,7 @@ end
 function embedded_cubature(
     T::DataType, tec::TabulatedEmbeddedCubature{DOM}
 ) where {DOM<:AbstractDomain}
-    if 10 * eps(T) < 10.0^(-tec.nb_significant_digits)
+    if 10 * eps(T) < 10.0^(-tec.precision)
         @warn "The embedded cubature `$(tec.description)` has fewer significant digits than type $T, which may lead to numerical inaccuracies in computations."
     end
     D = dimension(DOM)
