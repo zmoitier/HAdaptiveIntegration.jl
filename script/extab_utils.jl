@@ -30,7 +30,7 @@ end
 function assemble(
     order_high::Int,
     order_low::Int,
-    points::Tuple{Vector{AffineMap{D,T,N}},String,String,String}...,
+    points::Tuple{Vector{AffineMap{D,T,N}},NTuple{D,String},String,String}...,
 ) where {D,T,N}
     orbit_maps = Vector{Vector{AffineMap{D,T,N}}}()
     nodes = Vector{SVector{D,T}}()
@@ -39,7 +39,7 @@ function assemble(
 
     for (maps, point, wh, wl) in points
         push!(orbit_maps, maps)
-        push!(nodes, SVector{1}(parse(T, point)))
+        push!(nodes, SVector{D}(parse.(T, point)))
         push!(weights_high, parse(T, wh))
         if wl != ""
             push!(weights_low, parse(T, wl))
