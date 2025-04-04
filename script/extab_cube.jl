@@ -8,6 +8,38 @@ import HAdaptiveIntegration as hai
 
 include("./extab_utils.jl")
 
+function mats_to_ams(left::Vector{Matrix{T}}, right::Vector{Matrix{T}}) where {T}
+    return reduce(vcat, map(affine_map, A * B for (A, B) in product(left, right)))
+end
+
+function get_orbit_map()
+    I = BigFloat[1 0 0; 0 1 0; 0 0 1]
+    T12 = BigFloat[0 1 0; 1 0 0; 0 0 1]
+    T13 = BigFloat[0 0 1; 0 1 0; 1 0 0]
+    T23 = BigFloat[1 0 0; 0 0 1; 0 1 0]
+    C123 = T23 * T12
+    C132 = T23 * T13
+    N1 = BigFloat[-1 0 0; 0 1 0; 0 0 1]
+    N2 = BigFloat[1 0 0; 0 -1 0; 0 0 1]
+    N3 = BigFloat[1 0 0; 0 1 0; 0 0 -1]
+    N12 = N1 * N2
+    N13 = N1 * N3
+    N23 = N2 * N3
+    N123 = -I
+
+    ams = Dict("000" => affine_map.([I]))
+    ams["x00"] = mats_to_ams([I, T12, T13], [I, N1])
+    ams["xx0"] = mats_to_ams([I, T13, T23], [I, N1, N2, N12])
+    ams["xxx"] = affine_map.([I, N1, N2, N3, N12, N13, N23, N123])
+    ams["xy0"] = mats_to_ams([I, T12, T13, T23, C123, C132], [I, N1, N2, N12])
+    ams["xxy"] = mats_to_ams([I, T13, T23], [I, N1, N2, N3, N12, N13, N23, N123])
+    ams["xyz"] = mats_to_ams(
+        [I, T12, T13, T23, C123, C132], [I, N1, N2, N3, N12, N13, N23, N123]
+    )
+
+    return ams
+end
+
 function integral_chebyshev_orthotope(d::Int, tdm::Int)
     if d ≤ 0
         return Vector{Vector{Pair{Tuple{},Rational{Int}}}}()
@@ -33,7 +65,7 @@ function integral_chebyshev_orthotope(d::Int, tdm::Int)
     return indexes
 end
 
-function reduce_quarter(
+function remove_odd(
     indexes::Vector{Vector{Pair{NTuple{D,Int64},Rational{Int64}}}}
 ) where {D}
     new = Vector{Vector{Pair{NTuple{D,Int64},Rational{Int64}}}}()
@@ -51,7 +83,7 @@ function increase_precision(ec)
     kh = ec[:order_high]
     kl = ec[:order_low]
 
-    polynomials = reduce_quarter(integral_chebyshev_orthotope(2, kh))
+    polynomials = remove_odd(integral_chebyshev_orthotope(2, kh))
 
     U, D, H, L = pack(ec[:nodes], ec[:weights_high], ec[:weights_low])
     @assert D == 2
@@ -111,80 +143,53 @@ function main()
     cube = hai.cuboid(BigFloat[-1, -1, -1], BigFloat[1, 1, 1])
     reference = hai.reference_domain(typeof(cube))
 
-    I = BigFloat[1 0 0; 0 1 0; 0 0 1]
-    T12 = BigFloat[0 1 0; 1 0 0; 0 0 1]
-    T13 = BigFloat[0 0 1; 0 1 0; 1 0 0]
-    T23 = BigFloat[1 0 0; 0 0 1; 0 1 0]
-    C123 = T23 * T12
-    C132 = T23 * T13
-    N1 = BigFloat[-1 0 0; 0 1 0; 0 0 1]
-    N2 = BigFloat[1 0 0; 0 -1 0; 0 0 1]
-    N3 = BigFloat[1 0 0; 0 1 0; 0 0 -1]
-    N12 = N1 * N2
-    N13 = N1 * N3
-    N23 = N2 * N3
-    N123 = -I
-
-    ams_000 = affine_map.([I])
-    ams_x00 = affine_map.(A * B for (A, B) in product([I, T12, T13], [I, N1]))
-    ams_xx0 = affine_map.(A * B for (A, B) in product([I, T13, T23], [I, N1, N2, N12]))
-    ams_xxx = affine_map.([I, N1, N2, N3, N12, N13, N23, N123])
-    ams_xy0 =
-        affine_map.(
-            A * B for (A, B) in product([I, T12, T13, T23, C123, C132], [I, N1, N2, N12])
-        )
-    ams_xxy =
-        affine_map.(
-            A * B for (A, B) in product([I, T13, T23], [I, N1, N2, N3, N12, N13, N23, N123])
-        )
-    ams_xyz =
-        affine_map.(
-            A * B for (A, B) in
-            product([I, T12, T13, T23, C123, C132], [I, N1, N2, N3, N12, N13, N23, N123])
-        )
+    ams = get_orbit_map()
+    display(ams)
 
     # https://epubs.siam.org/doi/10.1137/0725016
-    # Berntsen-Espelid rule with 65 points
-    # be65 = assemble(
-    #     9,
-    #     7,
-    #     (
-    #         ams_00,
-    #         ("0.00000000000000000000", "0.00000000000000000000"),
-    #         "0.32363456790123456790",
-    #         "0.67592092205970002525",
-    #     ),
-    #     (
-    #         ams_x0,
-    #         ("0.90617984593866399280", "0.00000000000000000000"),
-    #         "0.13478507238752090312",
-    #         "0.23092842785903867626",
-    #     ),
-    #     (
-    #         ams_xx,
-    #         ("0.53846931010568309104", "0.53846931010568309104"),
-    #         "0.22908540022399111713",
-    #         "0.43953907332966785983",
-    #     ),
-    #     (
-    #         ams_xx,
-    #         ("0.90617984593866399280", "0.90617984593866399280"),
-    #         "0.56134348862428635955e-1",
-    #         "0.82373073956971141166e-1",
-    #     ),
-    #     (
-    #         ams_xy,
-    #         ("0.90617984593866399280", "0.53846931010568309104"),
-    #         "0.11340000000000000000",
-    #         "0.39089597169698608216e-1",
-    #     ),
-    #     (
-    #         ams_x0,
-    #         ("0.53846931010568309104", "0.00000000000000000000"),
-    #         "0.27228653255075070182",
-    #         "",
-    #     ),
-    # )
+    # Berntsen-Espelid with 65 points
+    be65 = assemble(
+        9,
+        7,
+        (
+            ams_000,
+            ("0.0000000000000000", "0.0000000000000000", "0.0000000000000000"),
+            "3.627223234882982e-2",
+            "-1.567680589691669",
+        ),
+        (
+            ams_x00,
+            ("0.5964879651434033", "0.0000000000000000", "0.0000000000000000"),
+            "3.344004803960433e-1",
+            "7.463617511755153e-1",
+        ),
+        ;
+        subtraction=true,
+    )
+
+    display(be65[:weights_low])
+
+    # ruleA = deorbit([
+    #     orbit_000("3.627223234882982e-2"),
+    #     orbit_x00("0.5964879651434033", "3.344004803960433e-1"),
+    #     orbit_x00("0.9115074790731163", "1.056782249762152e-1"),
+    #     orbit_xx0("0.8574202866331438", "1.052721389844229e-1"),
+    #     orbit_xxx("0.5055319855426346", "2.134446785647350e-1"),
+    #     orbit_xxx("0.9029552445284127", "2.932190346652714e-2"),
+    #     orbit_xxy("0.5250000000000000", "0.9350000000000000", "8.824405047310198e-2"),
+    # ])
+
+    # # 65 points, order 7
+    # ruleN = deorbit([
+    #     orbit_000("-1.567680589691669"),
+    #     orbit_x00("0.5964879651434033", "7.463617511755153e-1"),
+    #     orbit_x00("0.9115074790731163", "-2.514018470880359e-1"),
+    #     orbit_xx0("0.8574202866331438", "-4.386770693227025e-2"),
+    #     orbit_xxx("0.5055319855426346", "-3.526102622434519e-1"),
+    #     orbit_xxx("0.9029552445284127", "-2.158018313159962e-2"),
+    #     orbit_xxy("0.5250000000000000", "0.9350000000000000", "8.824405047310198e-2"),
+    # ])
+    # ruleB = (nodes=ruleN[:nodes], weights=ruleA[:weights] - ruleN[:weights])
 
     # for (cbt, name) in [(ch21, "CH21"), (ch25, "CH25")]
     #     println("##########")
@@ -233,26 +238,3 @@ function main()
 end
 
 main()
-
-# # 65 points, order 9
-# ruleA = deorbit([
-#     orbit_000("3.627223234882982e-2"),
-#     orbit_x00("0.5964879651434033", "3.344004803960433e-1"),
-#     orbit_x00("0.9115074790731163", "1.056782249762152e-1"),
-#     orbit_xx0("0.8574202866331438", "1.052721389844229e-1"),
-#     orbit_xxx("0.5055319855426346", "2.134446785647350e-1"),
-#     orbit_xxx("0.9029552445284127", "2.932190346652714e-2"),
-#     orbit_xxy("0.5250000000000000", "0.9350000000000000", "8.824405047310198e-2"),
-# ])
-
-# # 65 points, order 7
-# ruleN = deorbit([
-#     orbit_000("-1.567680589691669"),
-#     orbit_x00("0.5964879651434033", "7.463617511755153e-1"),
-#     orbit_x00("0.9115074790731163", "-2.514018470880359e-1"),
-#     orbit_xx0("0.8574202866331438", "-4.386770693227025e-2"),
-#     orbit_xxx("0.5055319855426346", "-3.526102622434519e-1"),
-#     orbit_xxx("0.9029552445284127", "-2.158018313159962e-2"),
-#     orbit_xxy("0.5250000000000000", "0.9350000000000000", "8.824405047310198e-2"),
-# ])
-# ruleB = (nodes=ruleN[:nodes], weights=ruleA[:weights] - ruleN[:weights])
