@@ -1,4 +1,5 @@
 using LinearAlgebra
+import HAdaptiveIntegration as hai
 
 function generate_monomials(k)
     monomials = Tuple{Int,Int}[]
