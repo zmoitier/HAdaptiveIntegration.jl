@@ -104,12 +104,6 @@ struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
         @assert order_high > order_low ≥ 1
         return new{D}(order_high, order_low)
     end
-
-    function GrundmannMoeller{D}(order_high::Int) where {D}
-        @assert isodd(order_high)
-        @assert order_high ≥ 3
-        return new{D}(order_high, order_high - 2)
-    end
 end
 
 """

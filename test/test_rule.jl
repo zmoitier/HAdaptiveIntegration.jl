@@ -35,10 +35,11 @@ import HAdaptiveIntegration as hai
     end
 
     @testset "Grundmann-Möller" begin
-        @test typeof(hai.GrundmannMoeller{2}(5)) <: hai.AbstractRule{hai.Simplex{2}}
         @test typeof(hai.GrundmannMoeller{3}(7, 3)) <: hai.AbstractRule{hai.Simplex{3}}
+        @test_throws AssertionError typeof(hai.GrundmannMoeller{3}(7, 6))
+        @test_throws AssertionError typeof(hai.GrundmannMoeller{3}(5, 7))
 
-        gm = hai.GrundmannMoeller{4}(5)
+        gm = hai.GrundmannMoeller{4}(5, 3)
         @test hai.orders(gm) == (5, 3)
         @test hai.validate_orders(
             hai.embedded_cubature(Float64, gm),
