@@ -16,41 +16,40 @@ I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
 
 where $f$ is any Julia function and $\Omega$ represents domains such as simplices and
-cuboids. The package employs an adaptive approach, dynamically refining the integration
+orthotopes. The package employs an adaptive approach, dynamically refining the integration
 domain as needed. It uses embedded quadrature rules to provide error estimates, aiming to
 achieve high accuracy while minimizing function evaluations.
 
 Features include:
 
-- Adaptive integration over simplices and orthotope of **any dimension**
-- Utilization of **efficient tabulated cubatures** for low-dimensional orthotopes and
-  simplices
-- Support for custom embedded cubature rules
-- Arbitrary precision arithmetic
+- Adaptive integration over simplices and orthotope of **any dimension**,
+- Utilization of **efficient tabulated cubatures** for low-dimensional simplices and
+  orthotopes,
+- Support for custom embedded cubature rules,
+- Arbitrary precision arithmetic.
 
-## Quick Example
+## Quick Examples
 
-Here is a simple example of how to use `HAdaptiveIntegration` to compute an integral over a
-triangle:
+Here are simple examples of how to use `HAdaptiveIntegration` to compute an integral over
+the supported shapes:
 
 ```julia
 using HAdaptiveIntegration
 
-# Define a triangle domain and a function to integrate
-tri = triangle((0, 0), (1, 0), (0, 1))
-f = x -> exp(im * x[1]) / (x[1]^2 + x[2]^2 + 1e-2)
+# Define a function
+f = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
 
-# Compute the integral and error estimate over the triangle
-I, E = integrate(f, tri)
+# Compute the integral and error estimate over a triangle and a rectangle
+I, E = integrate(f, triangle((0, 0), (1, 0), (0, 1)))
+I, E = integrate(f, rectangle((0, 0), (1, 1)))
+
+# Compute the integral and error estimate over a tetrahedron and a cuboid
+I, E = integrate(f, tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
+I, E = integrate(f, cuboid((0, 0, 0), (1, 1, 1)))
+
 ```
 
-The result `I` is the integral value, and `E` the error estimate.
-And for an integral over a tetrahedron:
-
-```julia
-tetra = tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
-I, E = integrate(f, tetra)
-```
+The result `I` is the integral value and `E` the error estimate.
 
 There are many options available for the `integrate` function, as well as other supported
 integration domains. For more information, see the

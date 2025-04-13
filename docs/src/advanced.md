@@ -52,7 +52,7 @@ you can do
 using HAdaptiveIntegration: GrundmannMoeller, embedded_cubature, integrate, triangle
 t = triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
-ec = embedded_cubature(Float64, GrundmannMoeller{2}(13))
+ec = embedded_cubature(Float64, GrundmannMoeller{2}(13, 11))
 I, E = integrate(f, t; embedded_cubature = ec)
 ```
 
