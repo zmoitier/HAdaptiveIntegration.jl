@@ -29,10 +29,10 @@ function measure_perf(
     bm = @benchmark hai.integrate(
         $fct,
         $domain,
-        embedded_cubature=$ec,
-        subdiv_algo=$subdiv_algo,
-        buffer=$buffer,
-        rtol=$rtol,
+        embedded_cubature=($ec),
+        subdiv_algo=($subdiv_algo),
+        buffer=($buffer),
+        rtol=($rtol),
     )
     display(bm)
     println()
