@@ -67,22 +67,27 @@ more details):
 - [`cuboid`](@ref): a cuboid in 3D,
 - [`orthotope`](@ref): an orthotope (hyperrectangle) in arbitrary dimension.
 
-#### Simplices
+### Simplices
 
 To integrate the above function over a ``d``-dimensional simplices (triangle, tetrahedron,
 ...), defined by their vertices, we can use
 
 - Triangle
+
   ```@example quickstart
   I, E = integrate(fct, triangle((0, 0), (1, 0), (0, 1)))
   ```
+
   The result `I` is the integral of `f` over a triangle with vertices `(0,0)`, `(1,0)`, and
   `(0,1)`, and `E` is an error estimate.
 - Tetrahedron
+
   ```@example quickstart
   I, E = integrate(fct, tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
   ```
+
 - ``4``-simplex
+
   ```@example quickstart
   I, E = integrate(
            fct,
@@ -90,23 +95,29 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
            rtol=1e-4
          )
   ```
+
   The keyword arguments `atol` and `rtol` can be used to control the desired absolute and
   relative error tolerances, respectively.
 
-#### Orthotopes
+### Orthotopes
 
 To integrate the same function over a ``d``-dimensional axis-aligned orthotope (rectangle,
 cuboid, and hyperrectangle), defined by their low and high corners, we can use
 
 - Rectangle
+
   ```@example quickstart
   I, E = integrate(fct, rectangle((0, 0), (1, 1)))
   ```
+
 - Cuboid
+
   ```@example quickstart
   I, E = integrate(fct, cuboid((0, 0, 0), (1, 1, 1)))
   ```
+
 - ``4``-orthotope (hyperrectangle)
+
   ```@example quickstart
   I, E = integrate(fct, orthotope((0, 0, 0, 0), (1, 1, 1, 1)); rtol=1e-4)
   ```

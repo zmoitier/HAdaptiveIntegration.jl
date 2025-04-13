@@ -1,8 +1,8 @@
 """
-Laurie Radon with 19 nodes.
+Radon-Laurie with 19 nodes.
 """
 const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
-    description="Laurie Radon with 19 nodes (TRIANGLE_RL19)",
+    description="Radon-Laurie with 19 nodes (TRIANGLE_RL19)",
     reference="""https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/radon/set_radon_standard.m
     https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/laurie/set_laurie_standard.m""",
     nb_significant_digits=15,
@@ -62,10 +62,10 @@ const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
 )
 
 """
-Grundmann and Möller with 20 nodes.
+Grundmann-Möller with 20 nodes.
 """
 const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
-    description="Grundmann and Möller with 19 nodes (TRIANGLE_GM19)",
+    description="Grundmann-Möller with 19 nodes (TRIANGLE_GM19)",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
     nb_significant_digits=35,
     nodes=[
@@ -184,10 +184,10 @@ const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
 )
 
 """
-Grundmann and Möller with 35 nodes.
+Grundmann-Möller with 35 nodes.
 """
 const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature{Tetrahedron}(;
-    description="Grundmann and Möller with 35 nodes (TETRAHEDRON_GM35)",
+    description="Grundmann-Möller with 35 nodes (TETRAHEDRON_GM35)",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
     nb_significant_digits=35,
     nodes=[

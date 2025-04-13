@@ -60,7 +60,7 @@ Which cubature rule is best depends on the function being integrated, as well as
 desired accuracy; as a rule of thumb, higher-order cubature rules will perform better for
 globally smooth functions `f` or higher accuracy requirements. Here is a short study on the
 number of function evaluations required to achieve a given accuracy for the default
-Laurie-Radon cubature and the `GrundmannMoeller` cubature rule above:
+Radon-Laurie cubature and the `GrundmannMoeller` cubature rule above:
 
 ```@example embedded-cubature
 const cc = Ref(0) # a counter for the number of function evaluations
