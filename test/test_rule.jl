@@ -68,11 +68,7 @@ end
     T = Float64
 
     @testset "Segment" begin
-        for tec in (
-            # hai.SEGMENT_GK7,
-            hai.SEGMENT_GK15,
-            hai.SEGMENT_GK31,
-        )
+        for tec in (hai.SEGMENT_GK7, hai.SEGMENT_GK15, hai.SEGMENT_GK31)
             ec = hai.embedded_cubature(T, tec)
             @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...)
         end
