@@ -3,16 +3,17 @@ using HAdaptiveIntegration:
     AbstractDomain,
     AbstractRule,
     EmbeddedCubature,
-    Rectangle,
+    GrundmannMoeller,
+    Orthotope,
     SEGMENT_GK15,
     SEGMENT_GK31,
     SQUARE_CHG21,
     SQUARE_CHG25,
     Segment,
+    Simplex,
     TRIANGLE_GM20,
     TRIANGLE_RL19,
     TabulatedEmbeddedCubature,
-    Triangle,
     embedded_cubature,
     map_from_reference,
     rectangle,
@@ -21,6 +22,23 @@ using StaticArrays
 
 function degree(tec::TabulatedEmbeddedCubature)
     return (tec.order_high, tec.order_low)
+end
+
+function degree(gm::GrundmannMoeller)
+    return (gm.deg, gm.deg - 2)
+end
+
+function vertices(domain::Triangle)
+    return Vector(domain.vertices)
+end
+
+function vertices(domain::Rectangle)
+    return [
+        domain.low_corner,
+        SVector(domain.high_corner[1], domain.low_corner[2]),
+        domain.high_corner,
+        SVector(domain.low_corner[1], domain.high_corner[2]),
+    ]
 end
 
 function color_weighs(weights::Vector{Float64})
@@ -68,28 +86,12 @@ function plot_rule(rule::AbstractRule{Segment})
     return fig
 end
 
-function vertices(domain::Triangle)
-    return Vector(domain.vertices)
-end
-
-function vertices(domain::Rectangle)
-    return [
-        domain.low_corner,
-        SVector(domain.high_corner[1], domain.low_corner[2]),
-        domain.high_corner,
-        SVector(domain.low_corner[1], domain.high_corner[2]),
-    ]
-end
-
 function plot(
     ec::EmbeddedCubature{2}, domain::AbstractDomain{2}, order_high::Int, order_low::Int
 )
     L = length(ec.weights_low)
     Φ = map_from_reference(domain)
     nodes = Φ.(ec.nodes)
-
-    display(nodes[1:L])
-    display(nodes[(L + 1):end])
 
     fig = Figure()
 
@@ -127,7 +129,7 @@ function plot(
     return fig
 end
 
-function plot_rule(rule::AbstractRule{Triangle})
+function plot_rule(rule::AbstractRule{Simplex{2}})
     ec = embedded_cubature(rule)
     dh, dl = degree(rule)
     domain = triangle((1, 0), (-0.5, √3 / 2), (-0.5, -√3 / 2))
@@ -135,7 +137,7 @@ function plot_rule(rule::AbstractRule{Triangle})
     return plot(ec, domain, dh, dl)
 end
 
-function plot_rule(rule::AbstractRule{Rectangle})
+function plot_rule(rule::AbstractRule{Orthotope{2}})
     ec = embedded_cubature(rule)
     dh, dl = degree(rule)
     domain = rectangle((-1, -1), (1, 1))
@@ -145,8 +147,9 @@ end
 
 function main()
     # fig = plot_rule(SEGMENT_GK15)
-    fig = plot_rule(SQUARE_CHG21)
-    # fig = plot_rule(TRIANGLE_GM20)
+    # fig = plot_rule(SQUARE_CHG21)
+    # fig = plot_rule(TRIANGLE_RL19)
+    fig = plot_rule(GrundmannMoeller{2}(9))
 
     display(fig)
 
