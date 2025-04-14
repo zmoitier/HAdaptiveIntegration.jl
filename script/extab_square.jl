@@ -33,7 +33,7 @@ function integral_chebyshev_orthotope(d::Int, tdm::Int)
     return indexes
 end
 
-function reduce_quarter(
+function remove_odd(
     indexes::Vector{Vector{Pair{NTuple{D,Int64},Rational{Int64}}}}
 ) where {D}
     new = Vector{Vector{Pair{NTuple{D,Int64},Rational{Int64}}}}()
@@ -51,7 +51,7 @@ function increase_precision(ec)
     kh = ec[:order_high]
     kl = ec[:order_low]
 
-    polynomials = reduce_quarter(integral_chebyshev_orthotope(2, kh))
+    polynomials = remove_odd(integral_chebyshev_orthotope(2, kh))
 
     U, D, H, L = pack(ec[:nodes], ec[:weights_high], ec[:weights_low])
     @assert D == 2
