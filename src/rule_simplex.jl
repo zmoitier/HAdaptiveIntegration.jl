@@ -1,5 +1,6 @@
 """
 Radon-Laurie with 19 nodes.
+Radon-Laurie with 19 nodes.
 """
 const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
     description="Radon-Laurie with 19 nodes (TRIANGLE_RL19)",
@@ -62,7 +63,7 @@ const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
 )
 
 """
-Grundmann-Möller with 20 nodes.
+Grundmann-Möller with 19 nodes.
 """
 const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
     description="Grundmann-Möller with 19 nodes (TRIANGLE_GM19)",
@@ -184,6 +185,7 @@ const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
 )
 
 """
+Grundmann-Möller with 35 nodes.
 Grundmann-Möller with 35 nodes.
 """
 const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature{Tetrahedron}(;
