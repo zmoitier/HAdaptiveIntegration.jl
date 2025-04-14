@@ -68,7 +68,7 @@ Grundmann-Möller with 19 nodes.
 const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
     description="Grundmann-Möller with 19 nodes (TRIANGLE_GM19)",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
-    precision=33,
+    precision=35,
     nodes=[
         [
             "3.333333333333333333333333333333333333e-01",
@@ -191,7 +191,7 @@ Grundmann-Möller with 35 nodes.
 const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature{Tetrahedron}(;
     description="Grundmann-Möller with 35 nodes (TETRAHEDRON_GM35)",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
-    precision=33,
+    precision=35,
     nodes=[
         [
             "2.500000000000000000000000000000000000e-01",
