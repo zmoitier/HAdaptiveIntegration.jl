@@ -484,7 +484,7 @@ Genz-Malik with 17 nodes.
 const SQUARE_GM17 = TabulatedEmbeddedCubature{Rectangle}(;
     description="Genz-Malik with 17 nodes (SQUARE_GM17)",
     reference="https://doi.org/10.1016/0771-050X(80)90039-X",
-    nb_significant_digits=35,
+    precision=35,
     nodes=[
         [
             "5.000000000000000000000000000000000000e-01",
@@ -787,7 +787,7 @@ Genz-Malik with 33 nodes.
 const CUBE_GM33 = TabulatedEmbeddedCubature{Cuboid}(;
     description="Genz-Malik with 33 nodes (CUBE_GM33)",
     reference="https://doi.org/10.1016/0771-050X(80)90039-X",
-    nb_significant_digits=35,
+    precision=35,
     nodes=[
         [
             "5.000000000000000000000000000000000000e-01",

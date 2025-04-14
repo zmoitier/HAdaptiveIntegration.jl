@@ -7,7 +7,7 @@ import HAdaptiveIntegration as hai
         tec = hai.TabulatedEmbeddedCubature{hai.Segment}(;
             description="Gauss (SEGMENT_G3)",
             reference="",
-            nb_significant_digits=16,
+            precision=16,
             nodes=[["5e-1"], ["1.127016653792583e-1"], ["8.872983346207417e-1"]],
             weights_high=[
                 "4.444444444444444e-1", "2.777777777777778e-1", "2.777777777777778e-1"
