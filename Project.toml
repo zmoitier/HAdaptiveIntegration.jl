@@ -5,12 +5,16 @@ version = "0.1.2"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+GrundmannMoeller = "36aa67b7-9d79-4e90-bbc0-05abd90a007e"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 Aqua = "0.8"
 DataStructures = "0.18"
+GLMakie = "0.11"
+GrundmannMoeller = "0.1"
 LinearAlgebra = "1"
 StaticArrays = "1"
 Test = "1"
