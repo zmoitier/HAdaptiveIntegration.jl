@@ -41,38 +41,21 @@ I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
 
 where ``\Omega \subset \mathbb{R}^d`` is a [`AbstractDomain`](@ref) object, and
-``f \colon \mathbb{R}^d \to \mathbb{F}`` is a function. Here is a simple example:
+``f \colon \mathbb{R}^d \to \mathbb{F}`` is a function. Here is a simple example: first, we
+define a function,
 
 ```@example quickstart
 using HAdaptiveIntegration
-domain = triangle((0, 0), (1, 0), (0, 1))
-fct    = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
-I, E   = integrate(fct, domain)
-```
 
-The result `I` is the integral of `f` over a triangle with vertices `(0,0)`, `(1,0)`, and
-`(0,1)`, and `E` is an error estimate.
+fct = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
+nothing # hide
+```
 
 !!! warning "Function signature"
     The function `f` must accept a single argument `x` which is an abstract vector of length
     `d`, the dimension of the domain (concretely, `f` is called through `f(::SVector)`). The
-    return type `T` of `f` can be any type that supports the operations `+(T,T)`, `norm(T)`,
-    and multiplication by a scalar (*e.g.* vectors or matrices).
-
-The keyword arguments `atol` and `rtol` can be used to control the desired absolute and
-relative error tolerances, respectively:
-
-```@example quickstart
-I, E = integrate(fct, domain; rtol = 1e-12)
-```
-
-Finally, to integrate the same function over a three-dimensional axis-aligned cuboid we can
-use
-
-```@example quickstart
-domain = cuboid((0, 0, 0), (1, 1, 1))
-I, E   = integrate(fct, domain)
-```
+    return type `T` of `f` can be any type that supports the operations `+(T, T)`,
+    `norm(T)`, and multiplication by a scalar (*e.g.* vectors or matrices).
 
 `Domain`s are constructed using the following functions (see their respective docstrings for
 more details):
@@ -82,7 +65,62 @@ more details):
 - [`simplex`](@ref): a simplex in arbitrary dimension,
 - [`rectangle`](@ref): a rectangle in 2D,
 - [`cuboid`](@ref): a cuboid in 3D,
-- [`orthotope`](@ref): an orthotope in arbitrary dimension.
+- [`orthotope`](@ref): an orthotope (hyperrectangle) in arbitrary dimension.
+
+### Simplices
+
+To integrate the above function over a ``d``-dimensional simplices (triangle, tetrahedron,
+...), defined by their vertices, we can use
+
+- Triangle
+
+  ```@example quickstart
+  I, E = integrate(fct, triangle((0, 0), (1, 0), (0, 1)))
+  ```
+
+  The result `I` is the integral of `f` over a triangle with vertices `(0,0)`, `(1,0)`, and
+  `(0,1)`, and `E` is an error estimate.
+- Tetrahedron
+
+  ```@example quickstart
+  I, E = integrate(fct, tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
+  ```
+
+- ``4``-simplex
+
+  ```@example quickstart
+  I, E = integrate(
+           fct,
+           simplex((0, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
+           rtol=1e-4
+         )
+  ```
+
+  The keyword arguments `atol` and `rtol` can be used to control the desired absolute and
+  relative error tolerances, respectively.
+
+### Orthotopes
+
+To integrate the same function over a ``d``-dimensional axis-aligned orthotope (rectangle,
+cuboid, and hyperrectangle), defined by their low and high corners, we can use
+
+- Rectangle
+
+  ```@example quickstart
+  I, E = integrate(fct, rectangle((0, 0), (1, 1)))
+  ```
+
+- Cuboid
+
+  ```@example quickstart
+  I, E = integrate(fct, cuboid((0, 0, 0), (1, 1, 1)))
+  ```
+
+- ``4``-orthotope (hyperrectangle)
+
+  ```@example quickstart
+  I, E = integrate(fct, orthotope((0, 0, 0, 0), (1, 1, 1, 1)); rtol=1e-4)
+  ```
 
 !!! tip "N-cuboids and `HCubature.jl`"
     If you are looking for a package that supports adaptive integration over arbitrarily

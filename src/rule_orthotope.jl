@@ -147,10 +147,10 @@ const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
 )
 
 """
-Cools and Haegemans with 25 nodes.
+Cools-Haegemans with 25 nodes.
 """
 const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
-    description="Cools and Haegemans with 25 nodes (SQUARE_CH25)",
+    description="Cools-Haegemans with 25 nodes (SQUARE_CH25)",
     reference="https://link.springer.com/article/10.1007/BF01389339",
     nb_significant_digits=19,
     nodes=[
@@ -235,10 +235,10 @@ const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
 )
 
 """
-Cools and Haegemans with 21 nodes.
+Cools-Haegemans with 21 nodes.
 """
 const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
-    description="Cools and Haegemans with 21 nodes (SQUARE_CH21)",
+    description="Cools-Haegemans with 21 nodes (SQUARE_CH21)",
     reference="https://link.springer.com/article/10.1007/BF01389339",
     nb_significant_digits=19,
     nodes=[
@@ -307,10 +307,10 @@ const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
 )
 
 """
-Genz and Malik with 17 nodes.
+Genz-Malik with 17 nodes.
 """
 const SQUARE_GM17 = TabulatedEmbeddedCubature{Rectangle}(;
-    description="Genz and Malik with 17 nodes (SQUARE_GM17)",
+    description="Genz-Malik with 17 nodes (SQUARE_GM17)",
     reference="https://doi.org/10.1016/0771-050X(80)90039-X",
     nb_significant_digits=35,
     nodes=[
@@ -422,10 +422,10 @@ const SQUARE_GM17 = TabulatedEmbeddedCubature{Rectangle}(;
 )
 
 """
-Berntsen and Espelid with 65 nodes.
+Berntsen-Espelid with 65 nodes.
 """
 const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
-    description="Berntsen and Espelid with 65 nodes (CUBE_BE65)",
+    description="Berntsen-Espelid with 65 nodes (CUBE_BE65)",
     reference="https://epubs.siam.org/doi/10.1137/0725016",
     nb_significant_digits=15,
     nodes=[
@@ -610,10 +610,10 @@ const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
 )
 
 """
-Genz and Malik with 33 nodes.
+Genz-Malik with 33 nodes.
 """
 const CUBE_GM33 = TabulatedEmbeddedCubature{Cuboid}(;
-    description="Genz and Malik with 33 nodes (CUBE_GM33)",
+    description="Genz-Malik with 33 nodes (CUBE_GM33)",
     reference="https://doi.org/10.1016/0771-050X(80)90039-X",
     nb_significant_digits=35,
     nodes=[

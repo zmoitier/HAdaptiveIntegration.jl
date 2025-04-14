@@ -163,7 +163,7 @@ Like `subdivide_simplex`, but operates on the reference simplex. Since the outpu
 only on the dimension `D`, and the type `T` used to represent coordinates, this function is
 generated for each combination of `D` and `T`.
 """
-@generated function subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
+@generated function subdivide_reference_simplex(::Val{D}, (::Type{T})=Float64) where {D,T}
     # vertices of the reference simplex
     vertices = [
         zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
@@ -242,7 +242,7 @@ Like `subdivide_orthotope`, but operates on the reference orthotope. Since the o
 depends only on the dimension `D`, and the type `T` used to represent coordinates, this
 function is generated for each combination of `D` and `T`.
 """
-@generated function subdivide_reference_orthotope(::Val{D}, ::Type{T}=Float64) where {D,T}
+@generated function subdivide_reference_orthotope(::Val{D}, (::Type{T})=Float64) where {D,T}
     a, b = zeros(SVector{D,T}), ones(SVector{D,T})
     m = SVector{D}(fill(T(1//2), D))
 
