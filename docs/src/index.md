@@ -41,7 +41,7 @@ I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
 
 where ``\Omega \subset \mathbb{R}^d`` is a [`AbstractDomain`](@ref) object, and
-``f \colon \mathbb{R}^d \to \mathbb{F}`` is a function. Here is a simple example: First, we
+``f \colon \mathbb{R}^d \to \mathbb{F}`` is a function. Here is a simple example: first, we
 define a function,
 
 ```@example quickstart
