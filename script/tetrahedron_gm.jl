@@ -15,9 +15,3 @@ fmt_weight = Format("\"%.36e\",")
 for w in ec.weights_high
     println(format(fmt_weight, w))
 end
-println()
-
-for w in ec.weights_low
-    println(format(fmt_weight, w))
-end
-println()
