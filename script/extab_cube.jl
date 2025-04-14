@@ -144,7 +144,7 @@ function main()
         )
 
     # https://epubs.siam.org/doi/10.1137/0725016
-    # Berntsen-Espelid rule with 65
+    # Berntsen-Espelid rule with 65 points
     # be65 = assemble(
     #     9,
     #     7,
