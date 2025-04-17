@@ -186,7 +186,6 @@ const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
 
 """
 Grundmann-Möller with 35 nodes.
-Grundmann-Möller with 35 nodes.
 """
 const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature{Tetrahedron}(;
     description="Grundmann-Möller with 35 nodes (TETRAHEDRON_GM35)",
