@@ -80,6 +80,13 @@ struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
 end
 
 """
+   struct RadonLaurie <: AbstractRule{Simplex{2}}
+
+Embedded cubature rule for a `2`-simplex of high order `8` and low order `5`.
+"""
+struct RadonLaurie <: AbstractRule{Simplex{2}} end
+
+"""
    struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
 
 Embedded cubature rule for a `D`-simplex.
@@ -109,7 +116,7 @@ end
 """
    struct GenzMalik{D} <: AbstractRule{Orthotope{D}}
 
-Embedded cubature rule for a `D`-orthotope of high order `7` and low order 5.
+Embedded cubature rule for a `D`-orthotope of high order `7` and low order `5`.
 
 ## Type Parameters:
 - `D`: The dimension of the orthotope.
@@ -123,6 +130,10 @@ Return the high and low order of the embedded cubature `rule`.
 """
 function orders(tec::TabulatedEmbeddedCubature)
     return tec.order_high, tec.order_low
+end
+
+function orders(::RadonLaurie)
+    return 8, 5
 end
 
 function orders(gm::GrundmannMoeller)

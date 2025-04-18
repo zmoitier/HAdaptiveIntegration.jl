@@ -1,3 +1,4 @@
+using Quadmath
 using Test
 
 import HAdaptiveIntegration as hai
@@ -65,19 +66,11 @@ import HAdaptiveIntegration as hai
 end
 
 @testset "Tabulated rules" begin
-    setprecision(BigFloat, 40; base=10)
-    T = BigFloat
-    rtol = big"1e-35"
+    T = Float128
+    rtol = 10 * eps(T)
 
     @testset "Segment" begin
         for tec in (hai.SEGMENT_GK7, hai.SEGMENT_GK15, hai.SEGMENT_GK31)
-            ec = hai.embedded_cubature(T, tec)
-            @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...; rtol=rtol)
-        end
-    end
-
-    @testset "Square" begin
-        for tec in (hai.SQUARE_CH25, hai.SQUARE_CH21, hai.SQUARE_GM17)
             ec = hai.embedded_cubature(T, tec)
             @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...; rtol=rtol)
         end
@@ -90,8 +83,8 @@ end
         end
     end
 
-    @testset "Cube" begin
-        for tec in (hai.CUBE_BE65, hai.CUBE_GM33)
+    @testset "Square" begin
+        for tec in (hai.SQUARE_CH25, hai.SQUARE_CH21, hai.SQUARE_GM17)
             ec = hai.embedded_cubature(T, tec)
             @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...; rtol=rtol)
         end
@@ -101,5 +94,12 @@ end
         tec = hai.TETRAHEDRON_GM35
         ec = hai.embedded_cubature(T, tec)
         @test hai.validate_orders(ec, hai.Simplex, hai.orders(tec)...; rtol=rtol)
+    end
+
+    @testset "Cube" begin
+        for tec in (hai.CUBE_BE65, hai.CUBE_GM33)
+            ec = hai.embedded_cubature(T, tec)
+            @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...; rtol=rtol)
+        end
     end
 end
