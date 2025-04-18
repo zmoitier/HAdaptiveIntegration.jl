@@ -1,11 +1,9 @@
 """
 Radon-Laurie with 19 nodes.
-Radon-Laurie with 19 nodes.
 """
 const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
     description="Radon-Laurie with 19 nodes (TRIANGLE_RL19)",
-    reference="""https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/radon/set_radon_standard.m
-    https://www.math.unipd.it/~alvise/SETS_CUBATURE_TRIANGLE/laurie/set_laurie_standard.m""",
+    reference="""https://doi.org/10.1145/355993.356001""",
     precision=15,
     nodes=[
         ["3.333333333333333e-01", "3.333333333333333e-01"],
