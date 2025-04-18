@@ -1,6 +1,23 @@
 using LinearAlgebra, StaticArrays, BenchmarkTools
 import HAdaptiveIntegration as hai
 
+function get_fct(dim::Int, case::Int=0)
+    if case == 1
+        print("-- Nearly-singular --\n\n")
+        x₀ = SVector{dim,Float64}([-0.1, [0.0 for _ in 2:dim]...])
+        return x -> norm(x - x₀)^(-3)
+
+    elseif case == 2
+        print("-- Singular --\n\n")
+        return x -> 1 / norm(x)
+
+    else
+        print("-- Regular --\n\n")
+        e = exp(1)
+        return x -> cos(e * x[1] + prod(x))
+    end
+end
+
 function measure_perf(
     name,
     domain,
@@ -57,16 +74,7 @@ end
 
 function triangle_subdiv(case::Int=0)
     domain = hai.triangle((0, 0), (1, 0), (0, 1))
-
-    if case == 1
-        x₀ = SVector(-0.1, 0)
-        fct = x -> norm(x - x₀)^(-3)
-    elseif case == 2
-        fct = x -> 1 / norm(x)
-    else
-        e = exp(1)
-        fct = x -> cos(e * sum(x) + prod(x))
-    end
+    fct = get_fct(2, case)
 
     measure_perf("subdivide_triangle4", domain, fct; subdiv_algo=hai.subdivide_triangle4)
     measure_perf("subdivide_triangle2", domain, fct; subdiv_algo=hai.subdivide_triangle2)
@@ -76,19 +84,16 @@ end
 
 function triangle_rule(case::Int=0)
     domain = hai.triangle((0, 0), (1, 0), (0, 1))
-
-    if case == 1
-        x₀ = SVector(-0.1, 0)
-        fct = x -> norm(x - x₀)^(-3)
-    elseif case == 2
-        fct = x -> 1 / norm(x)
-    else
-        e = exp(1)
-        fct = x -> cos(e * sum(x) + prod(x))
-    end
+    fct = get_fct(2, case)
 
     measure_perf("TRIANGLE_RL19", domain, fct; ec=hai.embedded_cubature(hai.TRIANGLE_RL19))
     measure_perf("TRIANGLE_GM19", domain, fct; ec=hai.embedded_cubature(hai.TRIANGLE_GM19))
+    measure_perf(
+        "TRIANGLE_GM_9_7",
+        domain,
+        fct;
+        ec=hai.embedded_cubature(hai.GrundmannMoeller{2}(9, 7)),
+    )
 
     return nothing
 end
