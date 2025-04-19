@@ -7,6 +7,7 @@ using HAdaptiveIntegration:
     GenzMalik,
     GrundmannMoeller,
     Orthotope,
+    RadonLaurie,
     SEGMENT_GK15,
     SEGMENT_GK31,
     SEGMENT_GK7,
@@ -55,6 +56,16 @@ using Test
         @test ec.nodes ≈ ec_ref.nodes
         @test ec.weights_high ≈ ec_ref.weights_high
         @test ec.weights_low ≈ ec_ref.weights_low
+    end
+
+    @testset "Radon-Laurie" begin
+        rl = RadonLaurie()
+        @test typeof(rl) <: AbstractRule{Simplex{2}}
+
+        @test orders(rl) == (8, 5)
+        @test validate_orders(
+            embedded_cubature(Float64, rl), Simplex, orders(rl)...; rtol=10 * eps(Float64)
+        )
     end
 
     @testset "Grundmann-Möller" begin
