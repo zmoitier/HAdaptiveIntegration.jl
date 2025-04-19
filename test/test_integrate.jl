@@ -1,91 +1,114 @@
 using DataStructures
+using HAdaptiveIntegration:
+    CUBE_BE115,
+    CUBE_GM33,
+    EmbeddedCubature,
+    SEGMENT_GK31,
+    SEGMENT_GK7,
+    SQUARE_CH21,
+    SQUARE_GM17,
+    TRIANGLE_GM19,
+    allocate_buffer,
+    cuboid,
+    default_embedded_cubature,
+    embedded_cubature,
+    integrate,
+    rectangle,
+    reference_orthotope,
+    reference_simplex,
+    segment,
+    tetrahedron,
+    triangle
 using LinearAlgebra
 using Test
 
-import HAdaptiveIntegration as hai
-
 @testset "Default embedded cubature" begin
     for domain in (
-        hai.reference_orthotope(1),
-        hai.reference_orthotope(2),
-        hai.reference_orthotope(3),
-        hai.reference_orthotope(4),
-        hai.reference_simplex(2),
-        hai.reference_simplex(3),
-        hai.reference_simplex(4),
+        reference_orthotope(1),
+        reference_orthotope(2),
+        reference_orthotope(3),
+        reference_orthotope(4),
+        reference_simplex(2),
+        reference_simplex(3),
+        reference_simplex(4),
     )
-        @test typeof(hai.default_embedded_cubature(domain)) <: hai.EmbeddedCubature
+        @test typeof(default_embedded_cubature(domain)) <: EmbeddedCubature
     end
 end
 
 @testset "Integrate" begin
-    domain = hai.reference_orthotope(1)
+    domain = reference_orthotope(1)
 
-    buffer = hai.allocate_buffer(x -> sum(x), domain)
+    buffer = allocate_buffer(x -> sum(x), domain)
     @test typeof(buffer) <: BinaryHeap
 
-    I, E = hai.integrate(x -> sin(10 * x[1]), domain; buffer=buffer)
+    I, E = integrate(x -> sin(10 * x[1]), domain; buffer=buffer)
     R = sin(5)^2 / 5
     @test abs(I - R) ≤ E * abs(R)
 
-    I, E = hai.integrate(x -> cos(7.5 * x[1]), domain; buffer=buffer)
+    I, E = integrate(x -> cos(7.5 * x[1]), domain; buffer=buffer)
     R = 2 * sin(7.5) / 15
     @test abs(I - R) ≤ E * abs(R)
 end
 
 @testset "Integrate over a segment" begin
-    segment = hai.segment(0, 1)
-    buffer = hai.allocate_buffer(x -> zero(x[1]), segment)
+    domain = segment(0, 1)
+    buffer = allocate_buffer(x -> zero(x[1]), domain)
 
-    for (fct, R) in [
-        (x -> exp(x[1]), exp(1) - 1),
-        (x -> cos(10 * x[1]), sin(10) / 10),
-        (x -> 1 / √x[1], 2),
-    ]
-        I, E = hai.integrate(fct, segment; buffer=buffer)
-        @test abs(I - R) ≤ E * abs(R)
+    for ec in (
+        embedded_cubature(SEGMENT_GK7),
+        default_embedded_cubature(domain),
+        embedded_cubature(SEGMENT_GK31),
+    )
+        for (fct, R) in [
+            (x -> exp(x[1]), exp(1) - 1),
+            (x -> cos(10 * x[1]), sin(10) / 10),
+            (x -> 1 / √x[1], 2),
+        ]
+            I, E = integrate(fct, domain; buffer=buffer)
+            @test abs(I - R) ≤ E * abs(R)
+        end
     end
 end
 
 @testset "Integrate over a triangle" begin
-    triangle = hai.triangle((0, 0), (2, 0), (0, 2))
-    buffer = hai.allocate_buffer(x -> zero(x[1]), triangle)
+    domain = triangle((0, 0), (2, 0), (0, 2))
+    buffer = allocate_buffer(x -> zero(x[1]), domain)
 
-    for ec in
-        (hai.default_embedded_cubature(triangle), hai.embedded_cubature(hai.TRIANGLE_GM19))
+    for ec in (embedded_cubature(TRIANGLE_GM19), default_embedded_cubature(domain))
         for (fct, R) in [
             (x -> exp(x[1] + 3 * x[2]), (exp(6) - 3 * exp(2) + 2) / 6),
             (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
             (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
         ]
-            I, E = hai.integrate(fct, triangle; embedded_cubature=ec, buffer=buffer)
+            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
 end
 
 @testset "Integrate over a rectangle" begin
-    square = hai.rectangle((0, 0), (1, 1))
-    buffer = hai.allocate_buffer(x -> zero(x[1]), square)
+    domain = rectangle((0, 0), (1, 1))
+    buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
-        hai.default_embedded_cubature(square),
-        hai.embedded_cubature(hai.SQUARE_CH21),
-        hai.embedded_cubature(hai.SQUARE_GM17),
+        embedded_cubature(SQUARE_GM17),
+        embedded_cubature(SQUARE_CH21),
+        default_embedded_cubature(domain),
     )
         for (fct, R) in [
             (x -> exp(x[1] + x[2]), (exp(1) - 1)^2),
             (x -> 1 / norm(x), log(17 + 12 * sqrt(2)) / 2),
         ]
-            I, E = hai.integrate(fct, square; embedded_cubature=ec, buffer=buffer)
+            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
 end
 
 @testset "Integrate over a tetrahedron" begin
-    triangle = hai.tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
-    buffer = hai.allocate_buffer(x -> zero(x[1]), triangle)
+    domain = tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+    buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for (fct, R) in [
         (
@@ -94,35 +117,39 @@ end
         ),
         (x -> 1 / norm(x), 0.3614258523411),
     ]
-        I, E = hai.integrate(fct, triangle; buffer=buffer)
+        I, E = integrate(fct, domain; buffer=buffer)
         @test abs(I - R) ≤ E * abs(R)
     end
 end
 
 @testset "Integrate over a Cuboid" begin
-    cube = hai.cuboid((0, 0, 0), (1, 1, 1))
-    buffer = hai.allocate_buffer(x -> zero(x[1]), cube)
+    domain = cuboid((0, 0, 0), (1, 1, 1))
+    buffer = allocate_buffer(x -> zero(x[1]), domain)
 
-    for ec in (hai.default_embedded_cubature(cube), hai.embedded_cubature(hai.CUBE_GM33))
+    for ec in (
+        embedded_cubature(CUBE_GM33),
+        default_embedded_cubature(domain),
+        embedded_cubature(CUBE_BE115),
+    )
         for (fct, R) in [
             (x -> exp(x[1]), exp(1) - 1),
             (x -> 1 / (1 + norm(x)^2)^2, π^2 / 32),
             (x -> 1 / norm(x), 1.1900386819897766),
         ]
-            I, E = hai.integrate(fct, cube; embedded_cubature=ec, buffer=buffer)
+            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
 end
 
 @testset "4-Simplex" begin
-    I, E = hai.integrate(x -> 1 / norm(x), hai.reference_simplex(4))
+    I, E = integrate(x -> 1 / norm(x), reference_simplex(4))
     R = 0.089876019011
     @test abs(I - R) ≤ E * abs(R)
 end
 
 @testset "4-Orthotope" begin
-    I, E = hai.integrate(x -> 1 / norm(x), hai.reference_orthotope(4))
+    I, E = integrate(x -> 1 / norm(x), reference_orthotope(4))
     R = 0.9674120212411487
     @test abs(I - R) ≤ E * abs(R)
 end

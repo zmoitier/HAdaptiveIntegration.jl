@@ -86,12 +86,12 @@ function orbit_cube()
 
     orbits = Dict("000" => affine_map.([Id]))
     orbits["x00"] = matrices_to_orbit([Id, T12, T13], [Id, N1])
-    orbits["xx0"] = matrices_to_orbit([Id, T13, T23], [Id, N1, N2, N12])
+    orbits["xx0"] = matrices_to_orbit([Id, T23, T13], [Id, N1, N2, N12])
     orbits["xxx"] = affine_map.([Id, N1, N2, N3, N12, N13, N23, N123])
-    orbits["xy0"] = matrices_to_orbit([Id, T12, T13, T23, C123, C132], [Id, N1, N2, N12])
-    orbits["xxy"] = matrices_to_orbit([Id, T13, T23], [Id, N1, N2, N3, N12, N13, N23, N123])
+    orbits["xy0"] = matrices_to_orbit([Id, T12, T23, C132, C123, T13], [Id, N1, N2, N12])
+    orbits["xxy"] = matrices_to_orbit([Id, T23, T13], [Id, N1, N2, N3, N12, N13, N23, N123])
     orbits["xyz"] = matrices_to_orbit(
-        [Id, T12, T13, T23, C123, C132], [Id, N1, N2, N3, N12, N13, N23, N123]
+        [Id, T12, T23, C132, C123, T13], [Id, N1, N2, N3, N12, N13, N23, N123]
     )
 
     return orbits
@@ -386,15 +386,67 @@ function segment_gk31()
     return nothing
 end
 
+function triangle_gm()
+    ec = embedded_cubature(BigFloat, GrundmannMoeller{2}(7, 5))
+    print_embedded_cubature(ec, "Grundmann-Möller")
+    return nothing
+end
+
 function triangle_rl()
     ec = embedded_cubature(BigFloat, RadonLaurie())
     print_embedded_cubature(ec, "Radon-Laurie")
     return nothing
 end
 
-function triangle_gm()
-    ec = embedded_cubature(BigFloat, GrundmannMoeller{2}(7, 5))
-    print_embedded_cubature(ec, "Grundmann-Möller")
+function square_gm()
+    ec = embedded_cubature(BigFloat, GenzMalik{2}())
+    print_embedded_cubature(ec, "Genz-Malik")
+    return nothing
+end
+
+function square_ch21()
+    orbits = orbit_square()
+
+    # https://link.springer.com/article/10.1007/BF01389339
+    # Cools-Haegemans with 21 points
+    cbt_ch = assemble(
+        7,
+        5,
+        (
+            orbits["00"],
+            ("0.00000000000000000000", "0.00000000000000000000"),
+            "0.67592092205970002525",
+            "0.61048736734452269380",
+        ),
+        (
+            orbits["x0"],
+            ("0.90617984593866399280", "0.00000000000000000000"),
+            "0.23092842785903867626",
+            "0.26364520521662754199",
+        ),
+        (
+            orbits["xx"],
+            ("0.53846931010568309104", "0.53846931010568309104"),
+            "0.43953907332966785983",
+            "0.47862867049936646804",
+        ),
+        (
+            orbits["xx"],
+            ("0.90617984593866399280", "0.90617984593866399280"),
+            "0.82373073956971141166e-1",
+            "0.10510428244787531652",
+        ),
+        (
+            orbits["xy"],
+            ("0.90617984593866399280", "0.53846931010568309104"),
+            "0.39089597169698608216e-1",
+            "",
+        ),
+    )
+    domain = rectangle((big"-1.0", big"-1.0"), (big"1.0", big"1.0"))
+
+    ec = to_reference(increase_precision_orthotope(cbt_ch, Val(2)), domain)
+    print_embedded_cubature(ec, "Cools-Haegemans")
     return nothing
 end
 
@@ -450,65 +502,19 @@ function square_ch25()
     return nothing
 end
 
-function square_ch21()
-    orbits = orbit_square()
-
-    # https://link.springer.com/article/10.1007/BF01389339
-    # Cools-Haegemans with 21 points
-    cbt_ch = assemble(
-        7,
-        5,
-        (
-            orbits["00"],
-            ("0.00000000000000000000", "0.00000000000000000000"),
-            "0.67592092205970002525",
-            "0.61048736734452269380",
-        ),
-        (
-            orbits["x0"],
-            ("0.90617984593866399280", "0.00000000000000000000"),
-            "0.23092842785903867626",
-            "0.26364520521662754199",
-        ),
-        (
-            orbits["xx"],
-            ("0.53846931010568309104", "0.53846931010568309104"),
-            "0.43953907332966785983",
-            "0.47862867049936646804",
-        ),
-        (
-            orbits["xx"],
-            ("0.90617984593866399280", "0.90617984593866399280"),
-            "0.82373073956971141166e-1",
-            "0.10510428244787531652",
-        ),
-        (
-            orbits["xy"],
-            ("0.90617984593866399280", "0.53846931010568309104"),
-            "0.39089597169698608216e-1",
-            "",
-        ),
-    )
-    domain = rectangle((big"-1.0", big"-1.0"), (big"1.0", big"1.0"))
-
-    ec = to_reference(increase_precision_orthotope(cbt_ch, Val(2)), domain)
-    print_embedded_cubature(ec, "Cools-Haegemans")
-    return nothing
-end
-
-function square_gm()
-    ec = embedded_cubature(BigFloat, GenzMalik{2}())
-    print_embedded_cubature(ec, "Genz-Malik")
-    return nothing
-end
-
 function tetrahedron_gm()
     ec = embedded_cubature(BigFloat, GrundmannMoeller{3}(7, 5))
     print_embedded_cubature(ec, "Grundmann-Möller")
     return nothing
 end
 
-function cube_be()
+function cube_gm()
+    ec = embedded_cubature(BigFloat, GenzMalik{3}())
+    print_embedded_cubature(ec, "Genz-Malik")
+    return nothing
+end
+
+function cube_be65()
     orbits = orbit_cube()
 
     # https://epubs.siam.org/doi/10.1137/0725016
@@ -567,8 +573,85 @@ function cube_be()
     return nothing
 end
 
-function cube_gm()
-    ec = embedded_cubature(BigFloat, GenzMalik{3}())
-    print_embedded_cubature(ec, "Genz-Malik")
+function cube_be115()
+    orbits = orbit_cube()
+
+    # https://epubs.siam.org/doi/10.1137/0725016
+    # Berntsen-Espelid with 115 points
+    cbt_be = assemble(
+        11,
+        9,
+        (
+            orbits["000"],
+            ("0.0000000000000000", "0.0000000000000000", "0.0000000000000000"),
+            "1.324609663263692e-1",
+            "7.025853877436244e-1",
+        ),
+        (
+            orbits["x00"],
+            ("0.9920271704660597", "0.0000000000000000", "0.0000000000000000"),
+            "1.088626296477019e-2",
+            "3.203268015578803e-2",
+        ),
+        (
+            orbits["x00"],
+            ("0.7582845050347407", "0.0000000000000000", "0.0000000000000000"),
+            "2.157141671884503e-1",
+            "-3.355925410762035e-2",
+        ),
+        (
+            orbits["x00"],
+            ("0.2447487465401134", "0.0000000000000000", "0.0000000000000000"),
+            "4.932409085050268e-2",
+            "-1.388110650417988e-1",
+        ),
+        (
+            orbits["xx0"],
+            ("0.9987344998351400", "0.9987344998351400", "0.0000000000000000"),
+            "1.687648683985235e-3",
+            "-1.512181927222183e-2",
+        ),
+        (
+            orbits["xx0"],
+            ("0.7793703685672423", "0.7793703685672423", "0.0000000000000000"),
+            "1.346468564512807e-1",
+            "1.922707982244711e-2",
+        ),
+        (
+            orbits["xxx"],
+            ("0.9999698993088767", "0.9999698993088767", "0.9999698993088767"),
+            "1.750145884600386e-3",
+            "-1.916070627476280e-3",
+        ),
+        (
+            orbits["xxx"],
+            ("0.7902637224771788", "0.7902637224771788", "0.7902637224771788"),
+            "7.752336383837454e-2",
+            "-1.854652834553552e-2",
+        ),
+        (
+            orbits["xxx"],
+            ("0.4403396687650737", "0.4403396687650737", "0.4403396687650737"),
+            "2.461864902770251e-1",
+            "3.727029226099722e-2",
+        ),
+        (
+            orbits["xxy"],
+            ("0.4378478459006862", "0.4378478459006862", "0.9549373822794593"),
+            "6.797944868483039e-2",
+            "-1.604480434502482e-2",
+        ),
+        (
+            orbits["xxy"],
+            ("0.9661093133630747", "0.9661093133630747", "0.4577105877763134"),
+            "1.419962823300713e-2",
+            "",
+        );
+        subtraction=true,
+    )
+    domain = cuboid((big"-1.0", big"-1.0", big"-1.0"), (big"1.0", big"1.0", big"1.0"))
+
+    ec = to_reference(increase_precision_orthotope(cbt_be, Val(3)), domain)
+    print_embedded_cubature(ec, "Berntsen-Espelid")
     return nothing
 end
