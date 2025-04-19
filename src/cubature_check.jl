@@ -54,7 +54,7 @@ function _validate_orders(
             end
 
             if !isapprox(Iₕ, vᵣ; atol=atol, rtol=rtol)
-                @error "fail to integrate the high order cubature within tolerance at degree = $idx. Computed value: $Iₗ, Reference value: $vᵣ."
+                @error "fail to integrate the high order cubature within tolerance at degree = $idx. Computed value: $Iₕ, Reference value: $vᵣ."
                 return false
             end
         end
