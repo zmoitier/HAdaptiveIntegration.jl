@@ -64,7 +64,7 @@ using Test
 
         @test orders(rl) == (8, 5)
         @test validate_orders(
-            embedded_cubature(Float64, rl), Simplex, orders(rl)...; rtol=10 * eps(Float64)
+            embedded_cubature(rl), Simplex, orders(rl)...; rtol=10 * eps(float(Int))
         )
     end
 
@@ -76,7 +76,7 @@ using Test
         gm = GrundmannMoeller{4}(5, 3)
         @test orders(gm) == (5, 3)
         @test validate_orders(
-            embedded_cubature(Float64, gm), Simplex, orders(gm)...; rtol=20 * eps(Float64)
+            embedded_cubature(gm), Simplex, orders(gm)...; rtol=20 * eps(float(Int))
         )
     end
 
@@ -86,7 +86,7 @@ using Test
 
         gm = GenzMalik{4}()
         @test validate_orders(
-            embedded_cubature(Float64, gm), Orthotope, orders(gm)...; rtol=10 * eps(Float64)
+            embedded_cubature(gm), Orthotope, orders(gm)...; rtol=10 * eps(float(Int))
         )
     end
 end
