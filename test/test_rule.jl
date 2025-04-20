@@ -1,13 +1,37 @@
+using HAdaptiveIntegration:
+    AbstractRule,
+    CUBE_BE115,
+    CUBE_BE65,
+    CUBE_GM33,
+    EmbeddedCubature,
+    GenzMalik,
+    GrundmannMoeller,
+    Orthotope,
+    RadonLaurie,
+    SEGMENT_GK15,
+    SEGMENT_GK31,
+    SEGMENT_GK7,
+    SQUARE_CH21,
+    SQUARE_CH25,
+    SQUARE_GM17,
+    Segment,
+    Simplex,
+    TETRAHEDRON_GM35,
+    TRIANGLE_GM19,
+    TRIANGLE_RL19,
+    TabulatedEmbeddedCubature,
+    embedded_cubature,
+    orders,
+    validate_orders
+using Quadmath
 using Test
-
-import HAdaptiveIntegration as hai
 
 @testset "Abstract rule" begin
     @testset "Tabulated embedded cubature" begin
-        tec = hai.TabulatedEmbeddedCubature{hai.Segment}(;
+        tec = TabulatedEmbeddedCubature{Segment}(;
             description="Gauss (SEGMENT_G3)",
             reference="",
-            nb_significant_digits=16,
+            precision=16,
             nodes=[["5e-1"], ["1.127016653792583e-1"], ["8.872983346207417e-1"]],
             weights_high=[
                 "4.444444444444444e-1", "2.777777777777778e-1", "2.777777777777778e-1"
@@ -16,92 +40,92 @@ import HAdaptiveIntegration as hai
             weights_low=["1"],
             order_low=1,
         )
-        @test typeof(tec) <: hai.TabulatedEmbeddedCubature{hai.Segment}
-        @test hai.orders(tec) == (5, 1)
+        @test typeof(tec) <: TabulatedEmbeddedCubature{Segment}
+        @test orders(tec) == (5, 1)
 
-        ec = hai.embedded_cubature(tec)
-        @test typeof(ec) <: hai.EmbeddedCubature{1,Float64}
+        ec = embedded_cubature(tec)
+        @test typeof(ec) <: EmbeddedCubature{1,Float64}
 
-        ec_ref = hai.embedded_cubature(
+        ec_ref = embedded_cubature(
             [[0.5], [(1 - √(3 / 5)) / 2], [(1 + √(3 / 5)) / 2]],
             [4 / 9, 5 / 18, 5 / 18],
             [1.0],
         )
-        @test typeof(ec_ref) <: hai.EmbeddedCubature{1,Float64}
+        @test typeof(ec_ref) <: EmbeddedCubature{1,Float64}
 
         @test ec.nodes ≈ ec_ref.nodes
         @test ec.weights_high ≈ ec_ref.weights_high
         @test ec.weights_low ≈ ec_ref.weights_low
     end
 
-    @testset "Grundmann-Möller" begin
-        @test typeof(hai.GrundmannMoeller{3}(7, 3)) <: hai.AbstractRule{hai.Simplex{3}}
-        @test_throws AssertionError typeof(hai.GrundmannMoeller{3}(7, 6))
-        @test_throws AssertionError typeof(hai.GrundmannMoeller{3}(5, 7))
+    @testset "Radon-Laurie" begin
+        rl = RadonLaurie()
+        @test typeof(rl) <: AbstractRule{Simplex{2}}
 
-        gm = hai.GrundmannMoeller{4}(5, 3)
-        @test hai.orders(gm) == (5, 3)
-        @test hai.validate_orders(
-            hai.embedded_cubature(Float64, gm),
-            hai.Simplex,
-            gm.order_high,
-            gm.order_low;
-            rtol=20 * eps(Float64),
+        @test orders(rl) == (8, 5)
+        @test validate_orders(
+            embedded_cubature(rl), Simplex, orders(rl)...; rtol=10 * eps(float(Int))
+        )
+    end
+
+    @testset "Grundmann-Möller" begin
+        @test typeof(GrundmannMoeller{3}(7, 3)) <: AbstractRule{Simplex{3}}
+        @test_throws AssertionError typeof(GrundmannMoeller{3}(7, 6))
+        @test_throws AssertionError typeof(GrundmannMoeller{3}(5, 7))
+
+        gm = GrundmannMoeller{4}(5, 3)
+        @test orders(gm) == (5, 3)
+        @test validate_orders(
+            embedded_cubature(gm), Simplex, orders(gm)...; rtol=20 * eps(float(Int))
         )
     end
 
     @testset "Genz-Malik" begin
-        @test typeof(hai.GenzMalik{2}()) <: hai.AbstractRule{hai.Orthotope{2}}
-        @test typeof(hai.GenzMalik{3}()) <: hai.AbstractRule{hai.Orthotope{3}}
+        @test typeof(GenzMalik{2}()) <: AbstractRule{Orthotope{2}}
+        @test typeof(GenzMalik{3}()) <: AbstractRule{Orthotope{3}}
 
-        gm = hai.GenzMalik{4}()
-        @test hai.validate_orders(
-            hai.embedded_cubature(Float64, gm),
-            hai.Orthotope,
-            hai.orders(gm)...;
-            rtol=10 * eps(Float64),
+        gm = GenzMalik{4}()
+        @test validate_orders(
+            embedded_cubature(gm), Orthotope, orders(gm)...; rtol=10 * eps(float(Int))
         )
     end
 end
 
 @testset "Tabulated rules" begin
-    T = Float64
+    T = Float128
+    rtol = 10 * eps(T)
 
     @testset "Segment" begin
-        for tec in (
-            # hai.SEGMENT_GK7,
-            hai.SEGMENT_GK15,
-            hai.SEGMENT_GK31,
-        )
-            ec = hai.embedded_cubature(T, tec)
-            @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...)
-        end
-    end
-
-    @testset "Square" begin
-        for tec in (hai.SQUARE_CH25, hai.SQUARE_CH21, hai.SQUARE_GM17)
-            ec = hai.embedded_cubature(T, tec)
-            @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...)
+        for tec in (SEGMENT_GK7, SEGMENT_GK15, SEGMENT_GK31)
+            ec = embedded_cubature(T, tec)
+            @test validate_orders(ec, Orthotope, orders(tec)...; rtol=rtol)
         end
     end
 
     @testset "Triangle" begin
-        for tec in (hai.TRIANGLE_RL19, hai.TRIANGLE_GM19)
-            ec = hai.embedded_cubature(T, tec)
-            @test hai.validate_orders(ec, hai.Simplex, hai.orders(tec)...)
+        for tec in (TRIANGLE_GM19, TRIANGLE_RL19)
+            ec = embedded_cubature(T, tec)
+            @test validate_orders(ec, Simplex, orders(tec)...; rtol=rtol)
         end
     end
 
-    @testset "Cube" begin
-        for tec in (hai.CUBE_BE65, hai.CUBE_GM33)
-            ec = hai.embedded_cubature(T, tec)
-            @test hai.validate_orders(ec, hai.Orthotope, hai.orders(tec)...)
+    @testset "Square" begin
+        for tec in (SQUARE_GM17, SQUARE_CH21, SQUARE_CH25)
+            ec = embedded_cubature(T, tec)
+            @test validate_orders(ec, Orthotope, orders(tec)...; rtol=rtol)
         end
     end
 
     @testset "Tetrahedron" begin
-        tec = hai.TETRAHEDRON_GM35
-        ec = hai.embedded_cubature(T, tec)
-        @test hai.validate_orders(ec, hai.Simplex, hai.orders(tec)..., rtol=20 * eps(T))
+        tec = TETRAHEDRON_GM35
+        ec = embedded_cubature(T, tec)
+        @test validate_orders(ec, Simplex, orders(tec)...; rtol=rtol)
+    end
+
+    @testset "Cube" begin
+        for tec in (CUBE_GM33, CUBE_BE65, CUBE_BE115)
+            ec = embedded_cubature(T, tec)
+            @test validate_orders(ec, Orthotope, orders(tec)...; rtol=rtol)
+        end
     end
 end
