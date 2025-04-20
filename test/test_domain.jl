@@ -7,17 +7,12 @@ using HAdaptiveIntegration:
     Tetrahedron,
     Triangle,
     abs_det_jac,
-    cuboid,
     dimension,
     map_from_reference,
     map_to_reference,
-    orthotope,
-    rectangle,
     reference_domain,
     reference_orthotope,
     reference_simplex,
-    segment,
-    simplex,
     subdivide_cuboid8,
     subdivide_orthotope,
     subdivide_rectangle4,
@@ -26,8 +21,6 @@ using HAdaptiveIntegration:
     subdivide_tetrahedron8,
     subdivide_triangle2,
     subdivide_triangle4,
-    tetrahedron,
-    triangle,
     validate_subdivision
 using StaticArrays
 using Test

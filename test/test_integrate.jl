@@ -9,16 +9,10 @@ using HAdaptiveIntegration:
     SQUARE_GM17,
     TRIANGLE_GM19,
     allocate_buffer,
-    cuboid,
     default_embedded_cubature,
     embedded_cubature,
-    integrate,
-    rectangle,
     reference_orthotope,
-    reference_simplex,
-    segment,
-    tetrahedron,
-    triangle
+    reference_simplex
 using LinearAlgebra
 using Test
 
