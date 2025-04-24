@@ -1,3 +1,16 @@
+module Rule
+
+import ..HAdaptiveIntegration:
+    AbstractDomain,
+    Cuboid,
+    Orthotope,
+    Rectangle,
+    Segment,
+    Simplex,
+    Tetrahedron,
+    Triangle,
+    dimension
+
 """
     abstract type AbstractRule{DOM<:AbstractDomain}
 
@@ -80,50 +93,6 @@ struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
 end
 
 """
-   struct RadonLaurie <: AbstractRule{Simplex{2}}
-
-Embedded cubature rule for a `2`-simplex of high order `8` and low order `5`.
-"""
-struct RadonLaurie <: AbstractRule{Simplex{2}} end
-
-"""
-   struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
-
-Embedded cubature rule for a `D`-simplex.
-
-## Type Parameters:
-- `D`: The dimension of the simplex.
-
-## Fields:
-- `order_high::Int`: the high order of the rule.
-- `order_low::Int`: the low order of the rule.
-
-## Invariants (check at construction):
-- `order_high` and `order_low` must be odd.
-- must have `order_high > order_low ≥ 1`.
-"""
-struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
-    order_high::Int
-    order_low::Int
-
-    function GrundmannMoeller{D}(order_high::Int, order_low::Int) where {D}
-        @assert isodd(order_high) && isodd(order_low)
-        @assert order_high > order_low ≥ 1
-        return new{D}(order_high, order_low)
-    end
-end
-
-"""
-   struct GenzMalik{D} <: AbstractRule{Orthotope{D}}
-
-Embedded cubature rule for a `D`-orthotope of high order `7` and low order `5`.
-
-## Type Parameters:
-- `D`: The dimension of the orthotope.
-"""
-struct GenzMalik{D} <: AbstractRule{Orthotope{D}} end
-
-"""
     orders(rule::AR) where {AR<:AbstractRule}
 
 Return the high and low order of the embedded cubature `rule`.
@@ -132,14 +101,25 @@ function orders(tec::TabulatedEmbeddedCubature)
     return tec.order_high, tec.order_low
 end
 
-function orders(::RadonLaurie)
-    return 8, 5
-end
+include("segment.jl")
+export SEGMENT_GK7, SEGMENT_GK15, SEGMENT_GK31
 
-function orders(gm::GrundmannMoeller)
-    return gm.order_high, gm.order_low
-end
+include("triangle.jl")
+export RadonLaurie, TRIANGLE_GM19, TRIANGLE_RL19
 
-function orders(::GenzMalik)
-    return 7, 5
+include("square.jl")
+export SQUARE_GM17, SQUARE_CH21, SQUARE_CH25
+
+include("tetrahedron.jl")
+export TETRAHEDRON_GM35
+
+include("cube.jl")
+export CUBE_GM33, CUBE_BE65, CUBE_BE115
+
+include("simplex.jl")
+export GrundmannMoeller
+
+include("orthotope.jl")
+export GenzMalik
+
 end

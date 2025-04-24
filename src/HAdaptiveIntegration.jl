@@ -24,9 +24,8 @@ export orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
 include("domain_subdivision.jl")
 
 # Tabulated cubature rule for supported domains
-include("rule.jl")
-include("rule_orthotope.jl")
-include("rule_simplex.jl")
+include("Rule/Rule.jl")
+import .Rule: GenzMalik, GrundmannMoeller, RadonLaurie, TabulatedEmbeddedCubature
 
 # Embedded cubature
 include("cubature_embedded.jl")
