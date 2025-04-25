@@ -5,6 +5,8 @@ const SEGMENT_GK7 = TabulatedEmbeddedCubature{Segment}(;
     description="Gauss-Kronrod with 7 nodes (SEGMENT_GK7)",
     reference="https://github.com/JuliaMath/QuadGK.jl",
     precision=35,
+    order_high=11,
+    order_low=5,
     nodes=[
         ["5.000000000000000000000000000000000000e-01"],
         ["8.872983346207416885179265399782399611e-01"],
@@ -23,13 +25,11 @@ const SEGMENT_GK7 = TabulatedEmbeddedCubature{Segment}(;
         "5.232811301323363259691192859603651912e-02",
         "5.232811301323363259691192859603651912e-02",
     ],
-    order_high=11,
     weights_low=[
         "4.444444444444444444444444444444444444e-01",
         "2.777777777777777777777777777777777778e-01",
         "2.777777777777777777777777777777777778e-01",
     ],
-    order_low=5,
 )
 
 """
@@ -39,6 +39,8 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
     description="Gauss-Kronrod with 15 nodes (SEGMENT_GK15)",
     reference="https://github.com/JuliaMath/QuadGK.jl",
     precision=35,
+    order_high=23,
+    order_low=13,
     nodes=[
         ["5.000000000000000000000000000000000000e-01"],
         ["7.029225756886985834533032060384807317e-01"],
@@ -73,7 +75,6 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
         "1.146766100526461248186600402948479600e-02",
         "1.146766100526461248186600402948479600e-02",
     ],
-    order_high=23,
     weights_low=[
         "2.089795918367346938775510204081632653e-01",
         "1.909150252525594724751848877444875669e-01",
@@ -83,7 +84,6 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
         "6.474248308443484663530571633954100916e-02",
         "6.474248308443484663530571633954100916e-02",
     ],
-    order_low=13,
 )
 
 """
@@ -92,6 +92,8 @@ Gauss-Kronrod with 31 nodes.
 const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
     description="Gauss-Kronrod with 31 nodes",
     reference="https://github.com/JuliaMath/QuadGK.jl",
+    order_high=47,
+    order_low=29,
     precision=35,
     nodes=[
         ["5.000000000000000000000000000000000000e-01"],
@@ -159,7 +161,6 @@ const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
         "2.688739936461674493896025715063824909e-03",
         "2.688739936461674493896025715063824909e-03",
     ],
-    order_high=47,
     weights_low=[
         "1.012891209627806364403100999837596574e-01",
         "9.921574266355578822805916322191966241e-02",
@@ -177,5 +178,4 @@ const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
         "1.537662099805863417731419678860220886e-02",
         "1.537662099805863417731419678860220886e-02",
     ],
-    order_low=29,
 )

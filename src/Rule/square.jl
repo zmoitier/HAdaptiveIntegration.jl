@@ -4,6 +4,8 @@ Genz-Malik with 17 nodes.
 const SQUARE_GM17 = TabulatedEmbeddedCubature{Rectangle}(;
     description="Genz-Malik with 17 nodes (SQUARE_GM17)",
     reference="https://doi.org/10.1016/0771-050X(80)90039-X",
+    order_high=7,
+    order_low=5,
     precision=35,
     nodes=[
         [
@@ -94,7 +96,6 @@ const SQUARE_GM17 = TabulatedEmbeddedCubature{Rectangle}(;
         "8.711832545851750241325001270131585632e-02",
         "8.711832545851750241325001270131585632e-02",
     ],
-    order_high=7,
     weights_low=[
         "-1.331961591220850480109739368998628258e+00",
         "5.041152263374485596707818930041152263e-01",
@@ -110,7 +111,6 @@ const SQUARE_GM17 = TabulatedEmbeddedCubature{Rectangle}(;
         "3.429355281207133058984910836762688615e-02",
         "3.429355281207133058984910836762688615e-02",
     ],
-    order_low=5,
 )
 
 """
@@ -119,6 +119,8 @@ Cools-Haegemans with 21 nodes.
 const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
     description="Cools-Haegemans with 21 nodes (SQUARE_CH21)",
     reference="https://link.springer.com/article/10.1007/BF01389339",
+    order_high=7,
+    order_low=5,
     precision=35,
     nodes=[
         [
@@ -229,7 +231,6 @@ const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
         "9.772399292424645487535414336354763648e-03",
         "9.772399292424645487535414336354763648e-03",
     ],
-    order_high=7,
     weights_low=[
         "1.526218418361306486442884511393218447e-01",
         "6.591130130415688306506220703853742741e-02",
@@ -245,7 +246,6 @@ const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
         "2.627607061196884476356897247311301463e-02",
         "2.627607061196884476356897247311301463e-02",
     ],
-    order_low=5,
 )
 
 """
@@ -254,6 +254,8 @@ Cools-Haegemans with 25 nodes.
 const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
     description="Cools-Haegemans with 25 nodes (SQUARE_CH25)",
     reference="https://link.springer.com/article/10.1007/BF01389339",
+    order_high=9,
+    order_low=7,
     precision=35,
     nodes=[
         [
@@ -384,7 +386,6 @@ const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
         "6.807163328620328507696894522217764455e-02",
         "6.807163328620328507696894522217764455e-02",
     ],
-    order_high=9,
     weights_low=[
         "1.689802306319903682683290932522631273e-01",
         "5.773210696822923076352990074033502715e-02",
@@ -408,5 +409,4 @@ const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
         "9.772399236931191208904692945818609348e-03",
         "9.772399236931191208904692945818609348e-03",
     ],
-    order_low=7,
 )

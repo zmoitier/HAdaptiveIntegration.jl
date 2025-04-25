@@ -4,6 +4,8 @@ Grundmann-Möller with 35 nodes.
 const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature{Tetrahedron}(;
     description="Grundmann-Möller with 35 nodes (TETRAHEDRON_GM35)",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
+    order_high=7,
+    order_low=5,
     precision=35,
     nodes=[
         [
@@ -219,7 +221,6 @@ const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature{Tetrahedron}(;
         "4.305831128747795414462081128747795414e-02",
         "4.305831128747795414462081128747795414e-02",
     ],
-    order_high=7,
     weights_low=[
         "4.444444444444444444444444444444444444e-02",
         "-9.642857142857142857142857142857142857e-02",
@@ -237,5 +238,4 @@ const TETRAHEDRON_GM35 = TabulatedEmbeddedCubature{Tetrahedron}(;
         "5.079365079365079365079365079365079365e-02",
         "5.079365079365079365079365079365079365e-02",
     ],
-    order_low=5,
 )

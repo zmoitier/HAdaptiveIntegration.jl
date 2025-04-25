@@ -4,6 +4,8 @@ Genz-Malik with 33 nodes.
 const CUBE_GM33 = TabulatedEmbeddedCubature{Cuboid}(;
     description="Genz-Malik with 33 nodes (CUBE_GM33)",
     reference="https://doi.org/10.1016/0771-050X(80)90039-X",
+    order_high=7,
+    order_low=5,
     precision=35,
     nodes=[
         [
@@ -207,7 +209,6 @@ const CUBE_GM33 = TabulatedEmbeddedCubature{Cuboid}(;
         "4.355916272925875120662500635065792816e-02",
         "4.355916272925875120662500635065792816e-02",
     ],
-    order_high=7,
     weights_low=[
         "-2.292181069958847736625514403292181070e+00",
         "5.041152263374485596707818930041152263e-01",
@@ -235,7 +236,6 @@ const CUBE_GM33 = TabulatedEmbeddedCubature{Cuboid}(;
         "3.429355281207133058984910836762688615e-02",
         "3.429355281207133058984910836762688615e-02",
     ],
-    order_low=5,
 )
 
 """
@@ -244,6 +244,8 @@ Berntsen-Espelid with 65 nodes.
 const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
     description="Berntsen-Espelid with 65 nodes (CUBE_BE65)",
     reference="https://epubs.siam.org/doi/10.1137/0725016",
+    order_high=9,
+    order_low=7,
     precision=35,
     nodes=[
         [
@@ -639,7 +641,6 @@ const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
         "1.103050630913774813169437862844004949e-02",
         "1.103050630913774813169437862844004949e-02",
     ],
-    order_high=9,
     weights_low=[
         "2.004941027550623479622707221631354780e-01",
         "-5.149515884743401061146110712527114715e-02",
@@ -683,7 +684,6 @@ const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
         "6.362760824765843947805690172516305288e-03",
         "6.362760824765843947805690172516305288e-03",
     ],
-    order_low=7,
 )
 
 """
@@ -692,6 +692,8 @@ Berntsen-Espelid with 115 nodes.
 const CUBE_BE115 = TabulatedEmbeddedCubature{Cuboid}(;
     description="Berntsen-Espelid with 115 nodes (CUBE_BE115)",
     reference="https://epubs.siam.org/doi/10.1137/0725016",
+    order_high=11,
+    order_low=9,
     precision=35,
     nodes=[
         [
@@ -1387,7 +1389,6 @@ const CUBE_BE115 = TabulatedEmbeddedCubature{Cuboid}(;
         "1.774953529125892650987155044026350114e-03",
         "1.774953529125892650987155044026350114e-03",
     ],
-    order_high=11,
     weights_low=[
         "-7.126555267715689919553393363325600921e-02",
         "-2.643302148877228176585036934595512665e-03",
@@ -1481,5 +1482,4 @@ const CUBE_BE115 = TabulatedEmbeddedCubature{Cuboid}(;
         "1.050303162873190139374545654721515269e-02",
         "1.050303162873190139374545654721515269e-02",
     ],
-    order_low=9,
 )

@@ -36,7 +36,6 @@ end
 simplex(vertices...) = simplex(promote_to_float(vertices...), vertices...)
 
 """
-    reference_simplex(D::Int)
     reference_simplex(T::DataType, D::Int)
 
 Return the reference `D`-dimensional simplex with element type `T`, which is the convex hull
@@ -220,23 +219,11 @@ end
 triangle(a, b, c) = triangle(promote_to_float(a, b, c), a, b, c)
 
 """
-    subdivide_triangle2(s::Triangle)
-
-Divide the triangle `t` into two triangles by connecting the first point of `t` to the
-midpoints of the two other points.
-"""
-function subdivide_triangle2(t::Triangle{T}) where {T}
-    a, b, c = t.vertices
-    bc = (b + c) / 2
-    return (Triangle{T}(bc, a, b), Triangle{T}(bc, c, a))
-end
-
-"""
-    subdivide_triangle4(t::Triangle)
+    subdivide_triangle(t::Triangle)
 
 Divide the triangle `t` into four triangles by connecting the midpoints of the edges.
 """
-function subdivide_triangle4(t::Triangle{T}) where {T}
+function subdivide_triangle(t::Triangle{T}) where {T}
     a, b, c = t.vertices
     ab = (a + b) / 2
     ac = (c + a) / 2
@@ -270,11 +257,11 @@ end
 tetrahedron(a, b, c, d) = tetrahedron(promote_to_float(a, b, c, d), a, b, c, d)
 
 """
-    subdivide_tetrahedron8(t::Tetrahedron)
+    subdivide_tetrahedron(t::Tetrahedron)
 
 Divide the tetrahedron `t` into eight tetrahedra by connecting the midpoints of the edges.
 """
-function subdivide_tetrahedron8(t::Tetrahedron{T}) where {T}
+function subdivide_tetrahedron(t::Tetrahedron{T}) where {T}
     a, b, c, d = t.vertices
     ab = (a + b) / 2
     ac = (a + c) / 2

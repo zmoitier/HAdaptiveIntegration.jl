@@ -67,6 +67,8 @@ Grundmann-Möller with 19 nodes.
 const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
     description="Grundmann-Möller with 19 nodes (TRIANGLE_GM19)",
     reference="https://epubs.siam.org/doi/10.1137/0715019",
+    order_high=7,
+    order_low=5,
     precision=35,
     nodes=[
         [
@@ -167,7 +169,6 @@ const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
         "2.059465680803571428571428571428571429e-01",
         "2.059465680803571428571428571428571429e-01",
     ],
-    order_high=7,
     weights_low=[
         "6.328125000000000000000000000000000000e-02",
         "-2.712673611111111111111111111111111111e-01",
@@ -180,7 +181,6 @@ const TRIANGLE_GM19 = TabulatedEmbeddedCubature{Triangle}(;
         "2.084201388888888888888888888888888889e-01",
         "2.084201388888888888888888888888888889e-01",
     ],
-    order_low=5,
 )
 
 """
@@ -189,6 +189,8 @@ Radon-Laurie with 19 nodes.
 const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
     description="Radon-Laurie with 19 nodes (TRIANGLE_RL19)",
     reference="""https://doi.org/10.1145/355993.356001""",
+    order_high=8,
+    order_low=5,
     precision=35,
     nodes=[
         [
@@ -289,7 +291,6 @@ const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
         "1.875486122761587439281937068310379991e-02",
         "1.875486122761587439281937068310379991e-02",
     ],
-    order_high=8,
     weights_low=[
         "1.125000000000000000000000000000000000e-01",
         "6.296959027241357629784197275009066683e-02",
@@ -299,5 +300,4 @@ const TRIANGLE_RL19 = TabulatedEmbeddedCubature{Triangle}(;
         "6.619707639425309036882469391657599984e-02",
         "6.619707639425309036882469391657599984e-02",
     ],
-    order_low=5,
 )

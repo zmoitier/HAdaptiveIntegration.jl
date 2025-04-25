@@ -35,7 +35,6 @@ function orthotope(low_corner, high_corner)
 end
 
 """
-    reference_orthotope(D::Int)
     reference_orthotope(T::DataType, D::Int)
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
@@ -101,39 +100,6 @@ function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
 end
 
 """
-    Segment{T} = Orthotope{1,T}
-
-Alias for a 1-dimensional segment of element type `T`.
-"""
-const Segment{T} = Orthotope{1,T}
-
-"""
-    segment(xmin, xmax)
-    segment(T::DataType, xmin, xmax)
-
-Return a segment in 1 dimensions with element type `T` representing the interval
-`[xmin, xmax]` with `xmin ≤ xmax`.
-"""
-function segment(T::DataType, xmin::R, xmax::S) where {R<:Real,S<:Real}
-    return orthotope(T, (xmin,), (xmax,))
-end
-function segment(xmin::R, xmax::S) where {R<:Real,S<:Real}
-    T = promote_type(typeof(xmin), typeof(xmax))
-    return segment(float(T), xmin, xmax)
-end
-
-"""
-    subdivide_segment2(s::Segment)
-
-Divide the segment `s` into two segments of equal length.
-"""
-function subdivide_segment2(s::Segment{T}) where {T}
-    a, b = s.low_corner, s.high_corner
-    m = (a + b) / 2
-    return (Segment{T}(a, m), Segment{T}(m, b))
-end
-
-"""
     Rectangle{T} = Orthotope{2,T}
 
 Alias for a 2-dimensional rectangle of element type `T`.
@@ -156,12 +122,12 @@ function rectangle(low_corner, high_corner)
 end
 
 """
-    subdivide_rectangle4(r::Rectangle)
+    subdivide_rectangle(r::Rectangle)
 
 Divide the rectangle `r` into four squares by connecting the center of the square to the
 midpoints of the edges.
 """
-function subdivide_rectangle4(r::Rectangle{T}) where {T}
+function subdivide_rectangle(r::Rectangle{T}) where {T}
     a, b = r.low_corner, r.high_corner
     m = (a + b) / 2
     return (
@@ -195,12 +161,12 @@ function cuboid(low_corner, high_corner)
 end
 
 """
-    subdivide_cuboid8(c::Cuboid)
+    subdivide_cuboid(c::Cuboid)
 
 Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints
 of the edges.
 """
-function subdivide_cuboid8(c::Cuboid{T}) where {T}
+function subdivide_cuboid(c::Cuboid{T}) where {T}
     a, b = c.low_corner, c.high_corner
     m = (a + b) / 2
     return (

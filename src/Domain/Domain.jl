@@ -3,30 +3,28 @@ module Domain
 # Domain types
 export AbstractDomain,
     Simplex,
-    Triangle,
-    Tetrahedron,
     Orthotope,
     Segment,
+    Triangle,
     Rectangle,
+    Tetrahedron,
     Cuboid,
     simplex,
-    triangle,
-    tetrahedron,
     orthotope,
-    segment,
+    triangle,
     rectangle,
+    tetrahedron,
     cuboid
 # Methods on domains
 export dimension, reference_domain, map_from_reference, map_to_reference, abs_det_jac
 # Subdivision methods
 export subdivide_simplex,
-    subdivide_triangle2,
-    subdivide_triangle4,
-    subdivide_tetrahedron8,
+    subdivide_triangle,
+    subdivide_tetrahedron,
     subdivide_orthotope,
-    subdivide_segment2,
-    subdivide_rectangle4,
-    subdivide_cuboid8
+    subdivide_segment,
+    subdivide_rectangle,
+    subdivide_cuboid
 
 using ..HAdaptiveIntegration: SVector, det, norm, promote_to_float, setindex
 
@@ -60,6 +58,7 @@ dimension(::Type{DOM}) where {DOM<:AbstractDomain} = dimension(supertype(DOM))
 
 include("simplex.jl")
 include("orthotope.jl")
+include("segment.jl")
 
 """
     reference_domain(::Type{<:AbstractDomain})
@@ -72,5 +71,8 @@ reference_domain(::Type{Simplex{D}}) where {D} = reference_simplex(float(Int), D
 
 reference_domain(::Type{Orthotope{D,T}}) where {D,T} = reference_orthotope(T, D)
 reference_domain(::Type{Orthotope{D}}) where {D} = reference_orthotope(float(Int), D)
+
+reference_domain(::Type{Segment{T}}) where {T} = reference_segment(T)
+reference_domain(::Type{Segment}) = reference_segment(float(Int))
 
 end

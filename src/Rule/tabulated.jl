@@ -26,22 +26,22 @@ reference domain (use the [`reference_domain`](@ref) function to get the referen
 struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
     description::String
     reference::String
+    order_high::Int
+    order_low::Int
     precision::Int
     nodes::Vector{Vector{String}}
     weights_high::Vector{String}
-    order_high::Int
     weights_low::Vector{String}
-    order_low::Int
 
     function TabulatedEmbeddedCubature{DOM}(;
         description::String,
         reference::String,
+        order_high::Int,
+        order_low::Int,
         precision::Int,
         nodes::Vector{Vector{String}},
         weights_high::Vector{String},
-        order_high::Int,
         weights_low::Vector{String},
-        order_low::Int,
     ) where {DOM<:AbstractDomain}
         D = dimension(DOM)
         @assert all(n -> length(n) == D, nodes) "Each node must have length equal to the dimension D"
@@ -52,12 +52,12 @@ struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
         return new{DOM}(
             description,
             reference,
+            order_high,
+            order_low,
             precision,
             nodes,
             weights_high,
-            order_high,
             weights_low,
-            order_low,
         )
     end
 end

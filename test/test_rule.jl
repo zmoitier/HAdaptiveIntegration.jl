@@ -51,26 +51,6 @@ function (ec::EmbeddedCubature{D,T})(fct) where {D,T}
     return Iₕᵢ, Iₗₒ
 end
 
-function integral_monomial_orthotope(dim::Int, k_max::Int)
-    @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
-
-    mlt_idx_val = [[(i,) => 1//(i + 1)] for i in 0:k_max]
-
-    for d in 2:dim
-        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:k_max]
-        for (k, mi_val) in zip(Iterators.countfrom(0), mlt_idx_val)
-            for (mi, val) in mi_val
-                for n in 0:(k_max - k)
-                    push!(new[k + 1 + n], (n, mi...) => val//(n + 1))
-                end
-            end
-        end
-        mlt_idx_val = new
-    end
-
-    return mlt_idx_val
-end
-
 function integral_monomial_simplex(dim::Int, k_max::Int)
     @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
 
@@ -85,6 +65,26 @@ function integral_monomial_simplex(dim::Int, k_max::Int)
                 for n in 1:(k_max - k)
                     v *= n//(n + k + dim)
                     push!(new[k + 1 + n], (n, mi...) => val * v)
+                end
+            end
+        end
+        mlt_idx_val = new
+    end
+
+    return mlt_idx_val
+end
+
+function integral_monomial_orthotope(dim::Int, k_max::Int)
+    @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
+
+    mlt_idx_val = [[(i,) => 1//(i + 1)] for i in 0:k_max]
+
+    for d in 2:dim
+        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:k_max]
+        for (k, mi_val) in zip(Iterators.countfrom(0), mlt_idx_val)
+            for (mi, val) in mi_val
+                for n in 0:(k_max - k)
+                    push!(new[k + 1 + n], (n, mi...) => val//(n + 1))
                 end
             end
         end
@@ -135,11 +135,11 @@ end
     end
 
     @testset "Grundmann-Möller" begin
-        @test typeof(GrundmannMoeller{3}(7, 3)) <: AbstractRule{Simplex{3}}
         @test_throws AssertionError typeof(GrundmannMoeller{3}(7, 6))
         @test_throws AssertionError typeof(GrundmannMoeller{3}(5, 7))
 
         gm = GrundmannMoeller{4}(5, 3)
+        @test typeof(gm) <: AbstractRule{Simplex{4}}
         @test orders(gm) == (5, 3)
         @test validate_orders(
             embedded_cubature(gm),
@@ -151,10 +151,8 @@ end
     end
 
     @testset "Genz-Malik" begin
-        @test typeof(GenzMalik{2}()) <: AbstractRule{Orthotope{2}}
-        @test typeof(GenzMalik{3}()) <: AbstractRule{Orthotope{3}}
-
         gm = GenzMalik{4}()
+        @test typeof(gm) <: AbstractRule{Orthotope{4}}
         @test orders(gm) == (7, 5)
         @test validate_orders(embedded_cubature(gm), integral_monomial_orthotope, 7, 5)
     end
@@ -168,6 +166,12 @@ end
             ec = embedded_cubature(T, tec)
             @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
         end
+
+        ec = embedded_cubature(T, GrundmannMoeller{1}(7, 5))
+        @test validate_orders(ec, integral_monomial_orthotope, 7, 5)
+
+        ec = embedded_cubature(T, GenzMalik{1}())
+        @test validate_orders(ec, integral_monomial_orthotope, 7, 5)
     end
 
     @testset "Triangle" begin

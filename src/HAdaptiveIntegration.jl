@@ -19,7 +19,7 @@ end
 # Supported integration domains
 include("Domain/Domain.jl")
 using .Domain
-export Domain, orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
+export Domain, simplex, orthotope, Segment, triangle, rectangle, tetrahedron, cuboid
 
 # Tabulated cubature rule for supported domains
 include("Rule/Rule.jl")

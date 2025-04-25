@@ -3,22 +3,22 @@
 
 Return the default algorithm to subdivide `domain`.
 - dimension 1:
-    - [`segment`](@ref): [`subdivide_segment2`](@ref)
+    - [`Segment`](@ref): [`subdivide_segment`](@ref)
 - dimension 2:
-    - [`triangle`](@ref): [`subdivide_triangle4`](@ref)
-    - [`rectangle`](@ref): [`subdivide_rectangle4`](@ref)
+    - [`triangle`](@ref): [`subdivide_triangle`](@ref)
+    - [`rectangle`](@ref): [`subdivide_rectangle`](@ref)
 - dimension 3:
-    - [`tetrahedron`](@ref): [`subdivide_tetrahedron8`](@ref)
-    - [`cuboid`](@ref): [`subdivide_cuboid8`](@ref)
+    - [`tetrahedron`](@ref): [`subdivide_tetrahedron`](@ref)
+    - [`cuboid`](@ref): [`subdivide_cuboid`](@ref)
 - dimension `d`:
     - [`simplex`](@ref): [`subdivide_simplex`](@ref)
     - [`orthotope`](@ref): [`subdivide_orthotope`](@ref)
 """
-default_subdivision(::Segment) = subdivide_segment2
-default_subdivision(::Triangle) = subdivide_triangle4
-default_subdivision(::Rectangle) = subdivide_rectangle4
-default_subdivision(::Tetrahedron) = subdivide_tetrahedron8
-default_subdivision(::Cuboid) = subdivide_cuboid8
+default_subdivision(::Segment) = subdivide_segment
+default_subdivision(::Triangle) = subdivide_triangle
+default_subdivision(::Rectangle) = subdivide_rectangle
+default_subdivision(::Tetrahedron) = subdivide_tetrahedron
+default_subdivision(::Cuboid) = subdivide_cuboid
 default_subdivision(::Simplex) = subdivide_simplex
 default_subdivision(::Orthotope) = subdivide_orthotope
 
@@ -27,7 +27,7 @@ default_subdivision(::Orthotope) = subdivide_orthotope
 
 Return a default embedded cubature for the domains:
 - dimension 1:
-    - [`segment`](@ref): [`SEGMENT_GK15`](@ref)
+    - [`Segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
     - [`triangle`](@ref): [`TRIANGLE_RL19`](@ref)
     - [`rectangle`](@ref): [`SQUARE_CH25`](@ref)

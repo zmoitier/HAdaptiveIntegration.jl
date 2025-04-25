@@ -29,7 +29,7 @@ end
 end
 
 @testset "Integrate over a segment" begin
-    domain = segment(0, 1)
+    domain = Segment{float(Int)}(0, 1)
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
