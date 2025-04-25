@@ -1,8 +1,8 @@
 module HAdaptiveIntegration
 
-using DataStructures
-using LinearAlgebra
-using StaticArrays
+using DataStructures: BinaryHeap
+using LinearAlgebra: det, norm
+using StaticArrays: SVector, setindex
 
 # This function is intended for internal use to determine the floating-point type.
 function promote_to_float(containers...)
@@ -17,19 +17,14 @@ function promote_to_float(containers...)
 end
 
 # Supported integration domains
-include("domain.jl")
-export orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
-
-# Subdivision strategies for various domains
-include("domain_subdivision.jl")
+include("Domain/Domain.jl")
+using .Domain
+export Domain, orthotope, segment, rectangle, cuboid, simplex, triangle, tetrahedron
 
 # Tabulated cubature rule for supported domains
 include("Rule/Rule.jl")
-import .Rule: GenzMalik, GrundmannMoeller, RadonLaurie, TabulatedEmbeddedCubature
-
-# Embedded cubature
-include("cubature_embedded.jl")
-include("cubature_check.jl")
+using .Rule
+export Rule
 
 # Default subdivision and embedded cubature for supported domain
 include("default.jl")

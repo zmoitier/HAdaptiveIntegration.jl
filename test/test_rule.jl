@@ -1,32 +1,100 @@
-using HAdaptiveIntegration:
-    AbstractRule,
-    CUBE_BE115,
-    CUBE_BE65,
-    CUBE_GM33,
-    EmbeddedCubature,
-    GenzMalik,
-    GrundmannMoeller,
-    Orthotope,
-    RadonLaurie,
-    SEGMENT_GK15,
-    SEGMENT_GK31,
-    SEGMENT_GK7,
-    SQUARE_CH21,
-    SQUARE_CH25,
-    SQUARE_GM17,
-    Segment,
-    Simplex,
-    TETRAHEDRON_GM35,
-    TRIANGLE_GM19,
-    TRIANGLE_RL19,
-    TabulatedEmbeddedCubature,
-    embedded_cubature,
-    orders,
-    validate_orders
+using HAdaptiveIntegration.Domain
+using HAdaptiveIntegration.Rule
 using Quadmath
 using Test
 
-@testset "Abstract rule" begin
+function validate_orders(
+    ec::EmbeddedCubature{D,T},
+    get_exact_values::Function,
+    order_high::Int,
+    order_low::Int;
+    rtol=10 * eps(T),
+) where {D,T}
+    exact_values = get_exact_values(D, order_high)
+
+    for k in 0:order_high
+        for (α, vₑₓ) in exact_values[k + 1]
+            fct = x -> prod(xᵢ^eᵢ for (xᵢ, eᵢ) in zip(x, α))
+            Iₕ, Iₗ = ec(fct)
+
+            if k ≤ order_low
+                if !isapprox(Iₗ, vₑₓ; rtol=rtol)
+                    @error "fail to integrate the low order cubature within tolerance at degree = $α. Relative error: $(abs(Iₗ/vₑₓ-1)), rtol: $rtol."
+                    return false
+                end
+            end
+
+            if !isapprox(Iₕ, vₑₓ; rtol=rtol)
+                @error "fail to integrate the high order cubature within tolerance at degree = $α. Relative error: $(abs(Iₕ/vₑₓ-1)), rtol: $rtol."
+                return false
+            end
+        end
+    end
+
+    return true
+end
+
+function (ec::EmbeddedCubature{D,T})(fct) where {D,T}
+    H, L = length(ec.weights_high), length(ec.weights_low)
+
+    v = fct(ec.nodes[1])
+    Iₗₒ = ec.weights_low[1] * v
+    Iₕᵢ = ec.weights_high[1] * v
+    for i in 2:L
+        v = fct(ec.nodes[i])
+        Iₗₒ += ec.weights_low[i] * v
+        Iₕᵢ += ec.weights_high[i] * v
+    end
+    for i in (L + 1):H
+        Iₕᵢ += ec.weights_high[i] * fct(ec.nodes[i])
+    end
+    return Iₕᵢ, Iₗₒ
+end
+
+function integral_monomial_orthotope(dim::Int, k_max::Int)
+    @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
+
+    mlt_idx_val = [[(i,) => 1//(i + 1)] for i in 0:k_max]
+
+    for d in 2:dim
+        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:k_max]
+        for (k, mi_val) in zip(Iterators.countfrom(0), mlt_idx_val)
+            for (mi, val) in mi_val
+                for n in 0:(k_max - k)
+                    push!(new[k + 1 + n], (n, mi...) => val//(n + 1))
+                end
+            end
+        end
+        mlt_idx_val = new
+    end
+
+    return mlt_idx_val
+end
+
+function integral_monomial_simplex(dim::Int, k_max::Int)
+    @assert (dim > 0) && (k_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
+
+    mlt_idx_val = [[(i,) => 1//prod((i + 1):(i + dim))] for i in 0:k_max]
+
+    for d in 2:dim
+        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:k_max]
+        for (k, mi_val) in zip(Iterators.countfrom(0), mlt_idx_val)
+            for (mi, val) in mi_val
+                push!(new[k + 1], (0, mi...) => val)
+                v = 1
+                for n in 1:(k_max - k)
+                    v *= n//(n + k + dim)
+                    push!(new[k + 1 + n], (n, mi...) => val * v)
+                end
+            end
+        end
+        mlt_idx_val = new
+    end
+
+    return mlt_idx_val
+end
+
+@testset "Rule construction" begin
     @testset "Tabulated embedded cubature" begin
         tec = TabulatedEmbeddedCubature{Segment}(;
             description="Gauss (SEGMENT_G3)",
@@ -63,9 +131,7 @@ using Test
         @test typeof(rl) <: AbstractRule{Simplex{2}}
 
         @test orders(rl) == (8, 5)
-        @test validate_orders(
-            embedded_cubature(rl), Simplex, orders(rl)...; rtol=10 * eps(float(Int))
-        )
+        @test validate_orders(embedded_cubature(rl), integral_monomial_simplex, 8, 5)
     end
 
     @testset "Grundmann-Möller" begin
@@ -76,7 +142,11 @@ using Test
         gm = GrundmannMoeller{4}(5, 3)
         @test orders(gm) == (5, 3)
         @test validate_orders(
-            embedded_cubature(gm), Simplex, orders(gm)...; rtol=20 * eps(float(Int))
+            embedded_cubature(gm),
+            integral_monomial_simplex,
+            5,
+            3;
+            rtol=20 * eps(float(Int)),
         )
     end
 
@@ -85,47 +155,45 @@ using Test
         @test typeof(GenzMalik{3}()) <: AbstractRule{Orthotope{3}}
 
         gm = GenzMalik{4}()
-        @test validate_orders(
-            embedded_cubature(gm), Orthotope, orders(gm)...; rtol=10 * eps(float(Int))
-        )
+        @test orders(gm) == (7, 5)
+        @test validate_orders(embedded_cubature(gm), integral_monomial_orthotope, 7, 5)
     end
 end
 
 @testset "Tabulated rules" begin
     T = Float128
-    rtol = 10 * eps(T)
 
     @testset "Segment" begin
         for tec in (SEGMENT_GK7, SEGMENT_GK15, SEGMENT_GK31)
             ec = embedded_cubature(T, tec)
-            @test validate_orders(ec, Orthotope, orders(tec)...; rtol=rtol)
+            @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
         end
     end
 
     @testset "Triangle" begin
         for tec in (TRIANGLE_GM19, TRIANGLE_RL19)
             ec = embedded_cubature(T, tec)
-            @test validate_orders(ec, Simplex, orders(tec)...; rtol=rtol)
+            @test validate_orders(ec, integral_monomial_simplex, orders(tec)...)
         end
     end
 
     @testset "Square" begin
         for tec in (SQUARE_GM17, SQUARE_CH21, SQUARE_CH25)
             ec = embedded_cubature(T, tec)
-            @test validate_orders(ec, Orthotope, orders(tec)...; rtol=rtol)
+            @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
         end
     end
 
     @testset "Tetrahedron" begin
         tec = TETRAHEDRON_GM35
         ec = embedded_cubature(T, tec)
-        @test validate_orders(ec, Simplex, orders(tec)...; rtol=rtol)
+        @test validate_orders(ec, integral_monomial_simplex, orders(tec)...)
     end
 
     @testset "Cube" begin
         for tec in (CUBE_GM33, CUBE_BE65, CUBE_BE115)
             ec = embedded_cubature(T, tec)
-            @test validate_orders(ec, Orthotope, orders(tec)...; rtol=rtol)
+            @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
         end
     end
 end

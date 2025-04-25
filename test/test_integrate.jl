@@ -1,37 +1,20 @@
-using DataStructures
-using HAdaptiveIntegration:
-    CUBE_BE115,
-    CUBE_GM33,
-    EmbeddedCubature,
-    SEGMENT_GK31,
-    SEGMENT_GK7,
-    SQUARE_CH21,
-    SQUARE_GM17,
-    TRIANGLE_GM19,
-    allocate_buffer,
-    default_embedded_cubature,
-    embedded_cubature,
-    reference_orthotope,
-    reference_simplex
-using LinearAlgebra
+using DataStructures: BinaryHeap
+using HAdaptiveIntegration.Domain
+using HAdaptiveIntegration.Rule
+using HAdaptiveIntegration: allocate_buffer, default_embedded_cubature, integrate
+using LinearAlgebra: norm
 using Test
 
 @testset "Default embedded cubature" begin
-    for domain in (
-        reference_orthotope(1),
-        reference_orthotope(2),
-        reference_orthotope(3),
-        reference_orthotope(4),
-        reference_simplex(2),
-        reference_simplex(3),
-        reference_simplex(4),
-    )
-        @test typeof(default_embedded_cubature(domain)) <: EmbeddedCubature
+    for domain in
+        (Segment, Rectangle, Cuboid, Orthotope{4}, Triangle, Tetrahedron, Simplex{4})
+        ec = default_embedded_cubature(reference_domain(domain))
+        @test typeof(ec) <: EmbeddedCubature
     end
 end
 
 @testset "Integrate" begin
-    domain = reference_orthotope(1)
+    domain = reference_domain(Segment)
 
     buffer = allocate_buffer(x -> sum(x), domain)
     @test typeof(buffer) <: BinaryHeap
@@ -137,13 +120,13 @@ end
 end
 
 @testset "4-Simplex" begin
-    I, E = integrate(x -> 1 / norm(x), reference_simplex(4))
+    I, E = integrate(x -> 1 / norm(x), reference_domain(Simplex{4}))
     R = 0.089876019011
     @test abs(I - R) ≤ E * abs(R)
 end
 
 @testset "4-Orthotope" begin
-    I, E = integrate(x -> 1 / norm(x), reference_orthotope(4))
+    I, E = integrate(x -> 1 / norm(x), reference_domain(Orthotope{4}))
     R = 0.9674120212411487
     @test abs(I - R) ≤ E * abs(R)
 end

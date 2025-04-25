@@ -40,7 +40,7 @@ function integrate(
     embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
-    norm=x -> LinearAlgebra.norm(x, Inf),
+    norm=x -> norm(x, Inf),
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,

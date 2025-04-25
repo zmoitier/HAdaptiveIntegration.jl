@@ -1,29 +1,12 @@
-using HAdaptiveIntegration:
-    Cuboid,
-    Orthotope,
-    Rectangle,
-    Segment,
-    Simplex,
-    Tetrahedron,
-    Triangle,
-    abs_det_jac,
-    dimension,
-    map_from_reference,
-    map_to_reference,
-    reference_domain,
-    reference_orthotope,
-    reference_simplex,
-    subdivide_cuboid8,
-    subdivide_orthotope,
-    subdivide_rectangle4,
-    subdivide_segment2,
-    subdivide_simplex,
-    subdivide_tetrahedron8,
-    subdivide_triangle2,
-    subdivide_triangle4,
-    validate_subdivision
+using HAdaptiveIntegration.Domain
 using StaticArrays
 using Test
+
+# Volume test
+function volume_check(subdiv_algo, domain::AbstractDomain{D,T}) where {D,T}
+    sub_domains = subdiv_algo(domain)
+    return isapprox(sum(abs_det_jac.(sub_domains)), abs_det_jac(domain); rtol=10 * eps(T))
+end
 
 @testset "Domain construction" begin
     @testset "Orthotope" begin
@@ -32,7 +15,7 @@ using Test
         @test typeof(orthotope(SVector(0), SVector(1))) <: Orthotope{1,Float64}
         @test typeof(orthotope((big"0",), (big"1",))) <: Orthotope{1,BigFloat}
 
-        r = reference_orthotope(Int, 4)
+        r = reference_domain(Orthotope{4,Int})
         @test typeof(r) <: Orthotope{4,Int}
         @test r.low_corner == SVector(0, 0, 0, 0)
         @test r.high_corner == SVector(1, 1, 1, 1)
@@ -49,7 +32,7 @@ using Test
         @test typeof(simplex(SVector(0), SVector(1))) <: Simplex{1,2,Float64}
         @test typeof(simplex((big"0",), (big"1",))) <: Simplex{1,2,BigFloat}
 
-        r = reference_simplex(Int, 4)
+        r = reference_domain(Simplex{4,5,Int})
         @test typeof(r) <: Simplex{4,5,Int}
         @test r.vertices[1] == SVector(0, 0, 0, 0)
         @test r.vertices[2] == SVector(1, 0, 0, 0)
@@ -134,23 +117,23 @@ end
     end
 end
 
-@testset "Subdivision" begin
+@testset "Domain Subdivision" begin
     @testset "segment" begin
         s = segment(-0.81, 0.48)
-        @test validate_subdivision(subdivide_segment2, s)
+        @test volume_check(subdivide_segment2, s)
     end
 
     @testset "triangle" begin
         t = triangle((-0.86, -0.19), (0.97, -0.84), (-0.05, 0.74))
-        @test validate_subdivision(subdivide_triangle2, t)
-        @test validate_subdivision(subdivide_triangle4, t)
-        @test validate_subdivision(subdivide_simplex, t)
+        @test volume_check(subdivide_triangle2, t)
+        @test volume_check(subdivide_triangle4, t)
+        @test volume_check(subdivide_simplex, t)
     end
 
     @testset "rectangle" begin
         r = rectangle((-0.07, 0.42), (0.35, 0.71))
-        @test validate_subdivision(subdivide_rectangle4, r)
-        @test validate_subdivision(subdivide_orthotope, r)
+        @test volume_check(subdivide_rectangle4, r)
+        @test volume_check(subdivide_orthotope, r)
     end
 
     @testset "tetrahedron" begin
@@ -160,14 +143,14 @@ end
             (-0.06, 0.57, -0.34),
             (-0.27, -0.12, 0.14),
         )
-        @test validate_subdivision(subdivide_tetrahedron8, t)
-        @test validate_subdivision(subdivide_simplex, t)
+        @test volume_check(subdivide_tetrahedron8, t)
+        @test volume_check(subdivide_simplex, t)
     end
 
     @testset "cuboid" begin
         c = cuboid((-0.38, -0.92, -0.43), (0.15, 0.30, 0.51))
-        @test validate_subdivision(subdivide_cuboid8, c)
-        @test validate_subdivision(subdivide_orthotope, c)
+        @test volume_check(subdivide_cuboid8, c)
+        @test volume_check(subdivide_orthotope, c)
     end
 
     @testset "4-simplex" begin
@@ -178,11 +161,11 @@ end
             (-0.27, -0.12, 0.14, 0.0),
             (-0.27, -0.12, 0.14, 1.0),
         )
-        @test validate_subdivision(subdivide_simplex, s)
+        @test volume_check(subdivide_simplex, s)
     end
 
     @testset "4-orthotope" begin
         h = orthotope((-2.12, -0.37, -0.86, 0.09), (-1.57, 0.11, 0.49, 0.66))
-        @test validate_subdivision(subdivide_orthotope, h)
+        @test volume_check(subdivide_orthotope, h)
     end
 end
