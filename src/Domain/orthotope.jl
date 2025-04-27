@@ -16,22 +16,15 @@ struct Orthotope{D,T} <: AbstractDomain{D,T}
     high_corner::SVector{D,T}
 end
 
-"""
-    orthotope(low_corner, high_corner)
-    orthotope(T::DataType, low_corner, high_corner)
-
-Return an axes-aligned orthotope in `D` dimensions, with element type `T`, given by two
-points `low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
-"""
-function orthotope(T::DataType, low_corner, high_corner)
-    @assert (length(low_corner) == length(high_corner))
-    @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner))
+function Orthotope{T}(low_corner, high_corner) where {T}
+    @assert (length(low_corner) == length(high_corner)) "corners must have the same length."
+    @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "low corner must be less than or equal to high corner."
 
     D = length(low_corner)
     return Orthotope(SVector{D,T}(low_corner), SVector{D,T}(high_corner))
 end
-function orthotope(low_corner, high_corner)
-    return orthotope(promote_to_float(low_corner, high_corner), low_corner, high_corner)
+function Orthotope(low_corner, high_corner)
+    return orthotope{promote_to_float(low_corner, high_corner)}(low_corner, high_corner)
 end
 
 """
@@ -97,86 +90,4 @@ function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
     map(refs) do ref
         Orthotope(f(ref.low_corner), f(ref.high_corner))
     end
-end
-
-"""
-    Rectangle{T} = Orthotope{2,T}
-
-Alias for a 2-dimensional rectangle of element type `T`.
-"""
-const Rectangle{T} = Orthotope{2,T}
-
-"""
-    rectangle(low_corner, high_corner)
-    rectangle(T::DataType, low_corner, high_corner)
-
-Return an axes-aligned rectangle, with element type `T`, given by two 2d-points `low_corner`
-and `high_corner` with. Note that, we must have `low_corner .≤ high_corner`.
-"""
-function rectangle(T::DataType, low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 2 "`low_corner` and `high_corner` must be 2d-vector."
-    return orthotope(T, low_corner, high_corner)
-end
-function rectangle(low_corner, high_corner)
-    return rectangle(promote_to_float(low_corner, high_corner), low_corner, high_corner)
-end
-
-"""
-    subdivide_rectangle(r::Rectangle)
-
-Divide the rectangle `r` into four squares by connecting the center of the square to the
-midpoints of the edges.
-"""
-function subdivide_rectangle(r::Rectangle{T}) where {T}
-    a, b = r.low_corner, r.high_corner
-    m = (a + b) / 2
-    return (
-        Rectangle{T}(a, m),
-        Rectangle{T}(SVector(m[1], a[2]), SVector(b[1], m[2])),
-        Rectangle{T}(SVector(a[1], m[2]), SVector(m[1], b[2])),
-        Rectangle{T}(m, b),
-    )
-end
-
-"""
-    Cuboid{T} = Orthotope{3,T}
-
-Alias for a 3-dimensional cuboid of value type `T`.
-"""
-const Cuboid{T} = Orthotope{3,T}
-
-"""
-    cuboid(low_corner, high_corner)
-    cuboid(T::DataType, low_corner, high_corner)
-
-Return an axes-aligned cuboid, with element type `T`, given by two 3d-points `low_corner`
-and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
-"""
-function cuboid(T::DataType, low_corner, high_corner)
-    @assert length(low_corner) == length(high_corner) == 3 "`low_corner` and `high_corner` must be 3d-vector."
-    return orthotope(T, low_corner, high_corner)
-end
-function cuboid(low_corner, high_corner)
-    return cuboid(promote_to_float(low_corner, high_corner), low_corner, high_corner)
-end
-
-"""
-    subdivide_cuboid(c::Cuboid)
-
-Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints
-of the edges.
-"""
-function subdivide_cuboid(c::Cuboid{T}) where {T}
-    a, b = c.low_corner, c.high_corner
-    m = (a + b) / 2
-    return (
-        Cuboid{T}(a, m),
-        Cuboid{T}(SVector(m[1], a[2], a[3]), SVector(b[1], m[2], m[3])),
-        Cuboid{T}(SVector(a[1], m[2], a[3]), SVector(m[1], b[2], m[3])),
-        Cuboid{T}(SVector(m[1], m[2], a[3]), SVector(b[1], b[2], m[3])),
-        Cuboid{T}(SVector(a[1], a[2], m[3]), SVector(m[1], m[2], b[3])),
-        Cuboid{T}(SVector(m[1], a[2], m[3]), SVector(b[1], m[2], b[3])),
-        Cuboid{T}(SVector(a[1], m[2], m[3]), SVector(m[1], b[2], b[3])),
-        Cuboid{T}(m, b),
-    )
 end

@@ -1,5 +1,5 @@
 """
-    struct Simplex{D,N,T} <: AbstractDomain{D,T}
+    struct Simplex{D,T,N} <: AbstractDomain{D,T}
 
 A simplex in `D` dimensions with `N=D+1` vertices of element type `T`.
 
@@ -8,23 +8,17 @@ A simplex in `D` dimensions with `N=D+1` vertices of element type `T`.
 
 ## Invariants (**not** check at construction):
 - `N = D+1`
+
+## Constructors:
+- `Simplex(vertices...)`
+- `Simplex{T}(vertices...)`
+- `Simplex(vertices::SVector{N,SVector{D,T}})`
 """
-struct Simplex{D,N,T} <: AbstractDomain{D,T}
+struct Simplex{D,T,N} <: AbstractDomain{D,T}
     vertices::SVector{N,SVector{D,T}}
 end
 
-function Simplex{D,N,T}(vertices::Vararg{SVector{D,T},N}) where {D,N,T}
-    return Simplex(SVector{N}(vertices...))
-end
-
-"""
-    simplex(vertices...)
-    simplex(T::DataType, vertices...)
-
-Return a `D`-simplex with element type `T` from a collection of `N=D+1` vertices. Note that
-all vertices must have the same length `D`.
-"""
-function simplex(T::DataType, vertices...)
+function Simplex{T}(vertices...) where {T}
     @assert allequal(length, vertices) "all `vertices` must have the same length."
     D = length(first(vertices))
 
@@ -33,7 +27,7 @@ function simplex(T::DataType, vertices...)
 
     return Simplex(SVector{N}(SVector{D,T}.(vertices)))
 end
-simplex(vertices...) = simplex(promote_to_float(vertices...), vertices...)
+Simplex(vertices...) = Simplex{promote_to_float(vertices...)}(vertices...)
 
 """
     reference_simplex(T::DataType, D::Int)
@@ -53,7 +47,7 @@ end
 
 Return an anonymous function that maps the reference domain to the physical domain `domain`.
 """
-function map_from_reference(s::Simplex{D,N,T}) where {D,N,T}
+function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
     return u -> begin
         v = (1 - sum(u)) * s.vertices[1]
         for i in 2:N
@@ -69,7 +63,7 @@ end
 Return the absolute value of the Jacobian's determinant of the map from the reference domain
 to the physical domain `domain`.
 """
-function abs_det_jac(s::Simplex{D,N,T}) where {D,N,T}
+function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
     vertices = s.vertices
     jacobian_matrix = hcat(ntuple(i -> vertices[i + 1] - vertices[1], D)...)
     return abs(det(jacobian_matrix))
@@ -85,7 +79,7 @@ Return an anonymous function that maps the physical domain `domain` to the refer
 - For `Simplex{D}`, the vertices must form a valid `D`-dimensional simplex with non-zero
   volume).
 """
-function map_to_reference(s::Simplex{D,N,T}) where {D,N,T}
+function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
     v = s.vertices
     jacobian_matrix = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
     @assert !isapprox(det(jacobian_matrix), 0; atol=(√eps(float(T)))) "degenerate $D-dimensional Simplex: the Jacobian matrix is not invertible."
@@ -190,95 +184,10 @@ Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Fr
 algorithm and the optimal number of congruence
 classes](https://link.springer.com/article/10.1007/s002110050475).
 """
-function subdivide_simplex(s::Simplex{D,N,T}) where {D,N,T}
+function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     refs = subdivide_reference_simplex(Val(D), T)
     f = map_from_reference(s)
     map(refs) do ref
         Simplex(f.(ref.vertices))
     end
-end
-
-"""
-    Triangle{T} = Simplex{2,3,T}
-
-Alias for a 2-dimensional triangle with 3 vertices of value type `T`.
-"""
-const Triangle{T} = Simplex{2,3,T}
-
-"""
-    triangle(a, b, c)
-    triangle(T::DataType, a, b, c)
-
-Return a triangle in 2 dimensions, with element type `T`, given by three 2d-points `a`, `b`,
-and `c`.
-"""
-function triangle(T::DataType, a, b, c)
-    @assert length(a) == length(b) == length(c) == 2 "`a`, `b`, and `c` must be 2d-vector."
-    return simplex(T, a, b, c)
-end
-triangle(a, b, c) = triangle(promote_to_float(a, b, c), a, b, c)
-
-"""
-    subdivide_triangle(t::Triangle)
-
-Divide the triangle `t` into four triangles by connecting the midpoints of the edges.
-"""
-function subdivide_triangle(t::Triangle{T}) where {T}
-    a, b, c = t.vertices
-    ab = (a + b) / 2
-    ac = (c + a) / 2
-    bc = (b + c) / 2
-    return (
-        Triangle{T}(a, ab, ac),
-        Triangle{T}(b, bc, ab),
-        Triangle{T}(c, ac, bc),
-        Triangle{T}(ab, bc, ac),
-    )
-end
-
-"""
-    Tetrahedron{T} = Simplex{3,4,T}
-
-Alias for a 3-dimensional tetrahedron with 4 vertices of element type `T`.
-"""
-const Tetrahedron{T} = Simplex{3,4,T}
-
-"""
-    tetrahedron(a, b, c, d)
-    tetrahedron(T::DataType, a, b, c, d)
-
-Return a tetrahedron in 3 dimensions, with element type `T`, given by four 3d-points `a`,
-`b`, `c`, and `d`.
-"""
-function tetrahedron(T::DataType, a, b, c, d)
-    @assert length(a) == length(b) == length(c) == length(d) == 3 "`a`, `b`, `c`, and `d` must be 3d-vector."
-    return simplex(T, a, b, c, d)
-end
-tetrahedron(a, b, c, d) = tetrahedron(promote_to_float(a, b, c, d), a, b, c, d)
-
-"""
-    subdivide_tetrahedron(t::Tetrahedron)
-
-Divide the tetrahedron `t` into eight tetrahedra by connecting the midpoints of the edges.
-"""
-function subdivide_tetrahedron(t::Tetrahedron{T}) where {T}
-    a, b, c, d = t.vertices
-    ab = (a + b) / 2
-    ac = (a + c) / 2
-    ad = (a + d) / 2
-    bc = (b + c) / 2
-    bd = (b + d) / 2
-    cd = (c + d) / 2
-    return (
-        # (1/2)-tetrahedron on each vertices
-        Tetrahedron{T}(a, ab, ac, ad),
-        Tetrahedron{T}(ab, b, bc, bd),
-        Tetrahedron{T}(ac, bc, c, cd),
-        Tetrahedron{T}(ad, bd, cd, d),
-        # octahedron splitting
-        Tetrahedron{T}(ab, ac, ad, bd),
-        Tetrahedron{T}(ab, ac, bc, bd),
-        Tetrahedron{T}(ac, ad, bd, cd),
-        Tetrahedron{T}(ac, bc, bd, cd),
-    )
 end

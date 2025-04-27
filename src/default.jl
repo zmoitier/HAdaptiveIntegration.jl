@@ -2,8 +2,6 @@
     default_subdivision(domain::DOM) where {DOM<:AbstractDomain}
 
 Return the default algorithm to subdivide `domain`.
-- dimension 1:
-    - [`Segment`](@ref): [`subdivide_segment`](@ref)
 - dimension 2:
     - [`triangle`](@ref): [`subdivide_triangle`](@ref)
     - [`rectangle`](@ref): [`subdivide_rectangle`](@ref)
@@ -14,20 +12,17 @@ Return the default algorithm to subdivide `domain`.
     - [`simplex`](@ref): [`subdivide_simplex`](@ref)
     - [`orthotope`](@ref): [`subdivide_orthotope`](@ref)
 """
-default_subdivision(::Segment) = subdivide_segment
-default_subdivision(::Triangle) = subdivide_triangle
-default_subdivision(::Rectangle) = subdivide_rectangle
-default_subdivision(::Tetrahedron) = subdivide_tetrahedron
-default_subdivision(::Cuboid) = subdivide_cuboid
 default_subdivision(::Simplex) = subdivide_simplex
+default_subdivision(::Triangle) = subdivide_triangle
+default_subdivision(::Tetrahedron) = subdivide_tetrahedron
 default_subdivision(::Orthotope) = subdivide_orthotope
+default_subdivision(::Rectangle) = subdivide_rectangle
+default_subdivision(::Cuboid) = subdivide_cuboid
 
 """
     default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
 
 Return a default embedded cubature for the domains:
-- dimension 1:
-    - [`Segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
     - [`triangle`](@ref): [`TRIANGLE_RL19`](@ref)
     - [`rectangle`](@ref): [`SQUARE_CH25`](@ref)
@@ -38,10 +33,6 @@ Return a default embedded cubature for the domains:
     - [`simplex`](@ref): [`GrundmannMoeller{d}(7, 5)`](@ref)`
     - [`orthotope`](@ref): [`GenzMalik{d}()`](@ref)
 """
-@generated function default_embedded_cubature(::Segment{T}) where {T}
-    ec = embedded_cubature(T, SEGMENT_GK15)
-    return :($ec)
-end
 @generated function default_embedded_cubature(::Triangle{T}) where {T}
     ec = embedded_cubature(T, TRIANGLE_RL19)
     return :($ec)
@@ -58,7 +49,7 @@ end
     ec = embedded_cubature(T, CUBE_BE65)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Simplex{D,N,T}) where {D,N,T}
+@generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
     ec = embedded_cubature(T, GrundmannMoeller{D}(7, 5))
     return :($ec)
 end

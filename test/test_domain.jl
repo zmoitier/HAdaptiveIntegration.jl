@@ -10,25 +10,25 @@ end
 
 @testset "Domain construction" begin
     @testset "Simplex" begin
-        @test typeof(simplex((0,), (1,))) <: Simplex{1,2,Float64}
-        @test typeof(simplex([0], [1])) <: Simplex{1,2,Float64}
-        @test typeof(simplex(SVector(0), SVector(1))) <: Simplex{1,2,Float64}
-        @test typeof(simplex((big"0",), (big"1",))) <: Simplex{1,2,BigFloat}
+        @test typeof(simplex((0,), (1,))) <: Simplex{1,Float64,2}
+        @test typeof(simplex([0], [1])) <: Simplex{1,Float64,2}
+        @test typeof(simplex(SVector(0), SVector(1))) <: Simplex{1,Float64,2}
+        @test typeof(simplex((big"0",), (big"1",))) <: Simplex{1,BigFloat,2}
 
-        r = reference_domain(Simplex{4,5,Int})
-        @test typeof(r) <: Simplex{4,5,Int}
+        r = reference_domain(Simplex{4,Int,5})
+        @test typeof(r) <: Simplex{4,Int,5}
         @test r.vertices[1] == SVector(0, 0, 0, 0)
         @test r.vertices[2] == SVector(1, 0, 0, 0)
         @test r.vertices[3] == SVector(0, 1, 0, 0)
         @test r.vertices[4] == SVector(0, 0, 1, 0)
         @test r.vertices[5] == SVector(0, 0, 0, 1)
 
-        @test typeof(triangle((2, 0), (0, 2), (0, 0))) <: Simplex{2,3,Float64}
+        @test typeof(triangle((2, 0), (0, 2), (0, 0))) <: Simplex{2,Float64,3}
         @test typeof(tetrahedron((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
-            Simplex{3,4,Float64}
+            Simplex{3,Float64,4}
         @test typeof(
             simplex((2, 0, 0, 0), (0, 2, 0, 0), (0, 0, 2, 0), (0, 0, 0, 2), (0, 0, 0, 0))
-        ) <: Simplex{4,5,Float64}
+        ) <: Simplex{4,Float64,5}
     end
 
     @testset "Orthotope" begin
@@ -77,19 +77,18 @@ end
 
         @test abs_det_jac(s) ≈ 16
 
-        @test typeof(reference_domain(Triangle)) <: Simplex{2,3,Float64}
-        @test typeof(reference_domain(Triangle{Int})) <: Simplex{2,3,Int}
-        @test typeof(reference_domain(Tetrahedron)) <: Simplex{3,4,Float64}
-        @test typeof(reference_domain(Tetrahedron{Int})) <: Simplex{3,4,Int}
-        @test typeof(reference_domain(Simplex{4})) <: Simplex{4,5,Float64}
-        @test typeof(reference_domain(Simplex{4,5})) <: Simplex{4,5,Float64}
-        @test typeof(reference_domain(Simplex{4,5,Float64})) <: Simplex{4,5,Float64}
+        @test typeof(reference_domain(Triangle)) <: Simplex{2,Float64,3}
+        @test typeof(reference_domain(Triangle{Int})) <: Simplex{2,Int,3}
+        @test typeof(reference_domain(Tetrahedron)) <: Simplex{3,Float64,4}
+        @test typeof(reference_domain(Tetrahedron{Int})) <: Simplex{3,Int,4}
+        @test typeof(reference_domain(Simplex{4})) <: Simplex{4,Float64,5}
+        @test typeof(reference_domain(Simplex{4,Int})) <: Simplex{4,Int,5}
+        @test typeof(reference_domain(Simplex{4,Int,5})) <: Simplex{4,Int,5}
 
         @test dimension(Triangle) == 2
-        @test dimension(Triangle{Int}) == 2
+        @test dimension(Tetrahedron) == 3
         @test dimension(Simplex{4}) == 4
-        @test dimension(Simplex{4,5}) == 4
-        @test dimension(Simplex{4,5,Int}) == 4
+        @test dimension(Simplex{4,Int}) == 4
     end
 
     @testset "Orthotope" begin
@@ -117,7 +116,7 @@ end
         @test typeof(reference_domain(Orthotope{4,Int})) <: Orthotope{4,Int}
 
         @test dimension(Rectangle) == 2
-        @test dimension(Rectangle{Int}) == 2
+        @test dimension(Cuboid) == 3
         @test dimension(Orthotope{4}) == 4
         @test dimension(Orthotope{4,Int}) == 4
     end
