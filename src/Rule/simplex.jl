@@ -1,5 +1,5 @@
 """
-   struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
+    struct GrundmannMoeller{D} <: AbstractRule{Simplex{D}}
 
 Embedded cubature rule for a `D`-simplex.
 
@@ -33,7 +33,7 @@ end
 #   A. Grundmann and H. M. Möller, Invariant integration formulas for the n-simplex by
 #   combinatorial methods, SIAM Journal on Numerical Analysis, volume 15, 1978,
 #   https://doi.org/10.1137/0715019.
-function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
+function embedded_cubature(gm::GrundmannMoeller{D}, (::Type{T})=float(Int)) where {D,T}
     sh, sl = (gm.order_high - 1) ÷ 2, (gm.order_low - 1) ÷ 2
 
     # Grundmann-Möller weights computed iteratively instead of using the formula for
@@ -81,7 +81,6 @@ function embedded_cubature(T::DataType, gm::GrundmannMoeller{D}) where {D}
 
     return EmbeddedCubature(nodes, weights_high, weights_low)
 end
-embedded_cubature(gm::GrundmannMoeller) = embedded_cubature(float(Int), gm)
 
 function _gm_weight_next(weight::Vector{T}, dim::Int) where {T}
     s = length(weight)

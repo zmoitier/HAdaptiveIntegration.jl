@@ -1,5 +1,5 @@
 # [Docstrings](@id docstrings)
 
 ```@autodocs
-Modules = [HAdaptiveIntegration]
+Modules = [HAdaptiveIntegration.Domain, HAdaptiveIntegration.Rule, HAdaptiveIntegration]
 ```

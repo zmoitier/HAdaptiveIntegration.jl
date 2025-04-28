@@ -10,6 +10,11 @@ Axes-aligned Orthotope in `D` dimensions, with element type `T`, given by two po
 
 ## Invariants (**not** check at construction):
 - `low_corner .≤ high_corner`
+
+## Constructors:
+- `Orthotope(low_corner, high_corner)`
+- `Orthotope{T}(low_corner, high_corner)`
+- `Orthotope(low_corner::SVector{D,T}, high_corner::SVector{D,T})`
 """
 struct Orthotope{D,T} <: AbstractDomain{D,T}
     low_corner::SVector{D,T}
@@ -28,11 +33,11 @@ function Orthotope(low_corner, high_corner)
 end
 
 """
-    reference_orthotope(T::DataType, D::Int)
+    reference_orthotope(D::Int, T::DataType=float(Int))
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
 """
-function reference_orthotope(T::DataType, D::Int)
+function reference_orthotope(D::Int, T::DataType=float(Int))
     return Orthotope(zeros(SVector{D,T}), ones(SVector{D,T}))
 end
 
@@ -52,13 +57,15 @@ function map_to_reference(h::Orthotope{D,T}) where {D,T}
 end
 
 """
-    subdivide_reference_orthotope(::Val{D}, ::Type{T}=Float64) where {D,T}
+    subdivide_reference_orthotope(::Val{D}, ::Type{T}=float(Int)) where {D,T}
 
 Like `subdivide_orthotope`, but operates on the reference orthotope. Since the output
 depends only on the dimension `D`, and the type `T` used to represent coordinates, this
 function is generated for each combination of `D` and `T`.
 """
-@generated function subdivide_reference_orthotope(::Val{D}, (::Type{T})=Float64) where {D,T}
+@generated function subdivide_reference_orthotope(
+    ::Val{D}, (::Type{T})=float(Int)
+) where {D,T}
     a, b = zeros(SVector{D,T}), ones(SVector{D,T})
     m = SVector{D}(fill(T(1//2), D))
 

@@ -55,12 +55,13 @@ include("cuboid.jl")
 """
     reference_domain(::Type{<:AbstractDomain})
 
-Return the reference domain for the given domain type.
+Return the reference domain for the given domain type. See [`reference_simplex`](@ref) and
+[`reference_orthotope`](@ref) for more details.
 """
-reference_domain(::Type{<:Simplex{D,T}}) where {D,T} = reference_simplex(T, D)
-reference_domain(::Type{<:Simplex{D}}) where {D} = reference_simplex(float(Int), D)
+reference_domain(::Type{<:Simplex{D,T}}) where {D,T} = reference_simplex(D, T)
+reference_domain(::Type{<:Simplex{D}}) where {D} = reference_simplex(D)
 
-reference_domain(::Type{<:Orthotope{D,T}}) where {D,T} = reference_orthotope(T, D)
-reference_domain(::Type{<:Orthotope{D}}) where {D} = reference_orthotope(float(Int), D)
+reference_domain(::Type{<:Orthotope{D,T}}) where {D,T} = reference_orthotope(D, T)
+reference_domain(::Type{<:Orthotope{D}}) where {D} = reference_orthotope(D)
 
 end

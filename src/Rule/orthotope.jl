@@ -1,5 +1,5 @@
 """
-   struct GenzMalik{D} <: AbstractRule{Orthotope{D}}
+    struct GenzMalik{D} <: AbstractRule{Orthotope{D}}
 
 Embedded cubature rule for a `D`-orthotope of high order `7` and low order `5`.
 
@@ -17,7 +17,7 @@ end
 #   numerical integration over an N-dimensional rectangular region, Journal of Computational
 #   and Applied Mathematics, Volume 6, Issue 4, 1980,
 #   https://doi.org/10.1016/0771-050X(80)90039-X.
-function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
+function embedded_cubature(::GenzMalik{D}, (::Type{T})=float(Int)) where {D,T}
     # map to the reference domain
     Φ = x -> (x .+ 1) ./ 2
 
@@ -81,4 +81,3 @@ function embedded_cubature(T::DataType, ::GenzMalik{D}) where {D}
 
     return EmbeddedCubature(nodes, weights_high, weights_low)
 end
-embedded_cubature(gm::GenzMalik{D}) where {D} = embedded_cubature(float(Int), gm)

@@ -40,12 +40,12 @@ using HAdaptiveIntegration
 f = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
 
 # Compute the integral and error estimate over a triangle and a rectangle
-I, E = integrate(f, triangle((0, 0), (1, 0), (0, 1)))
-I, E = integrate(f, rectangle((0, 0), (1, 1)))
+I, E = integrate(f, Triangle((0, 0), (1, 0), (0, 1)))
+I, E = integrate(f, Rectangle((0, 0), (1, 1)))
 
 # Compute the integral and error estimate over a tetrahedron and a cuboid
-I, E = integrate(f, tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
-I, E = integrate(f, cuboid((0, 0, 0), (1, 1, 1)))
+I, E = integrate(f, Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
+I, E = integrate(f, Cuboid((0, 0, 0), (1, 1, 1)))
 
 ```
 
@@ -67,3 +67,12 @@ approach for integrating over orthotope in any dimension. The key differences ar
 - For low-dimensional orthotopes such as squares and cubes, `HAdaptiveIntegration` employs
   tabulated cubatures for enhanced efficiency. This allows it to achieve precision
   comparable to `HCubature` with fewer function evaluations for these domains.
+
+Even if this package contains rule for an arbitrary `d`-dimensional simplex and orthotope:
+
+- the dimension `d=1` (`1`-simplex and `1`-orthotope reduce to a segment) is supported, but
+  we recommend to use [`QuadGk.jl`](https://github.com/JuliaMath/QuadGK.jl);
+- for large `d`-dimensional simplex and orthotope, the approach of this package will become
+  slow, in that case you should try to use stochastic method like in
+  [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
+  [`Cuba.jl`](https://github.com/giordano/Cuba.jl).

@@ -1,7 +1,8 @@
 """
-   struct RadonLaurie <: AbstractRule{Simplex{2}}
+    struct RadonLaurie <: AbstractRule{Simplex{2}}
 
-Embedded cubature rule for a `2`-simplex of high order `8` and low order `5`.
+Embedded cubature rule for a `2`-simplex (*a.k.a* a triangle) of high order `8` and low
+order `5`.
 """
 struct RadonLaurie <: AbstractRule{Simplex{2}} end
 
@@ -12,7 +13,7 @@ end
 # Based on the article:
 #   D. P. Laurie. 1982. Algorithm 584: CUBTRI: Automatic Cubature over a Triangle. ACM
 #   Trans. Math. Softw. 8, 1982, https://doi.org/10.1145/355993.356001.
-function embedded_cubature(T::DataType, ::RadonLaurie)
+function embedded_cubature(::RadonLaurie, (::Type{T})=float(Int)) where {T}
     ϕ, σ = sqrt(T(15)), sqrt(T(7))
 
     nodes = [SVector{2,T}(fill(1//3, 2))]
@@ -59,7 +60,6 @@ function embedded_cubature(T::DataType, ::RadonLaurie)
 
     return EmbeddedCubature(nodes, weights_high, weights_low)
 end
-embedded_cubature(rl::RadonLaurie) = embedded_cubature(float(Int), rl)
 
 """
 Grundmann-Möller with 19 nodes.

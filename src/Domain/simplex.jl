@@ -30,12 +30,12 @@ end
 Simplex(vertices...) = Simplex{promote_to_float(vertices...)}(vertices...)
 
 """
-    reference_simplex(T::DataType, D::Int)
+    reference_simplex(D::Int, T::DataType=float(Int))
 
 Return the reference `D`-dimensional simplex with element type `T`, which is the convex hull
 of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
 """
-function reference_simplex(T::DataType, D::Int)
+function reference_simplex(D::Int, T::DataType=float(Int))
     vertices = [
         zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
     ]
@@ -114,13 +114,15 @@ function combinations(n::Int, k::Int)
 end
 
 """
-    subdivide_reference_simplex(::Val{D}, ::Type{T}=Float64) where {D,T}
+    subdivide_reference_simplex(::Val{D}, ::Type{T}=float(Int)) where {D,T}
 
 Like `subdivide_simplex`, but operates on the reference simplex. Since the output depends
 only on the dimension `D`, and the type `T` used to represent coordinates, this function is
 generated for each combination of `D` and `T`.
 """
-@generated function subdivide_reference_simplex(::Val{D}, (::Type{T})=Float64) where {D,T}
+@generated function subdivide_reference_simplex(
+    ::Val{D}, (::Type{T})=float(Int)
+) where {D,T}
     # vertices of the reference simplex
     vertices = [
         zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...

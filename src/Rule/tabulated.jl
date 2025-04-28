@@ -9,13 +9,13 @@ reference domain (use the [`reference_domain`](@ref) function to get the referen
 ## Fields:
 - `description::String`: description of the embedded cubature.
 - `reference::String`: where the values are found.
+- `order_high::Int`: order of the high order cubature.
+- `order_low::Int`: order of the low order cubature.
 - `precision::Int`: number of significant digits on the node and weight values,
   `10^-precision` give the relative precision of the values.
 - `nodes::Vector{Vector{String}}`: the cubature nodes.
 - `weights_high::Vector{String}`: the cubature weights for the high order cubature.
-- `order_high::Int`: order of the high order cubature.
 - `weights_low::Vector{String}`: the cubature weights for the low order cubature.
-- `order_low::Int`: order of the low order cubature.
 
 ## Invariants (check at construction):
 - `length(nodes) == length(weights_high)`
@@ -72,8 +72,8 @@ function orders(tec::TabulatedEmbeddedCubature)
 end
 
 function embedded_cubature(
-    T::DataType, tec::TabulatedEmbeddedCubature{DOM}
-) where {DOM<:AbstractDomain}
+    tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}=float(Int)
+) where {DOM<:AbstractDomain,T}
     if 10 * eps(T) < 10.0^(-tec.precision)
         @warn "The embedded cubature `$(tec.description)` has fewer significant digits than type $T, which may lead to numerical inaccuracies in computations."
     end
@@ -84,4 +84,3 @@ function embedded_cubature(
         parse.(T, tec.weights_low),
     )
 end
-embedded_cubature(tec::TabulatedEmbeddedCubature) = embedded_cubature(float(Int), tec)

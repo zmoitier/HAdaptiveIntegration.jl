@@ -156,36 +156,36 @@ end
     T = Float128
 
     @testset "Segment" begin
-        ec = embedded_cubature(T, GrundmannMoeller{1}(7, 5))
+        ec = embedded_cubature(GrundmannMoeller{1}(7, 5), T)
         @test validate_orders(ec, integral_monomial_simplex, 7, 5)
 
-        ec = embedded_cubature(T, GenzMalik{1}())
+        ec = embedded_cubature(GenzMalik{1}(), T)
         @test validate_orders(ec, integral_monomial_orthotope, 7, 5)
     end
 
     @testset "Triangle" begin
         for tec in (TRIANGLE_GM19, TRIANGLE_RL19)
-            ec = embedded_cubature(T, tec)
+            ec = embedded_cubature(tec, T)
             @test validate_orders(ec, integral_monomial_simplex, orders(tec)...)
         end
     end
 
     @testset "Square" begin
         for tec in (SQUARE_GM17, SQUARE_CH21, SQUARE_CH25)
-            ec = embedded_cubature(T, tec)
+            ec = embedded_cubature(tec, T)
             @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
         end
     end
 
     @testset "Tetrahedron" begin
         tec = TETRAHEDRON_GM35
-        ec = embedded_cubature(T, tec)
+        ec = embedded_cubature(tec, T)
         @test validate_orders(ec, integral_monomial_simplex, orders(tec)...)
     end
 
     @testset "Cube" begin
         for tec in (CUBE_GM33, CUBE_BE65, CUBE_BE115)
-            ec = embedded_cubature(T, tec)
+            ec = embedded_cubature(tec, T)
             @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
         end
     end

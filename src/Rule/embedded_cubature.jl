@@ -29,27 +29,25 @@ struct EmbeddedCubature{D,T}
 end
 
 """
-    embedded_cubature(ar::AbstractRule)
-    embedded_cubature(T::DataType, ar::AbstractRule)
+    embedded_cubature(ar::AbstractRule, T=float(Int))
 
-    embedded_cubature(nodes, weights_high, weights_low)
-    embedded_cubature(T::DataType, nodes, weights_high, weights_low)
+    embedded_cubature(nodes, weights_high, weights_low, T=float(Int))
 
-Construct the embedded cubature with element type `T` from an `AbstractRule`
-([`TabulatedEmbeddedCubature`](@ref) or [`GrundmannMoeller`](@ref)), or from a vector of
-nodes and two vectors of weights for the high and low order cubature, with element type `T`.
+Construct the embedded cubature with element type `T` from a subtype of
+[`AbstractRule`](@ref) or from a vector of nodes and two vectors of weights for the high and
+low order cubature, with element type `T`. The list of `AbstractRule`'s subtype are:
+- [`TabulatedEmbeddedCubature`](@ref)
+- [`GrundmannMoeller`](@ref)
+- [`RadonLaurie`](@ref)
+- [`GenzMalik`](@ref)
 """
-function embedded_cubature(T::DataType, nodes, weights_high, weights_low)
+function embedded_cubature(
+    nodes, weights_high, weights_low, (::Type{T})=float(Int)
+) where {T}
     @assert allequal(length, nodes) "all nodes should have the same length."
     D = length(first(nodes))
 
-    return EmbeddedCubature(SVector{D,T}.(nodes), weights_high, weights_low)
-end
-function embedded_cubature(nodes, weights_high, weights_low)
-    T_nodes = promote_to_float(nodes...)
-    T_weights = promote_to_float(weights_high, weights_low)
-    T = promote_type(T_nodes, T_weights)
-    return embedded_cubature(float(T), nodes, weights_high, weights_low)
+    return EmbeddedCubature(SVector{D,T}.(nodes), T.(weights_high), T.(weights_low))
 end
 
 """
