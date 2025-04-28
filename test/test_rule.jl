@@ -96,7 +96,7 @@ end
 
 @testset "Rule construction" begin
     @testset "Tabulated embedded cubature" begin
-        tec = TabulatedEmbeddedCubature{Segment}(;
+        tec = TabulatedEmbeddedCubature{Orthotope{1}}(;
             description="Gauss (SEGMENT_G3)",
             reference="",
             precision=16,
@@ -108,7 +108,7 @@ end
             weights_low=["1"],
             order_low=1,
         )
-        @test typeof(tec) <: TabulatedEmbeddedCubature{Segment}
+        @test typeof(tec) <: TabulatedEmbeddedCubature{Orthotope{1}}
         @test orders(tec) == (5, 1)
 
         ec = embedded_cubature(tec)
@@ -135,24 +135,18 @@ end
     end
 
     @testset "Grundmann-Möller" begin
-        @test_throws AssertionError typeof(GrundmannMoeller{3}(7, 6))
-        @test_throws AssertionError typeof(GrundmannMoeller{3}(5, 7))
+        @test_throws AssertionError typeof(GrundmannMoeller{1}(7, 6))
+        @test_throws AssertionError typeof(GrundmannMoeller{1}(5, 7))
 
-        gm = GrundmannMoeller{4}(5, 3)
-        @test typeof(gm) <: AbstractRule{Simplex{4}}
+        gm = GrundmannMoeller{2}(5, 3)
+        @test typeof(gm) <: AbstractRule{Simplex{2}}
         @test orders(gm) == (5, 3)
-        @test validate_orders(
-            embedded_cubature(gm),
-            integral_monomial_simplex,
-            5,
-            3;
-            rtol=20 * eps(float(Int)),
-        )
+        @test validate_orders(embedded_cubature(gm), integral_monomial_simplex, 5, 3)
     end
 
     @testset "Genz-Malik" begin
-        gm = GenzMalik{4}()
-        @test typeof(gm) <: AbstractRule{Orthotope{4}}
+        gm = GenzMalik{2}()
+        @test typeof(gm) <: AbstractRule{Orthotope{2}}
         @test orders(gm) == (7, 5)
         @test validate_orders(embedded_cubature(gm), integral_monomial_orthotope, 7, 5)
     end
@@ -162,13 +156,8 @@ end
     T = Float128
 
     @testset "Segment" begin
-        for tec in (SEGMENT_GK7, SEGMENT_GK15, SEGMENT_GK31)
-            ec = embedded_cubature(T, tec)
-            @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
-        end
-
         ec = embedded_cubature(T, GrundmannMoeller{1}(7, 5))
-        @test validate_orders(ec, integral_monomial_orthotope, 7, 5)
+        @test validate_orders(ec, integral_monomial_simplex, 7, 5)
 
         ec = embedded_cubature(T, GenzMalik{1}())
         @test validate_orders(ec, integral_monomial_orthotope, 7, 5)

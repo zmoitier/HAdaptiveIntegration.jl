@@ -9,7 +9,9 @@ const Tetrahedron{T} = Simplex{3,T,4}
 
 function Tetrahedron{T}(a, b, c, d) where {T}
     @assert length(a) == length(b) == length(c) == length(d) == 3 "all `vertices` must have length 2."
-    return Simplex(SVector{3}(SVector{2,T}.(vertices)))
+    return Simplex(
+        SVector{4}(SVector{3,T}(a), SVector{3,T}(b), SVector{3,T}(c), SVector{3,T}(d))
+    )
 end
 Tetrahedron(a, b, c, d) = Tetrahedron{promote_to_float(a, b, c, d)}(a, b, c, d)
 

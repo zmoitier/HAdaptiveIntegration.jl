@@ -24,7 +24,7 @@ function Orthotope{T}(low_corner, high_corner) where {T}
     return Orthotope(SVector{D,T}(low_corner), SVector{D,T}(high_corner))
 end
 function Orthotope(low_corner, high_corner)
-    return orthotope{promote_to_float(low_corner, high_corner)}(low_corner, high_corner)
+    return Orthotope{promote_to_float(low_corner, high_corner)}(low_corner, high_corner)
 end
 
 """

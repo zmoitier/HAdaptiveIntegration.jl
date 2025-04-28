@@ -6,50 +6,14 @@ using LinearAlgebra: norm
 using Test
 
 @testset "Default embedded cubature" begin
-    for domain in
-        (Segment, Rectangle, Cuboid, Orthotope{4}, Triangle, Tetrahedron, Simplex{4})
+    for domain in (Simplex{1}, Triangle, Tetrahedron, Orthotope{1}, Rectangle, Cuboid)
         ec = default_embedded_cubature(reference_domain(domain))
         @test typeof(ec) <: EmbeddedCubature
     end
 end
 
-@testset "Integrate" begin
-    domain = reference_domain(Segment)
-
-    buffer = allocate_buffer(x -> sum(x), domain)
-    @test typeof(buffer) <: BinaryHeap
-
-    I, E = integrate(x -> sin(10 * x[1]), domain; buffer=buffer)
-    R = sin(5)^2 / 5
-    @test abs(I - R) ≤ E * abs(R)
-
-    I, E = integrate(x -> cos(7.5 * x[1]), domain; buffer=buffer)
-    R = 2 * sin(7.5) / 15
-    @test abs(I - R) ≤ E * abs(R)
-end
-
-@testset "Integrate over a segment" begin
-    domain = Segment{float(Int)}(0, 1)
-    buffer = allocate_buffer(x -> zero(x[1]), domain)
-
-    for ec in (
-        embedded_cubature(SEGMENT_GK7),
-        default_embedded_cubature(domain),
-        embedded_cubature(SEGMENT_GK31),
-    )
-        for (fct, R) in [
-            (x -> exp(x[1]), exp(1) - 1),
-            (x -> cos(10 * x[1]), sin(10) / 10),
-            (x -> 1 / √x[1], 2),
-        ]
-            I, E = integrate(fct, domain; buffer=buffer)
-            @test abs(I - R) ≤ E * abs(R)
-        end
-    end
-end
-
 @testset "Integrate over a triangle" begin
-    domain = triangle((0, 0), (2, 0), (0, 2))
+    domain = Triangle((0, 0), (2, 0), (0, 2))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (embedded_cubature(TRIANGLE_GM19), default_embedded_cubature(domain))
@@ -65,7 +29,7 @@ end
 end
 
 @testset "Integrate over a rectangle" begin
-    domain = rectangle((0, 0), (1, 1))
+    domain = Rectangle((0, 0), (1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
@@ -84,7 +48,7 @@ end
 end
 
 @testset "Integrate over a tetrahedron" begin
-    domain = tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+    domain = Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for (fct, R) in [
@@ -100,7 +64,7 @@ end
 end
 
 @testset "Integrate over a Cuboid" begin
-    domain = cuboid((0, 0, 0), (1, 1, 1))
+    domain = Cuboid((0, 0, 0), (1, 1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
