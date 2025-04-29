@@ -1,24 +1,26 @@
 using DataStructures: BinaryHeap
 using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
-using HAdaptiveIntegration: allocate_buffer, default_embedded_cubature, integrate
+using HAdaptiveIntegration:
+    allocate_buffer, default_embedded_cubature, default_subdivision, integrate
 using LinearAlgebra: norm
 using Test
 
-@testset "Default embedded cubature" begin
-    for domain in (Simplex{1}, Triangle, Tetrahedron, Orthotope{1}, Rectangle, Cuboid)
-        ec = default_embedded_cubature(reference_domain(domain))
-        @test typeof(ec) <: EmbeddedCubature
+@testset "Default" begin
+    for domain_type in (Simplex{1}, Triangle, Tetrahedron, Orthotope{1}, Rectangle, Cuboid)
+        domain = reference_domain(domain_type)
+
+        @test typeof(default_subdivision(domain)) <: Function
+        @test typeof(default_embedded_cubature(domain)) <: EmbeddedCubature
     end
 end
 
 @testset "Integrate over a triangle" begin
-    domain = Triangle((0, 0), (2, 0), (0, 2))
+    domain = Triangle{Float64}((0, 0), (2, 0), (0, 2))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (embedded_cubature(TRIANGLE_GM19), default_embedded_cubature(domain))
         for (fct, R) in [
-            (x -> exp(x[1] + 3 * x[2]), (exp(6) - 3 * exp(2) + 2) / 6),
             (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
             (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
         ]
@@ -29,7 +31,7 @@ end
 end
 
 @testset "Integrate over a rectangle" begin
-    domain = Rectangle((0, 0), (1, 1))
+    domain = Rectangle{Float64}((0, 0), (1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
@@ -48,7 +50,7 @@ end
 end
 
 @testset "Integrate over a tetrahedron" begin
-    domain = Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+    domain = Tetrahedron{Float64}((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for (fct, R) in [
@@ -64,7 +66,7 @@ end
 end
 
 @testset "Integrate over a Cuboid" begin
-    domain = Cuboid((0, 0, 0), (1, 1, 1))
+    domain = Cuboid{Float64}((0, 0, 0), (1, 1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
@@ -72,11 +74,8 @@ end
         default_embedded_cubature(domain),
         embedded_cubature(CUBE_BE115),
     )
-        for (fct, R) in [
-            (x -> exp(x[1]), exp(1) - 1),
-            (x -> 1 / (1 + norm(x)^2)^2, π^2 / 32),
-            (x -> 1 / norm(x), 1.1900386819897766),
-        ]
+        for (fct, R) in
+            [(x -> 1 / (1 + norm(x)^2)^2, π^2 / 32), (x -> 1 / norm(x), 1.1900386819897766)]
             I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end

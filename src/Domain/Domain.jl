@@ -12,7 +12,7 @@ export subdivide_simplex,
     subdivide_rectangle,
     subdivide_cuboid
 
-using ..HAdaptiveIntegration: SVector, det, norm, promote_to_float, setindex
+using ..HAdaptiveIntegration: SVector, det, norm, setindex
 
 """
     abstract type AbstractDomain{D,T}

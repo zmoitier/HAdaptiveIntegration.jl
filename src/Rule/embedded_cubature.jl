@@ -47,7 +47,11 @@ function embedded_cubature(
     @assert allequal(length, nodes) "all nodes should have the same length."
     D = length(first(nodes))
 
-    return EmbeddedCubature(SVector{D,T}.(nodes), T.(weights_high), T.(weights_low))
+    return EmbeddedCubature(
+        [SVector{D,T}(node) for node in nodes],
+        [T(w) for w in weights_high],
+        [T(w) for w in weights_low],
+    )
 end
 
 """

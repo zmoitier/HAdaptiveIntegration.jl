@@ -1,4 +1,5 @@
 using HAdaptiveIntegration.Domain
+using Quadmath
 using StaticArrays
 using Test
 
@@ -10,46 +11,57 @@ end
 
 @testset "Domain construction" begin
     @testset "Simplex" begin
-        @test typeof(Simplex((0,), (1,))) <: Simplex{1,Float64,2}
-        @test typeof(Simplex([0], [1])) <: Simplex{1,Float64,2}
-        @test typeof(Simplex(SVector(0.0), SVector(1.0))) <: Simplex{1,Float64,2}
-        @test typeof(Simplex((big"0",), (big"1",))) <: Simplex{1,BigFloat,2}
+        @test typeof(Simplex((0, 0), [0, 0], SVector(0, 0))) <: Simplex{2,Int,3}
+        @test typeof(Simplex((0, 0.0), [0, 0], SVector(0, 0))) <: Simplex{2,Float64,3}
 
-        r = reference_domain(Simplex{4,Int})
-        @test typeof(r) <: Simplex{4,Int,5}
-        @test r.vertices[1] == SVector(0, 0, 0, 0)
-        @test r.vertices[2] == SVector(1, 0, 0, 0)
-        @test r.vertices[3] == SVector(0, 1, 0, 0)
-        @test r.vertices[4] == SVector(0, 0, 1, 0)
-        @test r.vertices[5] == SVector(0, 0, 0, 1)
+        @test typeof(Simplex{Float64}([0], [0])) <: Simplex{1,Float64,2}
+        @test typeof(Simplex{Float128}([0], [0])) <: Simplex{1,Float128,2}
 
-        @test typeof(Triangle((2, 0), (0, 2), (0, 0))) <: Simplex{2,Float64,3}
+        @test typeof(Triangle((2, 0), (0, 2), (0, 0))) <: Triangle{Int}
+        @test typeof(Triangle{Float128}((2, 0), (0, 2), (0, 0))) <: Triangle{Float128}
+
         @test typeof(Tetrahedron((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
-            Simplex{3,Float64,4}
-        @test typeof(
-            Simplex((2, 0, 0, 0), (0, 2, 0, 0), (0, 0, 2, 0), (0, 0, 0, 2), (0, 0, 0, 0))
-        ) <: Simplex{4,Float64,5}
+            Tetrahedron{Int}
+        @test typeof(Tetrahedron{Float128}((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
+            Tetrahedron{Float128}
     end
 
     @testset "Orthotope" begin
-        @test typeof(Orthotope((0,), (1,))) <: Orthotope{1,Float64}
-        @test typeof(Orthotope([0], [1])) <: Orthotope{1,Float64}
-        @test typeof(Orthotope(SVector(0.0), SVector(1.0))) <: Orthotope{1,Float64}
-        @test typeof(Orthotope((big"0",), (big"1",))) <: Orthotope{1,BigFloat}
+        @test typeof(Orthotope((0,), [1])) <: Orthotope{1,Int}
+        @test typeof(Orthotope([0], SVector(1.0))) <: Orthotope{1,Float64}
 
-        r = reference_domain(Orthotope{4,Int})
-        @test typeof(r) <: Orthotope{4,Int}
-        @test r.low_corner == SVector(0, 0, 0, 0)
-        @test r.high_corner == SVector(1, 1, 1, 1)
+        @test typeof(Orthotope{Float64}([0], [1])) <: Orthotope{1,Float64}
+        @test typeof(Orthotope{Float128}([0], [1])) <: Orthotope{1,Float128}
 
-        @test typeof(Rectangle((-1, -1), (1, 1))) <: Orthotope{2,Float64}
-        @test typeof(Cuboid((-1, -1, -1), (1, 1, 1))) <: Orthotope{3,Float64}
-        @test typeof(Orthotope((-1, -1, -1, -1), (1, 1, 1, 1))) <: Orthotope{4,Float64}
+        @test typeof(Rectangle((-1, -1), (1, 1))) <: Rectangle{Int}
+        @test typeof(Rectangle{Float128}((-1, -1), (1, 1))) <: Rectangle{Float128}
+
+        @test typeof(Cuboid((-1, -1, -1), (1, 1, 1))) <: Cuboid{Int}
+        @test typeof(Cuboid{Float128}((-1, -1, -1), (1, 1, 1))) <: Cuboid{Float128}
     end
 end
 
 @testset "Domain interface" begin
     @testset "Simplex" begin
+        @test typeof(reference_domain(Triangle)) <: Triangle{Float64}
+        @test typeof(reference_domain(Triangle{Float128})) <: Triangle{Float128}
+
+        @test typeof(reference_domain(Tetrahedron)) <: Tetrahedron{Float64}
+        @test typeof(reference_domain(Tetrahedron{Float128})) <: Tetrahedron{Float128}
+
+        @test typeof(reference_domain(Simplex{4})) <: Simplex{4,Float64,5}
+        @test typeof(reference_domain(Simplex{4,Float128})) <: Simplex{4,Float128,5}
+        @test typeof(reference_domain(Simplex{4,Float128,5})) <: Simplex{4,Float128,5}
+
+        r = reference_domain(Simplex{4,Int})
+        @test r.vertices == SVector(
+            SVector(0, 0, 0, 0),
+            SVector(1, 0, 0, 0),
+            SVector(0, 1, 0, 0),
+            SVector(0, 0, 1, 0),
+            SVector(0, 0, 0, 1),
+        )
+
         s = Simplex(
             (-0.13, -0.78, -0.22, 0.04),
             (0.70, -0.23, -0.37, -0.72),
@@ -57,15 +69,6 @@ end
             (-0.27, -0.12, 0.14, -0.47),
             (0.68, 0.12, -0.66, -1.49),
         )
-
-        @test typeof(reference_domain(Triangle)) <: Simplex{2,Float64,3}
-        @test typeof(reference_domain(Triangle{Int})) <: Simplex{2,Int,3}
-        @test typeof(reference_domain(Tetrahedron)) <: Simplex{3,Float64,4}
-        @test typeof(reference_domain(Tetrahedron{Int})) <: Simplex{3,Int,4}
-        @test typeof(reference_domain(Simplex{4})) <: Simplex{4,Float64,5}
-        @test typeof(reference_domain(Simplex{4,Int})) <: Simplex{4,Int,5}
-        @test typeof(reference_domain(Simplex{4,Int,5})) <: Simplex{4,Int,5}
-
         Φ = map_from_reference(s)
         Ψ = map_to_reference(s)
         for v in (
@@ -84,18 +87,24 @@ end
         @test dimension(Tetrahedron) == 3
         @test dimension(Simplex{4}) == 4
         @test dimension(Simplex{4,Int}) == 4
+        @test dimension(Simplex{4,Int,5}) == 4
     end
 
     @testset "Orthotope" begin
-        h = Orthotope((0.21, -0.58, -0.98, -1.25), (0.43, 1.75, 0.65, 1.87))
-
         @test typeof(reference_domain(Rectangle)) <: Orthotope{2,Float64}
-        @test typeof(reference_domain(Rectangle{Int})) <: Orthotope{2,Int}
-        @test typeof(reference_domain(Cuboid)) <: Orthotope{3,Float64}
-        @test typeof(reference_domain(Cuboid{Int})) <: Orthotope{3,Int}
-        @test typeof(reference_domain(Orthotope{4})) <: Orthotope{4,Float64}
-        @test typeof(reference_domain(Orthotope{4,Int})) <: Orthotope{4,Int}
+        @test typeof(reference_domain(Rectangle{Float128})) <: Orthotope{2,Float128}
 
+        @test typeof(reference_domain(Cuboid)) <: Orthotope{3,Float64}
+        @test typeof(reference_domain(Cuboid{Float128})) <: Orthotope{3,Float128}
+
+        @test typeof(reference_domain(Orthotope{4})) <: Orthotope{4,Float64}
+        @test typeof(reference_domain(Orthotope{4,Float128})) <: Orthotope{4,Float128}
+
+        r = reference_domain(Orthotope{4,Int})
+        @test typeof(r) <: Orthotope{4,Int}
+        @test r.corners == SVector(SVector(0, 0, 0, 0), SVector(1, 1, 1, 1))
+
+        h = Orthotope((0.21, -0.58, -0.98, -1.25), (0.43, 1.75, 0.65, 1.87))
         Φ = map_from_reference(h)
         Ψ = map_to_reference(h)
         for v in (

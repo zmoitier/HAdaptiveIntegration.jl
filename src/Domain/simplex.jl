@@ -18,24 +18,37 @@ struct Simplex{D,T,N} <: AbstractDomain{D,T}
     vertices::SVector{N,SVector{D,T}}
 end
 
-function Simplex{T}(vertices...) where {T}
-    @assert allequal(length, vertices) "all `vertices` must have the same length."
-    D = length(first(vertices))
-
-    N = D + 1
-    @assert length(vertices) == N "Expected $N vertices, but got $(length(vertices))."
-
-    return Simplex(SVector{N}(SVector{D,T}.(vertices)))
+function _validate_invariant_simplex(vertices)
+    D = length(vertices) - 1
+    for point in vertices
+        @assert length(point) == D "$point must have length $D."
+    end
+    return nothing
 end
-Simplex(vertices...) = Simplex{promote_to_float(vertices...)}(vertices...)
+
+function Simplex{T}(vertices...) where {T}
+    N = length(vertices)
+    D = N - 1
+    _validate_invariant_simplex(vertices)
+
+    return Simplex(SVector{N}(SVector{D,T}.(vertices)...))
+end
+
+function Simplex(vertices...)
+    N = length(vertices)
+    D = N - 1
+    _validate_invariant_simplex(vertices)
+
+    return Simplex(SVector{N}(SVector{D}.(vertices)...))
+end
 
 """
-    reference_simplex(D::Int, T::DataType=float(Int))
+    reference_simplex(D::Int, T=float(Int))
 
 Return the reference `D`-dimensional simplex with element type `T`, which is the convex hull
 of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
 """
-function reference_simplex(D::Int, T::DataType=float(Int))
+function reference_simplex(D::Int, (::Type{T})=float(Int)) where {T}
     vertices = [
         zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
     ]
@@ -145,7 +158,8 @@ generated for each combination of `D` and `T`.
         return valid_perms
     end
 
-    sub_simplices = []
+    N = D + 1
+    sub_simplices = Vector{SVector{N,SVector{D,T}}}()
     for k in 0:D
         # Compute initial vertex v₀ = (x⁰ + xᵏ) / 2
         x₀ = vertices[1]
@@ -164,14 +178,13 @@ generated for each combination of `D` and `T`.
                 current_v = current_v .+ 0.5 .* edge_vector
                 push!(new_vertices, current_v)
             end
-            push!(sub_simplices, new_vertices)
+            push!(sub_simplices, SVector{N}(new_vertices))
         end
     end
 
     # convert to an efficient format with known sizes
     static_sub_simplices = ntuple(2^D) do i
-        pts = SVector{D + 1,SVector{D,T}}(sub_simplices[i])
-        Simplex(pts)
+        Simplex(sub_simplices[i])
     end
 
     return :($static_sub_simplices)

@@ -38,17 +38,17 @@ function (ec::EmbeddedCubature{D,T})(fct) where {D,T}
     H, L = length(ec.weights_high), length(ec.weights_low)
 
     v = fct(ec.nodes[1])
-    Iₗₒ = ec.weights_low[1] * v
-    Iₕᵢ = ec.weights_high[1] * v
+    Iₗ = ec.weights_low[1] * v
+    Iₕ = ec.weights_high[1] * v
     for i in 2:L
         v = fct(ec.nodes[i])
-        Iₗₒ += ec.weights_low[i] * v
-        Iₕᵢ += ec.weights_high[i] * v
+        Iₗ += ec.weights_low[i] * v
+        Iₕ += ec.weights_high[i] * v
     end
     for i in (L + 1):H
-        Iₕᵢ += ec.weights_high[i] * fct(ec.nodes[i])
+        Iₕ += ec.weights_high[i] * fct(ec.nodes[i])
     end
-    return Iₕᵢ, Iₗₒ
+    return Iₕ, Iₗ
 end
 
 function integral_monomial_simplex(dim::Int, k_max::Int)

@@ -5,59 +5,67 @@ Axes-aligned Orthotope in `D` dimensions, with element type `T`, given by two po
 `low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
 
 ## Fields:
-- `low_corner::SVector{D,T}`: the low corner.
-- `high_corner::SVector{D,T}`: the high corner.
+- `corners::SVector{2,SVector{D,T}}`: `corners[1]` = the low corner and `corners[2]` = the
+   ]high corner.
 
 ## Invariants (**not** check at construction):
-- `low_corner .≤ high_corner`
+- `corners[1] .≤ corners[2]`
 
 ## Constructors:
 - `Orthotope(low_corner, high_corner)`
 - `Orthotope{T}(low_corner, high_corner)`
-- `Orthotope(low_corner::SVector{D,T}, high_corner::SVector{D,T})`
+- `Orthotope(corners::SVector{2,SVector{D,T}})`
 """
 struct Orthotope{D,T} <: AbstractDomain{D,T}
-    low_corner::SVector{D,T}
-    high_corner::SVector{D,T}
+    corners::SVector{2,SVector{D,T}}
+end
+
+function _validate_invariant_orthotope(D::Int, low_corner, high_corner)
+    for point in (low_corner, high_corner)
+        @assert length(point) == D "$point must have length $D."
+    end
+    @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "must have `low_corner .≤ high_corner`."
+    return nothing
 end
 
 function Orthotope{T}(low_corner, high_corner) where {T}
-    @assert (length(low_corner) == length(high_corner)) "corners must have the same length."
-    @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "low corner must be less than or equal to high corner."
-
     D = length(low_corner)
-    return Orthotope(SVector{D,T}(low_corner), SVector{D,T}(high_corner))
+    _validate_invariant_orthotope(D, low_corner, high_corner)
+    return Orthotope(SVector(SVector{D,T}(low_corner), SVector{D,T}(high_corner)))
 end
+
 function Orthotope(low_corner, high_corner)
-    return Orthotope{promote_to_float(low_corner, high_corner)}(low_corner, high_corner)
+    D = length(low_corner)
+    _validate_invariant_orthotope(D, low_corner, high_corner)
+    return Orthotope(SVector(SVector{D}(low_corner), SVector{D}(high_corner)))
 end
 
 """
-    reference_orthotope(D::Int, T::DataType=float(Int))
+    reference_orthotope(D::Int, T=float(Int))
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
 """
-function reference_orthotope(D::Int, T::DataType=float(Int))
-    return Orthotope(zeros(SVector{D,T}), ones(SVector{D,T}))
+function reference_orthotope(D::Int, (::Type{T})=float(Int)) where {T}
+    return Orthotope(SVector{2}(zeros(SVector{D,T}), ones(SVector{D,T})))
 end
 
 function map_from_reference(h::Orthotope{D,T}) where {D,T}
-    return u -> h.low_corner + u .* (h.high_corner - h.low_corner)
+    return u -> h.corners[1] + u .* (h.corners[2] - h.corners[1])
 end
 
 function abs_det_jac(h::Orthotope{D,T}) where {D,T}
-    return prod(h.high_corner - h.low_corner)
+    return prod(h.corners[2] - h.corners[1])
 end
 
 function map_to_reference(h::Orthotope{D,T}) where {D,T}
-    diff = h.high_corner - h.low_corner
+    diff = h.corners[2] - h.corners[1]
     @assert all(x -> x > √eps(float(T)), diff) "degenerate $D-dimensional Orthotope: must have `high_corner .> low_corner`."
 
-    return p -> (p - h.low_corner) ./ diff
+    return p -> (p - h.corners[1]) ./ diff
 end
 
 """
-    subdivide_reference_orthotope(::Val{D}, ::Type{T}=float(Int)) where {D,T}
+    subdivide_reference_orthotope(::Val{D}, ::Type{T}=float(Int))
 
 Like `subdivide_orthotope`, but operates on the reference orthotope. Since the output
 depends only on the dimension `D`, and the type `T` used to represent coordinates, this
@@ -69,17 +77,17 @@ function is generated for each combination of `D` and `T`.
     a, b = zeros(SVector{D,T}), ones(SVector{D,T})
     m = SVector{D}(fill(T(1//2), D))
 
-    sub_corners = Vector{NTuple{2,SVector{D,T}}}()
+    sub_corners = Vector{SVector{2,SVector{D,T}}}()
     for choices in Base.product([(true, false) for _ in 1:D]...)
         # Compute the low and high corners of the sub-orthotope
         low_corner = SVector{D,T}(cᵢ ? aᵢ : mᵢ for (cᵢ, aᵢ, mᵢ) in zip(choices, a, m))
         high_corner = SVector{D,T}(cᵢ ? mᵢ : bᵢ for (cᵢ, mᵢ, bᵢ) in zip(choices, m, b))
-        push!(sub_corners, (low_corner, high_corner))
+        push!(sub_corners, SVector(low_corner, high_corner))
     end
 
     # Convert to an efficient format with known sizes
     static_orthotopes = ntuple(2^D) do i
-        Orthotope(sub_corners[i][1], sub_corners[i][2])
+        Orthotope(sub_corners[i])
     end
 
     return :($static_orthotopes)
@@ -95,6 +103,6 @@ function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
     refs = subdivide_reference_orthotope(Val(D), T)
     f = map_from_reference(h)
     map(refs) do ref
-        Orthotope(f(ref.low_corner), f(ref.high_corner))
+        Orthotope(f.(ref.corners))
     end
 end
