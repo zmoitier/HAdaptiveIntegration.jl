@@ -40,12 +40,12 @@ using HAdaptiveIntegration
 f = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
 
 # Compute the integral and error estimate over a triangle and a rectangle
-I, E = integrate(f, Triangle{Float64}((0, 0), (1, 0), (0, 1)))
-I, E = integrate(f, Rectangle{Float64}((0, 0), (1, 1)))
+I, E = integrate(f, Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0)))
+I, E = integrate(f, Rectangle((0.0, 0.0), (1.0, 1.0)))
 
 # Compute the integral and error estimate over a tetrahedron and a cuboid
-I, E = integrate(f, Tetrahedron{Float64}((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
-I, E = integrate(f, Cuboid{Float64}((0, 0, 0), (1, 1, 1)))
+I, E = integrate(f, Tetrahedron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)))
+I, E = integrate(f, Cuboid{Float64}((0.0, 0.0, 0.0), (1.0, 1.0, 1.0)))
 
 ```
 
