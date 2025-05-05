@@ -10,7 +10,7 @@ Alias for a 2-dimensional [`Simplex`](@ref) with 3 vertices of value type `T`.
 const Triangle{T} = Simplex{2,T,3}
 
 Triangle{T}(a, b, c) where {T} = Simplex{T}(a, b, c)
-Triangle(a, b, c) = Simplex{float(Int)}(a, b, c)
+Triangle(a, b, c) = Simplex(a, b, c)
 
 """
     subdivide_triangle(t::Triangle)

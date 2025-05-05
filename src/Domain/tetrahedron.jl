@@ -10,7 +10,7 @@ Alias for a 3-dimensional [`Simplex`](@ref) with 4 vertices of element type `T`.
 const Tetrahedron{T} = Simplex{3,T,4}
 
 Tetrahedron{T}(a, b, c, d) where {T} = Simplex{T}(a, b, c, d)
-Tetrahedron(a, b, c, d) = Simplex{float(Int)}(a, b, c, d)
+Tetrahedron(a, b, c, d) = Simplex(a, b, c, d)
 
 """
     subdivide_tetrahedron(t::Tetrahedron)

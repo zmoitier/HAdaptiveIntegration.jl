@@ -22,13 +22,23 @@ function Simplex{T}(vertices...) where {T}
     N = length(vertices)
     D = N - 1
 
-    for point in vertices
-        @assert length(point) == D "$point must have length $D."
+    for vertex in vertices
+        @assert length(vertex) == D "$vertex must have length $D."
     end
 
     return Simplex(SVector{N}(SVector{D,T}.(vertices)...))
 end
-Simplex(vertices...) = Simplex{float(Int)}(vertices...)
+
+function Simplex(vertices...)
+    N = length(vertices)
+    D = N - 1
+
+    for vertex in vertices
+        @assert length(vertex) == D "$vertex must have length $D."
+    end
+
+    return Simplex(SVector{N}(float.(SVector{D}.(vertices))...))
+end
 
 """
     reference_simplex(D::Int, T=float(Int))

@@ -10,7 +10,7 @@ Alias for a 2-dimensional [`Orthotope`](@ref) of element type `T`.
 const Rectangle{T} = Orthotope{2,T}
 
 Rectangle{T}(low_corner, high_corner) where {T} = Orthotope{T}(low_corner, high_corner, 2)
-Rectangle(low_corner, high_corner) = Orthotope{float(Int)}(low_corner, high_corner, 2)
+Rectangle(low_corner, high_corner) = Orthotope(low_corner, high_corner, 2)
 
 """
     subdivide_rectangle(r::Rectangle)

@@ -6,7 +6,7 @@ using Test
 Float = float(Int)
 
 # Volume test
-function volume_check(subdiv_algo, domain::AbstractDomain{D,T}) where {D,T}
+function volume_test(subdiv_algo, domain::AbstractDomain{D,T}) where {D,T}
     sub_domains = subdiv_algo(domain)
     return isapprox(sum(abs_det_jac.(sub_domains)), abs_det_jac(domain); rtol=10 * eps(T))
 end
@@ -15,26 +15,40 @@ end
     @testset "Simplex" begin
         @test typeof(Simplex((0, 0), [0, 0], SVector(0, 0))) <: Simplex{2,Float,3}
         @test typeof(Simplex{Float128}([0], [0])) <: Simplex{1,Float128,2}
+        @test typeof(Simplex(BigInt[0], BigInt[0])) <: Simplex{1,BigFloat,2}
 
-        @test typeof(Triangle((2, 0), (0, 2), (0, 0))) <: Triangle{Float}
-        @test typeof(Triangle{Float128}((2, 0), (0, 2), (0, 0))) <: Triangle{Float128}
+        @test typeof(Triangle((0, 0), (0, 0), (0, 0))) <: Triangle{Float}
+        @test typeof(Triangle{Float128}((0, 0), (0, 0), (0, 0))) <: Triangle{Float128}
+        @test typeof(Triangle(BigInt[0, 0], BigInt[0, 0], BigInt[0, 0])) <:
+            Triangle{BigFloat}
 
-        @test typeof(Tetrahedron((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
-            Tetrahedron{Float}
-        @test typeof(Tetrahedron{Float128}((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
-            Tetrahedron{Float128}
+        @test typeof(
+            Tetrahedron(zeros(Int, 3), zeros(Int, 3), zeros(Int, 3), zeros(Int, 3))
+        ) <: Tetrahedron{Float}
+        @test typeof(
+            Tetrahedron{Float128}(
+                zeros(Int, 3), zeros(Int, 3), zeros(Int, 3), zeros(Int, 3)
+            ),
+        ) <: Tetrahedron{Float128}
+        @test typeof(
+            Tetrahedron(
+                zeros(BigInt, 3), zeros(BigInt, 3), zeros(BigInt, 3), zeros(BigInt, 3)
+            ),
+        ) <: Tetrahedron{BigFloat}
     end
 
     @testset "Orthotope" begin
         @test typeof(Orthotope((0,), [1])) <: Orthotope{1,Float}
-        @test typeof(Orthotope([0], SVector(1))) <: Orthotope{1,Float}
+        @test typeof(Orthotope(BigInt[0], SVector(1))) <: Orthotope{1,BigFloat}
         @test typeof(Orthotope{Float128}([0], [1])) <: Orthotope{1,Float128}
 
         @test typeof(Rectangle((-1, -1), (1, 1))) <: Rectangle{Float}
         @test typeof(Rectangle{Float128}((-1, -1), (1, 1))) <: Rectangle{Float128}
+        @test typeof(Rectangle(zeros(BigInt, 2), ones(BigInt, 2))) <: Rectangle{BigFloat}
 
         @test typeof(Cuboid((-1, -1, -1), (1, 1, 1))) <: Cuboid{Float}
         @test typeof(Cuboid{Float128}((-1, -1, -1), (1, 1, 1))) <: Cuboid{Float128}
+        @test typeof(Cuboid(zeros(BigInt, 3), ones(BigInt, 3))) <: Cuboid{BigFloat}
     end
 end
 
@@ -126,14 +140,14 @@ end
 @testset "Domain Subdivision" begin
     @testset "triangle" begin
         t = Triangle((-0.86, -0.19), (0.97, -0.84), (-0.05, 0.74))
-        @test volume_check(subdivide_triangle, t)
-        @test volume_check(subdivide_simplex, t)
+        @test volume_test(subdivide_triangle, t)
+        @test volume_test(subdivide_simplex, t)
     end
 
     @testset "rectangle" begin
         r = Rectangle((-0.07, 0.42), (0.35, 0.71))
-        @test volume_check(subdivide_rectangle, r)
-        @test volume_check(subdivide_orthotope, r)
+        @test volume_test(subdivide_rectangle, r)
+        @test volume_test(subdivide_orthotope, r)
     end
 
     @testset "tetrahedron" begin
@@ -143,14 +157,14 @@ end
             (-0.06, 0.57, -0.34),
             (-0.27, -0.12, 0.14),
         )
-        @test volume_check(subdivide_tetrahedron, t)
-        @test volume_check(subdivide_simplex, t)
+        @test volume_test(subdivide_tetrahedron, t)
+        @test volume_test(subdivide_simplex, t)
     end
 
     @testset "cuboid" begin
         c = Cuboid((-0.38, -0.92, -0.43), (0.15, 0.30, 0.51))
-        @test volume_check(subdivide_cuboid, c)
-        @test volume_check(subdivide_orthotope, c)
+        @test volume_test(subdivide_cuboid, c)
+        @test volume_test(subdivide_orthotope, c)
     end
 
     @testset "4-simplex" begin
@@ -161,11 +175,11 @@ end
             (-0.27, -0.12, 0.14, -0.47),
             (0.68, 0.12, -0.66, -1.49),
         )
-        @test volume_check(subdivide_simplex, s)
+        @test volume_test(subdivide_simplex, s)
     end
 
     @testset "4-orthotope" begin
         h = Orthotope((-2.12, -0.37, -0.86, 0.09), (-1.57, 0.11, 0.49, 0.66))
-        @test volume_check(subdivide_orthotope, h)
+        @test volume_test(subdivide_orthotope, h)
     end
 end

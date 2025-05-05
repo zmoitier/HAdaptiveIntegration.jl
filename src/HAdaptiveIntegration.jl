@@ -7,12 +7,11 @@ using StaticArrays: SVector, setindex
 # Supported integration domains
 include("Domain/Domain.jl")
 using .Domain
-export Domain, Simplex, Triangle, Tetrahedron, Orthotope, Rectangle, Cuboid
+export Simplex, Triangle, Tetrahedron, Orthotope, Rectangle, Cuboid
 
 # Tabulated cubature rule for supported domains
 include("Rule/Rule.jl")
 using .Rule
-export Rule
 
 # Default subdivision and embedded cubature for supported domain
 include("default.jl")
