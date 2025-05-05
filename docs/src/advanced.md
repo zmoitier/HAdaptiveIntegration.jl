@@ -89,9 +89,23 @@ This example illustrates that testing is necessary to determine which cubature r
 for your specific application!
 
 !!! tip "Available embedded cubature formulas"
-    You can find a list of available embedded cubature formulas in the
-    [`Rule/Rule.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/Rule.jl)
-    file.
+    The list of available embedded cubature formulas is:
+    ```@example
+    using HAdaptiveIntegration # hide
+    not_rules = Set([ # hide
+        "AbstractRule", # hide
+        "Rule", # hide
+        "EmbeddedCubature", # hide
+        "TabulatedEmbeddedCubature", # hide
+        "embedded_cubature", # hide
+        "orders", # hide
+    ]) # hide
+    for name in map(String, names(HAdaptiveIntegration.Rule)) # hide
+        if name ∉ not_rules # hide
+            println(name) # hide
+        end # hide
+    end # hide
+    ```
 
 To add a custom embedded quadrature for a given domain, you must write a constructor *e.g.*
 `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref) object (see
