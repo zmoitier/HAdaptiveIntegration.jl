@@ -18,8 +18,8 @@ an error estimate.
 - `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
    support the multiplication by a scalar of type `T` and the addition.
 - `domain::AbstractDomain{D,T}`: the integration domain. Currently, we support
-  [`segment`](@ref), [`triangle`](@ref), [`rectangle`](@ref), [`tetrahedron`](@ref),
-  [`cuboid`](@ref), and d-dimensional [`simplex`](@ref).
+  [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref), [`Cuboid`](@ref),
+  `d`-dimensional [`Simplex`](@ref), and `d`-dimensional [`Orthotope`](@ref).
 
 ## Optional arguments
 - `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded cubature,
@@ -40,7 +40,7 @@ function integrate(
     embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
-    norm=x -> LinearAlgebra.norm(x, Inf),
+    norm=x -> norm(x, Inf),
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,

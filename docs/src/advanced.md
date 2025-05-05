@@ -15,7 +15,8 @@ like in practice:
 ```@example buffering
 using HAdaptiveIntegration
 using BenchmarkTools
-t = triangle((0, 0), (1, 0), (0, 1))
+
+t = Triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 @benchmark integrate($f, $t)
 ```
@@ -25,7 +26,8 @@ circumstances where one may want to avoid allocations altogether. This can be ac
 passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
 
 ```@example buffering
-using HAdaptiveIntegration: allocate_buffer, integrate, triangle
+using HAdaptiveIntegration: allocate_buffer
+
 buffer = allocate_buffer(f, t)
 integrate(f,t; buffer)
 b = @benchmark integrate($f, $t; buffer = $buffer)
@@ -49,10 +51,12 @@ orders 5 and 7 (see the `rules_simplex.jl` file for more details). If you want
 you can do
 
 ```@example embedded-cubature
-using HAdaptiveIntegration: GrundmannMoeller, embedded_cubature, integrate, triangle
-t = triangle((0, 0), (1, 0), (0, 1))
+using HAdaptiveIntegration
+using HAdaptiveIntegration.Rule: GrundmannMoeller, embedded_cubature
+
+t = Triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
-ec = embedded_cubature(Float64, GrundmannMoeller{2}(13, 11))
+ec = embedded_cubature(GrundmannMoeller{2}(13, 11))
 I, E = integrate(f, t; embedded_cubature = ec)
 ```
 
@@ -85,16 +89,28 @@ This example illustrates that testing is necessary to determine which cubature r
 for your specific application!
 
 !!! tip "Available embedded cubature formulas"
-    You can find a list of available embedded cubature formulas in the
-    [`rule_simplex.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/rule_simplex.jl)
-    file and
-    [`rule_orthotope.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/rule_orthotope.jl)
-    files.
+    The list of available embedded cubature formulas is:
+    ```@example
+    using HAdaptiveIntegration # hide
+    not_rules = Set([ # hide
+        "AbstractRule", # hide
+        "Rule", # hide
+        "EmbeddedCubature", # hide
+        "TabulatedEmbeddedCubature", # hide
+        "embedded_cubature", # hide
+        "orders", # hide
+    ]) # hide
+    for name in map(String, names(HAdaptiveIntegration.Rule)) # hide
+        if name ∉ not_rules # hide
+            println(name) # hide
+        end # hide
+    end # hide
+    ```
 
 To add a custom embedded quadrature for a given domain, you must write a constructor *e.g.*
 `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref) object (see
 the function [`embedded_cubature`](@ref) in the file
-[`embedded_cubature.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/cubature_embedded.jl)
+[`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl)
 for some examples on how this is done). PRs with new schemes are more than welcome!
 
 ## Subdivision strategies
@@ -105,7 +121,8 @@ smaller triangles by connecting the midpoints of the edges:
 
 ```@example default-subdivision
 using HAdaptiveIntegration
-t = triangle((0, 0), (1, 0), (0, 1))
+
+t = Triangle((0, 0), (1, 0), (0, 1))
 subdiv_algo = HAdaptiveIntegration.default_subdivision(t)
 ```
 
@@ -119,8 +136,13 @@ But is also possible (and maybe desirable) to split the triangle into 2 smaller 
 instead. The following function accomplishes this:
 
 ```@example default-subdivision
-using HAdaptiveIntegration: subdivide_triangle2
-subdivide_triangle2(t)
+using StaticArrays
+
+function subdivide_triangle2(t::Triangle{T}) where {T}
+        a, b, c = t.vertices
+        bc = (b + c) / 2
+        return (Triangle{T}(SVector(bc, a, b)), Triangle{T}(SVector(bc, c, a)))
+    end
 ```
 
 Passing `subdivide_triangle2` as the `subdiv_algo` to `integrate` will use this instead of

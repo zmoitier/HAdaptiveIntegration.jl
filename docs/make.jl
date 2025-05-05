@@ -1,5 +1,7 @@
-using HAdaptiveIntegration
 using Documenter
+using HAdaptiveIntegration
+using HAdaptiveIntegration.Domain
+using HAdaptiveIntegration.Rule
 
 DocMeta.setdocmeta!(
     HAdaptiveIntegration, :DocTestSetup, :(using HAdaptiveIntegration); recursive=true

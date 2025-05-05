@@ -11,8 +11,9 @@ various predefined [`AbstractDomain`](@ref)s. It uses *embedded cubature* rules 
 error estimates, and refines the integration domain by splitting its mesh elements until a
 certain tolerance is reached. Features include:
 
-- Adaptive integration over **simplices of any dimension**
-- Use of **efficient (tabulated) cubatures** for low-dimensional cuboids and simplices
+- Adaptive integration over **simplices and orthotope of any dimension**
+- Use of **efficient (tabulated) cubatures** for low-dimensional simplices (triangle and
+  tetrahedron) and orthotope (rectangle and cuboid)
 - Support for custom cubature rules
 - Arbitrary precision arithmetic
 
@@ -60,12 +61,12 @@ nothing # hide
 `Domain`s are constructed using the following functions (see their respective docstrings for
 more details):
 
-- [`triangle`](@ref): a triangle in 2D,
-- [`tetrahedron`](@ref): a tetrahedron in 3D,
-- [`simplex`](@ref): a simplex in arbitrary dimension,
-- [`rectangle`](@ref): a rectangle in 2D,
-- [`cuboid`](@ref): a cuboid in 3D,
-- [`orthotope`](@ref): an orthotope (hyperrectangle) in arbitrary dimension.
+- [`Triangle`](@ref): a triangle in 2D,
+- [`Tetrahedron`](@ref): a tetrahedron in 3D,
+- [`Simplex`](@ref): a simplex in arbitrary dimension,
+- [`Rectangle`](@ref): a rectangle in 2D,
+- [`Cuboid`](@ref): a cuboid in 3D,
+- [`Orthotope`](@ref): an orthotope (hyperrectangle) in arbitrary dimension.
 
 ### Simplices
 
@@ -75,7 +76,7 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
 - Triangle
 
   ```@example quickstart
-  I, E = integrate(fct, triangle((0, 0), (1, 0), (0, 1)))
+  I, E = integrate(fct, Triangle((0, 0), (1, 0), (0, 1)))
   ```
 
   The result `I` is the integral of `f` over a triangle with vertices `(0,0)`, `(1,0)`, and
@@ -83,7 +84,7 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
 - Tetrahedron
 
   ```@example quickstart
-  I, E = integrate(fct, tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
+  I, E = integrate(fct, Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
   ```
 
 - ``4``-simplex
@@ -91,7 +92,7 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
   ```@example quickstart
   I, E = integrate(
            fct,
-           simplex((0, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
+           Simplex((0, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
            rtol=1e-4
          )
   ```
@@ -99,7 +100,7 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
   The keyword arguments `atol` and `rtol` can be used to control the desired absolute and
   relative error tolerances, respectively.
 
-### Orthotopes
+### Orthotopes (*a.k.a.* hyperrectangle)
 
 To integrate the same function over a ``d``-dimensional axis-aligned orthotope (rectangle,
 cuboid, and hyperrectangle), defined by their low and high corners, we can use
@@ -107,25 +108,32 @@ cuboid, and hyperrectangle), defined by their low and high corners, we can use
 - Rectangle
 
   ```@example quickstart
-  I, E = integrate(fct, rectangle((0, 0), (1, 1)))
+  I, E = integrate(fct, Rectangle((0, 0), (1, 1)))
   ```
 
 - Cuboid
 
   ```@example quickstart
-  I, E = integrate(fct, cuboid((0, 0, 0), (1, 1, 1)))
+  I, E = integrate(fct, Cuboid((0, 0, 0), (1, 1, 1)))
   ```
 
 - ``4``-orthotope (hyperrectangle)
 
   ```@example quickstart
-  I, E = integrate(fct, orthotope((0, 0, 0, 0), (1, 1, 1, 1)); rtol=1e-4)
+  I, E = integrate(fct, Orthotope((0, 0, 0, 0), (1, 1, 1, 1)); rtol=1e-4)
   ```
 
-!!! tip "N-cuboids and `HCubature.jl`"
-    If you are looking for a package that supports adaptive integration over arbitrarily
-    high-dimensional axis-aligned orthotope, you may want to check out
-    [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl).
+!!! tip "Related package to integration over an orthotope (hyperrectangle)"
+    This package contains rule for an arbitrary ``d``-dimensional orthotope, however:
+    - For ``d=1``, you may want to check
+      [`QuadGk.jl`](https://github.com/JuliaMath/QuadGK.jl), as it is specialized to do
+      adaptive integration over the segment.
+    - For high ``d``, you may want to check
+      [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl), as it supports adaptive
+      integration over arbitrarily high-dimensional axis-aligned orthotope.
+    - For even larger ``d``, you may want to check
+      [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
+      [`Cuba.jl`](https://github.com/giordano/Cuba.jl), as they use stochastic method.
 
 ## Going further
 

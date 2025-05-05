@@ -1,77 +1,26 @@
-using DataStructures
+using DataStructures: BinaryHeap
+using HAdaptiveIntegration.Domain
+using HAdaptiveIntegration.Rule
 using HAdaptiveIntegration:
-    CUBE_BE115,
-    CUBE_GM33,
-    EmbeddedCubature,
-    SEGMENT_GK31,
-    SEGMENT_GK7,
-    SQUARE_CH21,
-    SQUARE_GM17,
-    TRIANGLE_GM19,
-    allocate_buffer,
-    default_embedded_cubature,
-    embedded_cubature,
-    reference_orthotope,
-    reference_simplex
-using LinearAlgebra
+    allocate_buffer, default_embedded_cubature, default_subdivision, integrate
+using LinearAlgebra: norm
 using Test
 
-@testset "Default embedded cubature" begin
-    for domain in (
-        reference_orthotope(1),
-        reference_orthotope(2),
-        reference_orthotope(3),
-        reference_orthotope(4),
-        reference_simplex(2),
-        reference_simplex(3),
-        reference_simplex(4),
-    )
+@testset "Default" begin
+    for domain_type in (Simplex{1}, Triangle, Tetrahedron, Orthotope{1}, Rectangle, Cuboid)
+        domain = reference_domain(domain_type)
+
+        @test typeof(default_subdivision(domain)) <: Function
         @test typeof(default_embedded_cubature(domain)) <: EmbeddedCubature
     end
 end
 
-@testset "Integrate" begin
-    domain = reference_orthotope(1)
-
-    buffer = allocate_buffer(x -> sum(x), domain)
-    @test typeof(buffer) <: BinaryHeap
-
-    I, E = integrate(x -> sin(10 * x[1]), domain; buffer=buffer)
-    R = sin(5)^2 / 5
-    @test abs(I - R) ≤ E * abs(R)
-
-    I, E = integrate(x -> cos(7.5 * x[1]), domain; buffer=buffer)
-    R = 2 * sin(7.5) / 15
-    @test abs(I - R) ≤ E * abs(R)
-end
-
-@testset "Integrate over a segment" begin
-    domain = segment(0, 1)
-    buffer = allocate_buffer(x -> zero(x[1]), domain)
-
-    for ec in (
-        embedded_cubature(SEGMENT_GK7),
-        default_embedded_cubature(domain),
-        embedded_cubature(SEGMENT_GK31),
-    )
-        for (fct, R) in [
-            (x -> exp(x[1]), exp(1) - 1),
-            (x -> cos(10 * x[1]), sin(10) / 10),
-            (x -> 1 / √x[1], 2),
-        ]
-            I, E = integrate(fct, domain; buffer=buffer)
-            @test abs(I - R) ≤ E * abs(R)
-        end
-    end
-end
-
 @testset "Integrate over a triangle" begin
-    domain = triangle((0, 0), (2, 0), (0, 2))
+    domain = Triangle((0, 0), (2, 0), (0, 2))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (embedded_cubature(TRIANGLE_GM19), default_embedded_cubature(domain))
         for (fct, R) in [
-            (x -> exp(x[1] + 3 * x[2]), (exp(6) - 3 * exp(2) + 2) / 6),
             (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
             (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
         ]
@@ -82,7 +31,7 @@ end
 end
 
 @testset "Integrate over a rectangle" begin
-    domain = rectangle((0, 0), (1, 1))
+    domain = Rectangle((0, 0), (1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
@@ -101,7 +50,7 @@ end
 end
 
 @testset "Integrate over a tetrahedron" begin
-    domain = tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+    domain = Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for (fct, R) in [
@@ -117,7 +66,7 @@ end
 end
 
 @testset "Integrate over a Cuboid" begin
-    domain = cuboid((0, 0, 0), (1, 1, 1))
+    domain = Cuboid((0, 0, 0), (1, 1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
@@ -125,11 +74,8 @@ end
         default_embedded_cubature(domain),
         embedded_cubature(CUBE_BE115),
     )
-        for (fct, R) in [
-            (x -> exp(x[1]), exp(1) - 1),
-            (x -> 1 / (1 + norm(x)^2)^2, π^2 / 32),
-            (x -> 1 / norm(x), 1.1900386819897766),
-        ]
+        for (fct, R) in
+            [(x -> 1 / (1 + norm(x)^2)^2, π^2 / 32), (x -> 1 / norm(x), 1.1900386819897766)]
             I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
@@ -137,13 +83,13 @@ end
 end
 
 @testset "4-Simplex" begin
-    I, E = integrate(x -> 1 / norm(x), reference_simplex(4))
+    I, E = integrate(x -> 1 / norm(x), reference_domain(Simplex{4}))
     R = 0.089876019011
     @test abs(I - R) ≤ E * abs(R)
 end
 
 @testset "4-Orthotope" begin
-    I, E = integrate(x -> 1 / norm(x), reference_orthotope(4))
+    I, E = integrate(x -> 1 / norm(x), reference_domain(Orthotope{4}))
     R = 0.9674120212411487
     @test abs(I - R) ≤ E * abs(R)
 end

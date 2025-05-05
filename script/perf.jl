@@ -76,7 +76,13 @@ function triangle_subdiv(case::Int=0)
     domain = hai.triangle((0, 0), (1, 0), (0, 1))
     fct = get_fct(2, case)
 
-    measure_perf("subdivide_triangle4", domain, fct; subdiv_algo=hai.subdivide_triangle4)
+    function subdivide_triangle2(t::hai.Triangle{T}) where {T}
+        a, b, c = t.vertices
+        bc = (b + c) / 2
+        return (hai.Triangle{T}(bc, a, b), hai.Triangle{T}(bc, c, a))
+    end
+
+    measure_perf("subdivide_triangle", domain, fct; subdiv_algo=hai.subdivide_triangle)
     measure_perf("subdivide_triangle2", domain, fct; subdiv_algo=hai.subdivide_triangle2)
 
     return nothing
