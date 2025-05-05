@@ -9,15 +9,8 @@ Alias for a 2-dimensional [`Orthotope`](@ref) of element type `T`.
 """
 const Rectangle{T} = Orthotope{2,T}
 
-function Rectangle{T}(low_corner, high_corner) where {T}
-    _validate_invariant_orthotope(2, low_corner, high_corner)
-    return Orthotope{T}(low_corner, high_corner)
-end
-
-function Rectangle(low_corner, high_corner)
-    _validate_invariant_orthotope(2, low_corner, high_corner)
-    return Orthotope(low_corner, high_corner)
-end
+Rectangle{T}(low_corner, high_corner) where {T} = Orthotope{T}(low_corner, high_corner, 2)
+Rectangle(low_corner, high_corner) = Orthotope{float(Int)}(low_corner, high_corner, 2)
 
 """
     subdivide_rectangle(r::Rectangle)

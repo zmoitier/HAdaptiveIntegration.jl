@@ -3,6 +3,8 @@ using HAdaptiveIntegration.Rule
 using Quadmath
 using Test
 
+Float = float(Int)
+
 function validate_orders(
     ec::EmbeddedCubature{D,T},
     get_exact_values::Function,
@@ -112,14 +114,14 @@ end
         @test orders(tec) == (5, 1)
 
         ec = embedded_cubature(tec)
-        @test typeof(ec) <: EmbeddedCubature{1,Float64}
+        @test typeof(ec) <: EmbeddedCubature{1,Float}
 
         ec_ref = embedded_cubature(
             [[0.5], [(1 - √(3 / 5)) / 2], [(1 + √(3 / 5)) / 2]],
             [4 / 9, 5 / 18, 5 / 18],
             [1.0],
         )
-        @test typeof(ec_ref) <: EmbeddedCubature{1,Float64}
+        @test typeof(ec_ref) <: EmbeddedCubature{1,Float}
 
         @test ec.nodes ≈ ec_ref.nodes
         @test ec.weights_high ≈ ec_ref.weights_high

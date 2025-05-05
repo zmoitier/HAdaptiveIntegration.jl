@@ -20,25 +20,19 @@ struct Orthotope{D,T} <: AbstractDomain{D,T}
     corners::SVector{2,SVector{D,T}}
 end
 
-function _validate_invariant_orthotope(D::Int, low_corner, high_corner)
+function Orthotope{T}(low_corner, high_corner, D::Union{Int,Nothing}=nothing) where {T}
+    if isnothing(D)
+        D = length(low_corner)
+    end
+
     for point in (low_corner, high_corner)
         @assert length(point) == D "$point must have length $D."
     end
     @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "must have `low_corner .≤ high_corner`."
-    return nothing
-end
 
-function Orthotope{T}(low_corner, high_corner) where {T}
-    D = length(low_corner)
-    _validate_invariant_orthotope(D, low_corner, high_corner)
     return Orthotope(SVector(SVector{D,T}(low_corner), SVector{D,T}(high_corner)))
 end
-
-function Orthotope(low_corner, high_corner)
-    D = length(low_corner)
-    _validate_invariant_orthotope(D, low_corner, high_corner)
-    return Orthotope(SVector(SVector{D}(low_corner), SVector{D}(high_corner)))
-end
+Orthotope(low_corner, high_corner) = Orthotope{float(Int)}(low_corner, high_corner)
 
 """
     reference_orthotope(D::Int, T=float(Int))

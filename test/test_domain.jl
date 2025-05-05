@@ -3,6 +3,8 @@ using Quadmath
 using StaticArrays
 using Test
 
+Float = float(Int)
+
 # Volume test
 function volume_check(subdiv_algo, domain::AbstractDomain{D,T}) where {D,T}
     sub_domains = subdiv_algo(domain)
@@ -11,45 +13,40 @@ end
 
 @testset "Domain construction" begin
     @testset "Simplex" begin
-        @test typeof(Simplex((0, 0), [0, 0], SVector(0, 0))) <: Simplex{2,Int,3}
-        @test typeof(Simplex((0, 0.0), [0, 0], SVector(0, 0))) <: Simplex{2,Float64,3}
-
-        @test typeof(Simplex{Float64}([0], [0])) <: Simplex{1,Float64,2}
+        @test typeof(Simplex((0, 0), [0, 0], SVector(0, 0))) <: Simplex{2,Float,3}
         @test typeof(Simplex{Float128}([0], [0])) <: Simplex{1,Float128,2}
 
-        @test typeof(Triangle((2, 0), (0, 2), (0, 0))) <: Triangle{Int}
+        @test typeof(Triangle((2, 0), (0, 2), (0, 0))) <: Triangle{Float}
         @test typeof(Triangle{Float128}((2, 0), (0, 2), (0, 0))) <: Triangle{Float128}
 
         @test typeof(Tetrahedron((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
-            Tetrahedron{Int}
+            Tetrahedron{Float}
         @test typeof(Tetrahedron{Float128}((0, 0, 2), (2, 0, 0), (0, 2, 0), (0, 0, 0))) <:
             Tetrahedron{Float128}
     end
 
     @testset "Orthotope" begin
-        @test typeof(Orthotope((0,), [1])) <: Orthotope{1,Int}
-        @test typeof(Orthotope([0], SVector(1.0))) <: Orthotope{1,Float64}
-
-        @test typeof(Orthotope{Float64}([0], [1])) <: Orthotope{1,Float64}
+        @test typeof(Orthotope((0,), [1])) <: Orthotope{1,Float}
+        @test typeof(Orthotope([0], SVector(1))) <: Orthotope{1,Float}
         @test typeof(Orthotope{Float128}([0], [1])) <: Orthotope{1,Float128}
 
-        @test typeof(Rectangle((-1, -1), (1, 1))) <: Rectangle{Int}
+        @test typeof(Rectangle((-1, -1), (1, 1))) <: Rectangle{Float}
         @test typeof(Rectangle{Float128}((-1, -1), (1, 1))) <: Rectangle{Float128}
 
-        @test typeof(Cuboid((-1, -1, -1), (1, 1, 1))) <: Cuboid{Int}
+        @test typeof(Cuboid((-1, -1, -1), (1, 1, 1))) <: Cuboid{Float}
         @test typeof(Cuboid{Float128}((-1, -1, -1), (1, 1, 1))) <: Cuboid{Float128}
     end
 end
 
 @testset "Domain interface" begin
     @testset "Simplex" begin
-        @test typeof(reference_domain(Triangle)) <: Triangle{Float64}
+        @test typeof(reference_domain(Triangle)) <: Triangle{Float}
         @test typeof(reference_domain(Triangle{Float128})) <: Triangle{Float128}
 
-        @test typeof(reference_domain(Tetrahedron)) <: Tetrahedron{Float64}
+        @test typeof(reference_domain(Tetrahedron)) <: Tetrahedron{Float}
         @test typeof(reference_domain(Tetrahedron{Float128})) <: Tetrahedron{Float128}
 
-        @test typeof(reference_domain(Simplex{4})) <: Simplex{4,Float64,5}
+        @test typeof(reference_domain(Simplex{4})) <: Simplex{4,Float,5}
         @test typeof(reference_domain(Simplex{4,Float128})) <: Simplex{4,Float128,5}
         @test typeof(reference_domain(Simplex{4,Float128,5})) <: Simplex{4,Float128,5}
 
@@ -91,13 +88,13 @@ end
     end
 
     @testset "Orthotope" begin
-        @test typeof(reference_domain(Rectangle)) <: Orthotope{2,Float64}
+        @test typeof(reference_domain(Rectangle)) <: Orthotope{2,Float}
         @test typeof(reference_domain(Rectangle{Float128})) <: Orthotope{2,Float128}
 
-        @test typeof(reference_domain(Cuboid)) <: Orthotope{3,Float64}
+        @test typeof(reference_domain(Cuboid)) <: Orthotope{3,Float}
         @test typeof(reference_domain(Cuboid{Float128})) <: Orthotope{3,Float128}
 
-        @test typeof(reference_domain(Orthotope{4})) <: Orthotope{4,Float64}
+        @test typeof(reference_domain(Orthotope{4})) <: Orthotope{4,Float}
         @test typeof(reference_domain(Orthotope{4,Float128})) <: Orthotope{4,Float128}
 
         r = reference_domain(Orthotope{4,Int})

@@ -9,15 +9,8 @@ Alias for a 3-dimensional [`Orthotope`](@ref) of value type `T`.
 """
 const Cuboid{T} = Orthotope{3,T}
 
-function Cuboid{T}(low_corner, high_corner) where {T}
-    _validate_invariant_orthotope(3, low_corner, high_corner)
-    return Orthotope{T}(low_corner, high_corner)
-end
-
-function Cuboid(low_corner, high_corner)
-    _validate_invariant_orthotope(3, low_corner, high_corner)
-    return Orthotope(low_corner, high_corner)
-end
+Cuboid{T}(low_corner, high_corner) where {T} = Orthotope{T}(low_corner, high_corner, 3)
+Cuboid(low_corner, high_corner) = Orthotope{float(Int)}(low_corner, high_corner, 3)
 
 """
     subdivide_cuboid(c::Cuboid)

@@ -18,29 +18,17 @@ struct Simplex{D,T,N} <: AbstractDomain{D,T}
     vertices::SVector{N,SVector{D,T}}
 end
 
-function _validate_invariant_simplex(vertices)
-    D = length(vertices) - 1
-    for point in vertices
-        @assert length(point) == D "$point must have length $D."
-    end
-    return nothing
-end
-
 function Simplex{T}(vertices...) where {T}
     N = length(vertices)
     D = N - 1
-    _validate_invariant_simplex(vertices)
+
+    for point in vertices
+        @assert length(point) == D "$point must have length $D."
+    end
 
     return Simplex(SVector{N}(SVector{D,T}.(vertices)...))
 end
-
-function Simplex(vertices...)
-    N = length(vertices)
-    D = N - 1
-    _validate_invariant_simplex(vertices)
-
-    return Simplex(SVector{N}(SVector{D}.(vertices)...))
-end
+Simplex(vertices...) = Simplex{float(Int)}(vertices...)
 
 """
     reference_simplex(D::Int, T=float(Int))

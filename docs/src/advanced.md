@@ -16,7 +16,7 @@ like in practice:
 using HAdaptiveIntegration
 using BenchmarkTools
 
-t = Triangle{Float64}((0, 0), (1, 0), (0, 1))
+t = Triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 @benchmark integrate($f, $t)
 ```
@@ -54,7 +54,7 @@ you can do
 using HAdaptiveIntegration
 using HAdaptiveIntegration.Rule: GrundmannMoeller, embedded_cubature
 
-t = Triangle{Float64}((0, 0), (1, 0), (0, 1))
+t = Triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 ec = embedded_cubature(GrundmannMoeller{2}(13, 11))
 I, E = integrate(f, t; embedded_cubature = ec)
@@ -108,7 +108,7 @@ smaller triangles by connecting the midpoints of the edges:
 ```@example default-subdivision
 using HAdaptiveIntegration
 
-t = Triangle{Float64}((0, 0), (1, 0), (0, 1))
+t = Triangle((0, 0), (1, 0), (0, 1))
 subdiv_algo = HAdaptiveIntegration.default_subdivision(t)
 ```
 

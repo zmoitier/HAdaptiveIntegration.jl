@@ -16,7 +16,7 @@ using Test
 end
 
 @testset "Integrate over a triangle" begin
-    domain = Triangle{Float64}((0, 0), (2, 0), (0, 2))
+    domain = Triangle((0, 0), (2, 0), (0, 2))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (embedded_cubature(TRIANGLE_GM19), default_embedded_cubature(domain))
@@ -31,7 +31,7 @@ end
 end
 
 @testset "Integrate over a rectangle" begin
-    domain = Rectangle{Float64}((0, 0), (1, 1))
+    domain = Rectangle((0, 0), (1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
@@ -50,7 +50,7 @@ end
 end
 
 @testset "Integrate over a tetrahedron" begin
-    domain = Tetrahedron{Float64}((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+    domain = Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for (fct, R) in [
@@ -66,7 +66,7 @@ end
 end
 
 @testset "Integrate over a Cuboid" begin
-    domain = Cuboid{Float64}((0, 0, 0), (1, 1, 1))
+    domain = Cuboid((0, 0, 0), (1, 1, 1))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (

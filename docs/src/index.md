@@ -76,7 +76,7 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
 - Triangle
 
   ```@example quickstart
-  I, E = integrate(fct, Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0)))
+  I, E = integrate(fct, Triangle((0, 0), (1, 0), (0, 1)))
   ```
 
   The result `I` is the integral of `f` over a triangle with vertices `(0,0)`, `(1,0)`, and
@@ -84,7 +84,7 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
 - Tetrahedron
 
   ```@example quickstart
-  I, E = integrate(fct, Tetrahedron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)))
+  I, E = integrate(fct, Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
   ```
 
 - ``4``-simplex
@@ -92,7 +92,7 @@ To integrate the above function over a ``d``-dimensional simplices (triangle, te
   ```@example quickstart
   I, E = integrate(
            fct,
-           Simplex{Float64}((0, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
+           Simplex((0, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
            rtol=1e-4
          )
   ```
@@ -108,19 +108,19 @@ cuboid, and hyperrectangle), defined by their low and high corners, we can use
 - Rectangle
 
   ```@example quickstart
-  I, E = integrate(fct, Rectangle((0.0, 0.0), (1.0, 1.0)))
+  I, E = integrate(fct, Rectangle((0, 0), (1, 1)))
   ```
 
 - Cuboid
 
   ```@example quickstart
-  I, E = integrate(fct, Cuboid((0.0, 0.0, 0.0), (1.0, 1.0, 1.0)))
+  I, E = integrate(fct, Cuboid((0, 0, 0), (1, 1, 1)))
   ```
 
 - ``4``-orthotope (hyperrectangle)
 
   ```@example quickstart
-  I, E = integrate(fct, Orthotope((0.0, 0.0, 0.0, 0.0), (1.0, 1.0, 1.0, 1.0)); rtol=1e-4)
+  I, E = integrate(fct, Orthotope((0, 0, 0, 0), (1, 1, 1, 1)); rtol=1e-4)
   ```
 
 !!! tip "Related package to integration over an orthotope (hyperrectangle)"
