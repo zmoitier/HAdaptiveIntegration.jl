@@ -22,7 +22,8 @@ end
 
 function Orthotope{T}(low_corner, high_corner, D::Union{Int,Nothing}=nothing) where {T}
     if isnothing(D)
-        @assert length(low_corner) == length(high_corner) "`low_corner` and `high_corner` must have the same length."
+        D = length(low_corner)
+        @assert length(high_corner) == D "`low_corner` and `high_corner` must have the same length."
     else
         @assert length(low_corner) == D "low_corner must have length $D."
         @assert length(high_corner) == D "high_corner must have length $D."
@@ -34,7 +35,8 @@ end
 
 function Orthotope(low_corner, high_corner, D::Union{Int,Nothing}=nothing)
     if isnothing(D)
-        @assert length(low_corner) == length(high_corner) "`low_corner` and `high_corner` must have the same length."
+        D = length(low_corner)
+        @assert length(high_corner) == D "`low_corner` and `high_corner` must have the same length."
     else
         @assert length(low_corner) == D "low_corner must have length $D."
         @assert length(high_corner) == D "high_corner must have length $D."
