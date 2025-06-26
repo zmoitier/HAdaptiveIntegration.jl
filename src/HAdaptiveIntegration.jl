@@ -39,4 +39,12 @@ include("default.jl")
 include("integrate.jl")
 export integrate
 
+# extensions API
+"""
+    bump_precision()
+
+
+"""
+function bump_precision end
+
 end
