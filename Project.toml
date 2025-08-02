@@ -10,7 +10,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 Aqua = "0.8"
-DataStructures = "0.18"
+DataStructures = "0.18, 0.19"
 LinearAlgebra = "1"
 Quadmath = "0.5"
 StaticArrays = "1"
