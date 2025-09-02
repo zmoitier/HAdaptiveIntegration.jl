@@ -18,7 +18,9 @@ IncreasePrecisionExt = "Optim"
 Aqua = "0.8"
 DataStructures = "0.18, 0.19"
 LinearAlgebra = "1"
+Logging = "1"
 Optim = "1"
+Pkg = "1"
 Quadmath = "0.5"
 StaticArrays = "1"
 Test = "1"
@@ -26,8 +28,19 @@ julia = "1"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "DataStructures", "LinearAlgebra", "Quadmath", "Test"]
+test = [
+    "Aqua",
+    "DataStructures",
+    "LinearAlgebra",
+    "Logging",
+    "Optim",
+    "Pkg",
+    "Quadmath",
+    "Test",
+]
