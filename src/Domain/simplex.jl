@@ -53,11 +53,6 @@ function reference_simplex(D::Int, (::Type{T})=float(Int)) where {T}
     return Simplex(SVector{D + 1}(vertices))
 end
 
-"""
-    map_from_reference(domain::DOM) where {DOM<:AbstractDomain}
-
-Return an anonymous function that maps the reference domain to the physical domain `domain`.
-"""
 function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
     return u -> begin
         v = (1 - sum(u)) * s.vertices[1]
@@ -68,28 +63,12 @@ function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
     end
 end
 
-"""
-    abs_det_jac(domain::DOM) where {DOM<:AbstractDomain}
-
-Return the absolute value of the Jacobian's determinant of the map from the reference domain
-to the physical domain `domain`.
-"""
 function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
     vertices = s.vertices
     jacobian_matrix = hcat(ntuple(i -> vertices[i + 1] - vertices[1], D)...)
     return abs(det(jacobian_matrix))
 end
 
-"""
-    map_to_reference(domain::DOM) where {DOM<:AbstractDomain}
-
-Return an anonymous function that maps the physical domain `domain` to the reference domain.
-
-## Constraints:
-- For `Orthotope`, must have `high_corner .> low_corner`.
-- For `Simplex{D}`, the vertices must form a valid `D`-dimensional simplex with non-zero
-  volume).
-"""
 function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
     v = s.vertices
     jacobian_matrix = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
@@ -191,7 +170,7 @@ end
 """
     subdivide_simplex(s::Simplex)
 
-Subdivide a `D`-simplex into `2ᴰ` simplices by using the Freudenthal triangulation.
+Subdivide a `D`-simplex into 2ᴰ simplices by using the Freudenthal triangulation.
 
 Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Freudenthal's
 algorithm and the optimal number of congruence

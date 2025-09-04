@@ -102,7 +102,7 @@ end
 """
     subdivide_orthotope(h::Orthotope)
 
-Subdivide the `D`-orthotope `h` into `2ᴰ` smaller orthotopes by splitting each dimension at
+Subdivide the `D`-orthotope `h` into 2ᴰ smaller orthotopes by splitting each dimension at
 its midpoint.
 """
 function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}

@@ -15,7 +15,7 @@ Tetrahedron(a, b, c, d) = Simplex(a, b, c, d)
 """
     subdivide_tetrahedron(t::Tetrahedron)
 
-Divide the tetrahedron `t` into eight tetrahedra by connecting the midpoints of the edges.
+Divide the tetrahedron `t` into 8 tetrahedra by connecting the midpoints of the edges.
 """
 function subdivide_tetrahedron(t::Tetrahedron{T}) where {T}
     a, b, c, d = t.vertices
