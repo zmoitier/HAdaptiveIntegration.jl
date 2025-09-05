@@ -1,6 +1,8 @@
 module Rule
 
 export AbstractRule, TabulatedEmbeddedCubature, orders, EmbeddedCubature, embedded_cubature
+# Rules for a segment
+export SEGMENT_GK7, SEGMENT_GK15, SEGMENT_GK31
 # Rules for a simplex
 export GrundmannMoeller, RadonLaurie, TRIANGLE_GM19, TRIANGLE_RL19, TETRAHEDRON_GM35
 # Rules for an orthotope
@@ -32,6 +34,9 @@ include("tabulated.jl")
 # D-dimensional rules
 include("simplex.jl")
 include("orthotope.jl")
+
+# 1-dimensional rules
+include("segment.jl")
 
 # 2-dimensional rules
 include("triangle.jl")

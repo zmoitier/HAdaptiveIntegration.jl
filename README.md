@@ -39,6 +39,9 @@ using HAdaptiveIntegration
 # Define a function
 f = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
 
+# Compute the integral and error estimate over a segment
+I, E = integrate(f, Segment(0, 1))
+
 # Compute the integral and error estimate over a triangle and a rectangle
 I, E = integrate(f, Triangle((0, 0), (1, 0), (0, 1)))
 I, E = integrate(f, Rectangle((0, 0), (1, 1)))

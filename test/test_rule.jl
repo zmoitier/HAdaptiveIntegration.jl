@@ -98,19 +98,19 @@ end
 
 @testset "Rule construction" begin
     @testset "Tabulated embedded cubature" begin
-        tec = TabulatedEmbeddedCubature{Orthotope{1}}(;
+        tec = TabulatedEmbeddedCubature{Segment}(;
             description="Gauss (SEGMENT_G3)",
             reference="",
-            precision=16,
-            nodes=[["5e-1"], ["1.127016653792583e-1"], ["8.872983346207417e-1"]],
-            weights_high=[
-                "4.444444444444444e-1", "2.777777777777778e-1", "2.777777777777778e-1"
+            precision=15,
+            nodes=[
+                [string(0.5)], [string((1 - √(3 / 5)) / 2)], [string((1 + √(3 / 5)) / 2)]
             ],
+            weights_high=[string(4 / 9), string(5 / 18), string(5 / 18)],
             order_high=5,
-            weights_low=["1"],
+            weights_low=[string(1.0)],
             order_low=1,
         )
-        @test typeof(tec) <: TabulatedEmbeddedCubature{Orthotope{1}}
+        @test typeof(tec) <: TabulatedEmbeddedCubature{Segment}
         @test orders(tec) == (5, 1)
 
         ec = embedded_cubature(tec)
@@ -158,6 +158,11 @@ end
     T = Float128
 
     @testset "Segment" begin
+        for tec in (SEGMENT_GK7, SEGMENT_GK15, SEGMENT_GK31)
+            ec = embedded_cubature(tec, T)
+            @test validate_orders(ec, integral_monomial_orthotope, orders(tec)...)
+        end
+
         ec = embedded_cubature(GrundmannMoeller{1}(7, 5), T)
         @test validate_orders(ec, integral_monomial_simplex, 7, 5)
 

@@ -15,7 +15,7 @@ Triangle(a, b, c) = Simplex(a, b, c)
 """
     subdivide_triangle(t::Triangle)
 
-Divide the triangle `t` into four triangles by connecting the midpoints of the edges.
+Divide the triangle `t` into 4 triangles by connecting the midpoints of the edges.
 """
 function subdivide_triangle(t::Triangle{T}) where {T}
     a, b, c = t.vertices
