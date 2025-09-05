@@ -56,7 +56,8 @@ function reference_orthotope(D::Int, (::Type{T})=float(Int)) where {T}
 end
 
 function map_from_reference(h::Orthotope{D,T}) where {D,T}
-    return u -> h.corners[1] + u .* (h.corners[2] - h.corners[1])
+    diff = h.corners[2] - h.corners[1]
+    return u -> h.corners[1] .+ u .* diff
 end
 
 function abs_det_jac(h::Orthotope{D,T}) where {D,T}

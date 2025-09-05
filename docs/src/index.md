@@ -32,6 +32,12 @@ Or, equivalently, via the Julia Pkg API
 julia> import Pkg; Pkg.add("HAdaptiveIntegration")
 ```
 
+Then use
+
+```@example quickstart
+using HAdaptiveIntegration
+```
+
 ## Basic usage
 
 The main function exported by this package is [`integrate(f, Ω)`](@ref), which is used to
@@ -46,8 +52,6 @@ where ``\Omega \subset \mathbb{R}^d`` is a [`AbstractDomain`](@ref) object, and
 define a function,
 
 ```@example quickstart
-using HAdaptiveIntegration
-
 fct = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
 nothing # hide
 ```
@@ -61,12 +65,17 @@ nothing # hide
 `Domain`s are constructed using the following functions (see their respective docstrings for
 more details):
 
-- [`Triangle`](@ref): a triangle in 2D,
-- [`Tetrahedron`](@ref): a tetrahedron in 3D,
-- [`Simplex`](@ref): a simplex in arbitrary dimension,
-- [`Rectangle`](@ref): a rectangle in 2D,
-- [`Cuboid`](@ref): a cuboid in 3D,
-- [`Orthotope`](@ref): an orthotope (hyperrectangle) in arbitrary dimension.
+- In 1 dimension:
+  - [`Segment`](@ref)
+- In 2 dimension:
+  - [`Triangle`](@ref)
+  - [`Rectangle`](@ref)
+- In 3 dimension:
+  - [`Tetrahedron`](@ref)
+  - [`Cuboid`](@ref)
+- In arbitrary dimension:
+  - [`Simplex`](@ref) — [en.wikipedia.org/wiki/Simplex](https://en.wikipedia.org/wiki/Simplex)
+  - [`Orthotope`](@ref) — [en.wikipedia.org/wiki/Hyperrectangle](https://en.wikipedia.org/wiki/Hyperrectangle)
 
 ### Simplices
 

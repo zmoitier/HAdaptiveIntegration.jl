@@ -13,6 +13,12 @@ end
 
 @testset "Domain construction" begin
     @testset "Simplex" begin
+        @test typeof(Segment(0, 1)) <: Segment{Float}
+        @test typeof(Segment{Float128}(0, 1)) <: Segment{Float128}
+        @test typeof(Segment(BigInt(0), BigInt(1))) <: Segment{BigFloat}
+    end
+
+    @testset "Simplex" begin
         @test typeof(Simplex((0, 0), [0, 0], SVector(0, 0))) <: Simplex{2,Float,3}
         @test typeof(Simplex{Float128}([0], [0])) <: Simplex{1,Float128,2}
         @test typeof(Simplex(BigInt[0], BigInt[0])) <: Simplex{1,BigFloat,2}
@@ -53,6 +59,28 @@ end
 end
 
 @testset "Domain interface" begin
+    @testset "Segment" begin
+        @test typeof(reference_domain(Segment)) <: Segment{Float}
+        @test typeof(reference_domain(Segment{Float128})) <: Segment{Float128}
+        @test typeof(reference_domain(Segment{BigFloat})) <: Segment{BigFloat}
+
+        r = reference_domain(Segment{Int})
+        @test r.xmin == 0
+        @test r.xmax == 1
+
+        s = Segment(-0.13, 0.78)
+        Φ = map_from_reference(s)
+        Ψ = map_to_reference(s)
+        for v in (0, 1)
+            @test Ψ(Φ(v)) ≈ v
+        end
+
+        @test abs_det_jac(r) ≈ 1
+
+        @test dimension(Segment) == 1
+        @test dimension(Segment{Int}) == 1
+    end
+
     @testset "Simplex" begin
         @test typeof(reference_domain(Triangle)) <: Triangle{Float}
         @test typeof(reference_domain(Triangle{Float128})) <: Triangle{Float128}
@@ -138,6 +166,11 @@ end
 end
 
 @testset "Domain Subdivision" begin
+    @testset "segment" begin
+        s = Segment(-0.13, 0.78)
+        @test volume_test(subdivide_segment, s)
+    end
+
     @testset "triangle" begin
         t = Triangle((-0.86, -0.19), (0.97, -0.84), (-0.05, 0.74))
         @test volume_test(subdivide_triangle, t)

@@ -7,11 +7,28 @@ using LinearAlgebra: norm
 using Test
 
 @testset "Default" begin
-    for domain_type in (Simplex{1}, Triangle, Tetrahedron, Orthotope{1}, Rectangle, Cuboid)
+    for domain_type in
+        (Segment, Simplex{1}, Triangle, Tetrahedron, Orthotope{1}, Rectangle, Cuboid)
         domain = reference_domain(domain_type)
 
         @test typeof(default_subdivision(domain)) <: Function
         @test typeof(default_embedded_cubature(domain)) <: EmbeddedCubature
+    end
+end
+
+@testset "Integrate over a segment" begin
+    domain = Segment(0, 1)
+    buffer = allocate_buffer(x -> zero(x[1]), domain)
+
+    for ec in (
+        embedded_cubature(SEGMENT_GK7),
+        default_embedded_cubature(domain),
+        embedded_cubature(SEGMENT_GK31),
+    )
+        for (fct, R) in [(x -> exp(x[1]), exp(1) - 1), (x -> 1 / sqrt(x[1]), 2)]
+            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            @test abs(I - R) ≤ E * abs(R)
+        end
     end
 end
 

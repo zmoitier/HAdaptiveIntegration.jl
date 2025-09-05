@@ -2,6 +2,8 @@
     default_subdivision(domain::DOM) where {DOM<:AbstractDomain}
 
 Return the default algorithm to subdivide `domain`.
+- dimension 1:
+    - [`Segment`](@ref): [`subdivide_segment`](@ref)
 - dimension 2:
     - [`Triangle`](@ref): [`subdivide_triangle`](@ref)
     - [`Rectangle`](@ref): [`subdivide_rectangle`](@ref)
@@ -12,6 +14,7 @@ Return the default algorithm to subdivide `domain`.
     - [`Simplex`](@ref): [`subdivide_simplex`](@ref)
     - [`Orthotope`](@ref): [`subdivide_orthotope`](@ref)
 """
+default_subdivision(::Segment) = subdivide_segment
 default_subdivision(::Simplex) = subdivide_simplex
 default_subdivision(::Triangle) = subdivide_triangle
 default_subdivision(::Tetrahedron) = subdivide_tetrahedron
@@ -23,6 +26,8 @@ default_subdivision(::Cuboid) = subdivide_cuboid
     default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
 
 Return a default embedded cubature for the domains:
+- dimension 1:
+    - [`Segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
     - [`Triangle`](@ref): [`TRIANGLE_RL19`](@ref)
     - [`Rectangle`](@ref): [`SQUARE_CH25`](@ref)
@@ -33,6 +38,10 @@ Return a default embedded cubature for the domains:
     - [`Simplex`](@ref): [`GrundmannMoeller{d}(7, 5)`](@ref)`
     - [`Orthotope`](@ref): [`GenzMalik{d}()`](@ref)
 """
+@generated function default_embedded_cubature(::Segment{T}) where {T}
+    ec = embedded_cubature(SEGMENT_GK15, T)
+    return :($ec)
+end
 @generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
     ec = embedded_cubature(GrundmannMoeller{D}(7, 5), T)
     return :($ec)

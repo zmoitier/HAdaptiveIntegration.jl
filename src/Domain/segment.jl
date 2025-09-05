@@ -13,8 +13,6 @@ must have `xmin ≤ xmax`.
 
 ## Constructors:
 - `Segment(xmin, xmax)`
-- `Segment{T}(low_corner, high_corner)`
-- `Segment(corners::SVector{2,SVector{1,T}})`
 """
 struct Segment{T} <: AbstractDomain{1,T}
     xmin::T
@@ -42,11 +40,12 @@ end
 Return the reference 1-dimensional segment `[0, 1]` with element type `T`.
 """
 function reference_segment((::Type{T})=float(Int)) where {T}
-    return Segment(zero(T), one(T))
+    return Segment{T}(zero(T), one(T))
 end
 
 function map_from_reference(s::Segment{T}) where {T}
-    return u -> s.xmin + u * (s.xmax - s.xmin)
+    diff = s.xmax - s.xmin
+    return u -> s.xmin .+ u .* diff
 end
 
 function abs_det_jac(s::Segment{T}) where {T}
@@ -57,7 +56,7 @@ function map_to_reference(s::Segment{T}) where {T}
     diff = s.xmax - s.xmin
     @assert diff > √eps(float(T)) "degenerate 1-dimensional Segment: must have `high_corner .> low_corner`."
 
-    return p -> (p - s.xmin) / diff
+    return p -> (p .- s.xmin) ./ diff
 end
 
 """
