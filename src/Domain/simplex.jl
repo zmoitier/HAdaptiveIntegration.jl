@@ -54,19 +54,9 @@ function reference_simplex(D::Int, (::Type{T})=float(Int)) where {T}
 end
 
 function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
-    return u -> begin
-        v = (1 - sum(u)) * s.vertices[1]
-        for i in 2:N
-            v += u[i - 1] * s.vertices[i]
-        end
-        return v
-    end
-end
-
-function abs_det_jac(s::Simplex{D,T,N}) where {D,T,N}
     vertices = s.vertices
     jacobian_matrix = hcat(ntuple(i -> vertices[i + 1] - vertices[1], D)...)
-    return abs(det(jacobian_matrix))
+    return (u -> vertices[1] + jacobian_matrix * u, abs(det(jacobian_matrix)))
 end
 
 function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
@@ -178,7 +168,7 @@ classes](https://link.springer.com/article/10.1007/s002110050475).
 """
 function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     refs = subdivide_reference_simplex(Val(D), T)
-    f = map_from_reference(s)
+    f, _ = map_from_reference(s)
     map(refs) do ref
         Simplex(f.(ref.vertices))
     end

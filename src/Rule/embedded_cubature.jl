@@ -69,8 +69,7 @@ function (ec::EmbeddedCubature{D,T})(
     fct, domain::AbstractDomain{D,T}, norm=x -> norm(x, Inf)
 ) where {D,T}
     H, L = length(ec.weights_high), length(ec.weights_low)
-    μ = abs_det_jac(domain)
-    Φ = map_from_reference(domain)
+    Φ, μ = map_from_reference(domain)
 
     v = fct(Φ(ec.nodes[1]))
     Iₗ = ec.weights_low[1] * v

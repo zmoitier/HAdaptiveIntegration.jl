@@ -61,35 +61,35 @@ function check_all()
     e = exp(1)
     fct = x -> cos(e * x[1] + prod(x))
 
-    measure_perf("Segment", hai.segment(0, 1), fct)
-    measure_perf("Rectangle", hai.rectangle((0, 0), (1, 1)), fct)
-    measure_perf("Triangle", hai.triangle((0, 0), (1, 0), (0, 1)), fct)
-    measure_perf("Cuboid", hai.cuboid((0, 0, 0), (1, 1, 1)), fct)
+    measure_perf("Segment", hai.Segment(0, 1), fct)
+    measure_perf("Rectangle", hai.Rectangle((0, 0), (1, 1)), fct)
+    measure_perf("Triangle", hai.Triangle((0, 0), (1, 0), (0, 1)), fct)
+    measure_perf("Cuboid", hai.Cuboid((0, 0, 0), (1, 1, 1)), fct)
     measure_perf(
-        "Tetrahedron", hai.tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)), fct
+        "Tetrahedron", hai.Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)), fct
     )
 
     return nothing
 end
 
-function triangle_subdiv(case::Int=0)
-    domain = hai.triangle((0, 0), (1, 0), (0, 1))
+function Triangle_subdiv(case::Int=0)
+    domain = hai.Triangle((0, 0), (1, 0), (0, 1))
     fct = get_fct(2, case)
 
-    function subdivide_triangle2(t::hai.Triangle{T}) where {T}
+    function subdivide_Triangle2(t::hai.Triangle{T}) where {T}
         a, b, c = t.vertices
         bc = (b + c) / 2
         return (hai.Triangle{T}(bc, a, b), hai.Triangle{T}(bc, c, a))
     end
 
-    measure_perf("subdivide_triangle", domain, fct; subdiv_algo=hai.subdivide_triangle)
-    measure_perf("subdivide_triangle2", domain, fct; subdiv_algo=hai.subdivide_triangle2)
+    measure_perf("subdivide_Triangle", domain, fct; subdiv_algo=hai.subdivide_Triangle)
+    measure_perf("subdivide_Triangle2", domain, fct; subdiv_algo=hai.subdivide_Triangle2)
 
     return nothing
 end
 
-function triangle_rule(case::Int=0)
-    domain = hai.triangle((0, 0), (1, 0), (0, 1))
+function Triangle_rule(case::Int=0)
+    domain = hai.Triangle((0, 0), (1, 0), (0, 1))
     fct = get_fct(2, case)
 
     measure_perf("TRIANGLE_RL19", domain, fct; ec=hai.embedded_cubature(hai.TRIANGLE_RL19))
@@ -104,7 +104,7 @@ function triangle_rule(case::Int=0)
     return nothing
 end
 
-function triangle_duffy(case::Int=0)
+function Triangle_duffy(case::Int=0)
     if case == 1
         println("-- Nearly-singular --")
         x₀ = SVector(-0.1, 0)
@@ -127,25 +127,25 @@ function triangle_duffy(case::Int=0)
 
     # I, E = hai.integrate(
     #     f_tr,
-    #     hai.triangle(BigFloat, (0, 0), (1, 0), (1, 1));
+    #     hai.Triangle(BigFloat, (0, 0), (1, 0), (1, 1));
     #     embedded_cubature=hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(2, 7)),
     #     maxsubdiv=2e4,
     # )
     # @show I E
 
-    triangle = hai.triangle((0, 0), (1, 0), (1, 1))
-    buffer_tr = hai.allocate_buffer(f_tr, triangle)
+    Triangle = hai.Triangle((0, 0), (1, 0), (1, 1))
+    buffer_tr = hai.allocate_buffer(f_tr, Triangle)
 
-    square = hai.rectangle((0, 0), (1, 1))
+    square = hai.Rectangle((0, 0), (1, 1))
     buffer_sq = hai.allocate_buffer(f_tr, square)
 
-    It, Et, ct = measure_perf("Triangle", triangle, f_tr; buffer=buffer_tr)
+    It, Et, ct = measure_perf("Triangle", Triangle, f_tr; buffer=buffer_tr)
     Is, Es, cs = measure_perf("Square", square, f_sq; buffer=buffer_sq)
 
-    println("triangle eval-count = $ct")
-    println("triangle est-err = $Et")
-    println("triangle rel-err = $(abs(It/I_ref-1))")
-    println("triangle abs-err = $(abs(It-I_ref))")
+    println("Triangle eval-count = $ct")
+    println("Triangle est-err = $Et")
+    println("Triangle rel-err = $(abs(It/I_ref-1))")
+    println("Triangle abs-err = $(abs(It-I_ref))")
     println()
     println("square eval-count = $cs")
     println("square est-err = $Es")
@@ -172,8 +172,8 @@ function square_cut(case::Int=0)
         I_ref = -3.72257456792235497e-1
     end
 
-    # t1 = hai.triangle(BigFloat, (0, 0), (1, 0), (0, 1))
-    # t2 = hai.triangle(BigFloat, (1, 1), (0, 1), (1, 0))
+    # t1 = hai.Triangle(BigFloat, (0, 0), (1, 0), (0, 1))
+    # t2 = hai.Triangle(BigFloat, (1, 1), (0, 1), (1, 0))
     # ec = hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(2, 7))
     # buffer = hai.allocate_buffer(fct, t1, ec)
     # n = 2e4
@@ -182,21 +182,21 @@ function square_cut(case::Int=0)
     # I2, E2 = hai.integrate(fct, t2; embedded_cubature=ec, buffer=buffer, maxsubdiv=n)
     # @show I1 + I2 max(E1, E2)
 
-    t1 = hai.triangle((0, 0), (1, 0), (0, 1))
-    t2 = hai.triangle((1, 1), (0, 1), (1, 0))
+    t1 = hai.Triangle((0, 0), (1, 0), (0, 1))
+    t2 = hai.Triangle((1, 1), (0, 1), (1, 0))
     buffer_tr = hai.allocate_buffer(fct, t1)
 
-    sq = hai.rectangle((0, 0), (1, 1))
+    sq = hai.Rectangle((0, 0), (1, 1))
     buffer_sq = hai.allocate_buffer(fct, sq)
 
     I1, E1, c1 = measure_perf("Triangle 1", t1, fct; buffer=buffer_tr)
     I2, E2, c2 = measure_perf("Triangle 2", t2, fct; buffer=buffer_tr)
     Is, Es, cs = measure_perf("Square", sq, fct; buffer=buffer_sq)
 
-    println("triangle eval-count = $(c1+c2)")
-    println("triangle est-err = $(max(E1,E2))")
-    println("triangle rel-err = $(abs((I1+I2)/I_ref-1))")
-    println("triangle abs-err = $(abs(I1+I2-I_ref))")
+    println("Triangle eval-count = $(c1+c2)")
+    println("Triangle est-err = $(max(E1,E2))")
+    println("Triangle rel-err = $(abs((I1+I2)/I_ref-1))")
+    println("Triangle abs-err = $(abs(I1+I2-I_ref))")
     println()
     println("square eval-count = $cs")
     println("square est-err = $Es")

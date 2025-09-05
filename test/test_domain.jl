@@ -8,7 +8,9 @@ Float = float(Int)
 # Volume test
 function volume_test(subdiv_algo, domain::AbstractDomain{D,T}) where {D,T}
     sub_domains = subdiv_algo(domain)
-    return isapprox(sum(abs_det_jac.(sub_domains)), abs_det_jac(domain); rtol=10 * eps(T))
+    _, μ = map_from_reference(domain)
+    μ_sub_sum = sum(v for (_, v) in map_from_reference.(sub_domains))
+    return isapprox(μ_sub_sum, μ; rtol=10 * eps(T))
 end
 
 @testset "Domain construction" begin
@@ -69,13 +71,14 @@ end
         @test r.xmax == 1
 
         s = Segment(-0.13, 0.78)
-        Φ = map_from_reference(s)
+        Φ, μ = map_from_reference(s)
         Ψ = map_to_reference(s)
         for v in (0, 1)
             @test Ψ(Φ(v)) ≈ v
         end
 
-        @test abs_det_jac(r) ≈ 1
+        _, μ = map_from_reference(r)
+        @test μ ≈ 1
 
         @test dimension(Segment) == 1
         @test dimension(Segment{Int}) == 1
@@ -108,7 +111,7 @@ end
             (-0.27, -0.12, 0.14, -0.47),
             (0.68, 0.12, -0.66, -1.49),
         )
-        Φ = map_from_reference(s)
+        Φ, _ = map_from_reference(s)
         Ψ = map_to_reference(s)
         for v in (
             SVector(0, 0, 0, 0),
@@ -120,7 +123,8 @@ end
             @test Ψ(Φ(v)) ≈ v
         end
 
-        @test abs_det_jac(reference_domain(Simplex{4,Int})) ≈ 1
+        _, μ = map_from_reference(r)
+        @test μ ≈ 1
 
         @test dimension(Triangle) == 2
         @test dimension(Tetrahedron) == 3
@@ -144,7 +148,7 @@ end
         @test r.corners == SVector(SVector(0, 0, 0, 0), SVector(1, 1, 1, 1))
 
         h = Orthotope((0.21, -0.58, -0.98, -1.25), (0.43, 1.75, 0.65, 1.87))
-        Φ = map_from_reference(h)
+        Φ, _ = map_from_reference(h)
         Ψ = map_to_reference(h)
         for v in (
             SVector(0, 0, 0, 0),
@@ -156,7 +160,8 @@ end
             @test Ψ(Φ(v)) ≈ v
         end
 
-        @test abs_det_jac(reference_domain(Orthotope{4,Int})) ≈ 1
+        _, μ = map_from_reference(r)
+        @test μ ≈ 1
 
         @test dimension(Rectangle) == 2
         @test dimension(Cuboid) == 3
