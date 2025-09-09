@@ -66,6 +66,7 @@ function _integrate(
     maxsubdiv,
 ) where {FCT,DOM}
     nb_subdiv = 0
+
     I, E = ec(fct, domain, norm)
 
     # initialize or reset the buffer
@@ -78,12 +79,8 @@ function _integrate(
         buffer
     end
 
-    # a quick check to see if splitting is really needed
-    if (E < atol) || (E < rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
-        return I, E, buffer
-    end
-
     push!(buffer, (domain, I, E))
+
     while (E > atol) && (E > rtol * norm(I)) && (nb_subdiv < maxsubdiv)
         domain, I_dom, E_dom = pop!(buffer)
         I -= I_dom
