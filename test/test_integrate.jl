@@ -110,3 +110,16 @@ end
     R = 0.9674120212411487
     @test abs(I - R) ≤ E * abs(R)
 end
+
+@testset "Return buffer" begin
+    domain = Segment(0, 1)
+    fct = x -> exp(x[1])
+
+    # by default, the buffer is not returned
+    @test length(integrate(fct, domain)) == 2
+
+    # we can ask for the buffer to be returned
+    @test length(integrate(fct, domain; return_buffer=Val(true))) == 3
+    I, E, buf = integrate(fct, domain; return_buffer=Val(true))
+    @test typeof(buf) == typeof(allocate_buffer(fct, domain))
+end
