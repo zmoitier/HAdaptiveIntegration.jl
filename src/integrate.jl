@@ -9,6 +9,7 @@
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
         maxsubdiv=8192 * 2^D,
+        return_buffer=Val(false),
     ) where {D,T}
 
 Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
@@ -18,8 +19,9 @@ an error estimate.
 - `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
    support the multiplication by a scalar of type `T` and the addition.
 - `domain::AbstractDomain{D,T}`: the integration domain. Currently, we support
-  [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref), [`Cuboid`](@ref),
-  `d`-dimensional [`Simplex`](@ref), and `d`-dimensional [`Orthotope`](@ref).
+  [`Segment`](@ref), [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref),
+  [`Cuboid`](@ref), `d`-dimensional [`Simplex`](@ref), and `d`-dimensional
+  [`Orthotope`](@ref).
 
 ## Optional arguments
 - `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded cubature,
@@ -48,10 +50,10 @@ function integrate(
     maxsubdiv=8192 * 2^D,
     return_buffer::Val{RETURN_BUF}=Val(false),
 ) where {D,T,RETURN_BUF}
-    I, E, buf = _integrate(
+    I, E, buffer = _integrate(
         fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
     )
-    return RETURN_BUF ? (I, E, buf) : (I, E)
+    return RETURN_BUF ? (I, E, buffer) : (I, E)
 end
 
 function _integrate(
@@ -71,14 +73,11 @@ function _integrate(
 
     # initialize or reset the buffer
     buffer = if isnothing(buffer)
-        BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(
-            Base.Order.By(last, Base.Order.Reverse)
-        )
+        BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(last, Base.Order.Reverse))
     else
         empty!(buffer.valtree)
         buffer
     end
-
     push!(buffer, (domain, I, E))
 
     while (E > atol) && (E > rtol * norm(I)) && (nb_subdiv < maxsubdiv)
@@ -119,9 +118,9 @@ function allocate_buffer(
     # - `I` is the integral value over the subdomain.
     # - `E` is the error estimate over the subdomain.
     # The heap is ordered by the maximum error (E) in descending order.
-    heap = BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(
+    buffer = BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(
         Base.Order.By(last, Base.Order.Reverse)
     )
 
-    return heap
+    return buffer
 end
