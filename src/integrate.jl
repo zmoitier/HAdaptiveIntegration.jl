@@ -50,13 +50,21 @@ function integrate(
     maxsubdiv=8192 * 2^D,
     return_buffer::Val{RETURN_BUF}=Val(false),
 ) where {D,T,RETURN_BUF}
-    I, E, buffer = _integrate(
-        fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
+    return _integrate(
+        fct,
+        domain,
+        embedded_cubature,
+        subdiv_algo,
+        buffer,
+        norm,
+        atol,
+        rtol,
+        maxsubdiv,
+        return_buffer,
     )
-    return RETURN_BUF ? (I, E, buffer) : (I, E)
 end
 
-function _integrate(
+@noinline function _integrate(
     fct::FCT,
     domain::DOM,
     ec::EmbeddedCubature,
@@ -66,7 +74,8 @@ function _integrate(
     atol,
     rtol,
     maxsubdiv,
-) where {FCT,DOM}
+    return_buffer::Val{RETURN_BUF},
+) where {FCT,DOM,RETURN_BUF}
     nb_subdiv = 0
 
     I, E = ec(fct, domain, norm)
@@ -97,7 +106,7 @@ function _integrate(
         @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
     end
 
-    return I, E, buffer
+    return RETURN_BUF ? (I, E, buffer) : (I, E)
 end
 
 """
