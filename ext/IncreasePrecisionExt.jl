@@ -70,7 +70,7 @@ function increase_precision(
         return V
     end
 
-    U, δ = newton!(U, G, x -> jacobian(G, x); atol=atol)
+    U, δ = newton(G, x -> jacobian(G, x), U; atol=atol)
 
     nodes, weights_high, weights_low = unpack(U, range_nodes, range_wh, range_wl, D)
     return TabulatedEmbeddedCubature{DOM}(;
@@ -85,31 +85,37 @@ function increase_precision(
     )
 end
 
-function newton!(U, G, DG; norm=x -> norm(x, Inf), atol=10 * eps(T), maxiter::Int=16)
+function newton(G, DG, U; norm=x -> norm(x, Inf), atol=10 * eps(T), maxiter::Int=16)
+    V = copy(U)
+
     iter = 0
-    R = G(U)
-    Δ = DG(U) \ R
-    U = U - Δ
+    R = G(V)
+    r = norm(R)
+    Δ = DG(V) \ R
+    δ = norm(Δ)
+    V = V - Δ
 
     iter = 1
-    while (norm(Δ) > atol) && (norm(R) > atol) && (iter < maxiter)
-        R = G(U)
-        Δ = DG(U) \ R
-        U = U - Δ
+    while (δ > atol) && (r > atol) && (iter < maxiter)
+        R = G(V)
+        r = norm(R)
+        Δ = DG(V) \ R
+        δ = norm(Δ)
+        V = V - Δ
         iter += 1
     end
 
     @info """Newton iteration : $iter
 
-        |Uₙ - Uₙ₋₁| = $(norm(Δ))
-            |F(Uₙ)| = $(norm(R))
+        |Uₙ - Uₙ₋₁| = $δ
+            |F(Uₙ)| = $r
     """
 
     if iter ≥ maxiter
         @warn "maximum number of iterations reached, try increasing the keyword argument `maxiter=$maxiter`."
     end
 
-    return U, norm(Δ)
+    return V, δ
 end
 
 # [ nodes[1]..., ..., nodes[end]..., weights_high..., weights_low... ]

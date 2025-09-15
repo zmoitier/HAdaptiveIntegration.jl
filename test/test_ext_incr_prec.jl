@@ -1,68 +1,54 @@
 using ForwardDiff
+using HAdaptiveIntegration
 using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
-using HAdaptiveIntegration: increase_precision
+using LinearAlgebra
 using Logging
 using Test
 
 global_logger(SimpleLogger(stderr, Logging.Warn))
 
 @testset "IncreasePrecisionExt" begin
-    @testset "Simplex" begin
-        tec = TabulatedEmbeddedCubature{Triangle}(;
-            description="Custom with 4 nodes",
-            reference="direct computation",
-            order_high=2,
-            order_low=1,
-            precision=6,
-            nodes=[
-                ["$(Float32(1/3))", "$(Float32(1/3))"],
-                ["$(Float32(0))", "$(Float32(0))"],
-                ["$(Float32(1))", "$(Float32(0))"],
-                ["$(Float32(0))", "$(Float32(1))"],
-            ],
-            weights_high=[
-                "$(Float32(3/8))",
-                "$(Float32(1/24))",
-                "$(Float32(1/24))",
-                "$(Float32(1/24))",
-            ],
-            weights_low=["$(Float32(1/2))"],
+    @testset "Triangle" begin
+        ec_ref = embedded_cubature(TRIANGLE_RL19, Float64)
+
+        ec_f32 = embedded_cubature(TRIANGLE_RL19, Float32)
+        tec0 = TabulatedEmbeddedCubature{Triangle}(;
+            description="Reduce Radon-Laurie",
+            reference="",
+            order_high=TRIANGLE_RL19.order_high,
+            order_low=TRIANGLE_RL19.order_low,
+            precision=7,
+            nodes=[Vector([string(v) for v in p]) for p in ec_f32.nodes],
+            weights_high=string.(ec_f32.weights_high),
+            weights_low=string.(ec_f32.weights_low),
         )
+        ec0 = embedded_cubature(tec0, Float64)
 
-        tec_incr = increase_precision(tec, Float64)
-        @test typeof(tec_incr) <: TabulatedEmbeddedCubature{Triangle}
+        tec1 = increase_precision(tec0, Float64; atol=1e-14)
+        @test typeof(tec1) <: TabulatedEmbeddedCubature{Triangle}
+        ec1 = embedded_cubature(tec1, Float64)
 
-        ec = embedded_cubature(tec_incr, Float64)
+        domain = reference_domain(Triangle{Float64})
+        fct = x -> exp(2 * x[1] + x[2])
+        R = (exp(1) - 1)^2 / 2
+        rtol = 1e-12
+
+        I, E = integrate(fct, domain; embedded_cubature=ec0, rtol=rtol)
+        @show I, E, R
+        @test abs(I - R) > rtol * abs(R)
+
+        I, E = integrate(fct, domain; embedded_cubature=ec1, rtol=rtol)
+        @show I, E, R
+        @test abs(I - R) ≤ rtol * abs(R)
     end
 
-    @testset "Orthotope" begin
-        tec = TabulatedEmbeddedCubature{Rectangle}(;
-            description="Custom with 5 nodes",
-            reference="direct computation",
-            order_high=3,
-            order_low=1,
-            precision=6,
-            nodes=[
-                ["$(Float32(1/2))", "$(Float32(1/2))"],
-                ["$(Float32(0))", "$(Float32(0))"],
-                ["$(Float32(1))", "$(Float32(0))"],
-                ["$(Float32(0))", "$(Float32(1))"],
-                ["$(Float32(1))", "$(Float32(1))"],
-            ],
-            weights_high=[
-                "$(Float32(2/3))",
-                "$(Float32(1/12))",
-                "$(Float32(1/12))",
-                "$(Float32(1/12))",
-                "$(Float32(1/12))",
-            ],
-            weights_low=["$(Float32(1))"],
-        )
+    @testset "Rectangle" begin
+        tec0 = simple_cbt_orthotope(2, Float32)
 
-        tec_incr = increase_precision(tec, Float64)
-        @test typeof(tec_incr) <: TabulatedEmbeddedCubature{Rectangle}
+        tec1 = increase_precision(tec0, Float64)
+        @test typeof(tec1) <: TabulatedEmbeddedCubature{Orthotope{2}}
 
-        ec = embedded_cubature(tec_incr, Float64)
+        ec = embedded_cubature(tec1, Float64)
     end
 end
