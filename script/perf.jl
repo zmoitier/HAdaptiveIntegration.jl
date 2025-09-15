@@ -72,18 +72,18 @@ function check_all()
     return nothing
 end
 
-function Triangle_subdiv(case::Int=0)
+function triangle_subdiv(case::Int=0)
     domain = hai.Triangle((0, 0), (1, 0), (0, 1))
     fct = get_fct(2, case)
 
-    function subdivide_Triangle2(t::hai.Triangle{T}) where {T}
+    function subdivide_triangle2(t::hai.Triangle{T}) where {T}
         a, b, c = t.vertices
         bc = (b + c) / 2
         return (hai.Triangle{T}(bc, a, b), hai.Triangle{T}(bc, c, a))
     end
 
-    measure_perf("subdivide_Triangle", domain, fct; subdiv_algo=hai.subdivide_Triangle)
-    measure_perf("subdivide_Triangle2", domain, fct; subdiv_algo=hai.subdivide_Triangle2)
+    measure_perf("subdivide_triangle", domain, fct; subdiv_algo=hai.subdivide_triangle)
+    measure_perf("subdivide_triangle2", domain, fct; subdiv_algo=subdivide_triangle2)
 
     return nothing
 end
