@@ -88,7 +88,7 @@ function triangle_subdiv(case::Int=0)
     return nothing
 end
 
-function Triangle_rule(case::Int=0)
+function triangle_rule(case::Int=0)
     domain = hai.Triangle((0, 0), (1, 0), (0, 1))
     fct = get_fct(2, case)
 
@@ -104,7 +104,7 @@ function Triangle_rule(case::Int=0)
     return nothing
 end
 
-function Triangle_duffy(case::Int=0)
+function triangle_duffy(case::Int=0)
     if case == 1
         println("-- Nearly-singular --")
         x₀ = SVector(-0.1, 0)
@@ -133,19 +133,19 @@ function Triangle_duffy(case::Int=0)
     # )
     # @show I E
 
-    Triangle = hai.Triangle((0, 0), (1, 0), (1, 1))
-    buffer_tr = hai.allocate_buffer(f_tr, Triangle)
+    triangle = hai.Triangle((0, 0), (1, 0), (1, 1))
+    buffer_tr = hai.allocate_buffer(f_tr, triangle)
 
     square = hai.Rectangle((0, 0), (1, 1))
     buffer_sq = hai.allocate_buffer(f_tr, square)
 
-    It, Et, ct = measure_perf("Triangle", Triangle, f_tr; buffer=buffer_tr)
+    It, Et, ct = measure_perf("Triangle", triangle, f_tr; buffer=buffer_tr)
     Is, Es, cs = measure_perf("Square", square, f_sq; buffer=buffer_sq)
 
-    println("Triangle eval-count = $ct")
-    println("Triangle est-err = $Et")
-    println("Triangle rel-err = $(abs(It/I_ref-1))")
-    println("Triangle abs-err = $(abs(It-I_ref))")
+    println("triangle eval-count = $ct")
+    println("triangle est-err = $Et")
+    println("triangle rel-err = $(abs(It/I_ref-1))")
+    println("triangle abs-err = $(abs(It-I_ref))")
     println()
     println("square eval-count = $cs")
     println("square est-err = $Es")
@@ -193,10 +193,10 @@ function square_cut(case::Int=0)
     I2, E2, c2 = measure_perf("Triangle 2", t2, fct; buffer=buffer_tr)
     Is, Es, cs = measure_perf("Square", sq, fct; buffer=buffer_sq)
 
-    println("Triangle eval-count = $(c1+c2)")
-    println("Triangle est-err = $(max(E1,E2))")
-    println("Triangle rel-err = $(abs((I1+I2)/I_ref-1))")
-    println("Triangle abs-err = $(abs(I1+I2-I_ref))")
+    println("triangle eval-count = $(c1+c2)")
+    println("triangle est-err = $(max(E1,E2))")
+    println("triangle rel-err = $(abs((I1+I2)/I_ref-1))")
+    println("triangle abs-err = $(abs(I1+I2-I_ref))")
     println()
     println("square eval-count = $cs")
     println("square est-err = $Es")
