@@ -9,6 +9,7 @@
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
         maxsubdiv=8192 * 2^D,
+        return_buffer=Val(false),
     ) where {D,T}
 
 Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
@@ -18,8 +19,9 @@ an error estimate.
 - `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
    support the multiplication by a scalar of type `T` and the addition.
 - `domain::AbstractDomain{D,T}`: the integration domain. Currently, we support
-  [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref), [`Cuboid`](@ref),
-  `d`-dimensional [`Simplex`](@ref), and `d`-dimensional [`Orthotope`](@ref).
+  [`Segment`](@ref), [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref),
+  [`Cuboid`](@ref), `d`-dimensional [`Simplex`](@ref), and `d`-dimensional
+  [`Orthotope`](@ref).
 
 ## Optional arguments
 - `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded cubature,
@@ -33,6 +35,8 @@ an error estimate.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
 - `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
+- `return_buffer=Val(false)`: if `Val(true)`, the buffer used for the computation is also
+   returned.
 """
 function integrate(
     fct,
@@ -44,13 +48,23 @@ function integrate(
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
-) where {D,T}
+    return_buffer::Val{RETURN_BUF}=Val(false),
+) where {D,T,RETURN_BUF}
     return _integrate(
-        fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
+        fct,
+        domain,
+        embedded_cubature,
+        subdiv_algo,
+        buffer,
+        norm,
+        atol,
+        rtol,
+        maxsubdiv,
+        return_buffer,
     )
 end
 
-function _integrate(
+@noinline function _integrate(
     fct::FCT,
     domain::DOM,
     ec::EmbeddedCubature,
@@ -60,35 +74,30 @@ function _integrate(
     atol,
     rtol,
     maxsubdiv,
-) where {FCT,DOM}
+    return_buffer::Val{RETURN_BUF},
+) where {FCT,DOM,RETURN_BUF}
     nb_subdiv = 0
+
     I, E = ec(fct, domain, norm)
 
-    # a quick check to see if splitting is really needed
-    if (E < atol) || (E < rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
-        return I, E
-    end
-
-    # split is needed, so initialize the heap
-    heap = if isnothing(buffer)
-        BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(
-            Base.Order.By(last, Base.Order.Reverse)
-        )
+    # initialize or reset the buffer
+    buffer = if isnothing(buffer)
+        BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(last, Base.Order.Reverse))
     else
         empty!(buffer.valtree)
         buffer
     end
+    push!(buffer, (domain, I, E))
 
-    push!(heap, (domain, I, E))
     while (E > atol) && (E > rtol * norm(I)) && (nb_subdiv < maxsubdiv)
-        domain, I_dom, E_dom = pop!(heap)
+        domain, I_dom, E_dom = pop!(buffer)
         I -= I_dom
         E -= E_dom
         for child in subdiv_algo(domain)
             I_child, E_child = ec(fct, child, norm)
             I += I_child
             E += E_child
-            push!(heap, (child, I_child, E_child))
+            push!(buffer, (child, I_child, E_child))
         end
         nb_subdiv += 1
     end
@@ -97,7 +106,7 @@ function _integrate(
         @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
     end
 
-    return I, E
+    return RETURN_BUF ? (I, E, buffer) : (I, E)
 end
 
 """
@@ -118,9 +127,9 @@ function allocate_buffer(
     # - `I` is the integral value over the subdomain.
     # - `E` is the error estimate over the subdomain.
     # The heap is ordered by the maximum error (E) in descending order.
-    heap = BinaryHeap{Tuple{typeof(domain),typeof(I),typeof(E)}}(
+    buffer = BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(
         Base.Order.By(last, Base.Order.Reverse)
     )
 
-    return heap
+    return buffer
 end

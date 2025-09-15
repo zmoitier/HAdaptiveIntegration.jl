@@ -57,11 +57,7 @@ end
 
 function map_from_reference(h::Orthotope{D,T}) where {D,T}
     diff = h.corners[2] - h.corners[1]
-    return u -> h.corners[1] .+ u .* diff
-end
-
-function abs_det_jac(h::Orthotope{D,T}) where {D,T}
-    return prod(h.corners[2] - h.corners[1])
+    return (u -> h.corners[1] .+ u .* diff, prod(diff))
 end
 
 function map_to_reference(h::Orthotope{D,T}) where {D,T}
@@ -108,7 +104,7 @@ its midpoint.
 """
 function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
     refs = subdivide_reference_orthotope(Val(D), T)
-    f = map_from_reference(h)
+    f, _ = map_from_reference(h)
     map(refs) do ref
         Orthotope(f.(ref.corners))
     end

@@ -61,19 +61,19 @@ function check_all()
     e = exp(1)
     fct = x -> cos(e * x[1] + prod(x))
 
-    measure_perf("Segment", hai.segment(0, 1), fct)
-    measure_perf("Rectangle", hai.rectangle((0, 0), (1, 1)), fct)
-    measure_perf("Triangle", hai.triangle((0, 0), (1, 0), (0, 1)), fct)
-    measure_perf("Cuboid", hai.cuboid((0, 0, 0), (1, 1, 1)), fct)
+    measure_perf("Segment", hai.Segment(0, 1), fct)
+    measure_perf("Rectangle", hai.Rectangle((0, 0), (1, 1)), fct)
+    measure_perf("Triangle", hai.Triangle((0, 0), (1, 0), (0, 1)), fct)
+    measure_perf("Cuboid", hai.Cuboid((0, 0, 0), (1, 1, 1)), fct)
     measure_perf(
-        "Tetrahedron", hai.tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)), fct
+        "Tetrahedron", hai.Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)), fct
     )
 
     return nothing
 end
 
 function triangle_subdiv(case::Int=0)
-    domain = hai.triangle((0, 0), (1, 0), (0, 1))
+    domain = hai.Triangle((0, 0), (1, 0), (0, 1))
     fct = get_fct(2, case)
 
     function subdivide_triangle2(t::hai.Triangle{T}) where {T}
@@ -83,13 +83,13 @@ function triangle_subdiv(case::Int=0)
     end
 
     measure_perf("subdivide_triangle", domain, fct; subdiv_algo=hai.subdivide_triangle)
-    measure_perf("subdivide_triangle2", domain, fct; subdiv_algo=hai.subdivide_triangle2)
+    measure_perf("subdivide_triangle2", domain, fct; subdiv_algo=subdivide_triangle2)
 
     return nothing
 end
 
 function triangle_rule(case::Int=0)
-    domain = hai.triangle((0, 0), (1, 0), (0, 1))
+    domain = hai.Triangle((0, 0), (1, 0), (0, 1))
     fct = get_fct(2, case)
 
     measure_perf("TRIANGLE_RL19", domain, fct; ec=hai.embedded_cubature(hai.TRIANGLE_RL19))
@@ -127,16 +127,16 @@ function triangle_duffy(case::Int=0)
 
     # I, E = hai.integrate(
     #     f_tr,
-    #     hai.triangle(BigFloat, (0, 0), (1, 0), (1, 1));
+    #     hai.Triangle(BigFloat, (0, 0), (1, 0), (1, 1));
     #     embedded_cubature=hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(2, 7)),
     #     maxsubdiv=2e4,
     # )
     # @show I E
 
-    triangle = hai.triangle((0, 0), (1, 0), (1, 1))
+    triangle = hai.Triangle((0, 0), (1, 0), (1, 1))
     buffer_tr = hai.allocate_buffer(f_tr, triangle)
 
-    square = hai.rectangle((0, 0), (1, 1))
+    square = hai.Rectangle((0, 0), (1, 1))
     buffer_sq = hai.allocate_buffer(f_tr, square)
 
     It, Et, ct = measure_perf("Triangle", triangle, f_tr; buffer=buffer_tr)
@@ -172,8 +172,8 @@ function square_cut(case::Int=0)
         I_ref = -3.72257456792235497e-1
     end
 
-    # t1 = hai.triangle(BigFloat, (0, 0), (1, 0), (0, 1))
-    # t2 = hai.triangle(BigFloat, (1, 1), (0, 1), (1, 0))
+    # t1 = hai.Triangle(BigFloat, (0, 0), (1, 0), (0, 1))
+    # t2 = hai.Triangle(BigFloat, (1, 1), (0, 1), (1, 0))
     # ec = hai.embedded_cubature(BigFloat, hai.GrundmannMoeller(2, 7))
     # buffer = hai.allocate_buffer(fct, t1, ec)
     # n = 2e4
@@ -182,11 +182,11 @@ function square_cut(case::Int=0)
     # I2, E2 = hai.integrate(fct, t2; embedded_cubature=ec, buffer=buffer, maxsubdiv=n)
     # @show I1 + I2 max(E1, E2)
 
-    t1 = hai.triangle((0, 0), (1, 0), (0, 1))
-    t2 = hai.triangle((1, 1), (0, 1), (1, 0))
+    t1 = hai.Triangle((0, 0), (1, 0), (0, 1))
+    t2 = hai.Triangle((1, 1), (0, 1), (1, 0))
     buffer_tr = hai.allocate_buffer(fct, t1)
 
-    sq = hai.rectangle((0, 0), (1, 1))
+    sq = hai.Rectangle((0, 0), (1, 1))
     buffer_sq = hai.allocate_buffer(fct, sq)
 
     I1, E1, c1 = measure_perf("Triangle 1", t1, fct; buffer=buffer_tr)

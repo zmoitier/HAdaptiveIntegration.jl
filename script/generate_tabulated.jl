@@ -5,7 +5,6 @@ using HAdaptiveIntegration:
     GenzMalik,
     GrundmannMoeller,
     RadonLaurie,
-    abs_det_jac,
     cuboid,
     embedded_cubature,
     map_to_reference,
@@ -271,7 +270,9 @@ function to_zero(node::SVector{D,T}, tol::T) where {D,T}
 end
 
 function to_reference(ec::EmbeddedCubature{D,T}, dom::AbstractDomain{D,T}) where {D,T}
-    λ = abs_det_jac(reference_domain(typeof(dom))) / abs_det_jac(dom)
+    _, μ_ref = map_from_reference(reference_domain(typeof(dom)))
+    _, μ = map_from_reference(dom)
+    λ = μ_ref / μ
     Ψ = map_to_reference(dom)
 
     nodes = Vector{SVector{D,T}}()

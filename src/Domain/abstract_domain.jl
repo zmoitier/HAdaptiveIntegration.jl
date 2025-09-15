@@ -9,7 +9,6 @@ Abstract type for integration domains' in `D` dimensions with element type `T`.
 
 ## Mandatory methods:
 - [`map_from_reference`](@ref)
-- [`abs_det_jac`](@ref)
 
 ## Useful (but non-mandatory) methods:
 - [`reference_domain`](@ref)
@@ -18,19 +17,13 @@ Abstract type for integration domains' in `D` dimensions with element type `T`.
 abstract type AbstractDomain{D,T} end
 
 """
-    map_from_reference(domain::DOM) where {DOM<:AbstractDomain}
+    Φ, μ = map_from_reference(domain::DOM) where {DOM<:AbstractDomain}
 
-Return an anonymous function that maps the reference domain to the physical domain `domain`.
+Return Φ and μ where Φ is an anonymous function that maps the reference domain to the
+physical domain `domain` and μ is the absolute value of the Jacobian's determinant of the
+map Φ.
 """
 function map_from_reference end
-
-"""
-    abs_det_jac(domain::DOM) where {DOM<:AbstractDomain}
-
-Return the absolute value of the Jacobian's determinant of the map from the reference domain
-to the physical domain `domain`.
-"""
-function abs_det_jac end
 
 """
     map_to_reference(domain::DOM) where {DOM<:AbstractDomain}

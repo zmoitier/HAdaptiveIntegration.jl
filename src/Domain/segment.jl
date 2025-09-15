@@ -45,11 +45,7 @@ end
 
 function map_from_reference(s::Segment{T}) where {T}
     diff = s.xmax - s.xmin
-    return u -> s.xmin .+ u .* diff
-end
-
-function abs_det_jac(s::Segment{T}) where {T}
-    return s.xmax - s.xmin
+    return (u -> s.xmin .+ u .* diff, diff)
 end
 
 function map_to_reference(s::Segment{T}) where {T}

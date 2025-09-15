@@ -3,7 +3,7 @@ module Domain
 # Domain types
 export AbstractDomain, Segment, Triangle, Rectangle, Tetrahedron, Cuboid, Simplex, Orthotope
 # Methods on domains
-export dimension, reference_domain, map_from_reference, map_to_reference, abs_det_jac
+export dimension, reference_domain, map_from_reference, map_to_reference
 # Subdivision methods
 export subdivide_segment,
     subdivide_simplex,
