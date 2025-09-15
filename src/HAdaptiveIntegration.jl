@@ -20,4 +20,7 @@ include("default.jl")
 include("integrate.jl")
 export integrate
 
+# Extensions
+include("extension.jl")
+
 end

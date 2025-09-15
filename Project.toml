@@ -8,10 +8,17 @@ DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
+[weakdeps]
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+
+[extensions]
+IncreasePrecisionExt = "Optim"
+
 [compat]
 Aqua = "0.8"
 DataStructures = "0.18, 0.19"
 LinearAlgebra = "1"
+Optim = "1"
 Quadmath = "0.5"
 StaticArrays = "1"
 Test = "1"
