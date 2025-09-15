@@ -33,7 +33,6 @@ julia> import Pkg; Pkg.add("HAdaptiveIntegration")
 ```
 
 Then use
-
 ```@example quickstart
 using HAdaptiveIntegration
 ```
