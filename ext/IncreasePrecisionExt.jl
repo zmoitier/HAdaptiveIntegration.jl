@@ -76,7 +76,7 @@ function increase_precision(
         return r
     end
 
-    @info "F(U₀) = $(F(U))"
+    @info "Initial objective value: $(F(U))"
 
     result = optimize(F, U, LBFGS(), options; autodiff=:forward)
     @info result
