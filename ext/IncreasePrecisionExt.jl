@@ -3,9 +3,10 @@ module IncreasePrecisionExt
 import HAdaptiveIntegration: increase_precision
 
 using Base.Iterators: countfrom, partition
-using HAdaptiveIntegration: Orthotope, Simplex, TabulatedEmbeddedCubature, dimension, orders
-using LinearAlgebra: norm
 using ForwardDiff: jacobian
+using HAdaptiveIntegration:
+    Orthotope, Segment, Simplex, TabulatedEmbeddedCubature, dimension, orders
+using LinearAlgebra: norm
 using StaticArrays: SVector
 
 function __init__()
@@ -25,7 +26,9 @@ function increase_precision(
     U, range_nodes, range_wh, range_wl = pack(tec, T, D)
     order_high, order_low = orders(tec)
 
-    if DOM <: Simplex
+    if DOM <: Segment
+        exp2int = exp2int = [[(i,) => 1//(i + 1)] for i in 0:order_high]
+    elseif DOM <: Simplex
         exp2int = integral_monomial_simplex(D, order_high)
     elseif DOM <: Orthotope
         exp2int = integral_monomial_orthotope(D, order_high)
@@ -96,14 +99,15 @@ function newton!(U, G, DG; norm=x -> norm(x, Inf), atol=10 * eps(T), maxiter::In
         iter += 1
     end
 
+    @info """Newton iteration : $iter
+
+        |Uₙ - Uₙ₋₁| = $(norm(Δ))
+            |F(Uₙ)| = $(norm(R))
+    """
+
     if iter ≥ maxiter
         @warn "maximum number of iterations reached, try increasing the keyword argument `maxiter=$maxiter`."
-    else
-        @info "iter = $iter"
     end
-
-    @info "|Uₙ - Uₙ₋₁| = $(norm(R))"
-    @info "|F(Uₙ)| = $(norm(R))"
 
     return U, norm(Δ)
 end

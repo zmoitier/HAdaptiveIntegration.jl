@@ -36,8 +36,8 @@ test = [
     "Aqua",
     "DataStructures",
     "ForwardDiff",
+    "Quadmath",
     "LinearAlgebra",
     "Logging",
-    "Quadmath",
     "Test",
 ]

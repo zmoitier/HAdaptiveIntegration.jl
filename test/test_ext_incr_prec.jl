@@ -1,8 +1,8 @@
+using ForwardDiff
 using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
 using HAdaptiveIntegration: increase_precision
 using Logging
-using Optim
 using Test
 
 global_logger(SimpleLogger(stderr, Logging.Warn))
@@ -30,8 +30,10 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
             weights_low=["$(Float32(1/2))"],
         )
 
-        ec = increase_precision(tec, Float64, Optim.Options(; g_abstol=1e-10))
-        @test typeof(ec) <: EmbeddedCubature{2,Float64}
+        tec_incr = increase_precision(tec, Float64)
+        @test typeof(tec_incr) <: TabulatedEmbeddedCubature{Triangle}
+
+        ec = embedded_cubature(tec_incr, Float64)
     end
 
     @testset "Orthotope" begin
@@ -58,7 +60,9 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
             weights_low=["$(Float32(1))"],
         )
 
-        ec = increase_precision(tec, Float64, Optim.Options(; g_abstol=1e-10))
-        @test typeof(ec) <: EmbeddedCubature{2,Float64}
+        tec_incr = increase_precision(tec, Float64)
+        @test typeof(tec_incr) <: TabulatedEmbeddedCubature{Rectangle}
+
+        ec = embedded_cubature(tec_incr, Float64)
     end
 end
