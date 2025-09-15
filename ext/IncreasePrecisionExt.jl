@@ -3,15 +3,9 @@ module IncreasePrecisionExt
 import HAdaptiveIntegration: increase_precision
 
 using Base.Iterators: countfrom, partition
-using HAdaptiveIntegration:
-    EmbeddedCubature,
-    Orthotope,
-    Simplex,
-    TabulatedEmbeddedCubature,
-    dimension,
-    embedded_cubature,
-    orders
-using Optim: LBFGS, Options, minimizer, optimize
+using HAdaptiveIntegration: Orthotope, Simplex, TabulatedEmbeddedCubature, dimension, orders
+using LinearAlgebra: norm
+using ForwardDiff: jacobian
 using StaticArrays: SVector
 
 function __init__()
@@ -19,13 +13,11 @@ function __init__()
 end
 
 function increase_precision(
-    tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}, options::Options=Options()
+    tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}; atol::T=10 * eps(T)
 ) where {DOM,T}
-    εT = eps(T)
-
-    if εT ≥ 10.0^(-tec.precision)
+    if eps(T) ≥ 10.0^(-tec.precision)
         @info "Tabulated precision $(tec.precision) is sufficient for type $T. No need to increase precision."
-        return embedded_cubature(tec, T)
+        return tec
     end
     @info "Need to increase precision, it may take some time."
 
@@ -42,16 +34,15 @@ function increase_precision(
     end
 
     L = length(range_wl)
-    function F(U)
-        r = zero(eltype(U))
-
+    function G(U::Vector{S}) where {S}
         nodes = @view U[range_nodes]
         wh = @view U[range_wh]
         wl = @view U[range_wl]
 
-        for e2i in exp2int[1:order_low]
+        V = Vector{S}(undef, order_high + order_low + 2)
+        for (k, e2i) in enumerate(exp2int[1:(order_low + 1)])
             for (e, v) in e2i
-                vh, vl = zero(v), zero(v)
+                vh, vl = zero(S), zero(S)
                 for (i, node) in enumerate(partition(nodes, D))
                     p = prod(node .^ e)
                     vh += wh[i] * p
@@ -59,29 +50,62 @@ function increase_precision(
                         vl += wl[i] * p
                     end
                 end
-                r += (vh - v)^2 + (vl - v)^2
+                V[k] = vh - v
+                V[order_high + 1 + k] = vl - v
             end
         end
-        for e2i in exp2int[(order_low + 1):order_high]
+        for (k, e2i) in enumerate(exp2int[(order_low + 2):(order_high + 1)])
             for (e, v) in e2i
                 vh = zero(v)
                 for (i, node) in enumerate(partition(nodes, D))
                     p = prod(node .^ e)
                     vh += wh[i] * p
                 end
-                r += (vh - v)^2
+                V[order_low + 1 + k] = vh - v
             end
         end
-
-        return r
+        return V
     end
 
-    @info "Initial objective value: $(F(U))"
+    U, δ = newton!(U, G, x -> jacobian(G, x); atol=atol)
 
-    result = optimize(F, U, LBFGS(), options; autodiff=:forward)
-    @info result
+    nodes, weights_high, weights_low = unpack(U, range_nodes, range_wh, range_wl, D)
+    return TabulatedEmbeddedCubature{DOM}(;
+        description=tec.description * " (increased precision)",
+        reference=tec.reference,
+        order_high=tec.order_high,
+        order_low=tec.order_low,
+        precision=-floor(Int, log10(δ)),
+        nodes=[Vector(string.(node)) for node in nodes],
+        weights_high=string.(weights_high),
+        weights_low=string.(weights_low),
+    )
+end
 
-    return unpack(minimizer(result), range_nodes, range_wh, range_wl, D)
+function newton!(U, G, DG; norm=x -> norm(x, Inf), atol=10 * eps(T), maxiter::Int=16)
+    iter = 0
+    R = G(U)
+    Δ = DG(U) \ R
+    U = U - Δ
+
+    iter = 1
+    while (norm(Δ) > atol) && (norm(R) > atol) && (iter < maxiter)
+        R = G(U)
+        Δ = DG(U) \ R
+        U = U - Δ
+        iter += 1
+    end
+
+    if iter ≥ maxiter
+        @warn "maximum number of iterations reached, try increasing the keyword argument `maxiter=$maxiter`."
+    else
+        @info "iter = $iter"
+    end
+
+    @info "|Uₙ - Uₙ₋₁| = $(norm(R))"
+    @info "|F(Uₙ)| = $(norm(R))"
+
+    return U, norm(Δ)
 end
 
 # [ nodes[1]..., ..., nodes[end]..., weights_high..., weights_low... ]
@@ -105,7 +129,6 @@ function unpack(
     D::Int,
 ) where {T}
     nodes = Vector{SVector{D,T}}()
-
     for node in partition(U[range_pts], D)
         push!(nodes, SVector{D}(node))
     end
@@ -113,7 +136,7 @@ function unpack(
     weights_high = U[range_wh]
     weights_low = U[range_wl]
 
-    return EmbeddedCubature(nodes, weights_high, weights_low)
+    return (nodes, weights_high, weights_low)
 end
 
 function integral_monomial_simplex(dim::Int, deg_tot_max::Int)

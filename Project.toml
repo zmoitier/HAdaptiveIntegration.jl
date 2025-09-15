@@ -9,18 +9,17 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [weakdeps]
-Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 
 [extensions]
-IncreasePrecisionExt = "Optim"
+IncreasePrecisionExt = "ForwardDiff"
 
 [compat]
 Aqua = "0.8"
 DataStructures = "0.18, 0.19"
+ForwardDiff = "1"
 LinearAlgebra = "1"
 Logging = "1"
-Optim = "1"
-Pkg = "1"
 Quadmath = "0.5"
 StaticArrays = "1"
 Test = "1"
@@ -29,7 +28,6 @@ julia = "1"
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
-Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
@@ -37,10 +35,9 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 test = [
     "Aqua",
     "DataStructures",
+    "ForwardDiff",
     "LinearAlgebra",
     "Logging",
-    "Optim",
-    "Pkg",
     "Quadmath",
     "Test",
 ]

@@ -1,3 +1,4 @@
+using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
 using HAdaptiveIntegration: increase_precision
 using Logging
@@ -11,7 +12,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         tec = TabulatedEmbeddedCubature{Triangle}(;
             description="Custom with 4 nodes",
             reference="direct computation",
-            order_high=3,
+            order_high=2,
             order_low=1,
             precision=6,
             nodes=[
@@ -37,7 +38,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         tec = TabulatedEmbeddedCubature{Rectangle}(;
             description="Custom with 5 nodes",
             reference="direct computation",
-            order_high=4,
+            order_high=3,
             order_low=1,
             precision=6,
             nodes=[
