@@ -1,6 +1,5 @@
 using Aqua
 using HAdaptiveIntegration
-using Pkg
 using Test
 
 @testset "Code quality (Aqua.jl)" begin
@@ -14,6 +13,5 @@ end
 end
 
 @testset "IncreasePrecisionExt.jl" begin
-    Pkg.add("Optim")
     include("test_ext_incr_prec.jl")
 end

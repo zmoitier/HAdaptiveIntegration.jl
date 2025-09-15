@@ -74,11 +74,11 @@ function increase_precision(
 
     nodes, weights_high, weights_low = unpack(U, range_nodes, range_wh, range_wl, D)
     return TabulatedEmbeddedCubature{DOM}(;
-        description=tec.description * " (increased precision)",
+        description=(tec.description * " (increased precision)"),
         reference=tec.reference,
         order_high=tec.order_high,
         order_low=tec.order_low,
-        precision=-floor(Int, log10(δ)),
+        precision=(-floor(Int, log10(δ))),
         nodes=[Vector(string.(node)) for node in nodes],
         weights_high=string.(weights_high),
         weights_low=string.(weights_low),
