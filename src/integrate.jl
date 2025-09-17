@@ -107,7 +107,7 @@ end
     end
 
     # How to enable debug logs with out allocations ?
-    # @debug LazyString("number of subdivision = ", nb_subdiv) 
+    # @debug LazyString("number of subdivision = ", nb_subdiv)
 
     return RETURN_BUF ? (I, E, buffer) : (I, E)
 end
