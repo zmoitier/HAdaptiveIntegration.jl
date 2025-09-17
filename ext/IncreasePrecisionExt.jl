@@ -5,8 +5,15 @@ import HAdaptiveIntegration: increase_precision
 using Base.Iterators: countfrom, partition
 using ForwardDiff: jacobian
 using HAdaptiveIntegration:
-    Orthotope, Segment, Simplex, TabulatedEmbeddedCubature, dimension, orders
+    Orthotope,
+    Segment,
+    Simplex,
+    TabulatedEmbeddedCubature,
+    dimension,
+    integral_monomials,
+    orders
 using LinearAlgebra: norm
+using Printf: @sprintf
 using StaticArrays: SVector
 
 function __init__()
@@ -17,24 +24,30 @@ function increase_precision(
     tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}; atol::T=10 * eps(T)
 ) where {DOM,T}
     if eps(T) ≥ 10.0^(-tec.precision)
-        @info "Tabulated precision $(tec.precision) is sufficient for type $T. No need to increase precision."
+        @info LazyString(
+            "Tabulated precision ",
+            tec.precision,
+            " is sufficient for type ",
+            T,
+            ". No need to increase precision.",
+        )
         return tec
     end
-    @info "Need to increase precision, it may take some time."
+
+    @info LazyString(
+        "Increasing to target precision ",
+        -floor(Int, log10(atol)),
+        " from tabulated precision ",
+        tec.precision,
+        ". This may take some time.",
+    )
 
     D = dimension(DOM)
     U, range_nodes, range_wh, range_wl = pack(tec, T, D)
     order_high, order_low = orders(tec)
-
-    if DOM <: Segment
-        exp2int = exp2int = [[(i,) => 1//(i + 1)] for i in 0:order_high]
-    elseif DOM <: Simplex
-        exp2int = integral_monomial_simplex(D, order_high)
-    elseif DOM <: Orthotope
-        exp2int = integral_monomial_orthotope(D, order_high)
-    else
-        error("increasing_precision is not implemented for domain type: $DOM")
-    end
+    exponent2values, range_low, range_high = _flatten_with_type(
+        integral_monomials(DOM, order_high), T, order_high, order_low
+    )
 
     L = length(range_wl)
     function G(U::Vector{S}) where {S}
@@ -42,31 +55,27 @@ function increase_precision(
         wh = @view U[range_wh]
         wl = @view U[range_wl]
 
-        V = Vector{S}(undef, order_high + order_low + 2)
-        for (k, e2i) in enumerate(exp2int[1:(order_low + 1)])
-            for (e, v) in e2i
-                vh, vl = zero(S), zero(S)
-                for (i, node) in enumerate(partition(nodes, D))
-                    p = prod(node .^ e)
-                    vh += wh[i] * p
-                    if i ≤ L
-                        vl += wl[i] * p
-                    end
+        V = Vector{S}(undef, range_high.stop + range_low.stop)
+        for (k, (α, vₑₓ)) in enumerate(exponent2values[range_low])
+            vh, vl = zero(S), zero(S)
+            for (i, node) in enumerate(partition(nodes, D))
+                r = prod(node .^ α)
+                vh += wh[i] * r
+                if i ≤ L
+                    vl += wl[i] * r
                 end
-                V[k] = vh - v
-                V[order_high + 1 + k] = vl - v
             end
+            V[k] = vh - vₑₓ
+            V[range_high.stop + k] = vl - vₑₓ
         end
-        for (k, e2i) in enumerate(exp2int[(order_low + 2):(order_high + 1)])
-            for (e, v) in e2i
-                vh = zero(v)
-                for (i, node) in enumerate(partition(nodes, D))
-                    p = prod(node .^ e)
-                    vh += wh[i] * p
-                end
-                V[order_low + 1 + k] = vh - v
+        for (k, (α, vₑₓ)) in enumerate(exponent2values[range_high])
+            vh = zero(S)
+            for (i, node) in enumerate(partition(nodes, D))
+                vh += wh[i] * prod(node .^ α)
             end
+            V[range_low.stop + k] = vh - vₑₓ
         end
+
         return V
     end
 
@@ -105,10 +114,11 @@ function newton(G, DG, U; norm=x -> norm(x, Inf), atol=10 * eps(T), maxiter::Int
         iter += 1
     end
 
-    @info """Newton iteration : $iter
+    @info """Newton convergence report:
 
-        |Uₙ - Uₙ₋₁| = $δ
-            |F(Uₙ)| = $r
+    |Uₙ - Uₙ₋₁| = $(@sprintf("%.2e", δ)) $(δ > atol ? "≰" : "≤") $(@sprintf("%.2e", atol))
+        |F(Uₙ)| = $(@sprintf("%.2e", r)) $(r > atol ? "≰" : "≤") $(@sprintf("%.2e", atol))
+     #iteration = $iter $(iter < maxiter ? "<" : "≮") $maxiter
     """
 
     if iter ≥ maxiter
@@ -149,47 +159,20 @@ function unpack(
     return (nodes, weights_high, weights_low)
 end
 
-function integral_monomial_simplex(dim::Int, deg_tot_max::Int)
-    @assert (dim > 0) && (deg_tot_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
+function _flatten_with_type(
+    exponent2values::Vector{Vector{Pair{NTuple{D,Int},S}}},
+    ::Type{T},
+    order_high::Int,
+    order_low::Int,
+) where {D,S,T}
+    nb_lo, nb_hi = binomial(order_low + D, D), binomial(order_high + D, D)
 
-    exp2int = [[(i,) => 1//prod((i + 1):(i + dim))] for i in 0:deg_tot_max]
-
-    for d in 2:dim
-        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
-        for (k, e2i) in zip(countfrom(0), exp2int)
-            for (e, v) in e2i
-                push!(new[k + 1], (0, e...) => v)
-                t = 1
-                for n in 1:(deg_tot_max - k)
-                    t *= n//(n + k + dim)
-                    push!(new[k + 1 + n], (n, e...) => t * v)
-                end
-            end
-        end
-        exp2int = new
+    result = Vector{Pair{NTuple{D,Int},T}}()
+    for α2v in exponent2values
+        append!(result, α2v)
     end
 
-    return exp2int
-end
-
-function integral_monomial_orthotope(dim::Int, deg_tot_max::Int)
-    @assert (dim > 0) && (deg_tot_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
-
-    exp2int = [[(i,) => 1//(i + 1)] for i in 0:deg_tot_max]
-
-    for d in 2:dim
-        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
-        for (k, e2i) in zip(countfrom(0), exp2int)
-            for (e, v) in e2i
-                for n in 0:(deg_tot_max - k)
-                    push!(new[k + 1 + n], (n, e...) => v//(n + 1))
-                end
-            end
-        end
-        exp2int = new
-    end
-
-    return exp2int
+    return result, 1:nb_lo, (nb_lo + 1):nb_hi
 end
 
 end

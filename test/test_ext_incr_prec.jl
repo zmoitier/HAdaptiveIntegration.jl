@@ -77,12 +77,12 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         R = (exp(2) - 1) * (exp(1) - 1) / 2
         rtol = 1e-14
 
-        ec_f32 = embedded_cubature(SQUARE_CH25, Float32)
+        ec_f32 = embedded_cubature(SQUARE_CH21, Float32)
         tec0 = TabulatedEmbeddedCubature{Rectangle}(;
             description="Reduce Cools-Haegemans",
             reference="",
-            order_high=SQUARE_CH25.order_high,
-            order_low=SQUARE_CH25.order_low,
+            order_high=SQUARE_CH21.order_high,
+            order_low=SQUARE_CH21.order_low,
             precision=7,
             nodes=[Vector([string(v) for v in p]) for p in ec_f32.nodes],
             weights_high=string.(ec_f32.weights_high),
@@ -93,12 +93,12 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         I, E = integrate(fct, domain; embedded_cubature=ec0, rtol=rtol)
         @test abs(I - R) > rtol * abs(R)
 
-        setprecision(BigFloat, 25; base=10)
+        setprecision(BigFloat, 20; base=10)
         tec1 = increase_precision(tec0, BigFloat; atol=eps(BigFloat))
         @test typeof(tec1) <: TabulatedEmbeddedCubature{Rectangle}
         ec1 = embedded_cubature(tec1, Float64)
 
         I, E = integrate(fct, domain; embedded_cubature=ec1, rtol=rtol)
-        @test_broken abs(I - R) ≤ rtol * abs(R)
+        @test abs(I - R) ≤ rtol * abs(R)
     end
 end

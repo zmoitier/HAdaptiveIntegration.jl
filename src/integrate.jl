@@ -104,9 +104,10 @@ end
 
     if nb_subdiv ≥ maxsubdiv
         @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
-    else
-        @debug "number of subdivision = $nb_subdiv"
     end
+
+    # How to enable debug logs with out allocations ?
+    # @debug LazyString("number of subdivision = ", nb_subdiv) 
 
     return RETURN_BUF ? (I, E, buffer) : (I, E)
 end

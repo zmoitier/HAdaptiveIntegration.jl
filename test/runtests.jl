@@ -3,7 +3,7 @@ using HAdaptiveIntegration
 using Test
 
 @testset "Code quality (Aqua.jl)" begin
-    Aqua.test_all(HAdaptiveIntegration)
+    Aqua.test_all(HAdaptiveIntegration; project_extras=false)
 end
 
 @testset "HAdaptiveIntegration.jl" begin

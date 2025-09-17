@@ -6,6 +6,7 @@ version = "0.2.2"
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [weakdeps]
@@ -20,6 +21,7 @@ DataStructures = "0.18, 0.19"
 ForwardDiff = "1"
 LinearAlgebra = "1"
 Logging = "1"
+Printf = "1"
 Quadmath = "0.5"
 StaticArrays = "1"
 Test = "1"
