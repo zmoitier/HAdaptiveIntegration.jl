@@ -20,8 +20,18 @@ function __init__()
     @info "Loading IncreasePrecisionExt.jl"
 end
 
+mutable struct NewtonState{T}
+    iter::Int
+    U::Vector{T}
+    R::Vector{T}
+    r::T
+    J::Matrix{T}
+    Δ::Vector{T}
+    δ::T
+end
+
 function increase_precision(
-    tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}; atol::T=10 * eps(T)
+    tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}; atol::T=10 * eps(T), maxiter::Int=16
 ) where {DOM,T}
     if eps(T) ≥ 10.0^(-tec.precision)
         @info LazyString(
@@ -79,7 +89,7 @@ function increase_precision(
         return V
     end
 
-    U, δ = newton(G, x -> jacobian(G, x), U; atol=atol)
+    U, δ = newton(G, x -> jacobian(G, x), U, atol, maxiter)
 
     nodes, weights_high, weights_low = unpack(U, range_nodes, range_wh, range_wl, D)
     return TabulatedEmbeddedCubature{DOM}(;
@@ -94,22 +104,22 @@ function increase_precision(
     )
 end
 
-function newton(G, DG, U; norm=x -> norm(x, Inf), atol=10 * eps(T), maxiter::Int=16)
+function newton(G, DG, U, atol, maxiter)
     V = copy(U)
 
     iter = 0
     R = G(V)
-    r = norm(R)
+    r = norm(R, Inf)
     Δ = DG(V) \ R
-    δ = norm(Δ)
+    δ = norm(Δ, Inf)
     V = V - Δ
 
     iter = 1
     while (δ > atol) && (r > atol) && (iter < maxiter)
         R = G(V)
-        r = norm(R)
+        r = norm(R, Inf)
         Δ = DG(V) \ R
-        δ = norm(Δ)
+        @show δ = norm(Δ, Inf)
         V = V - Δ
         iter += 1
     end
