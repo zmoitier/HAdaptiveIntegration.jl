@@ -136,3 +136,22 @@ function allocate_buffer(
 
     return buffer
 end
+
+"""
+    resum(buffer; norm=x -> LinearAlgebra.norm(x, Inf))
+
+Re-sum the integral and error estimate from a provided buffer (can be expensive).
+"""
+function resum(
+    buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=x -> norm(x, Inf)
+) where {DOM,IT,ET}
+    Is = Vector{IT}(undef, length(buffer))
+    Es = Vector{ET}(undef, length(buffer))
+    for (i, (_, I_dom, E_dom)) in enumerate(buffer.valtree)
+        Is[i] = I_dom
+        Es[i] = E_dom
+    end
+    sort!(Is; lt=(x, y) -> norm(x) < norm(y))
+    sort!(Es)
+    return sum(Is), sum(Es)
+end

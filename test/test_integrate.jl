@@ -2,7 +2,7 @@ using DataStructures: BinaryHeap
 using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
 using HAdaptiveIntegration:
-    allocate_buffer, default_embedded_cubature, default_subdivision, integrate
+    allocate_buffer, default_embedded_cubature, default_subdivision, integrate, resum
 using LinearAlgebra: norm
 using Test
 
@@ -122,4 +122,8 @@ end
     @test length(integrate(fct, domain; return_buffer=Val(true))) == 3
     I, E, buf = integrate(fct, domain; return_buffer=Val(true))
     @test typeof(buf) == typeof(allocate_buffer(fct, domain))
+
+    I2, E2 = resum(buf)
+    @test I ≈ I2
+    @test E ≈ E2
 end
