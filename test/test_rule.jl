@@ -1,4 +1,5 @@
 using HAdaptiveIntegration.Domain
+using HAdaptiveIntegration.Polynomial
 using HAdaptiveIntegration.Rule
 using Quadmath
 using Test

@@ -32,7 +32,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         @test abs(I - R) > rtol * abs(R)
 
         setprecision(BigFloat, 32; base=10)
-        tec1 = increase_precision(tec0, BigFloat; atol=eps(BigFloat))
+        tec1 = increase_precision(tec0, BigFloat)
         @test typeof(tec1) <: TabulatedEmbeddedCubature{Segment}
         ec1 = embedded_cubature(tec1, Float64)
 
@@ -63,7 +63,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         @test abs(I - R) > rtol * abs(R)
 
         setprecision(BigFloat, 20; base=10)
-        tec1 = increase_precision(tec0, BigFloat; atol=eps(BigFloat))
+        tec1 = increase_precision(tec0, BigFloat)
         @test typeof(tec1) <: TabulatedEmbeddedCubature{Triangle}
         ec1 = embedded_cubature(tec1, Float64)
 
@@ -94,7 +94,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         @test abs(I - R) > rtol * abs(R)
 
         setprecision(BigFloat, 64; base=10)
-        tec1 = increase_precision(tec0, BigFloat; atol=eps(BigFloat))
+        tec1 = increase_precision(tec0, BigFloat; f_atol=1e-25)
         @test typeof(tec1) <: TabulatedEmbeddedCubature{Rectangle}
         ec1 = embedded_cubature(tec1, Float64)
 

@@ -3,7 +3,8 @@ module IncreasePrecisionExt
 import HAdaptiveIntegration: increase_precision
 
 using Base.Iterators: countfrom, partition
-using ForwardDiff: jacobian
+using ForwardDiff.DiffResults: JacobianResult, MutableDiffResult, jacobian, value
+using ForwardDiff: jacobian!
 using HAdaptiveIntegration:
     Orthotope,
     Segment,
@@ -22,16 +23,94 @@ end
 
 mutable struct NewtonState{T}
     iter::Int
-    U::Vector{T}
-    R::Vector{T}
-    r::T
-    J::Matrix{T}
+    x::Vector{T}
+    result::MutableDiffResult{1,Vector{T},Tuple{Matrix{T}}}
     Δ::Vector{T}
-    δ::T
+    x_abs_err::T
+    f_abs_err::T
+
+    function NewtonState(x₀::Vector{T}, f::Function) where {T}
+        result = JacobianResult(f(x₀), x₀)
+        jacobian!(result, f, x₀)
+        Δ = jacobian(result) \ value(result)
+        x₁ = x₀ - Δ
+        x_abs_err = norm(Δ, Inf)
+        f_abs_err = norm(value(result), Inf)
+        return new{T}(1, x₁, result, Δ, x_abs_err, f_abs_err)
+    end
 end
 
+function iter!(ns::NewtonState{T}, f::Function) where {T}
+    jacobian!(ns.result, f, ns.x)
+    ns.Δ .= jacobian(ns.result) \ value(ns.result)
+    ns.x .-= ns.Δ
+    ns.x_abs_err = norm(ns.Δ, Inf)
+    ns.f_abs_err = norm(value(ns.result), Inf)
+    ns.iter += 1
+    return ns
+end
+
+function newton(f, x₀, x_atol, f_atol, maxiter)
+    ns = NewtonState(x₀, f)
+
+    @info @sprintf(
+        "iter %3d: |xₙ - xₙ₋₁| = %.2e, |f(xₙ)| = %.2e", ns.iter, ns.x_abs_err, ns.f_abs_err,
+    )
+
+    while (ns.x_abs_err > x_atol) && (ns.f_abs_err > f_atol) && (ns.iter < maxiter)
+        iter!(ns, f)
+        @info @sprintf(
+            "iter %3d: |xₙ - xₙ₋₁| = %.2e, |f(xₙ)| = %.2e",
+            ns.iter,
+            ns.x_abs_err,
+            ns.f_abs_err,
+        )
+    end
+
+    @info """Newton convergence report:
+
+          iteration = $(ns.iter) / $maxiter
+        |xₙ - xₙ₋₁| = $(@sprintf("%.2e", ns.x_abs_err)) $(ns.x_abs_err > x_atol ? "≰" : "≤") $(@sprintf("%.2e", x_atol))
+            |f(xₙ)| = $(@sprintf("%.2e", ns.f_abs_err)) $(ns.f_abs_err > f_atol ? "≰" : "≤") $(@sprintf("%.2e", f_atol))
+    """
+
+    if ns.iter ≥ maxiter
+        @warn "maximum number of iterations reached, try increasing the keyword argument `maxiter=$maxiter`."
+    end
+
+    return ns.x, ns.x_abs_err
+end
+
+"""
+    increase_precision(
+        tec::TabulatedEmbeddedCubature,
+        ::Type{T};
+        x_atol=10 * eps(T),
+        f_atol=10 * eps(T),
+        maxiter::Int=16,
+    )
+
+Increase the precision of a `TabulatedEmbeddedCubature` to match the precision of the
+floating point type `T`.
+
+## Arguments
+- `tec::TabulatedEmbeddedCubature`: the tabulated embedded cubature to increase the
+   precision of.
+- `::Type{T}`: the floating point type to increase the precision to.
+
+## Optional arguments
+- `x_atol=10 * eps(T)`: the absolute tolerance for the change in the variables
+   (nodes and weights) between Newton iterations.
+- `f_atol=10 * eps(T)`: the absolute tolerance for the change in the function values
+   (integral constraints) between Newton iterations.
+- `maxiter::Int=16`: the maximum number of Newton iterations to perform.
+"""
 function increase_precision(
-    tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}; atol::T=10 * eps(T), maxiter::Int=16
+    tec::TabulatedEmbeddedCubature{DOM},
+    ::Type{T};
+    x_atol=10 * eps(T),
+    f_atol=10 * eps(T),
+    maxiter::Int=16,
 ) where {DOM,T}
     if eps(T) ≥ 10.0^(-tec.precision)
         @info LazyString(
@@ -46,7 +125,7 @@ function increase_precision(
 
     @info LazyString(
         "Increasing to target precision ",
-        -floor(Int, log10(atol)),
+        -floor(Int, log10(x_atol)),
         " from tabulated precision ",
         tec.precision,
         ". This may take some time.",
@@ -89,7 +168,7 @@ function increase_precision(
         return V
     end
 
-    U, δ = newton(G, x -> jacobian(G, x), U, atol, maxiter)
+    U, δ = newton(G, U, x_atol, f_atol, maxiter)
 
     nodes, weights_high, weights_low = unpack(U, range_nodes, range_wh, range_wl, D)
     return TabulatedEmbeddedCubature{DOM}(;
@@ -102,40 +181,6 @@ function increase_precision(
         weights_high=string.(weights_high),
         weights_low=string.(weights_low),
     )
-end
-
-function newton(G, DG, U, atol, maxiter)
-    V = copy(U)
-
-    iter = 0
-    R = G(V)
-    r = norm(R, Inf)
-    Δ = DG(V) \ R
-    δ = norm(Δ, Inf)
-    V = V - Δ
-
-    iter = 1
-    while (δ > atol) && (r > atol) && (iter < maxiter)
-        R = G(V)
-        r = norm(R, Inf)
-        Δ = DG(V) \ R
-        @show δ = norm(Δ, Inf)
-        V = V - Δ
-        iter += 1
-    end
-
-    @info """Newton convergence report:
-
-    |Uₙ - Uₙ₋₁| = $(@sprintf("%.2e", δ)) $(δ > atol ? "≰" : "≤") $(@sprintf("%.2e", atol))
-        |F(Uₙ)| = $(@sprintf("%.2e", r)) $(r > atol ? "≰" : "≤") $(@sprintf("%.2e", atol))
-     #iteration = $iter $(iter < maxiter ? "<" : "≮") $maxiter
-    """
-
-    if iter ≥ maxiter
-        @warn "maximum number of iterations reached, try increasing the keyword argument `maxiter=$maxiter`."
-    end
-
-    return V, δ
 end
 
 # [ nodes[1]..., ..., nodes[end]..., weights_high..., weights_low... ]
