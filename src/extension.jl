@@ -1,17 +1,25 @@
 """
     increase_precision(
-        tec::TabulatedEmbeddedCubature, T, options=Optim.Options()
-    )::EmbeddedCubature
+        tec::TabulatedEmbeddedCubature,
+        ::Type{T};
+        x_atol=10 * eps(T),
+        f_atol=10 * eps(T),
+        maxiter::Int=16,
+    )
 
-Increase the precision of a tabulated embedded cubature rule `tec` to be suitable for type `T`.
+Increase the precision of a `TabulatedEmbeddedCubature` to match the precision of the
+floating point type `T`. This is an extension, you need `using ForwardDiff` for using it.
 
 ## Arguments
-- `tec::TabulatedEmbeddedCubature`: The tabulated embedded cubature.
-- `T`: The target type for the increased precision.
+- `tec::TabulatedEmbeddedCubature`: the tabulated embedded cubature to increase the
+  precision of.
+- `::Type{T}`: the floating point type to increase the precision to.
 
 ## Optional arguments
-- `options=Optim.Options()`: Optional optimization settings, the full parameters list can be
-   found here:
-   https://julianlsolvers.github.io/Optim.jl/stable/user/config/#General-Options
+- `x_atol=10 * eps(T)`: the absolute tolerance for the change in the variables (nodes and
+  weights) between Newton iterations.
+- `f_atol=10 * eps(T)`: the absolute tolerance for the change in the function values
+  (integral constraints) between Newton iterations.
+- `maxiter::Int=16`: the maximum number of Newton iterations to perform.
 """
 function increase_precision end

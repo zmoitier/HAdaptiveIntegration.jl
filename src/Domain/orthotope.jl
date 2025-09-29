@@ -5,8 +5,8 @@ Axes-aligned Orthotope in `D` dimensions, with element type `T`, given by two po
 `low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
 
 ## Fields:
-- `corners::SVector{2,SVector{D,T}}`: `corners[1]` = the low corner and `corners[2]` = the
-   ]high corner.
+- `corners::SVector{2,SVector{D,T}}`: `corners[1]` is the low corner and `corners[2]` is the
+   high corner.
 
 ## Invariants (**not** check at construction):
 - `corners[1] .≤ corners[2]`

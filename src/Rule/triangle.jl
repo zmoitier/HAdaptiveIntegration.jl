@@ -17,8 +17,8 @@ function embedded_cubature(::RadonLaurie, (::Type{T})=float(Int)) where {T}
     ϕ, σ = sqrt(T(15)), sqrt(T(7))
 
     nodes = [SVector{2,T}(fill(1//3, 2))]
-    weights_high = T[(7_137 // 62_720 - σ * 45 // 1568) / 2]
-    weights_low = T[9 // 40 / 2]
+    weights_high = T[(7_137//62_720 - σ * 45//1568) / 2]
+    weights_low = T[9//40 / 2]
 
     for s in (1, -1)
         ζ₁ = 3//7 + s * ϕ * 2//21
