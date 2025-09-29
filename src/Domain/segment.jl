@@ -58,8 +58,8 @@ end
 """
     subdivide_segment(s::Segment)
 
-Subdivide the 1-dimensional segment `s` into 2 smaller segments by splitting it at
-its midpoint.
+Subdivide the 1-dimensional segment `s` into 2 smaller segments by splitting it at its
+midpoint.
 """
 function subdivide_segment(s::Segment{T}) where {T}
     m = (s.xmin + s.xmax) / 2

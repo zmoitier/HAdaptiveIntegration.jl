@@ -13,7 +13,8 @@ export subdivide_segment,
     subdivide_rectangle,
     subdivide_cuboid
 
-using ..HAdaptiveIntegration: SVector, det, norm, setindex
+using LinearAlgebra: det, norm
+using StaticArrays: SVector, setindex
 
 # AbstractDomain type
 include("abstract_domain.jl")

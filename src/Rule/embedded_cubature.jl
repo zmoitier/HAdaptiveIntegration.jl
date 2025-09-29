@@ -79,7 +79,6 @@ function (ec::EmbeddedCubature{D,T})(
         Iₗ += ec.weights_low[i] * v
         Iₕ += ec.weights_high[i] * v
     end
-
     for i in (L + 1):H
         Iₕ += ec.weights_high[i] * fct(Φ(ec.nodes[i]))
     end

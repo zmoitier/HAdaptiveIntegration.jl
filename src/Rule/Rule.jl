@@ -9,7 +9,8 @@ export GrundmannMoeller, RadonLaurie, TRIANGLE_GM19, TRIANGLE_RL19, TETRAHEDRON_
 export GenzMalik, SQUARE_GM17, SQUARE_CH21, SQUARE_CH25, CUBE_GM33, CUBE_BE65, CUBE_BE115
 
 using ..HAdaptiveIntegration.Domain
-using ..HAdaptiveIntegration: SVector, norm
+using LinearAlgebra: norm
+using StaticArrays: SVector
 
 """
     abstract type AbstractRule{DOM<:AbstractDomain}
@@ -18,7 +19,7 @@ Abstract type for a cubature rule on a domain `DOM`.
 
 ## Type Parameters:
 - `DOM`: [`reference_domain(DOM)`](@ref) gives the reference domain on which the embedded
-   cubature is assume to be set.
+  cubature is assume to be set.
 
 ## Mandatory methods:
 - [`embedded_cubature`](@ref)

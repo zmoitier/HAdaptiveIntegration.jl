@@ -107,7 +107,7 @@ for your specific application!
     end # hide
     ```
 
-To add a custom embedded quadrature for a given domain, you must write a constructor *e.g.*
+To add a custom embedded cubature for a given domain, you must write a constructor *e.g.*
 `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref) object (see
 the function [`embedded_cubature`](@ref) in the file
 [`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl)
