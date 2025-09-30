@@ -46,12 +46,13 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         R = (exp(1) - 1)^2 / 2
         rtol = 1e-14
 
-        ec_f32 = embedded_cubature(TRIANGLE_RL19, Float32)
+        ec_f32 = embedded_cubature(RadonLaurie(), Float32)
+        oh, ol = orders(RadonLaurie())
         tec0 = TabulatedEmbeddedCubature{Triangle}(;
             description="Reduce Radon-Laurie",
             reference="",
-            order_high=TRIANGLE_RL19.order_high,
-            order_low=TRIANGLE_RL19.order_low,
+            order_high=oh,
+            order_low=ol,
             precision=7,
             nodes=[Vector([string(v) for v in p]) for p in ec_f32.nodes],
             weights_high=string.(ec_f32.weights_high),

@@ -36,7 +36,8 @@ end
     domain = Triangle((0, 0), (2, 0), (0, 2))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
-    for ec in (embedded_cubature(TRIANGLE_GM19), default_embedded_cubature(domain))
+    for ec in
+        (embedded_cubature(GrundmannMoeller{2}(7, 5)), default_embedded_cubature(domain))
         for (fct, R) in [
             (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
             (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
@@ -52,7 +53,7 @@ end
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
-        embedded_cubature(SQUARE_GM17),
+        embedded_cubature(GenzMalik{2}()),
         embedded_cubature(SQUARE_CH21),
         default_embedded_cubature(domain),
     )
@@ -87,7 +88,7 @@ end
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
-        embedded_cubature(CUBE_GM33),
+        embedded_cubature(GenzMalik{3}()),
         default_embedded_cubature(domain),
         embedded_cubature(CUBE_BE115),
     )

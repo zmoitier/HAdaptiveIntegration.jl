@@ -16,10 +16,10 @@ using ForwardDiff
 ```
 
 For example if we want to increase the precision of the rule
-[`HAdaptiveIntegration.TRIANGLE_RL19`](@ref), we do:
+[`HAdaptiveIntegration.SQUARE_CH21`](@ref), we do:
 
 ```@example increase_precision
-tec0 = HAdaptiveIntegration.TRIANGLE_RL19
+tec0 = HAdaptiveIntegration.SQUARE_CH21
 tec0.nodes
 ```
 

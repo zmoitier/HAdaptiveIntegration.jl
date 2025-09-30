@@ -4,9 +4,9 @@ export AbstractRule, TabulatedEmbeddedCubature, orders, EmbeddedCubature, embedd
 # Rules for a segment
 export SEGMENT_GK7, SEGMENT_GK15, SEGMENT_GK31
 # Rules for a simplex
-export GrundmannMoeller, RadonLaurie, TRIANGLE_GM19, TRIANGLE_RL19, TETRAHEDRON_GM35
+export GrundmannMoeller, RadonLaurie
 # Rules for an orthotope
-export GenzMalik, SQUARE_GM17, SQUARE_CH21, SQUARE_CH25, CUBE_GM33, CUBE_BE65, CUBE_BE115
+export GenzMalik, SQUARE_CH21, SQUARE_CH25, CUBE_BE65, CUBE_BE115
 
 using ..HAdaptiveIntegration.Domain
 using LinearAlgebra: norm
