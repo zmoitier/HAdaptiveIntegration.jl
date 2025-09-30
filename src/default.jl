@@ -29,14 +29,14 @@ Return a default embedded cubature for the domains:
 - dimension 1:
     - [`Segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
-    - [`Triangle`](@ref): [`TRIANGLE_RL19`](@ref)
+    - [`Triangle`](@ref): [`RadonLaurie`](@ref)`()`
     - [`Rectangle`](@ref): [`SQUARE_CH25`](@ref)
 - dimension 3:
-    - [`Tetrahedron`](@ref): [`TETRAHEDRON_GM35`](@ref)
+    - [`Tetrahedron`](@ref): [`GrundmannMoeller`](@ref)`{3}(7, 5)`
     - [`Cuboid`](@ref): [`CUBE_BE65`](@ref)
-- dimension `d`:
-    - [`Simplex`](@ref): [`GrundmannMoeller{d}(7, 5)`](@ref)`
-    - [`Orthotope`](@ref): [`GenzMalik{d}()`](@ref)
+- dimension `D`:
+    - [`Simplex`](@ref): [`GrundmannMoeller`](@ref)`{D}(7, 5)`
+    - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
 @generated function default_embedded_cubature(::Segment{T}) where {T}
     ec = embedded_cubature(SEGMENT_GK15, T)
@@ -47,11 +47,11 @@ end
     return :($ec)
 end
 @generated function default_embedded_cubature(::Triangle{T}) where {T}
-    ec = embedded_cubature(TRIANGLE_RL19, T)
+    ec = embedded_cubature(RadonLaurie(), T)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    ec = embedded_cubature(TETRAHEDRON_GM35, T)
+    ec = embedded_cubature(GrundmannMoeller{3}(7, 5), T)
     return :($ec)
 end
 @generated function default_embedded_cubature(::Orthotope{D,T}) where {D,T}

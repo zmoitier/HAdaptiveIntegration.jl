@@ -48,7 +48,7 @@ end
         tec = TabulatedEmbeddedCubature{Segment}(;
             description="Gauss (SEGMENT_G3)",
             reference="",
-            precision=15,
+            precision=16,
             nodes=[
                 [string(0.5)], [string((1 - √(3 / 5)) / 2)], [string((1 + √(3 / 5)) / 2)]
             ],
@@ -117,28 +117,15 @@ end
         @test validate_orders(ec, Orthotope{1}, 7, 5)
     end
 
-    @testset "Triangle" begin
-        for tec in (TRIANGLE_GM19, TRIANGLE_RL19)
-            ec = embedded_cubature(tec, T)
-            @test validate_orders(ec, Triangle, orders(tec)...)
-        end
-    end
-
     @testset "Square" begin
-        for tec in (SQUARE_GM17, SQUARE_CH21, SQUARE_CH25)
+        for tec in (SQUARE_CH21, SQUARE_CH25)
             ec = embedded_cubature(tec, T)
             @test validate_orders(ec, Rectangle, orders(tec)...)
         end
     end
 
-    @testset "Tetrahedron" begin
-        tec = TETRAHEDRON_GM35
-        ec = embedded_cubature(tec, T)
-        @test validate_orders(ec, Tetrahedron, orders(tec)...)
-    end
-
     @testset "Cube" begin
-        for tec in (CUBE_GM33, CUBE_BE65, CUBE_BE115)
+        for tec in (CUBE_BE65, CUBE_BE115)
             ec = embedded_cubature(tec, T)
             @test validate_orders(ec, Cuboid, orders(tec)...)
         end
