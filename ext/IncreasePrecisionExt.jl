@@ -89,23 +89,11 @@ function increase_precision(
     maxiter::Int=16,
 ) where {DOM,T}
     if eps(T) ≥ 10.0^(-tec.precision)
-        @info LazyString(
-            "Tabulated precision ",
-            tec.precision,
-            " is sufficient for type ",
-            T,
-            ". No need to increase precision.",
-        )
+        @info "Tabulated precision $(tec.precision) is sufficient for type $(T). No need to increase precision."
         return tec
     end
 
-    @info LazyString(
-        "Increasing to target precision ",
-        -floor(Int, log10(x_atol)),
-        " from tabulated precision ",
-        tec.precision,
-        ". This may take some time.",
-    )
+    @info "Increasing to target precision $(-floor(Int, log10(x_atol))) from tabulated precision $(tec.precision). This may take some time."
 
     D = dimension(DOM)
     U, range_nodes, range_wh, range_wl = pack(tec, T, D)
