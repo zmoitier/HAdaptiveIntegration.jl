@@ -138,20 +138,25 @@ function allocate_buffer(
 end
 
 """
-    resum(buffer; norm=x -> LinearAlgebra.norm(x, Inf))
+    resum(buffer)
 
-Re-sum the integral and error estimate from a provided buffer (can be expensive).
+Re-sum the integral and error estimate from a provided buffer. This function is more
+expensive than a sum because it use the Kahan-Babuška summation algorithm to reduce
+numeraical error due to floating-point number.
 """
-function resum(
-    buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=x -> norm(x, Inf)
-) where {DOM,IT,ET}
-    Is = Vector{IT}(undef, length(buffer))
-    Es = Vector{ET}(undef, length(buffer))
-    for (i, (_, I_dom, E_dom)) in enumerate(buffer.valtree)
-        Is[i] = I_dom
-        Es[i] = E_dom
+function resum(buffer::BinaryHeap{Tuple{DOM,IT,ET}}) where {DOM,IT,ET}
+    rᵢ = cᵢ = zero(IT)
+    rₑ = cₑ = zero(ET)
+    for (_, I_dom, E_dom) in buffer.valtree
+        yᵢ = I_dom - cᵢ
+        tᵢ = rᵢ + yᵢ
+        cᵢ = (tᵢ - rᵢ) - yᵢ
+        rᵢ = tᵢ
+
+        yₑ = E_dom - cₑ
+        tₑ = rₑ + yₑ
+        cₑ = (tₑ - rₑ) - yₑ
+        rₑ = tₑ
     end
-    sort!(Is; lt=(x, y) -> norm(x) < norm(y))
-    sort!(Es)
-    return sum(Is), sum(Es)
+    return rᵢ, rₑ
 end
