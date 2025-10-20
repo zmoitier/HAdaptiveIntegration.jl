@@ -93,7 +93,7 @@ end
         @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
     end
 
-    return (I, E)
+    return I, E
 end
 
 """
@@ -121,26 +121,33 @@ function allocate_buffer(
     return buffer
 end
 
+# paranoia about accumulated roundoff, see re-sum from QuadGK.jl
 """
-    resum(buffer)
+    resum(buffer; norm=LinearAlgebra.norm)
 
 Re-sum the integral and error estimate from a provided buffer. This function is more
-expensive than a sum because it use the Kahan-Babuška summation algorithm to reduce
+expensive than a sum because it use the Kahan-Babuška-Neumaier summation algorithm to reduce
 numerical error due to floating-point number.
 """
-function resum(buffer::BinaryHeap{Tuple{DOM,IT,ET}}) where {DOM,IT,ET}
-    rᵢ = cᵢ = zero(IT)
-    rₑ = cₑ = zero(ET)
+function resum(buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=norm) where {DOM,IT,ET}
+    I = cᵢ = zero(IT)
+    E = cₑ = zero(ET)
     for (_, I_dom, E_dom) in buffer.valtree
-        yᵢ = I_dom - cᵢ
-        tᵢ = rᵢ + yᵢ
-        cᵢ = (tᵢ - rᵢ) - yᵢ
-        rᵢ = tᵢ
+        tᵢ = I + I_dom
+        if norm(I) ≥ norm(I_dom)
+            cᵢ += (I - tᵢ) + I_dom
+        else
+            cᵢ += (I_dom - tᵢ) + I
+        end
+        I = tᵢ
 
-        yₑ = E_dom - cₑ
-        tₑ = rₑ + yₑ
-        cₑ = (tₑ - rₑ) - yₑ
-        rₑ = tₑ
+        tₑ = E + E_dom
+        if norm(E) ≥ norm(E_dom)
+            cₑ += (E - tₑ) + E_dom
+        else
+            cₑ += (E_dom - tₑ) + E
+        end
+        E = tₑ
     end
-    return rᵢ, rₑ
+    return I + cᵢ, E + cₑ
 end
