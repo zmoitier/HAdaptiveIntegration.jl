@@ -126,8 +126,11 @@ end
     resum(buffer; norm=LinearAlgebra.norm)
 
 Re-sum the integral and error estimate from a provided buffer. This function is more
-expensive than a sum because it use the Kahan-Babuška-Neumaier summation algorithm to reduce
-numerical error due to floating-point number.
+expensive than a sum because it use the Kahan-Babuška-Neumaier [1] summation algorithm to
+reduce numerical error due to floating-point number.
+
+[1] Klein, A. A Generalized Kahan-Babuška-Summation-Algorithm. Computing 76, 279-293 (2006).
+https://doi.org/10.1007/s00607-005-0139-x
 """
 function resum(buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=norm) where {DOM,IT,ET}
     I = cᵢ = zero(IT)
