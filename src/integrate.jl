@@ -35,8 +35,6 @@ is an error estimate.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
 - `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
-- `return_buffer=Val(false)`: if `Val(true)`, the buffer used for the computation is also
-  returned.
 """
 function integrate(
     fct,
@@ -48,19 +46,9 @@ function integrate(
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
-    return_buffer::Val{RETURN_BUF}=Val(false),
-) where {D,T,RETURN_BUF}
+) where {D,T}
     return _integrate(
-        fct,
-        domain,
-        embedded_cubature,
-        subdiv_algo,
-        buffer,
-        norm,
-        atol,
-        rtol,
-        maxsubdiv,
-        return_buffer,
+        fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
     )
 end
 
@@ -74,8 +62,7 @@ end
     atol,
     rtol,
     maxsubdiv,
-    return_buffer::Val{RETURN_BUF},
-) where {FCT,DOM,RETURN_BUF}
+) where {FCT,DOM}
     nb_subdiv = 0
 
     I, E = ec(fct, domain, norm)
@@ -106,10 +93,7 @@ end
         @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
     end
 
-    # How to enable debug logs with out allocations ?
-    # @debug LazyString("number of subdivision = ", nb_subdiv)
-
-    return RETURN_BUF ? (I, E, buffer) : (I, E)
+    return (I, E)
 end
 
 """
@@ -142,7 +126,7 @@ end
 
 Re-sum the integral and error estimate from a provided buffer. This function is more
 expensive than a sum because it use the Kahan-Babuška summation algorithm to reduce
-numeraical error due to floating-point number.
+numerical error due to floating-point number.
 """
 function resum(buffer::BinaryHeap{Tuple{DOM,IT,ET}}) where {DOM,IT,ET}
     rᵢ = cᵢ = zero(IT)

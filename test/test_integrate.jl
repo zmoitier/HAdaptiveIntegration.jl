@@ -112,19 +112,14 @@ end
     @test abs(I - R) ≤ E * abs(R)
 end
 
-@testset "Return buffer" begin
+@testset "Re-sum" begin
     domain = Segment(0, 1)
     fct = x -> exp(x[1])
 
-    # by default, the buffer is not returned
-    @test length(integrate(fct, domain)) == 2
+    buffer = allocate_buffer(fct, domain)
+    I, E = integrate(fct, domain; buffer=buffer)
+    I2, E2 = resum(buffer)
 
-    # we can ask for the buffer to be returned
-    @test length(integrate(fct, domain; return_buffer=Val(true))) == 3
-    I, E, buf = integrate(fct, domain; return_buffer=Val(true))
-    @test typeof(buf) == typeof(allocate_buffer(fct, domain))
-
-    I2, E2 = resum(buf)
     @test isapprox(I, I2; rtol=1e-12)
     @test isapprox(E, E2; atol=1e-12)
 end
