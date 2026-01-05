@@ -12,25 +12,34 @@ function validate_orders(
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
 ) where {D,T,DOM}
-    err_hi, err_lo = compute_error_monomials(ec, DOM, order_high, order_low)
+    val_ex = integral_monomials_exact(DOM, order_high)
+    val_num_hi, val_num_lo = integral_monomials_rule(ec, order_high, order_low)
 
     for k in 0:order_high
-        for (α, err) in err_hi[k]
-            if err.absolute > atol && err.relative > rtol
-                msg = "fail to integrate within tolerance at degree = $α.\n"
-                msg *= "Absolute error: $(err.absolute), atol: $atol.\n"
-                msg *= "Relative error: $(err.relative), rtol: $rtol."
-                @error msg
-                return false
+        for (α2v_num, α2v_ex) in zip(val_num_hi[k + 1], val_ex[k + 1])
+            for ((α, v_num), (_, v_ex)) in zip(α2v_num, α2v_ex)
+                err_abs = abs(v_num - v_ex)
+                err_rel = abs(err_abs / v_ex)
+                if err_abs > atol && err_rel > rtol
+                    msg = "fail to integrate within tolerance at degree = $α.\n"
+                    msg *= "Absolute error: $(err_abs), atol: $atol.\n"
+                    msg *= "Relative error: $(err_rel), rtol: $rtol."
+                    @error msg
+                    return false
+                end
             end
         end
+    end
 
-        if k ≤ order_low
-            for (α, err) in err_lo[k]
-                if err.absolute > atol && err.relative > rtol
+    for k in 0:order_low
+        for (α2v_num, α2v_ex) in zip(val_num_lo[k + 1], val_ex[k + 1])
+            for ((α, v_num), (_, v_ex)) in zip(α2v_num, α2v_ex)
+                err_abs = abs(v_num - v_ex)
+                err_rel = abs(err_abs / v_ex)
+                if err_abs > atol && err_rel > rtol
                     msg = "fail to integrate within tolerance at degree = $α.\n"
-                    msg *= "Absolute error: $(err.absolute), atol: $atol.\n"
-                    msg *= "Relative error: $(err.relative), rtol: $rtol."
+                    msg *= "Absolute error: $(err_abs), atol: $atol.\n"
+                    msg *= "Relative error: $(err_rel), rtol: $rtol."
                     @error msg
                     return false
                 end

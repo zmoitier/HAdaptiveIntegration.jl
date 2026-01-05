@@ -1,12 +1,8 @@
-function integral_monomials(::Type{<:Segment}, deg_tot_max::Int)
+function integral_monomials_exact(::Type{<:Segment}, deg_tot_max::Int)
     return [[(k,) => 1//(k + 1)] for k in 0:deg_tot_max]
 end
 
-function integral_chebyshev(::Type{<:Segment}, deg_tot_max::Int)
-    return [[(k,) => iseven(k) ? 1//(1 - k * k) : 0//1] for k in 0:deg_tot_max]
-end
-
-function integral_monomials(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
+function integral_monomials_exact(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
     @assert (D > 0) && (deg_tot_max ≥ 0) "must have `D > 0` and `k_max ≥ 0`."
 
     exponent2values = [[(i,) => 1//prod((i + 1):(i + D))] for i in 0:deg_tot_max]
@@ -29,7 +25,7 @@ function integral_monomials(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
     return exponent2values
 end
 
-function integral_monomials(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
+function integral_monomials_exact(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
     @assert (D > 0) && (deg_tot_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
 
     exponent2values = [[(i,) => 1//(i + 1)] for i in 0:deg_tot_max]

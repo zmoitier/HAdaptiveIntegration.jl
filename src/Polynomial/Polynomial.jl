@@ -1,20 +1,13 @@
 module Polynomial
 
-export integral_monomials,
-    integral_chebyshev, compute_error_monomials, compute_error_chebyshev
+export integral_monomials_exact, integral_monomials_rule
 
 using ..HAdaptiveIntegration.Domain
 using ..HAdaptiveIntegration.Rule
 using Base.Iterators: countfrom
 using Printf: @printf
 
-abstract type AbstractBasis end
-
-struct MonomialBasis <: AbstractBasis end
-
-struct ChebyshevBasis <: AbstractBasis end
-
-include("integrals.jl")
-include("errors.jl")
+include("integral_exact.jl")
+include("integral_num.jl")
 
 end

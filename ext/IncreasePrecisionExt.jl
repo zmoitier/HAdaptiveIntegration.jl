@@ -11,7 +11,7 @@ using HAdaptiveIntegration:
     Simplex,
     TabulatedEmbeddedCubature,
     dimension,
-    integral_monomials,
+    integral_monomials_exact,
     orders
 using LinearAlgebra: norm
 using Printf: @sprintf
@@ -99,7 +99,7 @@ function increase_precision(
     U, range_nodes, range_wh, range_wl = pack(tec, T, D)
     order_high, order_low = orders(tec)
     exponent2values, range_low, range_high = _flatten_with_type(
-        integral_monomials(DOM, order_high), T, order_high, order_low
+        integral_monomials_exact(DOM, order_high), T, order_high, order_low
     )
 
     L = length(range_wl)
