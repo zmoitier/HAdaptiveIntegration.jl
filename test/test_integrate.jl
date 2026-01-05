@@ -125,6 +125,6 @@ end
     @test typeof(buf) == typeof(allocate_buffer(fct, domain))
 
     I2, E2 = resum(buf)
-    @test I ≈ I2
-    @test E ≈ E2
+    @test isapprox(I, I2; rtol=1e-12)
+    @test isapprox(E, E2; atol=1e-12)
 end
