@@ -5,7 +5,7 @@
         embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
         subdiv_algo=default_subdivision(domain),
         buffer=nothing,
-        norm=x -> LinearAlgebra.norm(x, Inf),
+        norm=LinearAlgebra.norm,
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
         maxsubdiv=8192 * 2^D,
@@ -31,7 +31,7 @@ is an error estimate.
 - `buffer=nothing`: heap use to do the adaptive algorithm, can be allocated using
   [`allocate_buffer`](@ref), which might result in performance gain if multiple call to
   integrate is perform.
-- `norm=x -> LinearAlgebra.norm(x, Inf)`: norm used to estimate the error.
+- `norm=LinearAlgebra.norm`: norm used to estimate the error.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
 - `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
@@ -44,7 +44,7 @@ function integrate(
     embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
-    norm=x -> norm(x, Inf),
+    norm=norm,
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
