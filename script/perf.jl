@@ -1,5 +1,7 @@
-using LinearAlgebra, StaticArrays, BenchmarkTools
-import HAdaptiveIntegration as hai
+using BenchmarkTools
+using HAdaptiveIntegration: HAdaptiveIntegration as hai
+using LinearAlgebra
+using StaticArrays
 
 function get_fct(dim::Int, case::Int=0)
     if case == 1

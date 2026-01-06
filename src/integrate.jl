@@ -10,6 +10,7 @@
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
         maxsubdiv=8192 * 2^D,
         return_buffer=Val(false),
+        callback=(I, E, nb_subdiv, buffer) -> nothing,
     ) where {D,T}
 
 Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
@@ -35,6 +36,9 @@ an error estimate.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
 - `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
+- `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called at each
+  subdivision step with the current integral `I`, error estimate `E`, number of
+  subdivisions `nb_subdiv`, and `buffer`.
 """
 function integrate(
     fct,
@@ -46,9 +50,19 @@ function integrate(
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
+    callback=(I, E, nb_subdiv, buffer) -> nothing,
 ) where {D,T}
     return _integrate(
-        fct, domain, embedded_cubature, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv
+        fct,
+        domain,
+        embedded_cubature,
+        subdiv_algo,
+        buffer,
+        norm,
+        atol,
+        rtol,
+        maxsubdiv,
+        callback,
     )
 end
 
@@ -62,6 +76,7 @@ end
     atol,
     rtol,
     maxsubdiv,
+    callback,
 ) where {FCT,DOM}
     nb_subdiv = 0
 
@@ -75,6 +90,7 @@ end
         buffer
     end
     push!(buffer, (domain, I, E))
+    callback(I, E, nb_subdiv, buffer)
 
     while (E > atol) && (E > rtol * norm(I)) && (nb_subdiv < maxsubdiv)
         domain, I_dom, E_dom = pop!(buffer)
@@ -87,6 +103,7 @@ end
             push!(buffer, (child, I_child, E_child))
         end
         nb_subdiv += 1
+        callback(I, E, nb_subdiv, buffer)
     end
 
     if nb_subdiv ≥ maxsubdiv

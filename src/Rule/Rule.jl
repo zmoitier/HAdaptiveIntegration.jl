@@ -9,7 +9,7 @@ export GrundmannMoeller, RadonLaurie
 export GenzMalik, SQUARE_CH21, SQUARE_CH25, CUBE_BE65, CUBE_BE115
 
 using ..HAdaptiveIntegration.Domain
-using ..HAdaptiveIntegration.LinearAlgebra: norm
+using ..HAdaptiveIntegration.LinearAlgebra: LinearAlgebra
 using ..HAdaptiveIntegration.StaticArrays: SVector
 
 """

@@ -68,7 +68,7 @@ the addition. Note that there is no check, beyond compatibility of dimension and
 the embedded cubature is for the right domain.
 """
 function (ec::EmbeddedCubature{D,T})(
-    fct, domain::AbstractDomain{D,T}, norm=norm
+    fct, domain::AbstractDomain{D,T}, norm=LinearAlgebra.norm
 ) where {D,T}
     H, L = length(ec.weights_high), length(ec.weights_low)
     Φ, μ = map_from_reference(domain)
