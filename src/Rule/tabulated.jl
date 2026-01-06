@@ -44,10 +44,14 @@ struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
         weights_low::Vector{String},
     ) where {DOM<:AbstractDomain}
         D = dimension(DOM)
-        @assert all(n -> length(n) == D, nodes) "Each node must have length equal to the dimension D"
-        @assert length(nodes) == length(weights_high) "The number of nodes must match the number of high-order weights"
-        @assert length(weights_high) ≥ length(weights_low) "The length of high order weights must be greater or equal to the length of low-order weights"
-        @assert order_high ≥ order_low ≥ 0 "order_high must be greater than or equal to order_low and orders must be non-negative"
+        @assert all(n -> length(n) == D, nodes) "Each node must have length equal to the \
+        dimension D"
+        @assert length(nodes) == length(weights_high) "The number of nodes must match the \
+        number of high-order weights"
+        @assert length(weights_high) ≥ length(weights_low) "The length of high order \
+        weights must be greater or equal to the length of low-order weights"
+        @assert order_high ≥ order_low ≥ 0 "order_high must be greater than or equal to \
+        order_low and orders must be non-negative"
         @assert precision ≥ 0
         return new{DOM}(
             description,
@@ -75,7 +79,8 @@ function embedded_cubature(
     tec::TabulatedEmbeddedCubature{DOM}, (::Type{T})=float(Int)
 ) where {DOM<:AbstractDomain,T}
     if eps(T) < 10.0^(-tec.precision)
-        @warn "The embedded cubature `$(tec.description)` has fewer significant digits than type $T, which may lead to inaccurate computations."
+        @warn "The embedded cubature `$(tec.description)` has fewer significant digits \
+        than type $T, which may lead to inaccurate computations."
     end
     D = dimension(DOM)
     return EmbeddedCubature(

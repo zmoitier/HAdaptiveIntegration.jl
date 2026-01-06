@@ -111,12 +111,17 @@ function newton(f, x₀, x_atol, f_atol, maxiter)
     @info """Newton convergence report:
 
           iteration = $(ns.iter) / $maxiter
-        |xₙ - xₙ₋₁| = $(@sprintf("%.2e", ns.x_abs_err)) $(ns.x_abs_err > x_atol ? "≰" : "≤") $(@sprintf("%.2e", x_atol))
-            |f(xₙ)| = $(@sprintf("%.2e", ns.f_abs_err)) $(ns.f_abs_err > f_atol ? "≰" : "≤") $(@sprintf("%.2e", f_atol))
+        |xₙ - xₙ₋₁ | = $(@sprintf("%.2e", ns.x_abs_err)) \
+                      $(ns.x_abs_err > x_atol ? "≰" : "≤") \
+                      $(@sprintf("%.2e", x_atol))
+            |f(xₙ)| = $(@sprintf("%.2e", ns.f_abs_err)) \
+                      $(ns.f_abs_err > f_atol ? "≰" : "≤") \
+                      $(@sprintf("%.2e", f_atol))
     """
 
     if ns.iter ≥ maxiter
-        @warn "maximum number of iterations reached, try increasing the keyword argument `maxiter=$maxiter`."
+        @warn "maximum number of iterations reached, try increasing the keyword argument \
+        `maxiter=$maxiter`."
     end
 
     return ns.x, ns.x_abs_err
@@ -130,11 +135,13 @@ function increase_precision(
     maxiter::Int=16,
 ) where {DOM,T}
     if eps(T) ≥ 10.0^(-tec.precision)
-        @info "Tabulated precision $(tec.precision) is sufficient for type $(T). No need to increase precision."
+        @info "Tabulated precision $(tec.precision) is sufficient for type $(T). No need \
+        to increase precision."
         return tec
     end
 
-    @info "Increasing to target precision $(-floor(Int, log10(x_atol))) from tabulated precision $(tec.precision). This may take some time."
+    @info "Increasing to target precision $(-floor(Int, log10(x_atol))) from tabulated \
+    precision $(tec.precision). This may take some time."
 
     D = dimension(DOM)
     U, range_nodes, range_wh, range_wl = pack(tec, T, D)

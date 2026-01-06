@@ -12,8 +12,8 @@
         return_buffer=Val(false),
     ) where {D,T}
 
-Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E`
-is an error estimate.
+Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
+an error estimate.
 
 ## Arguments
 - `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
@@ -24,8 +24,8 @@ is an error estimate.
   [`Orthotope`](@ref).
 
 ## Optional arguments
-- `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the
-  embedded cubature, each supported domain has a [`default_embedded_cubature`](@ref).
+- `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded
+  cubature, each supported domain has a [`default_embedded_cubature`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
 - `buffer=nothing`: heap use to do the adaptive algorithm, can be allocated using
@@ -42,7 +42,7 @@ function integrate(
     embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
-    norm=norm,
+    norm=LinearAlgebra.norm,
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
@@ -90,24 +90,33 @@ end
     end
 
     if nb_subdiv ≥ maxsubdiv
-        @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
+        @warn "maximum number of subdivide reached `maxsubdiv=$maxsubdiv`, try increasing \
+        the keyword argument `maxsubdiv`."
     end
 
     return I, E
 end
 
 """
-    allocate_buffer(fct, domain, ec=default_embedded_cubature(domain))
+    allocate_buffer(
+        fct,
+        domain::AbstractDomain{D,T};
+        embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
+        norm=LinearAlgebra.norm
+    ) where {D,T}
 
 Allocate and return a buffer that can be passed to the [`integrate`](@ref) function to
 improve performance by reducing memory allocations when `integrate` is called multiple
 times.
 """
 function allocate_buffer(
-    fct, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
+    fct,
+    domain::DOM;
+    embedded_cubature::EmbeddedCubature=default_embedded_cubature(domain),
+    norm=LinearAlgebra.norm,
 ) where {DOM<:AbstractDomain}
     # Determine the type of elements returned by the embedded cubature.
-    I, E = ec(fct, domain)
+    I, E = embedded_cubature(fct, domain, norm)
 
     # Create a binary heap to store elements of the form (domain, I, E), where:
     # - `domain` is the current subdomain being processed.
@@ -132,7 +141,9 @@ reduce numerical error due to floating-point number.
 [1] Klein, A. A Generalized Kahan-Babuška-Summation-Algorithm. Computing 76, 279-293 (2006).
 https://doi.org/10.1007/s00607-005-0139-x
 """
-function resum(buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=norm) where {DOM,IT,ET}
+function resum(
+    buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=LinearAlgebra.norm
+) where {DOM,IT,ET}
     I = cᵢ = zero(IT)
     E = cₑ = zero(ET)
     for (_, I_dom, E_dom) in buffer.valtree
