@@ -1,8 +1,8 @@
 module HAdaptiveIntegration
 
 using DataStructures: BinaryHeap
-using LinearAlgebra: det, norm
-using StaticArrays: SVector, setindex
+using LinearAlgebra: LinearAlgebra
+using StaticArrays: StaticArrays
 
 # Supported integration domains
 include("Domain/Domain.jl")

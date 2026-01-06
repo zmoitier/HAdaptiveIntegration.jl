@@ -9,8 +9,8 @@ export GrundmannMoeller, RadonLaurie
 export GenzMalik, SQUARE_CH21, SQUARE_CH25, CUBE_BE65, CUBE_BE115
 
 using ..HAdaptiveIntegration.Domain
-using LinearAlgebra: norm
-using StaticArrays: SVector
+using ..HAdaptiveIntegration.LinearAlgebra: norm
+using ..HAdaptiveIntegration.StaticArrays: SVector
 
 """
     abstract type AbstractRule{DOM<:AbstractDomain}

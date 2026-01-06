@@ -5,11 +5,11 @@ import HAdaptiveIntegration: increase_precision
 using Base.Iterators: countfrom, partition
 using ForwardDiff.DiffResults: JacobianResult, MutableDiffResult, jacobian, value
 using ForwardDiff: jacobian!
+using HAdaptiveIntegration.LinearAlgebra: norm
+using HAdaptiveIntegration.Printf: @sprintf
+using HAdaptiveIntegration.StaticArrays: SVector
 using HAdaptiveIntegration:
     Orthotope, Segment, Simplex, TabulatedEmbeddedCubature, dimension, orders
-using LinearAlgebra: norm
-using Printf: @sprintf
-using StaticArrays: SVector
 
 function __init__()
     @info "Loading IncreasePrecisionExt.jl"
