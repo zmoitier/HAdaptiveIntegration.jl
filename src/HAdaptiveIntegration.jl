@@ -13,10 +13,6 @@ export Segment, Triangle, Rectangle, Tetrahedron, Cuboid, Simplex, Orthotope
 include("Rule/Rule.jl")
 using .Rule
 
-# Compute error on polynomials basis
-include("Polynomial/Polynomial.jl")
-using .Polynomial
-
 # Default subdivision and embedded cubature for supported domain
 include("default.jl")
 

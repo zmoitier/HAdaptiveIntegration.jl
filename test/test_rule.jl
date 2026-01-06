@@ -1,8 +1,29 @@
 using HAdaptiveIntegration.Domain
-using HAdaptiveIntegration.Polynomial
 using HAdaptiveIntegration.Rule
 using Quadmath
 using Test
+using Base.Iterators: countfrom
+
+using Printf
+include("../ext/IncreasePrecisionExt.jl")
+
+function (ec::EmbeddedCubature{D,T})(α::NTuple{D,Int}) where {D,T}
+    H, L = length(ec.weights_high), length(ec.weights_low)
+
+    v = prod(ec.nodes[1] .^ α)
+    Iₗ = ec.weights_low[1] * v
+    Iₕ = ec.weights_high[1] * v
+    for i in 2:L
+        v = prod(ec.nodes[i] .^ α)
+        Iₗ += ec.weights_low[i] * v
+        Iₕ += ec.weights_high[i] * v
+    end
+    for i in (L + 1):H
+        Iₕ += ec.weights_high[i] * prod(ec.nodes[i] .^ α)
+    end
+
+    return Iₕ, Iₗ
+end
 
 function validate_orders(
     ec::EmbeddedCubature{D,T},
@@ -12,32 +33,21 @@ function validate_orders(
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
 ) where {D,T,DOM}
-    val_ex = integral_monomials_exact(DOM, order_high)
-    val_num_hi, val_num_lo = integral_monomials_rule(ec, order_high, order_low)
+    val_ex = IncreasePrecisionExt.integral_monomials(DOM, order_high)
+    for (k, α2v) in zip(countfrom(0), val_ex)
+        for (α, v) in α2v
+            vh, vl = ec(α)
 
-    for k in 0:order_high
-        for (α2v_num, α2v_ex) in zip(val_num_hi[k + 1], val_ex[k + 1])
-            for ((α, v_num), (_, v_ex)) in zip(α2v_num, α2v_ex)
-                err_abs = abs(v_num - v_ex)
-                err_rel = abs(err_abs / v_ex)
-                if err_abs > atol && err_rel > rtol
-                    msg = "fail to integrate within tolerance at degree = $α.\n"
-                    msg *= "Absolute error: $(err_abs), atol: $atol.\n"
-                    msg *= "Relative error: $(err_rel), rtol: $rtol."
-                    @error msg
-                    return false
-                end
+            vs = [(vh, "high order")]
+            if k ≤ order_low
+                push!(vs, (vl, "low order"))
             end
-        end
-    end
 
-    for k in 0:order_low
-        for (α2v_num, α2v_ex) in zip(val_num_lo[k + 1], val_ex[k + 1])
-            for ((α, v_num), (_, v_ex)) in zip(α2v_num, α2v_ex)
-                err_abs = abs(v_num - v_ex)
-                err_rel = abs(err_abs / v_ex)
+            for (v, label) in vs
+                err_abs = abs(vh - v)
+                err_rel = abs(err_abs / v)
                 if err_abs > atol && err_rel > rtol
-                    msg = "fail to integrate within tolerance at degree = $α.\n"
+                    msg = "fail to integrate $label rule within tolerance at degree = $α.\n"
                     msg *= "Absolute error: $(err_abs), atol: $atol.\n"
                     msg *= "Relative error: $(err_rel), rtol: $rtol."
                     @error msg

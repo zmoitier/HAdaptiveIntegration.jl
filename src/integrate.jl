@@ -121,7 +121,7 @@ function allocate_buffer(
     return buffer
 end
 
-# paranoia about accumulated roundoff, see re-sum from QuadGK.jl
+# paranoia about accumulated round-off, see re-sum from QuadGK.jl
 """
     resum(buffer; norm=LinearAlgebra.norm)
 
