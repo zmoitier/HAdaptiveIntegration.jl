@@ -2,6 +2,7 @@ module HAdaptiveIntegration
 
 using DataStructures: BinaryHeap
 using LinearAlgebra: LinearAlgebra
+using Printf: Printf
 using StaticArrays: StaticArrays
 
 # Supported integration domains
