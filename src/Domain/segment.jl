@@ -51,7 +51,7 @@ end
 function map_to_reference(s::Segment{T}) where {T}
     diff = s.xmax - s.xmin
     @assert diff > √eps(float(T)) "degenerate 1-dimensional Segment: must have \
-    `high_corner .> low_corner`."
+`high_corner .> low_corner`."
 
     return p -> (p .- s.xmin) ./ diff
 end

@@ -30,7 +30,7 @@ function Orthotope{T}(low_corner, high_corner, D::Union{Int,Nothing}=nothing) wh
         @assert length(high_corner) == D "high_corner must have length $D."
     end
     @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "must have `low_corner \
-    .≤ high_corner`."
+.≤ high_corner`."
 
     return Orthotope(SVector(SVector{D,T}(low_corner), SVector{D,T}(high_corner)))
 end
@@ -45,7 +45,7 @@ function Orthotope(low_corner, high_corner, D::Union{Int,Nothing}=nothing)
         @assert length(high_corner) == D "high_corner must have length $D."
     end
     @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "must have `low_corner \
-    .≤ high_corner`."
+.≤ high_corner`."
 
     return Orthotope(SVector(float(SVector{D}(low_corner)), float(SVector{D}(high_corner))))
 end
@@ -67,7 +67,7 @@ end
 function map_to_reference(h::Orthotope{D,T}) where {D,T}
     diff = h.corners[2] - h.corners[1]
     @assert all(x -> x > √eps(float(T)), diff) "degenerate $D-dimensional Orthotope: must \
-    have `high_corner .> low_corner`."
+have `high_corner .> low_corner`."
 
     return p -> (p - h.corners[1]) ./ diff
 end

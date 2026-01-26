@@ -25,7 +25,7 @@ struct EmbeddedCubature{D,T}
         @assert length(nodes) == length(weights_high) "The number of nodes must match the \
         number of high-order weights."
         @assert length(weights_high) ≥ length(weights_low) "weights_high must have a \
-        length greater than or equal to weights_low."
+length greater than or equal to weights_low."
         return new{D,T}(nodes, weights_high, weights_low)
     end
 end
