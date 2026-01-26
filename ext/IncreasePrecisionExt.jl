@@ -12,7 +12,7 @@ using HAdaptiveIntegration:
     Orthotope, Segment, Simplex, TabulatedEmbeddedCubature, dimension, orders
 
 function __init__()
-    @info "Loading IncreasePrecisionExt.jl"
+    @debug "Loading IncreasePrecisionExt.jl"
 end
 
 function integral_monomials(::Type{<:Segment}, deg_tot_max::Int)
