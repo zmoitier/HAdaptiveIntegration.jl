@@ -36,9 +36,10 @@ an error estimate.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
 - `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
-- `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called at each
-  subdivision step with the current integral `I`, error estimate `E`, number of
-  subdivisions `nb_subdiv`, and `buffer`.
+- `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
+  estimated value of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after
+  each subdivision. The callback receives the current integral `I`, error estimate `E`,
+  number of subdivisions `nb_subdiv`, and `buffer`.
 """
 function integrate(
     fct,
@@ -90,9 +91,16 @@ end
         buffer
     end
     push!(buffer, (domain, I, E))
-    callback(I, E, nb_subdiv, buffer)
 
-    while (E > atol) && (E > rtol * norm(I)) && (nb_subdiv < maxsubdiv)
+    while true
+        callback(I, E, nb_subdiv, buffer)
+
+        # check termination conditions
+        if (E ≤ atol) || (E ≤ rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
+            break
+        end
+
+        # subdivide the domain with the largest error
         domain, I_dom, E_dom = pop!(buffer)
         I -= I_dom
         E -= E_dom
@@ -103,7 +111,6 @@ end
             push!(buffer, (child, I_child, E_child))
         end
         nb_subdiv += 1
-        callback(I, E, nb_subdiv, buffer)
     end
 
     if nb_subdiv ≥ maxsubdiv
