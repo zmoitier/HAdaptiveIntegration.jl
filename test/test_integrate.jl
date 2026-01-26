@@ -160,7 +160,7 @@ end
 
     callback_noop = (args...) -> nothing
     alloc_noop = let f = fct, d = domain, b = buffer, cb = callback_noop
-        integrate(fct, domain; buffer=buffer, callback=cb)  # warmup
+        integrate(f, d; buffer=b, callback=cb)
         @allocated integrate(f, d; buffer=b, callback=cb)
     end
 
@@ -172,6 +172,8 @@ end
     integrate(fct, domain; buffer=buffer, callback=callback_work)  # warmup
     empty!(data)
     alloc_work = let f = fct, d = domain, b = buffer, cb = callback_work
+        empty!(data)
+        sizehint!(data, 0) # make sure the array is empty to measure allocations
         @allocated integrate(f, d; buffer=b, callback=cb)
     end
     @test alloc_work > 0
