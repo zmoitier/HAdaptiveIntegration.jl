@@ -103,4 +103,3 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         @test abs(I - R) ≤ rtol * abs(R)
     end
 end
->

@@ -114,8 +114,8 @@ end
     end
 
     if nb_subdiv ≥ maxsubdiv
-        @warn "maximum number of subdivide reached `maxsubdiv=$maxsubdiv`, try increasing \
-        the keyword argument `maxsubdiv`."
+        @warn "maximum number of subdivisions reached `maxsubdiv=$maxsubdiv`, try \
+        increasing the keyword argument `maxsubdiv`."
     end
 
     return I, E
@@ -159,8 +159,8 @@ end
     resum(buffer; norm=LinearAlgebra.norm)
 
 Re-sum the integral and error estimate from a provided buffer. This function is more
-expensive than a sum because it use the Kahan-Babuška-Neumaier [1] summation algorithm to
-reduce numerical error due to floating-point number.
+expensive than a sum because it uses the Kahan-Babuška-Neumaier [1] summation algorithm to
+reduce numerical error due to floating-point numbers.
 
 [1] Klein, A. A Generalized Kahan-Babuška-Summation-Algorithm. Computing 76, 279-293 (2006).
 https://doi.org/10.1007/s00607-005-0139-x

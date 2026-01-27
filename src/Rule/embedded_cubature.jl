@@ -58,7 +58,7 @@ end
 
 """
     (ec::EmbeddedCubature{D,T})(
-        fct, domain::Domain{D,T}, norm=LinearAlgebra.norm
+        fct, domain::AbstractDomain{D,T}, norm=LinearAlgebra.norm
     ) where {D,T}
 
 Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the
