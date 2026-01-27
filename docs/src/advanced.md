@@ -47,7 +47,7 @@ Although these are generally good choices, you can also specify a custom embedde
 cubature formula by passing it as a keyword argument to `integrate`. For example, in the
 case of a triangle, the package defaults to a Radon-Laurie embedded cubature formula of
 orders 5 and 7 (see the `rules_simplex.jl` file for more details). If you want
-*e.g.* to use an embedded cubature based on the [`GrundmannMoeller`](@ref) rule of order 13,
+_e.g._ to use an embedded cubature based on the [`GrundmannMoeller`](@ref) rule of order 13,
 you can do
 
 ```@example embedded-cubature
@@ -89,8 +89,8 @@ This example illustrates that testing is necessary to determine which cubature r
 for your specific application!
 
 !!! tip "Available embedded cubature formulas"
-    The list of available embedded cubature formulas is:
-    ```@example
+The list of available embedded cubature formulas is:
+`@example
     using HAdaptiveIntegration # hide
     not_rules = Set([ # hide
         "AbstractRule", # hide
@@ -105,9 +105,9 @@ for your specific application!
             println(name) # hide
         end # hide
     end # hide
-    ```
+    `
 
-To add a custom embedded cubature for a given domain, you must write a constructor *e.g.*
+To add a custom embedded cubature for a given domain, you must write a constructor _e.g._
 `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref) object (see
 the function [`embedded_cubature`](@ref) in the file
 [`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl)
@@ -164,29 +164,22 @@ including the initial estimate (`nb_subdiv=0`) and after each subdivision. It re
 current integral `I`, error estimate `E`, number of subdivisions `nb_subdiv`, and the
 internal `buffer`.
 
-Here is a simple example that prints the convergence history:
+Here is a simple example that collects the convergence history:
 
 ```@example callback
 using HAdaptiveIntegration
 
 t = Triangle((0, 0), (1, 0), (0, 1))
-f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
+f = x -> 1 / (x[1]^2 + x[2]^2 + 0.5)
 
-function my_callback(I, E, nb_subdiv, buffer)
-    println("  step $nb_subdiv: I = $I, E = $E")
-    return nothing
-end
-
-I, E = integrate(f, t; callback = my_callback)
-```
-
-This can be useful for debugging, logging, or collecting convergence data for later
-analysis:
-
-```@example callback
 history = @NamedTuple{I::Float64, E::Float64, nb_subdiv::Int}[]
 
 I, E = integrate(f, t; callback = (I, E, nb_subdiv, _) -> push!(history, (; I, E, nb_subdiv)))
 
-history[end]
+using Printf
+@printf("  %4s | %14s | %12s\n", "step", "I", "E")
+@printf("  %4s-+-%14s-+-%12s\n", "----", "--------------", "------------")
+foreach(history) do h
+    @printf("  %4d | %14.10f | %12.4e\n", h.nb_subdiv, h.I, h.E)
+end
 ```
