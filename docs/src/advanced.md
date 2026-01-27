@@ -155,3 +155,38 @@ I, E = integrate(f, t; subdiv_algo = subdivide_triangle2)
 
 Which subdivision strategy is best depends on the function being integrated; for the example
 presented above, it turns out the default strategy is more efficient!
+
+## Callback
+
+The `callback` keyword argument allows you to monitor the progress of the adaptive
+integration. The callback function is called for each estimated value of `I` and `E`,
+including the initial estimate (`nb_subdiv=0`) and after each subdivision. It receives the
+current integral `I`, error estimate `E`, number of subdivisions `nb_subdiv`, and the
+internal `buffer`.
+
+Here is a simple example that prints the convergence history:
+
+```@example callback
+using HAdaptiveIntegration
+
+t = Triangle((0, 0), (1, 0), (0, 1))
+f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
+
+function my_callback(I, E, nb_subdiv, buffer)
+    println("  step $nb_subdiv: I = $I, E = $E")
+    return nothing
+end
+
+I, E = integrate(f, t; callback = my_callback)
+```
+
+This can be useful for debugging, logging, or collecting convergence data for later
+analysis:
+
+```@example callback
+history = @NamedTuple{I::Float64, E::Float64, nb_subdiv::Int}[]
+
+I, E = integrate(f, t; callback = (I, E, nb_subdiv, _) -> push!(history, (; I, E, nb_subdiv)))
+
+history[end]
+```
