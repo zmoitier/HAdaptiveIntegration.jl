@@ -164,7 +164,9 @@ end
         @allocated integrate(f, d; buffer=b, callback=cb)
     end
 
-    @test alloc_noop == 0
+    # we expect the function above to have zero allocs, but that seems to be true only on
+    # recent Julia versions (1.12+), so we mark the test as broken on older versions
+    @test alloc_noop == 0 broken=(VERSION < v"1.12")
 
     # callback that does work (allocates)
     data = Float64[]
