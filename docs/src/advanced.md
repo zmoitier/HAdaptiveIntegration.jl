@@ -39,6 +39,34 @@ Provided evaluating `f` does not allocate, and the `buffer` has a sufficiently l
 capacity, `integrate` will not allocate memory during the integration process, as shown in
 the benchmark above.
 
+## Callback
+
+The `callback` keyword argument allows you to monitor the progress of the adaptive
+integration. The callback function is called for each estimated value of `I` and `E`,
+including the initial estimate (`nb_subdiv=0`) and after each subdivision. It receives the
+current integral `I`, error estimate `E`, number of subdivisions `nb_subdiv`, and the
+internal `buffer`.
+
+Here is a simple example that collects the convergence history:
+
+```@example callback
+using HAdaptiveIntegration
+
+t = Triangle((0, 0), (1, 0), (0, 1))
+f = x -> 1 / (x[1]^2 + x[2]^2 + 0.5)
+
+history = @NamedTuple{I::Float64, E::Float64, nb_subdiv::Int}[]
+
+I, E = integrate(f, t; callback = (I, E, nb_subdiv, _) -> push!(history, (; I, E, nb_subdiv)))
+
+using Printf
+@printf("  %4s | %14s | %12s\n", "step", "I", "E")
+@printf("  %4s-+-%14s-+-%12s\n", "----", "--------------", "------------")
+foreach(history) do h
+    @printf("  %4d | %14.10f | %12.4e\n", h.nb_subdiv, h.I, h.E)
+end
+```
+
 ## Embedded cubature formulas
 
 By default, when calling `integrate(f, domain)`, the package uses a default embedded
@@ -89,8 +117,9 @@ This example illustrates that testing is necessary to determine which cubature r
 for your specific application!
 
 !!! tip "Available embedded cubature formulas"
-The list of available embedded cubature formulas is:
-`@example
+    The list of available embedded cubature formulas is:
+
+    ```@example rule-name
     using HAdaptiveIntegration # hide
     not_rules = Set([ # hide
         "AbstractRule", # hide
@@ -105,7 +134,7 @@ The list of available embedded cubature formulas is:
             println(name) # hide
         end # hide
     end # hide
-    `
+    ```
 
 To add a custom embedded cubature for a given domain, you must write a constructor _e.g._
 `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref) object (see
@@ -155,31 +184,3 @@ I, E = integrate(f, t; subdiv_algo = subdivide_triangle2)
 
 Which subdivision strategy is best depends on the function being integrated; for the example
 presented above, it turns out the default strategy is more efficient!
-
-## Callback
-
-The `callback` keyword argument allows you to monitor the progress of the adaptive
-integration. The callback function is called for each estimated value of `I` and `E`,
-including the initial estimate (`nb_subdiv=0`) and after each subdivision. It receives the
-current integral `I`, error estimate `E`, number of subdivisions `nb_subdiv`, and the
-internal `buffer`.
-
-Here is a simple example that collects the convergence history:
-
-```@example callback
-using HAdaptiveIntegration
-
-t = Triangle((0, 0), (1, 0), (0, 1))
-f = x -> 1 / (x[1]^2 + x[2]^2 + 0.5)
-
-history = @NamedTuple{I::Float64, E::Float64, nb_subdiv::Int}[]
-
-I, E = integrate(f, t; callback = (I, E, nb_subdiv, _) -> push!(history, (; I, E, nb_subdiv)))
-
-using Printf
-@printf("  %4s | %14s | %12s\n", "step", "I", "E")
-@printf("  %4s-+-%14s-+-%12s\n", "----", "--------------", "------------")
-foreach(history) do h
-    @printf("  %4d | %14.10f | %12.4e\n", h.nb_subdiv, h.I, h.E)
-end
-```

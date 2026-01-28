@@ -1,6 +1,6 @@
 name = "HAdaptiveIntegration"
 uuid = "eaa5ad34-b243-48e9-b09c-54bc0655cecf"
-version = "0.2.3"
+version = "1.0.0"
 authors = ["Zois Moitier", "Luiz M. Faria"]
 
 [deps]
@@ -34,11 +34,4 @@ Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = [
-  "Aqua",
-  "DataStructures",
-  "Quadmath",
-  "LinearAlgebra",
-  "Logging",
-  "Test",
-]
+test = ["Aqua", "DataStructures", "Quadmath", "LinearAlgebra", "Logging", "Test"]
