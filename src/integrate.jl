@@ -8,8 +8,7 @@
         norm=LinearAlgebra.norm,
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
-        maxsubdiv=8192 * 2^D,
-        return_buffer=Val(false),
+        maxsubdiv=2^(13 + D),
         callback=(I, E, nb_subdiv, buffer) -> nothing,
     ) where {D,T}
 
@@ -35,7 +34,7 @@ an error estimate.
 - `norm=LinearAlgebra.norm`: norm used to estimate the error.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
-- `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
+- `maxsubdiv=2^(13 + D)`: maximum number of subdivision.
 - `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
   estimated value of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after
   each subdivision. The callback receives the current integral `I`, error estimate `E`,
@@ -50,7 +49,7 @@ function integrate(
     norm=LinearAlgebra.norm,
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
-    maxsubdiv=8192 * 2^D,
+    maxsubdiv=2^(13 + D),
     callback=(I, E, nb_subdiv, buffer) -> nothing,
 ) where {D,T}
     return _integrate(
