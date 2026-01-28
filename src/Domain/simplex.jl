@@ -62,7 +62,8 @@ end
 function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
     v = s.vertices
     jacobian_matrix = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
-    @assert !isapprox(det(jacobian_matrix), 0; atol=(√eps(float(T)))) "degenerate $D-dimensional Simplex: the Jacobian matrix is not invertible."
+    @assert !isapprox(det(jacobian_matrix), 0; atol=(√eps(float(T)))) "degenerate \
+$D-dimensional Simplex: the Jacobian matrix is not invertible."
 
     M = inv(jacobian_matrix)
     return u -> M * (u - v[1])

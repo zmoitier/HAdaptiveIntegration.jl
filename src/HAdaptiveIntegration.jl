@@ -1,8 +1,9 @@
 module HAdaptiveIntegration
 
 using DataStructures: BinaryHeap
-using LinearAlgebra: det, norm
-using StaticArrays: SVector, setindex
+using LinearAlgebra: LinearAlgebra
+using Printf: Printf
+using StaticArrays: StaticArrays
 
 # Supported integration domains
 include("Domain/Domain.jl")
@@ -12,10 +13,6 @@ export Segment, Triangle, Rectangle, Tetrahedron, Cuboid, Simplex, Orthotope
 # Tabulated cubature rule for supported domains
 include("Rule/Rule.jl")
 using .Rule
-
-# Compute error on polynomials basis
-include("Polynomial/Polynomial.jl")
-using .Polynomial
 
 # Default subdivision and embedded cubature for supported domain
 include("default.jl")

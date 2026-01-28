@@ -22,8 +22,10 @@ struct EmbeddedCubature{D,T}
     function EmbeddedCubature(
         nodes::Vector{SVector{D,T}}, weights_high::Vector{T}, weights_low::Vector{T}
     ) where {D,T}
-        @assert length(nodes) == length(weights_high) "The number of nodes must match the number of high-order weights."
-        @assert length(weights_high) ≥ length(weights_low) "weights_high must have a length greater than or equal to weights_low."
+        @assert length(nodes) == length(weights_high) "The number of nodes must match the \
+        number of high-order weights."
+        @assert length(weights_high) ≥ length(weights_low) "weights_high must have a \
+length greater than or equal to weights_low."
         return new{D,T}(nodes, weights_high, weights_low)
     end
 end
@@ -56,7 +58,7 @@ end
 
 """
     (ec::EmbeddedCubature{D,T})(
-        fct, domain::Domain{D,T}, norm=x -> LinearAlgebra.norm(x, Inf)
+        fct, domain::AbstractDomain{D,T}, norm=LinearAlgebra.norm
     ) where {D,T}
 
 Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the
@@ -66,7 +68,7 @@ the addition. Note that there is no check, beyond compatibility of dimension and
 the embedded cubature is for the right domain.
 """
 function (ec::EmbeddedCubature{D,T})(
-    fct, domain::AbstractDomain{D,T}, norm=x -> norm(x, Inf)
+    fct, domain::AbstractDomain{D,T}, norm=LinearAlgebra.norm
 ) where {D,T}
     H, L = length(ec.weights_high), length(ec.weights_low)
     Φ, μ = map_from_reference(domain)

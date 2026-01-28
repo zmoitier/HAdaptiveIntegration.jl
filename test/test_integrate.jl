@@ -26,7 +26,7 @@ end
         embedded_cubature(SEGMENT_GK31),
     )
         for (fct, R) in [(x -> exp(x[1]), exp(1) - 1), (x -> 1 / sqrt(x[1]), 2)]
-            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            I, E = @inferred(integrate(fct, domain; embedded_cubature=ec, buffer=buffer))
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -42,7 +42,7 @@ end
             (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
             (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
         ]
-            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            I, E = @inferred integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -61,7 +61,7 @@ end
             (x -> exp(x[1] + x[2]), (exp(1) - 1)^2),
             (x -> 1 / norm(x), log(17 + 12 * sqrt(2)) / 2),
         ]
-            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            I, E = @inferred integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -78,7 +78,7 @@ end
         ),
         (x -> 1 / norm(x), 0.3614258523411),
     ]
-        I, E = integrate(fct, domain; buffer=buffer)
+        I, E = @inferred integrate(fct, domain; buffer=buffer)
         @test abs(I - R) ≤ E * abs(R)
     end
 end
@@ -94,37 +94,89 @@ end
     )
         for (fct, R) in
             [(x -> 1 / (1 + norm(x)^2)^2, π^2 / 32), (x -> 1 / norm(x), 1.1900386819897766)]
-            I, E = integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            I, E = @inferred integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
 end
 
 @testset "4-Simplex" begin
-    I, E = integrate(x -> 1 / norm(x), reference_domain(Simplex{4}))
+    I, E = @inferred integrate(x -> 1 / norm(x), reference_domain(Simplex{4}))
     R = 0.089876019011
     @test abs(I - R) ≤ E * abs(R)
 end
 
 @testset "4-Orthotope" begin
-    I, E = integrate(x -> 1 / norm(x), reference_domain(Orthotope{4}))
+    I, E = @inferred integrate(x -> 1 / norm(x), reference_domain(Orthotope{4}))
     R = 0.9674120212411487
     @test abs(I - R) ≤ E * abs(R)
 end
 
-@testset "Return buffer" begin
+@testset "Re-sum" begin
     domain = Segment(0, 1)
     fct = x -> exp(x[1])
 
-    # by default, the buffer is not returned
-    @test length(integrate(fct, domain)) == 2
+    buffer = allocate_buffer(fct, domain)
+    I, E = @inferred integrate(fct, domain; buffer=buffer)
+    I2, E2 = resum(buffer)
 
-    # we can ask for the buffer to be returned
-    @test length(integrate(fct, domain; return_buffer=Val(true))) == 3
-    I, E, buf = integrate(fct, domain; return_buffer=Val(true))
-    @test typeof(buf) == typeof(allocate_buffer(fct, domain))
+    @test isapprox(I, I2; rtol=1.0e-12)
+    @test isapprox(E, E2; atol=1.0e-12)
+end
 
-    I2, E2 = resum(buf)
-    @test I ≈ I2
-    @test E ≈ E2
+@testset "Callback" begin
+    domain = Segment(0, 1)
+    fct = x -> 1 / sqrt(x[1])  # singular integrand requiring subdivisions
+
+    # collect callback data
+    callback_data = Vector{@NamedTuple{I::Float64,E::Float64,nb_subdiv::Int}}()
+    function callback(I, E, nb_subdiv, buffer)
+        push!(callback_data, (; I, E, nb_subdiv))
+        return nothing
+    end
+
+    I, E = @inferred integrate(fct, domain; callback=callback)
+
+    # callback is called at least once (initial estimate)
+    @test length(callback_data) ≥ 1
+
+    # first call has nb_subdiv=0
+    @test callback_data[1].nb_subdiv == 0
+
+    # nb_subdiv increments correctly: 0, 1, 2, ...
+    for (i, data) in enumerate(callback_data)
+        @test data.nb_subdiv == i - 1
+    end
+
+    # final callback values match returned I, E
+    @test callback_data[end].I == I
+    @test callback_data[end].E == E
+end
+
+@testset "No-op callback optimization" begin
+    domain = Segment(0, 1)
+    fct = x -> exp(x[1])
+    buffer = allocate_buffer(fct, domain)
+
+    callback_noop = (args...) -> nothing
+    alloc_noop = let f = fct, d = domain, b = buffer, cb = callback_noop
+        integrate(f, d; buffer=b, callback=cb)
+        @allocated integrate(f, d; buffer=b, callback=cb)
+    end
+
+    # we expect the function above to have zero allocs, but that seems to be true only on
+    # recent Julia versions (1.12+), so we mark the test as broken on older versions
+    @test alloc_noop == 0 broken=(VERSION < v"1.12")
+
+    # callback that does work (allocates)
+    data = Float64[]
+    callback_work = (I, E, n, b) -> push!(data, I)
+    integrate(fct, domain; buffer=buffer, callback=callback_work)  # warmup
+    empty!(data)
+    alloc_work = let f = fct, d = domain, b = buffer, cb = callback_work
+        empty!(data)
+        sizehint!(data, 0) # make sure the array is empty to measure allocations
+        @allocated integrate(f, d; buffer=b, callback=cb)
+    end
+    @test alloc_work > 0
 end

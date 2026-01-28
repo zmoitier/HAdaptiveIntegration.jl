@@ -5,15 +5,16 @@
         embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
         subdiv_algo=default_subdivision(domain),
         buffer=nothing,
-        norm=x -> LinearAlgebra.norm(x, Inf),
+        norm=LinearAlgebra.norm,
         atol=zero(T),
         rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
         maxsubdiv=8192 * 2^D,
         return_buffer=Val(false),
+        callback=(I, E, nb_subdiv, buffer) -> nothing,
     ) where {D,T}
 
-Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E`
-is an error estimate.
+Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
+an error estimate.
 
 ## Arguments
 - `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
@@ -24,19 +25,21 @@ is an error estimate.
   [`Orthotope`](@ref).
 
 ## Optional arguments
-- `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the
-  embedded cubature, each supported domain has a [`default_embedded_cubature`](@ref).
+- `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded
+  cubature, each supported domain has a [`default_embedded_cubature`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
 - `buffer=nothing`: heap use to do the adaptive algorithm, can be allocated using
   [`allocate_buffer`](@ref), which might result in performance gain if multiple call to
   integrate is perform.
-- `norm=x -> LinearAlgebra.norm(x, Inf)`: norm used to estimate the error.
+- `norm=LinearAlgebra.norm`: norm used to estimate the error.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
 - `maxsubdiv=8192 * 2^D`: maximum number of subdivision.
-- `return_buffer=Val(false)`: if `Val(true)`, the buffer used for the computation is also
-  returned.
+- `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
+  estimated value of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after
+  each subdivision. The callback receives the current integral `I`, error estimate `E`,
+  number of subdivisions `nb_subdiv`, and `buffer`.
 """
 function integrate(
     fct,
@@ -44,12 +47,12 @@ function integrate(
     embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
-    norm=x -> norm(x, Inf),
+    norm=LinearAlgebra.norm,
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
     maxsubdiv=8192 * 2^D,
-    return_buffer::Val{RETURN_BUF}=Val(false),
-) where {D,T,RETURN_BUF}
+    callback=(I, E, nb_subdiv, buffer) -> nothing,
+) where {D,T}
     return _integrate(
         fct,
         domain,
@@ -60,7 +63,7 @@ function integrate(
         atol,
         rtol,
         maxsubdiv,
-        return_buffer,
+        callback,
     )
 end
 
@@ -74,8 +77,8 @@ end
     atol,
     rtol,
     maxsubdiv,
-    return_buffer::Val{RETURN_BUF},
-) where {FCT,DOM,RETURN_BUF}
+    callback,
+) where {FCT,DOM}
     nb_subdiv = 0
 
     I, E = ec(fct, domain, norm)
@@ -89,7 +92,15 @@ end
     end
     push!(buffer, (domain, I, E))
 
-    while (E > atol) && (E > rtol * norm(I)) && (nb_subdiv < maxsubdiv)
+    while true
+        callback(I, E, nb_subdiv, buffer)
+
+        # check termination conditions
+        if (E ≤ atol) || (E ≤ rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
+            break
+        end
+
+        # subdivide the domain with the largest error
         domain, I_dom, E_dom = pop!(buffer)
         I -= I_dom
         E -= E_dom
@@ -103,27 +114,33 @@ end
     end
 
     if nb_subdiv ≥ maxsubdiv
-        @warn "maximum number of subdivide reached, try increasing the keyword argument `maxsubdiv=$maxsubdiv`."
+        @warn "maximum number of subdivisions reached `maxsubdiv=$maxsubdiv`, try \
+        increasing the keyword argument `maxsubdiv`."
     end
 
-    # How to enable debug logs with out allocations ?
-    # @debug LazyString("number of subdivision = ", nb_subdiv)
-
-    return RETURN_BUF ? (I, E, buffer) : (I, E)
+    return I, E
 end
 
 """
-    allocate_buffer(fct, domain, ec=default_embedded_cubature(domain))
+    allocate_buffer(
+        fct,
+        domain::AbstractDomain{D,T};
+        embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
+        norm=LinearAlgebra.norm
+    ) where {D,T}
 
 Allocate and return a buffer that can be passed to the [`integrate`](@ref) function to
 improve performance by reducing memory allocations when `integrate` is called multiple
 times.
 """
 function allocate_buffer(
-    fct, domain::DOM, ec::EmbeddedCubature=default_embedded_cubature(domain)
+    fct,
+    domain::DOM;
+    embedded_cubature::EmbeddedCubature=default_embedded_cubature(domain),
+    norm=LinearAlgebra.norm,
 ) where {DOM<:AbstractDomain}
     # Determine the type of elements returned by the embedded cubature.
-    I, E = ec(fct, domain)
+    I, E = embedded_cubature(fct, domain, norm)
 
     # Create a binary heap to store elements of the form (domain, I, E), where:
     # - `domain` is the current subdomain being processed.
@@ -137,21 +154,38 @@ function allocate_buffer(
     return buffer
 end
 
+# paranoia about accumulated round-off, see re-sum from QuadGK.jl
 """
-    resum(buffer; norm=x -> LinearAlgebra.norm(x, Inf))
+    resum(buffer; norm=LinearAlgebra.norm)
 
-Re-sum the integral and error estimate from a provided buffer (can be expensive).
+Re-sum the integral and error estimate from a provided buffer. This function is more
+expensive than a sum because it uses the Kahan-Babuška-Neumaier [1] summation algorithm to
+reduce numerical error due to floating-point numbers.
+
+[1] Klein, A. A Generalized Kahan-Babuška-Summation-Algorithm. Computing 76, 279-293 (2006).
+https://doi.org/10.1007/s00607-005-0139-x
 """
 function resum(
-    buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=x -> norm(x, Inf)
+    buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=LinearAlgebra.norm
 ) where {DOM,IT,ET}
-    Is = Vector{IT}(undef, length(buffer))
-    Es = Vector{ET}(undef, length(buffer))
-    for (i, (_, I_dom, E_dom)) in enumerate(buffer.valtree)
-        Is[i] = I_dom
-        Es[i] = E_dom
+    I = cᵢ = zero(IT)
+    E = cₑ = zero(ET)
+    for (_, I_dom, E_dom) in buffer.valtree
+        tᵢ = I + I_dom
+        if norm(I) ≥ norm(I_dom)
+            cᵢ += (I - tᵢ) + I_dom
+        else
+            cᵢ += (I_dom - tᵢ) + I
+        end
+        I = tᵢ
+
+        tₑ = E + E_dom
+        if norm(E) ≥ norm(E_dom)
+            cₑ += (E - tₑ) + E_dom
+        else
+            cₑ += (E_dom - tₑ) + E
+        end
+        E = tₑ
     end
-    sort!(Is; lt=(x, y) -> norm(x) < norm(y))
-    sort!(Es)
-    return sum(Is), sum(Es)
+    return I + cᵢ, E + cₑ
 end

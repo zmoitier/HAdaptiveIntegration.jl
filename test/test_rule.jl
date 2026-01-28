@@ -1,8 +1,8 @@
 using HAdaptiveIntegration.Domain
-using HAdaptiveIntegration.Polynomial
 using HAdaptiveIntegration.Rule
 using Quadmath
 using Test
+using Base.Iterators: countfrom
 
 function validate_orders(
     ec::EmbeddedCubature{D,T},
@@ -12,25 +12,23 @@ function validate_orders(
     atol=zero(T),
     rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
 ) where {D,T,DOM}
-    err_hi, err_lo = compute_error_monomials(ec, DOM, order_high, order_low)
+    val_ex = integral_monomials(DOM, order_high)
+    for (k, α2v) in zip(countfrom(0), val_ex)
+        for (α, v) in α2v
+            vh, vl = eval_monomial(ec, α)
 
-    for k in 0:order_high
-        for (α, err) in err_hi[k]
-            if err.absolute > atol && err.relative > rtol
-                msg = "fail to integrate within tolerance at degree = $α.\n"
-                msg *= "Absolute error: $(err.absolute), atol: $atol.\n"
-                msg *= "Relative error: $(err.relative), rtol: $rtol."
-                @error msg
-                return false
+            vs = [(vh, "high order")]
+            if k ≤ order_low
+                push!(vs, (vl, "low order"))
             end
-        end
 
-        if k ≤ order_low
-            for (α, err) in err_lo[k]
-                if err.absolute > atol && err.relative > rtol
-                    msg = "fail to integrate within tolerance at degree = $α.\n"
-                    msg *= "Absolute error: $(err.absolute), atol: $atol.\n"
-                    msg *= "Relative error: $(err.relative), rtol: $rtol."
+            for (v, label) in vs
+                err_abs = abs(vh - v)
+                err_rel = abs(err_abs / v)
+                if err_abs > atol && err_rel > rtol
+                    msg = "fail to integrate $label rule within tolerance at degree = $α.\n"
+                    msg *= "Absolute error: $(err_abs), atol: $atol.\n"
+                    msg *= "Relative error: $(err_rel), rtol: $rtol."
                     @error msg
                     return false
                 end
@@ -39,6 +37,71 @@ function validate_orders(
     end
 
     return true
+end
+
+function integral_monomials(::Type{<:Segment}, deg_tot_max::Int)
+    return [[(k,) => 1//(k + 1)] for k in 0:deg_tot_max]
+end
+
+function integral_monomials(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
+    @assert (D > 0) && (deg_tot_max ≥ 0) "must have `D > 0` and `k_max ≥ 0`."
+
+    exponent2values = [[(i,) => 1//prod((i + 1):(i + D))] for i in 0:deg_tot_max]
+
+    for d in 2:D
+        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
+        for (k, α2v) in zip(countfrom(0), exponent2values)
+            for (α, v) in α2v
+                push!(new[k + 1], (0, α...) => v)
+                t = 1
+                for n in 1:(deg_tot_max - k)
+                    t *= n//(n + k + D)
+                    push!(new[k + 1 + n], (n, α...) => t * v)
+                end
+            end
+        end
+        exponent2values = new
+    end
+
+    return exponent2values
+end
+
+function integral_monomials(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
+    @assert (D > 0) && (deg_tot_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
+
+    exponent2values = [[(i,) => 1//(i + 1)] for i in 0:deg_tot_max]
+
+    for d in 2:D
+        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
+        for (k, α2v) in zip(countfrom(0), exponent2values)
+            for (α, v) in α2v
+                for n in 0:(deg_tot_max - k)
+                    push!(new[k + 1 + n], (n, α...) => v//(n + 1))
+                end
+            end
+        end
+        exponent2values = new
+    end
+
+    return exponent2values
+end
+
+function eval_monomial(ec::EmbeddedCubature{D,T}, α::NTuple{D,Int}) where {D,T}
+    H, L = length(ec.weights_high), length(ec.weights_low)
+
+    v = prod(ec.nodes[1] .^ α)
+    Iₗ = ec.weights_low[1] * v
+    Iₕ = ec.weights_high[1] * v
+    for i in 2:L
+        v = prod(ec.nodes[i] .^ α)
+        Iₗ += ec.weights_low[i] * v
+        Iₕ += ec.weights_high[i] * v
+    end
+    for i in (L + 1):H
+        Iₕ += ec.weights_high[i] * prod(ec.nodes[i] .^ α)
+    end
+
+    return Iₕ, Iₗ
 end
 
 @testset "Rule construction" begin

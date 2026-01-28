@@ -1,16 +1,7 @@
 using Base.Iterators: countfrom, partition, product
-using HAdaptiveIntegration:
-    AbstractDomain,
-    EmbeddedCubature,
-    GenzMalik,
-    GrundmannMoeller,
-    RadonLaurie,
-    cuboid,
-    embedded_cubature,
-    map_to_reference,
-    rectangle,
-    reference_domain,
-    segment
+using HAdaptiveIntegration.Domain: AbstractDomain, map_from_reference, reference_domain
+using HAdaptiveIntegration.Rule: EmbeddedCubature, embedded_cubature
+using HAdaptiveIntegration: Cuboid, Rectangle, Segment
 using LinearAlgebra
 using Optim
 using Printf: Format, format
@@ -46,7 +37,7 @@ function matrices_to_orbit(left::Vector{<:AbstractMatrix}, right::Vector{<:Abstr
     return reduce(vcat, map(affine_map, A * B for (A, B) in product(left, right)))
 end
 
-function orbits_segment()
+function orbits_Segment()
     return Dict(
         "0" => [affine_map([big"1.0";;])],
         "x" => [affine_map([big"1.0";;]), affine_map([big"-1.0";;])],
@@ -315,7 +306,7 @@ function print_embedded_cubature(ec::EmbeddedCubature{D,T}, name::String) where 
 end
 
 function segment_gk7()
-    orbit = orbits_segment()
+    orbit = orbits_Segment()
 
     # Values from QuadGK.jl
     quad_gk = assemble(
@@ -326,7 +317,7 @@ function segment_gk7()
         (orbit["x"], ("0.4342437493468026",), "0.40139741477596220", ""),
         (orbit["x"], ("0.9604912687080203",), "0.10465622602646725", ""),
     )
-    domain = segment(big"-1.0", big"1.0")
+    domain = Segment(big"-1.0", big"1.0")
 
     ec = to_reference(increase_precision_orthotope(quad_gk, Val(1)), domain)
     print_embedded_cubature(ec, "Gauss-Kronrod")
@@ -334,7 +325,7 @@ function segment_gk7()
 end
 
 function segment_gk15()
-    orbit = orbits_segment()
+    orbit = orbits_Segment()
 
     # Values from QuadGK.jl
     quad_gk = assemble(
@@ -349,7 +340,7 @@ function segment_gk15()
         (orbit["x"], ("0.8648644233597691",), "0.10479001032225017", ""),
         (orbit["x"], ("0.9914553711208126",), "0.02293532201052925", ""),
     )
-    domain = segment(big"-1.0", big"1.0")
+    domain = Segment(big"-1.0", big"1.0")
 
     ec = to_reference(increase_precision_orthotope(quad_gk, Val(1)), domain)
     print_embedded_cubature(ec, "Gauss-Kronrod")
@@ -357,7 +348,7 @@ function segment_gk15()
 end
 
 function segment_gk31()
-    orbit = orbits_segment()
+    orbit = orbits_Segment()
 
     # Values from QuadGK.jl
     quad_gk = assemble(
@@ -380,7 +371,7 @@ function segment_gk31()
         (orbit["x"], ("0.9677390756791391",), "0.02546084732671520", ""),
         (orbit["x"], ("0.9980022986933971",), "0.00537747987292333", ""),
     )
-    domain = segment(big"-1.0", big"1.0")
+    domain = Segment(big"-1.0", big"1.0")
 
     ec = to_reference(increase_precision_orthotope(quad_gk, Val(1)), domain)
     print_embedded_cubature(ec, "Gauss-Kronrod")
@@ -390,18 +381,6 @@ end
 function triangle_gm()
     ec = embedded_cubature(BigFloat, GrundmannMoeller{2}(7, 5))
     print_embedded_cubature(ec, "Grundmann-Möller")
-    return nothing
-end
-
-function triangle_rl()
-    ec = embedded_cubature(BigFloat, RadonLaurie())
-    print_embedded_cubature(ec, "Radon-Laurie")
-    return nothing
-end
-
-function square_gm()
-    ec = embedded_cubature(BigFloat, GenzMalik{2}())
-    print_embedded_cubature(ec, "Genz-Malik")
     return nothing
 end
 
@@ -444,7 +423,7 @@ function square_ch21()
             "",
         ),
     )
-    domain = rectangle((big"-1.0", big"-1.0"), (big"1.0", big"1.0"))
+    domain = Rectangle((big"-1.0", big"-1.0"), (big"1.0", big"1.0"))
 
     ec = to_reference(increase_precision_orthotope(cbt_ch, Val(2)), domain)
     print_embedded_cubature(ec, "Cools-Haegemans")
@@ -496,22 +475,10 @@ function square_ch25()
             "",
         ),
     )
-    domain = rectangle((big"-1.0", big"-1.0"), (big"1.0", big"1.0"))
+    domain = Rectangle((big"-1.0", big"-1.0"), (big"1.0", big"1.0"))
 
     ec = to_reference(increase_precision_orthotope(cbt_ch, Val(2)), domain)
     print_embedded_cubature(ec, "Cools-Haegemans")
-    return nothing
-end
-
-function tetrahedron_gm()
-    ec = embedded_cubature(BigFloat, GrundmannMoeller{3}(7, 5))
-    print_embedded_cubature(ec, "Grundmann-Möller")
-    return nothing
-end
-
-function cube_gm()
-    ec = embedded_cubature(BigFloat, GenzMalik{3}())
-    print_embedded_cubature(ec, "Genz-Malik")
     return nothing
 end
 
@@ -567,7 +534,7 @@ function cube_be65()
         );
         subtraction=true,
     )
-    domain = cuboid((big"-1.0", big"-1.0", big"-1.0"), (big"1.0", big"1.0", big"1.0"))
+    domain = Cuboid((big"-1.0", big"-1.0", big"-1.0"), (big"1.0", big"1.0", big"1.0"))
 
     ec = to_reference(increase_precision_orthotope(cbt_be, Val(3)), domain)
     print_embedded_cubature(ec, "Berntsen-Espelid")
@@ -650,7 +617,7 @@ function cube_be115()
         );
         subtraction=true,
     )
-    domain = cuboid((big"-1.0", big"-1.0", big"-1.0"), (big"1.0", big"1.0", big"1.0"))
+    domain = Cuboid((big"-1.0", big"-1.0", big"-1.0"), (big"1.0", big"1.0", big"1.0"))
 
     ec = to_reference(increase_precision_orthotope(cbt_be, Val(3)), domain)
     print_embedded_cubature(ec, "Berntsen-Espelid")
