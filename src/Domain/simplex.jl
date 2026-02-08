@@ -129,7 +129,7 @@ generated for each combination of `D` and `T`.
     N = D + 1
     sub_simplices = Vector{SVector{N,SVector{D,T}}}()
     for k in 0:D
-        # Compute initial vertex v₀ = (x⁰ + xᵏ) / 2
+        # Compute initial vertex v₀ = (x₀ + xₖ) / 2
         x₀ = vertices[1]
         xₖ = vertices[k + 1]
         v₀ = (x₀ .+ xₖ) ./ 2
