@@ -14,7 +14,7 @@ export subdivide_segment,
     subdivide_cuboid
 
 using ..HAdaptiveIntegration.LinearAlgebra: det, norm
-using ..HAdaptiveIntegration.StaticArrays: SVector, setindex
+using ..HAdaptiveIntegration.StaticArrays: MMatrix, SMatrix, SVector, setindex
 
 # AbstractDomain type
 include("abstract_domain.jl")
@@ -37,10 +37,10 @@ include("cuboid.jl")
 reference_domain(::Type{<:Segment{T}}) where {T} = reference_segment(T)
 reference_domain(::Type{<:Segment}) = reference_segment()
 
-reference_domain(::Type{<:Simplex{D,T}}) where {D,T} = reference_simplex(D, T)
-reference_domain(::Type{<:Simplex{D}}) where {D} = reference_simplex(D)
+reference_domain(::Type{<:Simplex{D,T}}) where {D,T} = reference_simplex(Val(D), T)
+reference_domain(::Type{<:Simplex{D}}) where {D} = reference_simplex(Val(D))
 
-reference_domain(::Type{<:Orthotope{D,T}}) where {D,T} = reference_orthotope(D, T)
-reference_domain(::Type{<:Orthotope{D}}) where {D} = reference_orthotope(D)
+reference_domain(::Type{<:Orthotope{D,T}}) where {D,T} = reference_orthotope(Val(D), T)
+reference_domain(::Type{<:Orthotope{D}}) where {D} = reference_orthotope(Val(D))
 
 end

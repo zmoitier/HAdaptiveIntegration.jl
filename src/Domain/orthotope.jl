@@ -55,9 +55,10 @@ end
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
 """
-function reference_orthotope(D::Int, (::Type{T})=float(Int)) where {T}
+function reference_orthotope(::Val{D}, (::Type{T})=float(Int)) where {D,T}
     return Orthotope(SVector{2}(zeros(SVector{D,T}), ones(SVector{D,T})))
 end
+reference_orthotope(D::Int, T::Type{<:Real}=float(Int)) = reference_orthotope(Val(D), T)
 
 function map_from_reference(h::Orthotope{D,T}) where {D,T}
     diff = h.corners[2] - h.corners[1]
