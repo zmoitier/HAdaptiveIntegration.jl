@@ -14,7 +14,7 @@ export subdivide_segment,
     subdivide_cuboid
 
 using ..HAdaptiveIntegration.LinearAlgebra: det, norm
-using ..HAdaptiveIntegration.StaticArrays: MMatrix, SMatrix, SVector, setindex
+using ..HAdaptiveIntegration.StaticArrays: MMatrix, MVector, SMatrix, SVector, setindex
 
 # AbstractDomain type
 include("abstract_domain.jl")

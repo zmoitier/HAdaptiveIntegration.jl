@@ -52,7 +52,6 @@ function reference_simplex(::Val{D}, (::Type{T})=float(Int)) where {D,T}
     end
     return Simplex(SVector{D + 1}(vertices))
 end
-reference_simplex(D::Int, T::Type{<:Real}=float(Int)) = reference_simplex(Val(D), T)
 
 function map_from_reference(s::Simplex{D,T,N}) where {D,T,N}
     vertices = s.vertices
@@ -74,22 +73,23 @@ end
     subdivide_simplex_scheme(::Val{D}) where {D}
 
 Return the color schemes for subdividing a `D`-simplex into 2ᴰ simplices by using the
-SimpleS algorithm.
+`SimpleS` algorithm.
 """
 @generated function subdivide_simplex_scheme(::Val{D}) where {D}
     N = D + 1
 
-    color_schemes = ntuple(2^D) do k
+    color_schemes = ntuple(Val(2^D)) do k
+        bits = k - 1
         cs = MMatrix{2,N,Int}(undef)
 
         cs[1, 1] = 1
         for j in 1:D
-            cs[1, j + 1] = cs[1, j] + iseven((k - 1) >> (j - 1))
+            cs[1, j + 1] = cs[1, j] + iseven(bits >> (j - 1))
         end
 
         cs[2, 1] = cs[1, N]
         for j in 1:D
-            cs[2, j + 1] = cs[2, j] + isodd((k - 1) >> (j - 1))
+            cs[2, j + 1] = cs[2, j] + isodd(bits >> (j - 1))
         end
 
         return SMatrix{2,N,Int}(cs)
@@ -101,7 +101,7 @@ end
 """
     subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
 
-Subdivide a `D`-simplex into 2ᴰ simplices by using the SimpleS algorithm.
+Subdivide a `D`-simplex into 2ᴰ simplices by using the `SimpleS` algorithm.
 
 Implements the `SimpleS` algorithm in [Algorithm 860: SimpleS -- an extension of
 Freudenthal's simplex subdivision](https://doi.org/10.1145/1186785.1186792).
