@@ -153,30 +153,39 @@ end
     @test callback_data[end].E == E
 end
 
+@testset "No allocations" begin
+    for domain_type in
+        (Segment, Triangle, Rectangle, Tetrahedron, Cuboid, Simplex{4}, Orthotope{4})
+        domain = reference_domain(domain_type)
+        fct = x -> sum(abs2, x)^(-0.25)
+        buffer = allocate_buffer(fct, domain)
+        rtol = 1e-4
+
+        nb_alloc = @allocations integrate(fct, domain; buffer=buffer, rtol=rtol)
+        @test nb_alloc > 0
+
+        # We expect the function below to have zero allocs, but that seems to be true only
+        # on recent Julia versions (1.12+), so we mark the test as broken on older versions.
+        nb_alloc = @allocations integrate(fct, domain; buffer=buffer, rtol=rtol)
+        @test nb_alloc == 0 broken = (VERSION < v"1.12")
+    end
+end
+
 @testset "No-op callback optimization" begin
     domain = Segment(0, 1)
-    fct = x -> exp(x[1])
+    fct = x -> sqrt(x[1])
     buffer = allocate_buffer(fct, domain)
-
-    callback_noop = (args...) -> nothing
-    alloc_noop = let f = fct, d = domain, b = buffer, cb = callback_noop
-        integrate(f, d; buffer=b, callback=cb)
-        @allocated integrate(f, d; buffer=b, callback=cb)
-    end
-
-    # we expect the function above to have zero allocs, but that seems to be true only on
-    # recent Julia versions (1.12+), so we mark the test as broken on older versions
-    @test alloc_noop == 0 broken = (VERSION < v"1.12")
+    rtol = 1e-4
 
     # callback that does work (allocates)
     data = Float64[]
-    callback_work = (I, E, n, b) -> push!(data, I)
-    integrate(fct, domain; buffer=buffer, callback=callback_work)  # warmup
-    empty!(data)
-    alloc_work = let f = fct, d = domain, b = buffer, cb = callback_work
+    callback = (I, E, n, b) -> push!(data, I)
+
+    integrate(fct, domain; buffer=buffer, rtol=rtol, callback=callback)  # warmup
+    nb_alloc = let f = fct, d = domain, b = buffer, ε = rtol, cb = callback
         empty!(data)
         sizehint!(data, 0) # make sure the array is empty to measure allocations
-        @allocated integrate(f, d; buffer=b, callback=cb)
+        @allocations integrate(f, d; buffer=b, rtol=ε, callback=cb)
     end
-    @test alloc_work > 0
+    @test nb_alloc > 0
 end

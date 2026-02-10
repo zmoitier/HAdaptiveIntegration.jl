@@ -79,23 +79,19 @@ Subdivide the `D`-orthotope `h` into 2ᴰ smaller orthotopes by splitting each d
 its midpoint.
 """
 function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
-    a = h.corners[1]
-    b = h.corners[2]
+    a, b = h.corners
     m = (a + b) / 2
 
     return ntuple(Val(2^D)) do k
-        aₖ = MVector{D,T}(undef)
-        bₖ = MVector{D,T}(undef)
+        aₖ, bₖ = MVector{D,T}(undef), MVector{D,T}(undef)
         for j in 1:D
             # `k-1` encodes, in binary, which half (lower or upper) is selected for each
             # dimension `j`. Bit `j` of `k-1` indicates whether the sub-orthotope uses the
             # lower half along `j`.
             if isodd((k - 1) >> (j - 1))
-                aₖ[j] = a[j]
-                bₖ[j] = m[j]
+                aₖ[j], bₖ[j] = a[j], m[j]
             else
-                aₖ[j] = m[j]
-                bₖ[j] = b[j]
+                aₖ[j], bₖ[j] = m[j], b[j]
             end
         end
         return Orthotope(SVector(SVector{D}(aₖ), SVector{D}(bₖ)))

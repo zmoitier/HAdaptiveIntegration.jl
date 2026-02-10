@@ -31,7 +31,7 @@ function subdivide_tetrahedron(t::Tetrahedron{T}) where {T}
         Tetrahedron{T}(SVector(ab, b, bc, bd)),
         Tetrahedron{T}(SVector(ac, bc, c, cd)),
         Tetrahedron{T}(SVector(ad, bd, cd, d)),
-        # octahedron splitting
+        # middle octahedron splitting
         Tetrahedron{T}(SVector(ab, ac, ad, bd)),
         Tetrahedron{T}(SVector(ab, ac, bc, bd)),
         Tetrahedron{T}(SVector(ac, ad, bd, cd)),

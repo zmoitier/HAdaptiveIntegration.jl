@@ -109,7 +109,7 @@ Freudenthal's simplex subdivision](https://doi.org/10.1145/1186785.1186792).
 function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
     color_schemes = subdivide_simplex_scheme(Val(D))
     return map(color_schemes) do color_scheme
-        Simplex(
+        Simplex{D,T,N}(
             SVector{N}(
                 (s.vertices[i] + s.vertices[j]) / 2 for (i, j) in eachcol(color_scheme)
             ),
