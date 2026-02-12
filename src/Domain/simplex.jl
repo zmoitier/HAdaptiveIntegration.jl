@@ -41,15 +41,15 @@ function Simplex(vertices...)
 end
 
 """
-    reference_simplex(D::Int, T=float(Int))
+    reference_simplex(::Val{D}, (::Type{T})=float(Int)) where {D,T}
 
 Return the reference `D`-dimensional simplex with element type `T`, which is the convex hull
 of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.
 """
-function reference_simplex(D::Int, (::Type{T})=float(Int)) where {T}
-    vertices = [
-        zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
-    ]
+function reference_simplex(::Val{D}, (::Type{T})=float(Int)) where {D,T}
+    vertices = ntuple(D + 1) do i
+        i == 1 ? zeros(SVector{D,T}) : setindex(zeros(SVector{D,T}), 1, i - 1)
+    end
     return Simplex(SVector{D + 1}(vertices))
 end
 
@@ -70,107 +70,51 @@ $D-dimensional Simplex: the Jacobian matrix is not invertible."
 end
 
 """
-    combinations(n::Int, k::Int)
+    subdivide_simplex_scheme(::Val{D}) where {D}
 
-Helper function to generate all combinations of `k` elements from `1:n`, similar to calling
-`combinations(1:n, k)` from `Combinatorics.jl`.
+Return the color schemes for subdividing a `D`-simplex into 2ᴰ simplices by using the
+`SimpleS` algorithm.
 """
-function combinations(n::Int, k::Int)
-    function combinations_helper(start::Int, end_::Int, k_::Int)
-        if k_ == 0
-            return Vector{Int}[[]]
-        elseif k_ > (end_ - start + 1)
-            return Vector{Int}[]
-        else
-            res = Vector{Int}[]
-            for i in start:(end_ - k_ + 1)
-                for c in combinations_helper(i + 1, end_, k_ - 1)
-                    push!(res, vcat([i], c))
-                end
-            end
-            return res
-        end
-    end
-    return combinations_helper(1, n, k)
-end
-
-"""
-    subdivide_reference_simplex(::Val{D}, ::Type{T}=float(Int)) where {D,T}
-
-Like `subdivide_simplex`, but operates on the reference simplex. Since the output depends
-only on the dimension `D`, and the type `T` used to represent coordinates, this function is
-generated for each combination of `D` and `T`.
-"""
-@generated function subdivide_reference_simplex(
-    ::Val{D}, (::Type{T})=float(Int)
-) where {D,T}
-    # vertices of the reference simplex
-    vertices = [
-        zeros(SVector{D,T}), collect(setindex(zeros(SVector{D,T}), 1, i) for i in 1:D)...
-    ]
-
-    # valid permutations of the vertices
-    function generate_valid_permutations(n::Int, k::Int)
-        valid_perms = []
-        # Generate all combinations of k positions from 1:n
-        for positions in combinations(n, k)
-            # Create a permutation where the first k elements (1:k) are placed at the
-            # selected positions in order, and the rest (k+1:n) follow.
-            perm = zeros(Int, n)
-            selected_pos = sort(positions)
-            remaining_pos = setdiff(1:n, selected_pos)
-            perm[selected_pos] = 1:k
-            perm[remaining_pos] = (k + 1):n
-            push!(valid_perms, perm)
-        end
-        return valid_perms
-    end
-
+@generated function subdivide_simplex_scheme(::Val{D}) where {D}
     N = D + 1
-    sub_simplices = Vector{SVector{N,SVector{D,T}}}()
-    for k in 0:D
-        # Compute initial vertex v₀ = (x⁰ + xᵏ) / 2
-        x₀ = vertices[1]
-        xₖ = vertices[k + 1]
-        v₀ = (x₀ .+ xₖ) ./ 2
-        # Generate valid permutations for this k
-        perms = generate_valid_permutations(D, k)
-        for π in perms
-            new_vertices = [v₀]
-            current_v = v₀
-            for ℓ in 1:D
-                edge_num = π[ℓ]  # Edge between x^{edge_num-1} and x^{edge_num}
-                edge_start = vertices[edge_num]
-                edge_end = vertices[edge_num + 1]
-                edge_vector = edge_end .- edge_start
-                current_v = current_v .+ 0.5 .* edge_vector
-                push!(new_vertices, current_v)
-            end
-            push!(sub_simplices, SVector{N}(new_vertices))
+
+    color_schemes = ntuple(Val(2^D)) do k
+        bits = k - 1
+        cs = MMatrix{2,N,Int}(undef)
+
+        # For the first row, the "color" is increased when the `j` bit of `k - 1` is `0`.
+        cs[1, 1] = 1
+        for j in 1:D
+            cs[1, j + 1] = cs[1, j] + Int(iseven(bits >> (j - 1)))
         end
+
+        # For the second row, the "color" is increased when the `j` bit of `k - 1` is `1`.
+        cs[2, 1] = cs[1, N]
+        for j in 1:D
+            cs[2, j + 1] = cs[2, j] + Int(isodd(bits >> (j - 1)))
+        end
+
+        return SMatrix{2,N,Int}(cs)
     end
 
-    # convert to an efficient format with known sizes
-    static_sub_simplices = ntuple(2^D) do i
-        Simplex(sub_simplices[i])
-    end
-
-    return :($static_sub_simplices)
+    return :($color_schemes)
 end
 
 """
-    subdivide_simplex(s::Simplex)
+    subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
 
-Subdivide a `D`-simplex into 2ᴰ simplices by using the Freudenthal triangulation.
+Subdivide a `D`-simplex into 2ᴰ simplices by using the `SimpleS` algorithm.
 
-Implements the `RedRefinementND` algorithm in [Simplicial grid refinement: on Freudenthal's
-algorithm and the optimal number of congruence
-classes](https://link.springer.com/article/10.1007/s002110050475).
+Implements the `SimpleS` algorithm in [Algorithm 860: SimpleS -- an extension of
+Freudenthal's simplex subdivision](https://doi.org/10.1145/1186785.1186792).
 """
 function subdivide_simplex(s::Simplex{D,T,N}) where {D,T,N}
-    refs = subdivide_reference_simplex(Val(D), T)
-    f, _ = map_from_reference(s)
-    map(refs) do ref
-        Simplex(f.(ref.vertices))
+    color_schemes = subdivide_simplex_scheme(Val(D))
+    return map(color_schemes) do color_scheme
+        Simplex{D,T,N}(
+            SVector{N}(
+                (s.vertices[i] + s.vertices[j]) / 2 for (i, j) in eachcol(color_scheme)
+            ),
+        )
     end
 end

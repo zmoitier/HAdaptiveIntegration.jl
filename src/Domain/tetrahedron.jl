@@ -26,12 +26,12 @@ function subdivide_tetrahedron(t::Tetrahedron{T}) where {T}
     bd = (b + d) / 2
     cd = (c + d) / 2
     return (
-        # (1/2)-tetrahedron on each vertices
+        # (1/2)-tetrahedron on each vertex
         Tetrahedron{T}(SVector(a, ab, ac, ad)),
         Tetrahedron{T}(SVector(ab, b, bc, bd)),
         Tetrahedron{T}(SVector(ac, bc, c, cd)),
         Tetrahedron{T}(SVector(ad, bd, cd, d)),
-        # octahedron splitting
+        # middle octahedron splitting
         Tetrahedron{T}(SVector(ab, ac, ad, bd)),
         Tetrahedron{T}(SVector(ab, ac, bc, bd)),
         Tetrahedron{T}(SVector(ac, ad, bd, cd)),

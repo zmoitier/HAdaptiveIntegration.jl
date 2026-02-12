@@ -13,6 +13,7 @@ using HAdaptiveIntegration:
 
 function __init__()
     @debug "Loading IncreasePrecisionExt.jl"
+    return nothing
 end
 
 function integral_monomials(::Type{<:Segment}, deg_tot_max::Int)

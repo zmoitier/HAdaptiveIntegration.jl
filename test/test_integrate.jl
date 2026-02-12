@@ -124,18 +124,37 @@ end
     @test isapprox(E, E2; atol=1.0e-12)
 end
 
+@testset "No allocations" begin
+    for domain_type in
+        (Segment, Triangle, Rectangle, Tetrahedron, Cuboid, Simplex{4}, Orthotope{4})
+        domain = reference_domain(domain_type)
+        fct = x -> sum(abs2, x)^(-0.25)
+        buffer = allocate_buffer(fct, domain)
+        rtol = 1e-4
+
+        nb_alloc = @allocations integrate(fct, domain; buffer=buffer, rtol=rtol)
+        @test nb_alloc > 0
+
+        # We expect the function below to have zero allocs, but that seems to be true only
+        # on recent Julia versions (1.12+), so we mark the test as broken on older versions.
+        nb_alloc = @allocations integrate(fct, domain; buffer=buffer, rtol=rtol)
+        @test nb_alloc == 0 broken = (VERSION < v"1.12")
+    end
+end
+
 @testset "Callback" begin
     domain = Segment(0, 1)
-    fct = x -> 1 / sqrt(x[1])  # singular integrand requiring subdivisions
+    fct = x -> sqrt(x[1])
+    rtol = 1e-4
 
     # collect callback data
     callback_data = Vector{@NamedTuple{I::Float64,E::Float64,nb_subdiv::Int}}()
-    function callback(I, E, nb_subdiv, buffer)
+    function callback(I, E, nb_subdiv, _)
         push!(callback_data, (; I, E, nb_subdiv))
         return nothing
     end
 
-    I, E = @inferred integrate(fct, domain; callback=callback)
+    I, E = @inferred integrate(fct, domain; callback=callback, rtol=rtol)
 
     # callback is called at least once (initial estimate)
     @test length(callback_data) ≥ 1
@@ -151,32 +170,4 @@ end
     # final callback values match returned I, E
     @test callback_data[end].I == I
     @test callback_data[end].E == E
-end
-
-@testset "No-op callback optimization" begin
-    domain = Segment(0, 1)
-    fct = x -> exp(x[1])
-    buffer = allocate_buffer(fct, domain)
-
-    callback_noop = (args...) -> nothing
-    alloc_noop = let f = fct, d = domain, b = buffer, cb = callback_noop
-        integrate(f, d; buffer=b, callback=cb)
-        @allocated integrate(f, d; buffer=b, callback=cb)
-    end
-
-    # we expect the function above to have zero allocs, but that seems to be true only on
-    # recent Julia versions (1.12+), so we mark the test as broken on older versions
-    @test alloc_noop == 0 broken=(VERSION < v"1.12")
-
-    # callback that does work (allocates)
-    data = Float64[]
-    callback_work = (I, E, n, b) -> push!(data, I)
-    integrate(fct, domain; buffer=buffer, callback=callback_work)  # warmup
-    empty!(data)
-    alloc_work = let f = fct, d = domain, b = buffer, cb = callback_work
-        empty!(data)
-        sizehint!(data, 0) # make sure the array is empty to measure allocations
-        @allocated integrate(f, d; buffer=b, callback=cb)
-    end
-    @test alloc_work > 0
 end

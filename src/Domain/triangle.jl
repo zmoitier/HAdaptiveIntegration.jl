@@ -20,12 +20,14 @@ Divide the triangle `t` into 4 triangles by connecting the midpoints of the edge
 function subdivide_triangle(t::Triangle{T}) where {T}
     a, b, c = t.vertices
     ab = (a + b) / 2
-    ac = (c + a) / 2
+    ac = (a + c) / 2
     bc = (b + c) / 2
     return (
+        # (1/2)-triangle on each vertex
         Triangle{T}(SVector(a, ab, ac)),
-        Triangle{T}(SVector(b, bc, ab)),
-        Triangle{T}(SVector(c, ac, bc)),
-        Triangle{T}(SVector(ab, bc, ac)),
+        Triangle{T}(SVector(ab, b, bc)),
+        Triangle{T}(SVector(ac, bc, c)),
+        # middle triangle
+        Triangle{T}(SVector(bc, ac, ab)),
     )
 end

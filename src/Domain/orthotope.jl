@@ -51,11 +51,11 @@ function Orthotope(low_corner, high_corner, D::Union{Int,Nothing}=nothing)
 end
 
 """
-    reference_orthotope(D::Int, T=float(Int))
+    reference_orthotope(::Val{D}, (::Type{T})=float(Int)) where {D,T}
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
 """
-function reference_orthotope(D::Int, (::Type{T})=float(Int)) where {T}
+function reference_orthotope(::Val{D}, (::Type{T})=float(Int)) where {D,T}
     return Orthotope(SVector{2}(zeros(SVector{D,T}), ones(SVector{D,T})))
 end
 
@@ -73,44 +73,27 @@ have `high_corner .> low_corner`."
 end
 
 """
-    subdivide_reference_orthotope(::Val{D}, ::Type{T}=float(Int))
-
-Like `subdivide_orthotope`, but operates on the reference orthotope. Since the output
-depends only on the dimension `D`, and the type `T` used to represent coordinates, this
-function is generated for each combination of `D` and `T`.
-"""
-@generated function subdivide_reference_orthotope(
-    ::Val{D}, (::Type{T})=float(Int)
-) where {D,T}
-    a, b = zeros(SVector{D,T}), ones(SVector{D,T})
-    m = SVector{D}(fill(T(1//2), D))
-
-    sub_corners = Vector{SVector{2,SVector{D,T}}}()
-    for choices in Base.product([(true, false) for _ in 1:D]...)
-        # Compute the low and high corners of the sub-orthotope
-        low_corner = SVector{D,T}(cᵢ ? aᵢ : mᵢ for (cᵢ, aᵢ, mᵢ) in zip(choices, a, m))
-        high_corner = SVector{D,T}(cᵢ ? mᵢ : bᵢ for (cᵢ, mᵢ, bᵢ) in zip(choices, m, b))
-        push!(sub_corners, SVector(low_corner, high_corner))
-    end
-
-    # Convert to an efficient format with known sizes
-    static_orthotopes = ntuple(2^D) do i
-        Orthotope(sub_corners[i])
-    end
-
-    return :($static_orthotopes)
-end
-
-"""
     subdivide_orthotope(h::Orthotope)
 
 Subdivide the `D`-orthotope `h` into 2ᴰ smaller orthotopes by splitting each dimension at
 its midpoint.
 """
 function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
-    refs = subdivide_reference_orthotope(Val(D), T)
-    f, _ = map_from_reference(h)
-    map(refs) do ref
-        Orthotope(f.(ref.corners))
+    a, b = h.corners
+    m = (a + b) / 2
+
+    return ntuple(Val(2^D)) do k
+        aₖ, bₖ = MVector{D,T}(undef), MVector{D,T}(undef)
+        for j in 1:D
+            # `k-1` encodes, in binary, which half (lower or upper) is selected for each
+            # dimension `j`. Bit `j` of `k-1` indicates whether the sub-orthotope uses the
+            # lower half along `j`.
+            if isodd((k - 1) >> (j - 1))
+                aₖ[j], bₖ[j] = a[j], m[j]
+            else
+                aₖ[j], bₖ[j] = m[j], b[j]
+            end
+        end
+        return Orthotope(SVector(SVector{D}(aₖ), SVector{D}(bₖ)))
     end
 end
