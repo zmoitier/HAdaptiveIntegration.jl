@@ -23,7 +23,7 @@ function subdivide_triangle(t::Triangle{T}) where {T}
     ac = (a + c) / 2
     bc = (b + c) / 2
     return (
-        # (1/2)-triangle on each vertices
+        # (1/2)-triangle on each vertex
         Triangle{T}(SVector(a, ab, ac)),
         Triangle{T}(SVector(ab, b, bc)),
         Triangle{T}(SVector(ac, bc, c)),

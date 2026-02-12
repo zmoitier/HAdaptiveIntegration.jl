@@ -41,7 +41,7 @@ function Simplex(vertices...)
 end
 
 """
-    reference_simplex(D::Int, T=float(Int))
+    reference_simplex(::Val{D}, (::Type{T})=float(Int)) where {D,T}
 
 Return the reference `D`-dimensional simplex with element type `T`, which is the convex hull
 of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,0,1)`.

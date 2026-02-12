@@ -51,7 +51,7 @@ function Orthotope(low_corner, high_corner, D::Union{Int,Nothing}=nothing)
 end
 
 """
-    reference_orthotope(D::Int, T=float(Int))
+    reference_orthotope(::Val{D}, (::Type{T})=float(Int)) where {D,T}
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
 """

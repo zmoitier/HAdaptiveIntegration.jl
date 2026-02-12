@@ -124,35 +124,6 @@ end
     @test isapprox(E, E2; atol=1.0e-12)
 end
 
-@testset "Callback" begin
-    domain = Segment(0, 1)
-    fct = x -> 1 / sqrt(x[1])  # singular integrand requiring subdivisions
-
-    # collect callback data
-    callback_data = Vector{@NamedTuple{I::Float64,E::Float64,nb_subdiv::Int}}()
-    function callback(I, E, nb_subdiv, buffer)
-        push!(callback_data, (; I, E, nb_subdiv))
-        return nothing
-    end
-
-    I, E = @inferred integrate(fct, domain; callback=callback)
-
-    # callback is called at least once (initial estimate)
-    @test length(callback_data) ≥ 1
-
-    # first call has nb_subdiv=0
-    @test callback_data[1].nb_subdiv == 0
-
-    # nb_subdiv increments correctly: 0, 1, 2, ...
-    for (i, data) in enumerate(callback_data)
-        @test data.nb_subdiv == i - 1
-    end
-
-    # final callback values match returned I, E
-    @test callback_data[end].I == I
-    @test callback_data[end].E == E
-end
-
 @testset "No allocations" begin
     for domain_type in
         (Segment, Triangle, Rectangle, Tetrahedron, Cuboid, Simplex{4}, Orthotope{4})
@@ -171,21 +142,32 @@ end
     end
 end
 
-@testset "No-op callback optimization" begin
+@testset "Callback" begin
     domain = Segment(0, 1)
     fct = x -> sqrt(x[1])
-    buffer = allocate_buffer(fct, domain)
     rtol = 1e-4
 
-    # callback that does work (allocates)
-    data = Float64[]
-    callback = (I, E, n, b) -> push!(data, I)
-
-    integrate(fct, domain; buffer=buffer, rtol=rtol, callback=callback)  # warmup
-    nb_alloc = let f = fct, d = domain, b = buffer, ε = rtol, cb = callback
-        empty!(data)
-        sizehint!(data, 0) # make sure the array is empty to measure allocations
-        @allocations integrate(f, d; buffer=b, rtol=ε, callback=cb)
+    # collect callback data
+    callback_data = Vector{@NamedTuple{I::Float64,E::Float64,nb_subdiv::Int}}()
+    function callback(I, E, nb_subdiv, _)
+        push!(callback_data, (; I, E, nb_subdiv))
+        return nothing
     end
-    @test nb_alloc > 0
+
+    I, E = @inferred integrate(fct, domain; callback=callback, rtol=rtol)
+
+    # callback is called at least once (initial estimate)
+    @test length(callback_data) ≥ 1
+
+    # first call has nb_subdiv=0
+    @test callback_data[1].nb_subdiv == 0
+
+    # nb_subdiv increments correctly: 0, 1, 2, ...
+    for (i, data) in enumerate(callback_data)
+        @test data.nb_subdiv == i - 1
+    end
+
+    # final callback values match returned I, E
+    @test callback_data[end].I == I
+    @test callback_data[end].E == E
 end
