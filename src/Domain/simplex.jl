@@ -82,14 +82,16 @@ Return the color schemes for subdividing a `D`-simplex into 2ᴰ simplices by us
         bits = k - 1
         cs = MMatrix{2,N,Int}(undef)
 
+        # For the first row, the "color" is increased when the `j` bit of `k - 1` is `0`.
         cs[1, 1] = 1
         for j in 1:D
-            cs[1, j + 1] = cs[1, j] + iseven(bits >> (j - 1))
+            cs[1, j + 1] = cs[1, j] + Int(iseven(bits >> (j - 1)))
         end
 
+        # For the second row, the "color" is increased when the `j` bit of `k - 1` is `1`.
         cs[2, 1] = cs[1, N]
         for j in 1:D
-            cs[2, j + 1] = cs[2, j] + isodd(bits >> (j - 1))
+            cs[2, j + 1] = cs[2, j] + Int(isodd(bits >> (j - 1)))
         end
 
         return SMatrix{2,N,Int}(cs)
