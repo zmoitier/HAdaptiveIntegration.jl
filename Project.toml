@@ -1,6 +1,6 @@
 name = "HAdaptiveIntegration"
 uuid = "eaa5ad34-b243-48e9-b09c-54bc0655cecf"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Zois Moitier", "Luiz M. Faria"]
 
 [deps]

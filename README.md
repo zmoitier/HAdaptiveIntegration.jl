@@ -8,73 +8,91 @@
 [![Coverage](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl)
 [![BestieTemplate](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/JuliaBesties/BestieTemplate.jl/main/docs/src/assets/badge.json)](https://github.com/JuliaBesties/BestieTemplate.jl)
 
-`HAdaptiveIntegration` is a Julia package designed for numerical integration over
-multidimensional domains. It computes integrals of the form
+`HAdaptiveIntegration` is a Julia package for adaptive numerical integration on
+multidimensional simplices and orthotopes. It computes integrals of the form
 
 ```math
 I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
 
-where $f$ is any Julia function and $\Omega$ represents domains such as simplices and
-orthotopes. The package employs an adaptive approach, dynamically refining the integration
-domain as needed. It uses embedded cubature rules to provide error estimates, aiming to
-achieve high accuracy while minimizing function evaluations.
+where $f$ is a Julia function and $\Omega$ is the integration domain. The algorithm
+adaptively subdivides the domain and uses embedded cubature rules to estimate error,
+targeting high accuracy with fewer function evaluations.
 
-Features include:
+**Key Features:**
 
-- Adaptive integration over simplices and orthotope of **any dimension**,
-- Utilization of **efficient tabulated cubatures** for low-dimensional simplices and
-  orthotopes,
-- Support for custom embedded cubature rules,
-- Arbitrary precision arithmetic.
+- Adaptive integration over simplices and orthotopes of arbitrary dimension.
+- Efficient tabulated cubature rules for low-dimensional simplices and orthotopes.
+- Support for custom embedded cubature rules.
+- Arbitrary-precision arithmetic.
 
-## Quick Examples
+## Installation
 
-Here are simple examples of how to use `HAdaptiveIntegration` to compute an integral over
-the supported shapes:
+```julia
+using Pkg
+Pkg.add("HAdaptiveIntegration")
+```
+
+## Quick Start
 
 ```julia
 using HAdaptiveIntegration
 
-# Define a function
 f = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
 
-# Compute the integral and error estimate over a segment
+# Segment
 I, E = integrate(f, Segment(0, 1))
 
-# Compute the integral and error estimate over a triangle and a rectangle
+# Triangle and rectangle
 I, E = integrate(f, Triangle((0, 0), (1, 0), (0, 1)))
 I, E = integrate(f, Rectangle((0, 0), (1, 1)))
 
-# Compute the integral and error estimate over a tetrahedron and a cuboid
+# Tetrahedron and cuboid
 I, E = integrate(f, Tetrahedron((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1)))
 I, E = integrate(f, Cuboid((0, 0, 0), (1, 1, 1)))
+
+# 4-simplex and 4-orthotope
+I, E = integrate(
+    f,
+    Simplex((0, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1));
+    rtol=1e-4,
+)
+I, E = integrate(f, Orthotope((0, 0, 0, 0), (1, 1, 1, 1)); rtol=1e-4)
 ```
 
-The result `I` is the integral value and `E` the error estimate.
+`I` is the integral estimate and `E` is the error estimate.
 
-There are many options available for the `integrate` function, as well as other supported
-integration domains. For more information, see the
+## Practical `integrate` Options
+
+Common keyword arguments:
+
+- `atol` (absolute tolerance) and `rtol` (relative tolerance) to control stopping
+  tolerances.
+- `maxsubdiv` to cap the number of refinements.
+
+For full API details and advanced usage, see the
 [stable documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable/) or the
 [latest development documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev/).
 
-## Related packages
+## Related Packages and When to Use Them
 
 `HAdaptiveIntegration` draws inspiration from the
 [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) package, which offers a similar
-approach for integrating over orthotope in any dimension. The key differences are:
+approach for integrating over orthotopes in any dimension. Key differences:
 
 - `HAdaptiveIntegration` supports integration over simplices of any dimension, whereas
-`HCubature` is focused on orthotopes.
+  `HCubature` is focused on orthotopes.
 - For low-dimensional orthotopes such as squares and cubes, `HAdaptiveIntegration` employs
-  tabulated cubatures for enhanced efficiency. This allows it to achieve precision
-  comparable to `HCubature` with fewer function evaluations for these domains.
+  tabulated cubatures for efficiency. In these domains it can be competitive with
+  `HCubature` while using fewer function evaluations.
 
-Even if this package contains rule for an arbitrary `d`-dimensional simplex and orthotope:
+This package includes rules for arbitrary `d`-dimensional simplices and orthotopes, but:
 
-- the dimension `d=1` (`1`-simplex and `1`-orthotope reduce to a segment) is supported, but
-  we recommend to use [`QuadGk.jl`](https://github.com/JuliaMath/QuadGK.jl);
-- for large `d`-dimensional simplex and orthotope, the approach of this package will become
-  slow, in that case you should try to use stochastic method like in
+- for `d=1` (where both `1`-simplex and `1`-orthotope reduce to a segment),
+  [`QuadGK.jl`](https://github.com/JuliaMath/QuadGK.jl) is usually preferable;
+- for medium-dimensional orthotopes,
+  [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) may be faster;
+- for large-dimensional simplices or orthotopes, deterministic adaptive cubature may become
+  slow, so it may be better to use stochastic methods such as
   [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
   [`Cuba.jl`](https://github.com/giordano/Cuba.jl).

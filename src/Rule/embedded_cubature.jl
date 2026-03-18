@@ -3,7 +3,7 @@
 
 An embedded cubature rule consisting of a high order cubature rule with `H` nodes and a low
 order cubature rule with `L` nodes. Note that the low order cubature uses `nodes[1:L]` as
-its nodes. The cubature nodes and weights are assumed to be for the reference domain.
+its nodes. The cubature nodes and weights are assumed to be defined on the reference domain.
 
 ## Fields:
 - `nodes::Vector{SVector{D,T}}`: the cubature nodes.
@@ -35,12 +35,13 @@ end
 
     embedded_cubature(nodes, weights_high, weights_low, T=float(Int))
 
-Construct the embedded cubature with element type `T` from a subtype of
-[`AbstractRule`](@ref) or from a vector of nodes and two vectors of weights for the high and
-low order cubature, with element type `T`. The list of `AbstractRule`'s subtype are:
+Construct an embedded cubature with element type `T`.
+
+The constructor can be called from a subtype of [`AbstractRule`](@ref), or from explicit
+`nodes`, `weights_high`, and `weights_low` data. Available rule types include:
 - [`TabulatedEmbeddedCubature`](@ref)
-- [`GrundmannMoeller`](@ref)
 - [`RadonLaurie`](@ref)
+- [`GrundmannMoeller`](@ref)
 - [`GenzMalik`](@ref)
 """
 function embedded_cubature(
@@ -63,9 +64,9 @@ end
 
 Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the
 high order cubature and the low order cubature on `domain`. The function `fct` must take a
-`SVector{D,T}` to a return type `K`, and `K` must support the multiplication by a scalar and
-the addition. Note that there is no check, beyond compatibility of dimension and type, that
-the embedded cubature is for the right domain.
+`SVector{D,T}` to a return type `F`, and `F` must support scalar multiplication and
+addition. Note that there is no check, beyond compatibility of dimension and type, that the
+embedded cubature matches the intended domain geometry.
 """
 function (ec::EmbeddedCubature{D,T})(
     fct, domain::AbstractDomain{D,T}, norm=LinearAlgebra.norm

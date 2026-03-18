@@ -2,17 +2,16 @@
     @kwdef struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
 
 An embedded cubature rule consisting of a high order cubature rule and a low order cubature
-rule. Note that the low order cubature uses `nodes[1:L]` as its nodes where `L` is the
-length of the `weights_low`. The cubature nodes and weights are assumed to be for the
-reference domain (use the [`reference_domain`](@ref) function to get the reference domain).
+rule. The low-order cubature uses `nodes[1:L]`, where `L = length(weights_low)`. Nodes and
+weights are defined on the reference domain (use [`reference_domain`](@ref) to inspect it).
 
 ## Fields:
 - `description::String`: description of the embedded cubature.
-- `reference::String`: where the values are found.
+- `reference::String`: source of the tabulated values.
 - `order_high::Int`: order of the high order cubature.
 - `order_low::Int`: order of the low order cubature.
 - `precision::Int`: number of significant digits on the node and weight values,
-  `10^-precision` give the relative precision of the values.
+  `10^-precision` gives the approximate relative precision.
 - `nodes::Vector{Vector{String}}`: the cubature nodes.
 - `weights_high::Vector{String}`: the cubature weights for the high order cubature.
 - `weights_low::Vector{String}`: the cubature weights for the low order cubature.
@@ -20,7 +19,7 @@ reference domain (use the [`reference_domain`](@ref) function to get the referen
 ## Invariants (check at construction):
 - `length(nodes) == length(weights_high)`
 - `length(weights_high) ≥ length(weights_low)`
-- `order_high ≥ order_low` ≥ 0
+- `order_high ≥ order_low ≥ 0`
 - `precision ≥ 0`
 """
 struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
@@ -69,7 +68,7 @@ end
 """
     orders(rule::AR) where {AR<:AbstractRule}
 
-Return the high and low order of the embedded cubature `rule`.
+Return `(order_high, order_low)` for `rule`.
 """
 function orders(tec::TabulatedEmbeddedCubature)
     return tec.order_high, tec.order_low

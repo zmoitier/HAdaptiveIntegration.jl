@@ -1,5 +1,7 @@
 """
-Gauss-Kronrod with 7 nodes.
+Gauss-Kronrod tabulated embedded cubature for [`Segment`](@ref).
+
+This rule uses 7 nodes with high order 11 and low order 5.
 """
 const SEGMENT_GK7 = TabulatedEmbeddedCubature{Segment}(;
     description="Gauss-Kronrod with 7 nodes (SEGMENT_GK7)",
@@ -33,7 +35,9 @@ const SEGMENT_GK7 = TabulatedEmbeddedCubature{Segment}(;
 )
 
 """
-Gauss-Kronrod with 15 nodes.
+Gauss-Kronrod tabulated embedded cubature for [`Segment`](@ref).
+
+This rule uses 15 nodes with high order 23 and low order 13.
 """
 const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
     description="Gauss-Kronrod with 15 nodes (SEGMENT_GK15)",
@@ -87,7 +91,9 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
 )
 
 """
-Gauss-Kronrod with 31 nodes.
+Gauss-Kronrod tabulated embedded cubature for [`Segment`](@ref).
+
+This rule uses 31 nodes with high order 47 and low order 29.
 """
 const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
     description="Gauss-Kronrod with 31 nodes",

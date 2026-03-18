@@ -15,8 +15,7 @@ Cuboid(low_corner, high_corner) = Orthotope(low_corner, high_corner, 3)
 """
     subdivide_cuboid(c::Cuboid)
 
-Divide the cuboid `c` into 8 cuboid by connecting the center of the cuboid to the midpoints
-of the edges.
+Divide the cuboid `c` into 8 smaller cuboids by splitting each axis at its midpoint.
 """
 function subdivide_cuboid(c::Cuboid{T}) where {T}
     a, b = c.corners

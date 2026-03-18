@@ -19,7 +19,7 @@ Abstract type for a cubature rule on a domain `DOM`.
 
 ## Type Parameters:
 - `DOM`: [`reference_domain(DOM)`](@ref) gives the reference domain on which the embedded
-  cubature is assume to be set.
+  cubature is assumed to be defined.
 
 ## Mandatory methods:
 - [`embedded_cubature`](@ref)

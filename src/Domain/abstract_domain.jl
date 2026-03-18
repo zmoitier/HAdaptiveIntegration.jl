@@ -1,7 +1,7 @@
 """
     abstract type AbstractDomain{D,T}
 
-Abstract type for integration domains' in `D` dimensions with element type `T`.
+Abstract type for integration domains in `D` dimensions with element type `T`.
 
 ## Type Parameters:
 - `D`: dimension of the domain.
@@ -19,9 +19,8 @@ abstract type AbstractDomain{D,T} end
 """
     Φ, μ = map_from_reference(domain::DOM) where {DOM<:AbstractDomain}
 
-Return Φ and μ where Φ is an anonymous function that maps the reference domain to the
-physical domain `domain` and μ is the absolute value of the Jacobian's determinant of the
-map Φ.
+Return `(Φ, μ)`, where `Φ` maps the reference domain to the physical domain `domain`, and
+`μ` is the absolute value of the Jacobian determinant of `Φ`.
 """
 function map_from_reference end
 
@@ -33,7 +32,7 @@ Return an anonymous function that maps the physical `domain` to the reference do
 ## Constraints:
 - For `Segment`, must have `xmax > xmin`.
 - For `Simplex{D}`, the vertices must form a valid `D`-dimensional simplex with non-zero
-  volume).
+  volume.
 - For `Orthotope`, must have `high_corner .> low_corner`.
 """
 function map_to_reference end
@@ -49,6 +48,6 @@ function reference_domain end
 """
     dimension(::Type{<:AbstractDomain{D}}) where {D}
 
-Return the dimension `D` of the given domain `DOM`.
+Return the dimension `D` encoded in the domain type.
 """
 dimension(::Type{<:AbstractDomain{D}}) where {D} = D
