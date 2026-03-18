@@ -137,12 +137,22 @@ cuboid, and hyperrectangle), defined by their low and high corners, we can use
     - For ``d=1``, you may want to check
       [`QuadGk.jl`](https://github.com/JuliaMath/QuadGK.jl), as it is specialized to do
       adaptive integration over the segment.
-    - For high ``d``, you may want to check
+    - For ``d \geq 4``, you may want to check
       [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl), as it supports adaptive
       integration over arbitrarily high-dimensional axis-aligned orthotope.
-    - For even larger ``d``, you may want to check
+    - For large ``d``, you may want to check
       [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
       [`Cuba.jl`](https://github.com/giordano/Cuba.jl), as they use stochastic method.
+
+!!! note "When to use HAdaptiveIntegration.jl"
+    **Best fit:** low- to medium-dimensional simplices, low-dimensional orthotopes,
+    deterministic adaptive integration, arbitrary-precision workflows.
+
+    **In practice:** use [`QuadGK.jl`](https://github.com/JuliaMath/QuadGK.jl) for 1D
+    integration; [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) may be faster
+    on some medium-dimensional orthotopes; consider
+    [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
+    [`Cuba.jl`](https://github.com/giordano/Cuba.jl) for high-dimensional problems.
 
 ## Going further
 

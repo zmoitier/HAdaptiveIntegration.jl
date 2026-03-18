@@ -18,7 +18,6 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "Advanced usage" => "advanced.md",
-        # "Examples and benchmarks" => "examples.md",
         "Extensions" => "extensions.md",
         "docstrings.md",
     ],

@@ -33,3 +33,37 @@ display(tec1) # hide
 ```@example increase_precision
 tec1.nodes
 ```
+
+## Complete workflow: Arbitrary precision integration
+
+Now let's use the increased precision rule in an actual integration. First define a function
+to integrate over a domain:
+
+```@example increase_precision
+domain = Rectangle((big"0", big"0"), (big"1", big"1"))
+f = x -> x[1]^2 + x[2]^2
+nothing # hide
+```
+
+Create an embedded cubature with the high-precision rule and a lower-order pair:
+
+```@example increase_precision
+using HAdaptiveIntegration.Rule: embedded_cubature
+ec_big = embedded_cubature(tec1, BigFloat)
+nothing # hide
+```
+
+Now integrate with arbitrary precision:
+
+```@example increase_precision
+I, E = HAdaptiveIntegration.integrate(
+    f, domain;
+    embedded_cubature = ec_big,
+    rtol = big"1e-64"
+)
+println("I = $I") # hide
+println("E = $E") # hide
+```
+
+The result is now computed with arbitrary precision (BigFloat), enabling high-precision
+numerical integration when needed for sensitive applications or validation studies.

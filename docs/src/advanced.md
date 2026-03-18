@@ -6,7 +6,7 @@ CurrentModule = HAdaptiveIntegration
 
 We now cover the options available for the [`integrate`](@ref) function.
 
-## Buffering
+## Reduce memory allocations
 
 When calling `integrate(f, domain)`, the package allocates memory for storing the various
 subregions that are generated during the adaptive integration process. Here is what it looks
@@ -39,7 +39,7 @@ Provided evaluating `f` does not allocate, and the `buffer` has a sufficiently l
 capacity, `integrate` will not allocate memory during the integration process, as shown in
 the benchmark above.
 
-## Callback
+## Track convergence progress
 
 The `callback` keyword argument allows you to monitor the progress of the adaptive
 integration. The callback function is called for each estimated value of `I` and `E`,
@@ -67,7 +67,7 @@ foreach(history) do h
 end
 ```
 
-## Embedded cubature formulas
+## Choose custom cubature rules
 
 By default, when calling `integrate(f, domain)`, the package uses a default embedded
 cubature formula for the given `domain` by calling [`default_embedded_cubature`](@ref).
@@ -142,7 +142,7 @@ the function [`embedded_cubature`](@ref) in the file
 [`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl)
 for some examples on how this is done). PRs with new schemes are more than welcome!
 
-## Subdivision strategies
+## Define custom subdivision strategies
 
 The package uses a default subdivision strategy for the given `domain` by calling
 [`default_subdivision`](@ref). For example, by default triangles are subdivided into 4
