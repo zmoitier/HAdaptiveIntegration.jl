@@ -10,7 +10,7 @@ Return the default algorithm to subdivide `domain`.
 - dimension 3:
     - [`Tetrahedron`](@ref): [`subdivide_tetrahedron`](@ref)
     - [`Cuboid`](@ref): [`subdivide_cuboid`](@ref)
-- dimension `d`:
+- dimension `D`:
     - [`Simplex`](@ref): [`subdivide_simplex`](@ref)
     - [`Orthotope`](@ref): [`subdivide_orthotope`](@ref)
 """

@@ -1,14 +1,14 @@
 """
     struct Orthotope{D,T} <: AbstractDomain{D,T}
 
-Axes-aligned Orthotope in `D` dimensions, with element type `T`, given by two points
-`low_corner` and `high_corner`. Note that, we must have `low_corner .≤ high_corner`.
+Axis-aligned orthotope in `D` dimensions, with element type `T`, defined by two points
+`low_corner` and `high_corner`.
 
 ## Fields:
 - `corners::SVector{2,SVector{D,T}}`: `corners[1]` is the low corner and `corners[2]` is the
-   high corner.
+  high corner.
 
-## Invariants (**not** check at construction):
+## Invariants (checked by outer constructors):
 - `corners[1] .≤ corners[2]`
 
 ## Constructors:
@@ -75,8 +75,7 @@ end
 """
     subdivide_orthotope(h::Orthotope)
 
-Subdivide the `D`-orthotope `h` into 2ᴰ smaller orthotopes by splitting each dimension at
-its midpoint.
+Subdivide `h` into `2^D` smaller orthotopes by bisecting each axis at its midpoint.
 """
 function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
     a, b = h.corners

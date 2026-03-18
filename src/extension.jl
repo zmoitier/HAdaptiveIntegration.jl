@@ -8,12 +8,13 @@
     )
 
 Increase the precision of a `TabulatedEmbeddedCubature` to match the precision of the
-floating point type `T`. This is an extension, you need `using ForwardDiff` for using it.
+floating-point type `T`. This method is provided by an extension, so `ForwardDiff` must be
+loaded.
 
 ## Arguments
-- `tec::TabulatedEmbeddedCubature`: the tabulated embedded cubature to increase the
+- `tec::TabulatedEmbeddedCubature`: the tabulated embedded cubature to increase the 
   precision of.
-- `::Type{T}`: the floating point type to increase the precision to.
+- `::Type{T}`: target floating-point type.
 
 ## Optional arguments
 - `x_atol=10 * eps(T)`: the absolute tolerance for the change in the variables (nodes and

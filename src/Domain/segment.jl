@@ -1,18 +1,18 @@
 """
     struct Segment{T} <: AbstractDomain{1,T}
 
-Segment in 1 dimension, with element type `T`, given by `xmin` and `xmax`. Note that, we
-must have `xmin ≤ xmax`.
+One-dimensional segment with element type `T`, defined by `xmin` and `xmax`.
 
 ## Fields:
-- `xmin::T`: the low corner.
-- `xmax::T`: the high corner.
+- `xmin::T`: lower endpoint.
+- `xmax::T`: upper endpoint.
 
-## Invariants (**not** check at construction):
-- `xmin ≤ xmax`
+## Invariants (checked by outer constructors):
+- `xmin < xmax`
 
 ## Constructors:
 - `Segment(xmin, xmax)`
+- `Segment{T}(xmin, xmax)`
 """
 struct Segment{T} <: AbstractDomain{1,T}
     xmin::T
@@ -59,8 +59,7 @@ end
 """
     subdivide_segment(s::Segment)
 
-Subdivide the 1-dimensional segment `s` into 2 smaller segments by splitting it at its
-midpoint.
+Subdivide `s` into two smaller segments by splitting at its midpoint.
 """
 function subdivide_segment(s::Segment{T}) where {T}
     m = (s.xmin + s.xmax) / 2

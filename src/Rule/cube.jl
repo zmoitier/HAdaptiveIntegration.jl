@@ -1,5 +1,7 @@
 """
-Berntsen-Espelid with 65 nodes.
+Berntsen-Espelid tabulated embedded cubature for [`Cuboid`](@ref).
+
+This rule uses 65 nodes with high order 9 and low order 7.
 """
 const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
     description="Berntsen-Espelid with 65 nodes (CUBE_BE65)",
@@ -447,7 +449,9 @@ const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
 )
 
 """
-Berntsen-Espelid with 115 nodes.
+Berntsen-Espelid tabulated embedded cubature for [`Cuboid`](@ref).
+
+This rule uses 115 nodes with high order 11 and low order 9.
 """
 const CUBE_BE115 = TabulatedEmbeddedCubature{Cuboid}(;
     description="Berntsen-Espelid with 115 nodes (CUBE_BE115)",

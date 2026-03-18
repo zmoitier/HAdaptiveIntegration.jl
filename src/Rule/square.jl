@@ -1,5 +1,7 @@
 """
-Cools-Haegemans with 21 nodes.
+Cools-Haegemans tabulated embedded cubature for [`Rectangle`](@ref).
+
+This rule uses 21 nodes with high order 7 and low order 5.
 """
 const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
     description="Cools-Haegemans with 21 nodes (SQUARE_CH21)",
@@ -134,7 +136,9 @@ const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
 )
 
 """
-Cools-Haegemans with 25 nodes.
+Cools-Haegemans tabulated embedded cubature for [`Rectangle`](@ref).
+
+This rule uses 25 nodes with high order 9 and low order 7.
 """
 const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
     description="Cools-Haegemans with 25 nodes (SQUARE_CH25)",

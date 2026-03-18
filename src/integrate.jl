@@ -12,33 +12,38 @@
         callback=(I, E, nb_subdiv, buffer) -> nothing,
     ) where {D,T}
 
-Return `I` and `E` where `I` is the integral of the function `fct` over `domain` and `E` is
-an error estimate.
+Adaptively integrate `fct` over `domain`.
+
+Return `(I, E)` where `I` is the integral estimate and `E` is an error estimate computed
+from an embedded cubature pair.
 
 ## Arguments
-- `fct`: a function that must take a `SVector{D,T}` to a return type `K`, with `K` must
-  support the multiplication by a scalar of type `T` and the addition.
+- `fct`: a function that maps `SVector{D,T}` to a value `K`. The return type `K` must
+    support addition and multiplication by scalars of type `T`.
 - `domain::AbstractDomain{D,T}`: the integration domain. Currently, we support
   [`Segment`](@ref), [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref),
-  [`Cuboid`](@ref), `d`-dimensional [`Simplex`](@ref), and `d`-dimensional
+  [`Cuboid`](@ref), `D`-dimensional [`Simplex`](@ref), and `D`-dimensional
   [`Orthotope`](@ref).
 
 ## Optional arguments
 - `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded
-  cubature, each supported domain has a [`default_embedded_cubature`](@ref).
+  cubature. Each supported domain has a [`default_embedded_cubature`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
-- `buffer=nothing`: heap use to do the adaptive algorithm, can be allocated using
-  [`allocate_buffer`](@ref), which might result in performance gain if multiple call to
-  integrate is perform.
+- `buffer=nothing`: optional heap used by the adaptive algorithm. Reusing a buffer from
+  [`allocate_buffer`](@ref) can reduce allocations when calling `integrate` repeatedly.
 - `norm=LinearAlgebra.norm`: norm used to estimate the error.
 - `atol=zero(T)`: absolute tolerance.
 - `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
-- `maxsubdiv=2^(13 + D)`: maximum number of subdivision.
+- `maxsubdiv=2^(13 + D)`: maximum number of subdivisions.
 - `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
-  estimated value of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after
-  each subdivision. The callback receives the current integral `I`, error estimate `E`,
-  number of subdivisions `nb_subdiv`, and `buffer`.
+  estimate of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after each
+  subdivision. The callback receives the current integral `I`, error estimate `E`, number
+  of subdivisions `nb_subdiv`, and `buffer`.
+
+## Notes
+- Iteration stops when `E ≤ atol`, `E ≤ rtol * norm(I)`, or `nb_subdiv ≥ maxsubdiv`.
+- The callback is informative only and does not control termination.
 """
 function integrate(
     fct,
@@ -128,9 +133,10 @@ end
         norm=LinearAlgebra.norm
     ) where {D,T}
 
-Allocate and return a buffer that can be passed to the [`integrate`](@ref) function to
-improve performance by reducing memory allocations when `integrate` is called multiple
-times.
+Allocate and return a heap buffer compatible with [`integrate`](@ref).
+
+Passing this buffer through the `buffer` keyword can reduce memory allocations when
+`integrate` is called repeatedly with compatible domain and value types.
 """
 function allocate_buffer(
     fct,
@@ -157,9 +163,10 @@ end
 """
     resum(buffer; norm=LinearAlgebra.norm)
 
-Re-sum the integral and error estimate from a provided buffer. This function is more
-expensive than a sum because it uses the Kahan-Babuška-Neumaier [1] summation algorithm to
-reduce numerical error due to floating-point numbers.
+Re-sum integral and error contributions stored in `buffer`.
+
+This is more expensive than a plain sum, but it uses the Kahan-Babuška-Neumaier [1]
+summation algorithm to reduce floating-point round-off error.
 
 [1] Klein, A. A Generalized Kahan-Babuška-Summation-Algorithm. Computing 76, 279-293 (2006).
 https://doi.org/10.1007/s00607-005-0139-x

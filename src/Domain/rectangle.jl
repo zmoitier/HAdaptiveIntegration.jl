@@ -15,8 +15,7 @@ Rectangle(low_corner, high_corner) = Orthotope(low_corner, high_corner, 2)
 """
     subdivide_rectangle(r::Rectangle)
 
-Divide the rectangle `r` into 4 squares by connecting the center of the square to the
-midpoints of the edges.
+Divide the rectangle `r` into 4 smaller rectangles by splitting each axis at its midpoint.
 """
 function subdivide_rectangle(r::Rectangle{T}) where {T}
     a, b = r.corners
