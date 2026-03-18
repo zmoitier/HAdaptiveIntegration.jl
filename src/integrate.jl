@@ -43,7 +43,6 @@ from an embedded cubature pair.
 
 ## Notes
 - Iteration stops when `E ≤ atol`, `E ≤ rtol * norm(I)`, or `nb_subdiv ≥ maxsubdiv`.
-- The callback is informative only and does not control termination.
 """
 function integrate(
     fct,
