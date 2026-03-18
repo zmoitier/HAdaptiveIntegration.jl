@@ -20,6 +20,7 @@ adaptively subdivides the domain and uses embedded cubature rules to estimate er
 targeting high accuracy with fewer function evaluations.
 
 **Key Features:**
+
 - Adaptive integration over simplices and orthotopes of arbitrary dimension.
 - Efficient tabulated cubature rules for low-dimensional simplices and orthotopes.
 - Support for custom embedded cubature rules.

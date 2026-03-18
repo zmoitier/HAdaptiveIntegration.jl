@@ -12,7 +12,7 @@ floating-point type `T`. This method is provided by an extension, so `ForwardDif
 loaded.
 
 ## Arguments
-- `tec::TabulatedEmbeddedCubature`: the tabulated embedded cubature to increase the 
+- `tec::TabulatedEmbeddedCubature`: the tabulated embedded cubature to increase the
   precision of.
 - `::Type{T}`: target floating-point type.
 
