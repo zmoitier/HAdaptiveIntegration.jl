@@ -1,0 +1,18 @@
+title: "\\texttt{HAdaptiveIntegration.jl}: Adaptive numerical integration over simplices and orthotopes"
+keywords:
+  - Julia
+  - Scientific computing
+  - Numerical integration
+authors:
+  - name: Luiz Faria
+    affiliation: 1
+  - name: Zoïs Moitier
+    orcid: 0000-0003-1736-5754
+    affiliation: 2
+affiliations:
+  - name: POEMS, CNRS, Inria, ENSTA, Institut Polytechnique de Paris, 91120 Palaiseau, France
+    index: 1
+  - name: Inria, Unité de Mathématiques Appliquées, ENSTA, Institut Polytechnique de Paris, 91120 Palaiseau, France
+    index: 2
+date: 24 April 2019
+bibliography: ref.bib
