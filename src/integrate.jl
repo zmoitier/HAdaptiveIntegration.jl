@@ -51,8 +51,8 @@ function integrate(
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
     norm=LinearAlgebra.norm,
-    atol=zero(T),
-    rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+    atol=nothing,
+    rtol=nothing,
     maxsubdiv=2^(13 + D),
     callback=(I, E, nb_subdiv, buffer) -> nothing,
 ) where {D,T}
@@ -94,6 +94,14 @@ end
         buffer
     end
     push!(buffer, (domain, I, E))
+
+    # set default tolerances if not provided
+    if isnothing(atol)
+        atol = zero(E)
+    end
+    if isnothing(rtol)
+        rtol = ifelse(iszero(atol), sqrt(eps(typeof(E))), zero(E))
+    end
 
     while true
         callback(I, E, nb_subdiv, buffer)
