@@ -34,7 +34,7 @@ from an embedded cubature pair.
   [`allocate_buffer`](@ref) can reduce allocations when calling `integrate` repeatedly.
 - `norm=LinearAlgebra.norm`: norm used to estimate the error.
 - `atol=zero(T)`: absolute tolerance.
-- `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
+- `rtol=(iszero(atol) ? sqrt(eps(typeof(one(T)))) : zero(typeof(one(T))))`: relative tolerance.
 - `maxsubdiv=2^(13 + D)`: maximum number of subdivisions.
 - `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
   estimate of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after each
@@ -47,12 +47,12 @@ from an embedded cubature pair.
 function integrate(
     fct,
     domain::AbstractDomain{D,T};
-    embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
+    embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
     buffer=nothing,
     norm=LinearAlgebra.norm,
     atol=zero(T),
-    rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+    rtol=(iszero(atol) ? sqrt(eps(typeof(one(T)))) : zero(typeof(one(T)))),
     maxsubdiv=2^(13 + D),
     callback=(I, E, nb_subdiv, buffer) -> nothing,
 ) where {D,T}
@@ -99,7 +99,7 @@ end
         callback(I, E, nb_subdiv, buffer)
 
         # check termination conditions
-        if (E ≤ atol) || (E ≤ rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
+        if (!iszero(atol) && E ≤ atol) || (E ≤ rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
             break
         end
 

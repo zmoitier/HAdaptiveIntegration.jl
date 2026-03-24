@@ -38,31 +38,49 @@ Return a default embedded cubature for the domains:
     - [`Simplex`](@ref): [`GrundmannMoeller`](@ref)`{D}(7, 5)`
     - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
-@generated function default_embedded_cubature(::Segment{T}) where {T}
-    ec = embedded_cubature(SEGMENT_GK15, T)
+# The public functions are plain (not @generated) so that _numtype(T) runs at call time
+# in the current world age. This avoids world-age errors when T is a type from an external
+# package (e.g. a Unitful quantity) whose one() method may be newer than the precompilation
+# age. The @generated helpers below cache the cubature per numeric type S.
+_numtype(::Type{T}) where {T} = typeof(one(T))
+
+default_embedded_cubature(::Segment{T}) where {T} = _default_ec_segment(_numtype(T))
+function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
+    _default_ec_simplex(Val(D), _numtype(T))
+end
+default_embedded_cubature(::Triangle{T}) where {T} = _default_ec_triangle(_numtype(T))
+default_embedded_cubature(::Tetrahedron{T}) where {T} = _default_ec_tetrahedron(_numtype(T))
+function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
+    _default_ec_orthotope(Val(D), _numtype(T))
+end
+default_embedded_cubature(::Rectangle{T}) where {T} = _default_ec_rectangle(_numtype(T))
+default_embedded_cubature(::Cuboid{T}) where {T} = _default_ec_cuboid(_numtype(T))
+
+@generated function _default_ec_segment(::Type{S}) where {S}
+    ec = embedded_cubature(SEGMENT_GK15, S)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(GrundmannMoeller{D}(7, 5), T)
+@generated function _default_ec_simplex(::Val{D}, ::Type{S}) where {D,S}
+    ec = embedded_cubature(GrundmannMoeller{D}(7, 5), S)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Triangle{T}) where {T}
-    ec = embedded_cubature(RadonLaurie(), T)
+@generated function _default_ec_triangle(::Type{S}) where {S}
+    ec = embedded_cubature(RadonLaurie(), S)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    ec = embedded_cubature(GrundmannMoeller{3}(7, 5), T)
+@generated function _default_ec_tetrahedron(::Type{S}) where {S}
+    ec = embedded_cubature(GrundmannMoeller{3}(7, 5), S)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
-    ec = embedded_cubature(GenzMalik{D}(), T)
+@generated function _default_ec_orthotope(::Val{D}, ::Type{S}) where {D,S}
+    ec = embedded_cubature(GenzMalik{D}(), S)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Rectangle{T}) where {T}
-    ec = embedded_cubature(SQUARE_CH25, T)
+@generated function _default_ec_rectangle(::Type{S}) where {S}
+    ec = embedded_cubature(SQUARE_CH25, S)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Cuboid{T}) where {T}
-    ec = embedded_cubature(CUBE_BE65, T)
+@generated function _default_ec_cuboid(::Type{S}) where {S}
+    ec = embedded_cubature(CUBE_BE65, S)
     return :($ec)
 end
