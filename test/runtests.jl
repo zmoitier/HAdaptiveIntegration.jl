@@ -12,6 +12,10 @@ end
     include("test_integrate.jl")
 end
 
+@testset "Unitful" begin
+    include("test_unitful.jl")
+end
+
 @testset "IncreasePrecisionExt.jl" begin
     include("test_ext_incr_prec.jl")
 end

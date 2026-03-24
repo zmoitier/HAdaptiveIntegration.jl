@@ -48,7 +48,7 @@ of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,
 """
 function reference_simplex(::Val{D}, (::Type{T})=float(Int)) where {D,T}
     vertices = ntuple(D + 1) do i
-        i == 1 ? zeros(SVector{D,T}) : setindex(zeros(SVector{D,T}), 1, i - 1)
+        i == 1 ? zeros(SVector{D,T}) : setindex(zeros(SVector{D,T}), oneunit(T), i - 1)
     end
     return Simplex(SVector{D + 1}(vertices))
 end
