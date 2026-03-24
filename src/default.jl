@@ -23,12 +23,18 @@ default_subdivision(::Rectangle) = subdivide_rectangle
 default_subdivision(::Cuboid) = subdivide_cuboid
 
 const _DEFAULT_EC_CACHE = Dict{DataType,Any}()
+const _DEFAULT_EC_CACHE_LOCK = ReentrantLock()
 
 function _cached_default_ec(
     ::Type{DOM}, rule::AR, (::Type{T})
 )::EmbeddedCubature{D,T} where {D,DOM<:AbstractDomain{D},AR<:AbstractRule,T<:Real}
-    return get!(_DEFAULT_EC_CACHE, DOM) do
-        embedded_cubature(rule, T)
+    lock(_DEFAULT_EC_CACHE_LOCK)
+    try
+        return get!(_DEFAULT_EC_CACHE, DOM) do
+            embedded_cubature(rule, T)
+        end
+    finally
+        unlock(_DEFAULT_EC_CACHE_LOCK)
     end
 end
 
