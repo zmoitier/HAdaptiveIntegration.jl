@@ -22,6 +22,18 @@ default_subdivision(::Orthotope) = subdivide_orthotope
 default_subdivision(::Rectangle) = subdivide_rectangle
 default_subdivision(::Cuboid) = subdivide_cuboid
 
+const _DEFAULT_EC_CACHE = Dict{DataType,Any}()
+
+function _cached_default_ec(
+    ::Type{DOM}, rule::AR, (::Type{T})
+)::EmbeddedCubature{D,T} where {D,DOM<:AbstractDomain{D},AR<:AbstractRule,T<:Real}
+    return get!(_DEFAULT_EC_CACHE, DOM) do
+        embedded_cubature(rule, T)
+    end
+end
+
+_scalar_type(::Type{T}) where {T} = typeof(one(T))
+
 """
     default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
 
@@ -38,31 +50,31 @@ Return a default embedded cubature for the domains:
     - [`Simplex`](@ref): [`GrundmannMoeller`](@ref)`{D}(7, 5)`
     - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
-@generated function default_embedded_cubature(::Segment{T}) where {T}
-    ec = embedded_cubature(SEGMENT_GK15, typeof(one(T)))
-    return :($ec)
+function default_embedded_cubature(::Segment{T}) where {T}
+    S = _scalar_type(T)
+    return _cached_default_ec(Segment{T}, SEGMENT_GK15, S)
 end
-@generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(GrundmannMoeller{D}(7, 5), typeof(one(T)))
-    return :($ec)
+function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
+    S = _scalar_type(T)
+    return _cached_default_ec(Simplex{D,T,N}, GrundmannMoeller{D}(7, 5), S)
 end
-@generated function default_embedded_cubature(::Triangle{T}) where {T}
-    ec = embedded_cubature(RadonLaurie(), typeof(one(T)))
-    return :($ec)
+function default_embedded_cubature(::Triangle{T}) where {T}
+    S = _scalar_type(T)
+    return _cached_default_ec(Triangle{T}, RadonLaurie(), S)
 end
-@generated function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    ec = embedded_cubature(GrundmannMoeller{3}(7, 5), typeof(one(T)))
-    return :($ec)
+function default_embedded_cubature(::Tetrahedron{T}) where {T}
+    S = _scalar_type(T)
+    return _cached_default_ec(Tetrahedron{T}, GrundmannMoeller{3}(7, 5), S)
 end
-@generated function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
-    ec = embedded_cubature(GenzMalik{D}(), typeof(one(T)))
-    return :($ec)
+function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
+    S = _scalar_type(T)
+    return _cached_default_ec(Orthotope{D,T}, GenzMalik{D}(), S)
 end
-@generated function default_embedded_cubature(::Rectangle{T}) where {T}
-    ec = embedded_cubature(SQUARE_CH25, typeof(one(T)))
-    return :($ec)
+function default_embedded_cubature(::Rectangle{T}) where {T}
+    S = _scalar_type(T)
+    return _cached_default_ec(Rectangle{T}, SQUARE_CH25, S)
 end
-@generated function default_embedded_cubature(::Cuboid{T}) where {T}
-    ec = embedded_cubature(CUBE_BE65, typeof(one(T)))
-    return :($ec)
+function default_embedded_cubature(::Cuboid{T}) where {T}
+    S = _scalar_type(T)
+    return _cached_default_ec(Cuboid{T}, CUBE_BE65, S)
 end

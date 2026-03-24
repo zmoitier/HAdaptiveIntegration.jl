@@ -1,16 +1,15 @@
-using HAdaptiveIntegration
-using HAdaptiveIntegration: integrate
 using HAdaptiveIntegration.Domain:
-    dimension,
-    reference_domain,
     AbstractDomain,
-    Segment,
-    Triangle,
-    Rectangle,
-    Tetrahedron,
     Cuboid,
+    Orthotope,
+    Rectangle,
+    Segment,
     Simplex,
-    Orthotope
+    Tetrahedron,
+    Triangle,
+    dimension,
+    reference_domain
+using HAdaptiveIntegration: integrate
 using Test
 using Unitful
 
