@@ -11,37 +11,33 @@ using StaticArrays
 using Test
 using Unitful
 
-function bug1() # work
-    I, E = @inferred(integrate(p -> sum(p) * u"A", Triangle((0, 0), (1, 0), (1, 1))))
-    return I, E
-end
-
-function bug2() # does not work
-    T = typeof(0.0u"A")
-    dom = Triangle((0u"A", 0u"A"), (1u"A", 0u"A"), (1u"A", 1u"A"))
-
-    # unit not working generated rule (RadonLaurie, GenzMalik, GrundmannMoeller)
-    # ec = embedded_cubature(RadonLaurie(), T)
-    # ec = embedded_cubature(GenzMalik{2}(), T)
-    # ec = embedded_cubature(GrundmannMoeller{2}(3, 1), T)
-
-    # uint not working in TabulatedEmbeddedCubature rule because of parse
-    # ec = embedded_cubature(SQUARE_CH21, T)
-
-    ec = embedded_cubature(RadonLaurie(), T.types[1])
-    I, E = @inferred(integrate(p -> sum(p), dom; embedded_cubature=ec))
+function bug1()
+    I, E = @inferred(integrate(p -> 1u"g", Triangle((0, 0), (1, 0), (1, 1))))
     @show I
     @show E
 
     return nothing
 end
 
-function bug3() # does not work
-    T = typeof(0.0u"A")
-    dom = Triangle((0u"A", 0u"A"), (1u"A", 0u"A"), (1u"A", 1u"A"))
+function bug2()
+    T = typeof(0.0u"m")
 
-    ec = embedded_cubature(RadonLaurie(), T.types[1])
-    I, E = @inferred (integrate(p -> sum(p) * u"B", dom; embedded_cubature=ec))
+    # dom = Triangle((0u"L", 0u"L"), (1u"L", 0u"L"), (1u"L", 1u"L"))
+    dom = Rectangle((0u"m", 0u"m"), (1u"m", 1u"m"))
+
+    ec = embedded_cubature(SQUARE_CH21, typeof(one(T)))
+    I, E = @inferred integrate(p -> 1, dom; embedded_cubature=ec)
     @show I
     @show E
+
+    return nothing
+end
+
+function bug3()
+    dom = Triangle((0u"m", 0u"m"), (1u"m", 0u"m"), (1u"m", 1u"m"))
+    I, E = @inferred (integrate(p -> 1u"g", dom))
+    @show I
+    @show E
+
+    return nothing
 end

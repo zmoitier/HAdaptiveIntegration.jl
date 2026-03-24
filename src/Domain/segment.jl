@@ -40,7 +40,7 @@ end
 Return the reference 1-dimensional segment `[0, 1]` with element type `T`.
 """
 function reference_segment((::Type{T})=float(Int)) where {T}
-    return Segment{T}(zero(T), one(T))
+    return Segment{T}(zero(T), oneunit(T))
 end
 
 function map_from_reference(s::Segment{T}) where {T}

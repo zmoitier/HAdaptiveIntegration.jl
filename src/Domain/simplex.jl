@@ -48,7 +48,7 @@ of the `N=D+1` points `(0,...,0)`, `(1,0,...,0)`, `(0,1,0,...,0)`, ..., `(0,...,
 """
 function reference_simplex(::Val{D}, (::Type{T})=float(Int)) where {D,T}
     vertices = ntuple(D + 1) do i
-        i == 1 ? zeros(SVector{D,T}) : setindex(zeros(SVector{D,T}), 1, i - 1)
+        i == 1 ? zeros(SVector{D,T}) : setindex(zeros(SVector{D,T}), oneunit(T), i - 1)
     end
     return Simplex(SVector{D + 1}(vertices))
 end
@@ -62,7 +62,7 @@ end
 function map_to_reference(s::Simplex{D,T,N}) where {D,T,N}
     v = s.vertices
     jacobian_matrix = hcat(ntuple(i -> v[i + 1] - v[1], D)...)
-    @assert !isapprox(det(jacobian_matrix), 0; atol=(√eps(float(T)))) "degenerate \
+    @assert !isapprox(det(jacobian_matrix), zero(T); atol=(√eps(float(T)))) "degenerate \
 $D-dimensional Simplex: the Jacobian matrix is not invertible."
 
     M = inv(jacobian_matrix)

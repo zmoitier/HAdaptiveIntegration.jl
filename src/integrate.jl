@@ -1,16 +1,16 @@
 """
     integrate(
         fct,
-        domain::AbstractDomain{D,T};
-        embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
+        domain::AbstractDomain{D};
+        embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
         subdiv_algo=default_subdivision(domain),
         buffer=nothing,
         norm=LinearAlgebra.norm,
-        atol=zero(T),
-        rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+        atol=nothing,
+        rtol=nothing,
         maxsubdiv=2^(13 + D),
         callback=(I, E, nb_subdiv, buffer) -> nothing,
-    ) where {D,T}
+    ) where {D}
 
 Adaptively integrate `fct` over `domain`.
 

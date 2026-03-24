@@ -56,7 +56,9 @@ end
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
 """
 function reference_orthotope(::Val{D}, (::Type{T})=float(Int)) where {D,T}
-    return Orthotope(SVector{2}(zeros(SVector{D,T}), ones(SVector{D,T})))
+    return Orthotope(
+        SVector{2}(zeros(SVector{D,T}), SVector{D,T}(ntuple(_ -> oneunit(T), Val(D))))
+    )
 end
 
 function map_from_reference(h::Orthotope{D,T}) where {D,T}

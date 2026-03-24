@@ -17,7 +17,7 @@ end
 #   numerical integration over an N-dimensional rectangular region, Journal of Computational
 #   and Applied Mathematics, Volume 6, Issue 4, 1980,
 #   https://doi.org/10.1016/0771-050X(80)90039-X.
-function embedded_cubature(::GenzMalik{D}, (::Type{T})=float(Int)) where {D,T}
+function embedded_cubature(::GenzMalik{D}, (::Type{T})=float(Int)) where {D,T<:Real}
     # map to the reference domain
     Φ = x -> (x .+ 1) ./ 2
 

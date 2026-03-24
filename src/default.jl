@@ -39,30 +39,30 @@ Return a default embedded cubature for the domains:
     - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
 @generated function default_embedded_cubature(::Segment{T}) where {T}
-    ec = embedded_cubature(SEGMENT_GK15, T)
+    ec = embedded_cubature(SEGMENT_GK15, typeof(one(T)))
     return :($ec)
 end
 @generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    ec = embedded_cubature(GrundmannMoeller{D}(7, 5), T)
+    ec = embedded_cubature(GrundmannMoeller{D}(7, 5), typeof(one(T)))
     return :($ec)
 end
 @generated function default_embedded_cubature(::Triangle{T}) where {T}
-    ec = embedded_cubature(RadonLaurie(), T)
+    ec = embedded_cubature(RadonLaurie(), typeof(one(T)))
     return :($ec)
 end
 @generated function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    ec = embedded_cubature(GrundmannMoeller{3}(7, 5), T)
+    ec = embedded_cubature(GrundmannMoeller{3}(7, 5), typeof(one(T)))
     return :($ec)
 end
 @generated function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
-    ec = embedded_cubature(GenzMalik{D}(), T)
+    ec = embedded_cubature(GenzMalik{D}(), typeof(one(T)))
     return :($ec)
 end
 @generated function default_embedded_cubature(::Rectangle{T}) where {T}
-    ec = embedded_cubature(SQUARE_CH25, T)
+    ec = embedded_cubature(SQUARE_CH25, typeof(one(T)))
     return :($ec)
 end
 @generated function default_embedded_cubature(::Cuboid{T}) where {T}
-    ec = embedded_cubature(CUBE_BE65, T)
+    ec = embedded_cubature(CUBE_BE65, typeof(one(T)))
     return :($ec)
 end
