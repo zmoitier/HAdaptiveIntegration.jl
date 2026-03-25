@@ -38,7 +38,7 @@ function _cached_default_ec(
     end
 end
 
-_scalar_type(::Type{T}) where {T} = typeof(one(T))
+_floating_type(::Type{T}) where {T} = typeof(one(T))
 
 """
     default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
@@ -57,30 +57,30 @@ Return a default embedded cubature for the domains:
     - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
 function default_embedded_cubature(::Segment{T}) where {T}
-    S = _scalar_type(T)
+    S = _floating_type(T)
     return _cached_default_ec(Segment{T}, SEGMENT_GK15, S)
 end
 function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    S = _scalar_type(T)
+    S = _floating_type(T)
     return _cached_default_ec(Simplex{D,T,N}, GrundmannMoeller{D}(7, 5), S)
 end
 function default_embedded_cubature(::Triangle{T}) where {T}
-    S = _scalar_type(T)
+    S = _floating_type(T)
     return _cached_default_ec(Triangle{T}, RadonLaurie(), S)
 end
 function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    S = _scalar_type(T)
+    S = _floating_type(T)
     return _cached_default_ec(Tetrahedron{T}, GrundmannMoeller{3}(7, 5), S)
 end
 function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
-    S = _scalar_type(T)
+    S = _floating_type(T)
     return _cached_default_ec(Orthotope{D,T}, GenzMalik{D}(), S)
 end
 function default_embedded_cubature(::Rectangle{T}) where {T}
-    S = _scalar_type(T)
+    S = _floating_type(T)
     return _cached_default_ec(Rectangle{T}, SQUARE_CH25, S)
 end
 function default_embedded_cubature(::Cuboid{T}) where {T}
-    S = _scalar_type(T)
+    S = _floating_type(T)
     return _cached_default_ec(Cuboid{T}, CUBE_BE65, S)
 end

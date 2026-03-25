@@ -17,7 +17,7 @@ IncreasePrecisionExt = "ForwardDiff"
 
 [compat]
 Aqua = "0.8"
-DataStructures = "0.18, 0.19"
+DataStructures = "0.19"
 ForwardDiff = "1"
 LinearAlgebra = "1"
 Logging = "1"
@@ -36,4 +36,12 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [targets]
-test = ["Aqua", "DataStructures", "Quadmath", "LinearAlgebra", "Logging", "Test", "Unitful"]
+test = [
+    "Aqua",
+    "DataStructures",
+    "Quadmath",
+    "LinearAlgebra",
+    "Logging",
+    "Test",
+    "Unitful",
+]

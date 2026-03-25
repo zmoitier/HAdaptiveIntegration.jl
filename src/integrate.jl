@@ -4,12 +4,12 @@
         domain::AbstractDomain{D};
         embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
         subdiv_algo=default_subdivision(domain),
-        buffer=nothing,
         norm=LinearAlgebra.norm,
+        buffer=nothing,
         atol=nothing,
         rtol=nothing,
         maxsubdiv=2^(13 + D),
-        callback=(I, E, nb_subdiv, buffer) -> nothing,
+        callback=(_, _, _, _) -> nothing,
     ) where {D}
 
 Adaptively integrate `fct` over `domain`.
@@ -30,12 +30,12 @@ from an embedded cubature pair.
   cubature. Each supported domain has a [`default_embedded_cubature`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
+- `norm=LinearAlgebra.norm`: norm used to estimate the error.
 - `buffer=nothing`: optional heap used by the adaptive algorithm. Reusing a buffer from
   [`allocate_buffer`](@ref) can reduce allocations when calling `integrate` repeatedly.
-- `norm=LinearAlgebra.norm`: norm used to estimate the error.
-- `atol=nothing`: absolute tolerance, `atol = nothing` is equivalent to `atol = zero(E)`.
-- `rtol=nothing`: relative tolerance, `rtol = nothing` is equivalent to
-  `rtol = isnothing(atol) ? sqrt(eps(one(E))) : zero(one(E))`.
+- `atol=nothing`: absolute tolerance, if `nothing` is passed, it will be set to `zero(E)`.
+- `rtol=nothing`: relative tolerance, if `nothing` is passed, it will be set to
+  `sqrt(eps(one(E)))`.
 - `maxsubdiv=2^(13 + D)`: maximum number of subdivisions.
 - `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
   estimate of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after each
@@ -50,8 +50,8 @@ function integrate(
     domain::AbstractDomain{D};
     embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
     subdiv_algo=default_subdivision(domain),
-    buffer=nothing,
     norm=LinearAlgebra.norm,
+    buffer=nothing,
     atol=nothing,
     rtol=nothing,
     maxsubdiv=2^(13 + D),
@@ -83,29 +83,27 @@ end
     maxsubdiv,
     callback,
 ) where {FCT,DOM}
-    nb_subdiv = 0
-
     I, E = ec(fct, domain, norm)
 
     # initialize or reset the buffer
     buffer = if isnothing(buffer)
         BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(last, Base.Order.Reverse))
     else
-        empty!(buffer.valtree)
+        empty!(buffer)
         buffer
     end
     push!(buffer, (domain, I, E))
 
     # set default tolerances if not provided
-    εᵣₑₗ = isnothing(rtol) ? sqrt(eps(one(E))) : rtol
+    εₐ = something(atol, zero(E))
+    εᵣ = something(rtol, sqrt(eps(one(E))))
 
+    nb_subdiv = 0
     while true
         callback(I, E, nb_subdiv, buffer)
 
         # check termination conditions
-        if (!isnothing(atol) && E ≤ atol) ||
-            (isnothing(atol) && E ≤ εᵣₑₗ * norm(I)) ||
-            (nb_subdiv ≥ maxsubdiv)
+        if (E ≤ εₐ) || (E ≤ εᵣ * norm(I)) || (nb_subdiv ≥ maxsubdiv)
             break
         end
 
@@ -132,11 +130,11 @@ end
 
 """
     allocate_buffer(
-        fct,
-        domain::AbstractDomain{D,T};
-        embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
-        norm=LinearAlgebra.norm
-    ) where {D,T}
+        fct::FCT,
+        domain::DOM;
+        embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
+        norm=LinearAlgebra.norm,
+    ) where {D,FCT,DOM<:AbstractDomain{D}}
 
 Allocate and return a heap buffer compatible with [`integrate`](@ref).
 
@@ -144,11 +142,11 @@ Passing this buffer through the `buffer` keyword can reduce memory allocations w
 `integrate` is called repeatedly with compatible domain and value types.
 """
 function allocate_buffer(
-    fct,
+    fct::FCT,
     domain::DOM;
-    embedded_cubature::EmbeddedCubature=default_embedded_cubature(domain),
+    embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
     norm=LinearAlgebra.norm,
-) where {DOM<:AbstractDomain}
+) where {D,FCT,DOM<:AbstractDomain{D}}
     # Determine the type of elements returned by the embedded cubature.
     I, E = embedded_cubature(fct, domain, norm)
 
