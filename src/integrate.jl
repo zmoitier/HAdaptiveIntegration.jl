@@ -33,8 +33,9 @@ from an embedded cubature pair.
 - `buffer=nothing`: optional heap used by the adaptive algorithm. Reusing a buffer from
   [`allocate_buffer`](@ref) can reduce allocations when calling `integrate` repeatedly.
 - `norm=LinearAlgebra.norm`: norm used to estimate the error.
-- `atol=zero(T)`: absolute tolerance.
-- `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
+- `atol=nothing`: absolute tolerance, `atol = nothing` is equivalent to `atol = zero(E)`.
+- `rtol=nothing`: relative tolerance, `rtol = nothing` is equivalent to
+  `rtol = isnothing(atol) ? sqrt(eps(one(E))) : zero(one(E))`.
 - `maxsubdiv=2^(13 + D)`: maximum number of subdivisions.
 - `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
   estimate of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after each
@@ -42,7 +43,7 @@ from an embedded cubature pair.
   of subdivisions `nb_subdiv`, and `buffer`.
 
 ## Notes
-- Iteration stops when `E ≤ atol`, `E ≤ rtol * norm(I)`, or `nb_subdiv ≥ maxsubdiv`.
+- Iteration stops when `E ≤ atol` or `E ≤ rtol * norm(I)` or `nb_subdiv ≥ maxsubdiv`.
 """
 function integrate(
     fct,
@@ -54,7 +55,7 @@ function integrate(
     atol=nothing,
     rtol=nothing,
     maxsubdiv=2^(13 + D),
-    callback=(I, E, nb_subdiv, buffer) -> nothing,
+    callback=(_, _, _, _) -> nothing,
 ) where {D}
     return _integrate(
         fct,
@@ -96,18 +97,15 @@ end
     push!(buffer, (domain, I, E))
 
     # set default tolerances if not provided
-    if isnothing(atol)
-        atol = zero(E)
-    end
-    if isnothing(rtol)
-        rtol = ifelse(iszero(atol), sqrt(eps(typeof(E))), zero(E))
-    end
+    εᵣₑₗ = isnothing(rtol) ? sqrt(eps(one(E))) : rtol
 
     while true
         callback(I, E, nb_subdiv, buffer)
 
         # check termination conditions
-        if (E ≤ atol) || (E ≤ rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
+        if (!isnothing(atol) && E ≤ atol) ||
+            (isnothing(atol) && E ≤ εᵣₑₗ * norm(I)) ||
+            (nb_subdiv ≥ maxsubdiv)
             break
         end
 
