@@ -9,7 +9,7 @@
         atol=nothing,
         rtol=nothing,
         maxsubdiv=2^(13 + D),
-        callback=(_, _, _, _) -> nothing,
+        callback=(I, E, nb_subdiv, buffer) -> nothing,
     ) where {D}
 
 Adaptively integrate `fct` over `domain`.
@@ -18,8 +18,8 @@ Return `(I, E)` where `I` is the integral estimate and `E` is an error estimate 
 from an embedded cubature pair.
 
 ## Arguments
-- `fct`: a function that maps `SVector{D,T}` to a value `K`. The return type `K` must
-    support addition and multiplication by scalars of type `T`.
+- `fct`: a function that maps `SVector{D,T}` to a value in `K`. The return type `K` must
+  support addition and multiplication by scalars of type `typeof(one(T))`.
 - `domain::AbstractDomain{D,T}`: the integration domain. Currently, we support
   [`Segment`](@ref), [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref),
   [`Cuboid`](@ref), `D`-dimensional [`Simplex`](@ref), and `D`-dimensional
@@ -90,7 +90,6 @@ end
         BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(last, Base.Order.Reverse))
     else
         empty!(buffer)
-        buffer
     end
     push!(buffer, (domain, I, E))
 
@@ -103,7 +102,7 @@ end
         callback(I, E, nb_subdiv, buffer)
 
         # check termination conditions
-        if (E ≤ εₐ) || (E ≤ εᵣ * norm(I)) || (nb_subdiv ≥ maxsubdiv)
+        if (E ≤ εₐ) || (E ≤ εᵣ * norm(I)) || (nb_subdiv == maxsubdiv)
             break
         end
 
@@ -120,7 +119,7 @@ end
         nb_subdiv += 1
     end
 
-    if nb_subdiv ≥ maxsubdiv
+    if nb_subdiv == maxsubdiv
         @warn "maximum number of subdivisions reached `maxsubdiv=$maxsubdiv`, try \
         increasing the keyword argument `maxsubdiv`."
     end

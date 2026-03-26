@@ -79,9 +79,6 @@ end
 
         _, μ = map_from_reference(r)
         @test μ ≈ 1
-
-        @test dimension(Segment) == 1
-        @test dimension(Segment{Int}) == 1
     end
 
     @testset "Simplex" begin
@@ -125,12 +122,6 @@ end
 
         _, μ = map_from_reference(r)
         @test μ ≈ 1
-
-        @test dimension(Triangle) == 2
-        @test dimension(Tetrahedron) == 3
-        @test dimension(Simplex{4}) == 4
-        @test dimension(Simplex{4,Int}) == 4
-        @test dimension(Simplex{4,Int,5}) == 4
     end
 
     @testset "Orthotope" begin
@@ -162,11 +153,6 @@ end
 
         _, μ = map_from_reference(r)
         @test μ ≈ 1
-
-        @test dimension(Rectangle) == 2
-        @test dimension(Cuboid) == 3
-        @test dimension(Orthotope{4}) == 4
-        @test dimension(Orthotope{4,Int}) == 4
     end
 end
 

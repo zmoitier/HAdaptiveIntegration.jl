@@ -7,13 +7,14 @@ using HAdaptiveIntegration.Domain:
     Simplex,
     Tetrahedron,
     Triangle,
-    dimension,
     reference_domain
 using HAdaptiveIntegration: integrate
 using Test
 using Unitful
 
 # test for https://github.com/zmoitier/HAdaptiveIntegration.jl/issues/56
+
+dimension(::Type{<:AbstractDomain{D}}) where {D} = D
 
 @testset "Support for Unitful.jl" begin
     U = typeof(0.0u"m")

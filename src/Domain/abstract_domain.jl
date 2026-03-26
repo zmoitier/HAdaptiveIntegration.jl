@@ -44,10 +44,3 @@ Return the reference domain for the given domain type. See [`reference_segment`]
 [`reference_simplex`](@ref), and [`reference_orthotope`](@ref) for more details.
 """
 function reference_domain end
-
-"""
-    dimension(::Type{<:AbstractDomain{D}}) where {D}
-
-Return the dimension `D` encoded in the domain type.
-"""
-dimension(::Type{<:AbstractDomain{D}}) where {D} = D

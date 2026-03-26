@@ -41,8 +41,7 @@ struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
         nodes::Vector{Vector{String}},
         weights_high::Vector{String},
         weights_low::Vector{String},
-    ) where {DOM<:AbstractDomain}
-        D = dimension(DOM)
+    ) where {D,DOM<:AbstractDomain{D}}
         @assert all(n -> length(n) == D, nodes) "Each node must have length equal to the \
         dimension D"
         @assert length(nodes) == length(weights_high) "The number of nodes must match the \
@@ -76,12 +75,11 @@ end
 
 function embedded_cubature(
     tec::TabulatedEmbeddedCubature{DOM}, (::Type{T})=float(Int)
-) where {DOM<:AbstractDomain,T<:Real}
+) where {D,DOM<:AbstractDomain{D},T<:Real}
     if eps(T) < 10.0^(-tec.precision)
         @warn "The embedded cubature `$(tec.description)` has fewer significant digits \
         than type $T, which may lead to inaccurate computations."
     end
-    D = dimension(DOM)
     return EmbeddedCubature(
         [SVector{D,T}(parse.(T, x)) for x in tec.nodes],
         parse.(T, tec.weights_high),

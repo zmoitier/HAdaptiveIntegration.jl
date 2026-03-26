@@ -22,24 +22,6 @@ default_subdivision(::Orthotope) = subdivide_orthotope
 default_subdivision(::Rectangle) = subdivide_rectangle
 default_subdivision(::Cuboid) = subdivide_cuboid
 
-const _DEFAULT_EC_CACHE = Dict{DataType,Any}()
-const _DEFAULT_EC_CACHE_LOCK = ReentrantLock()
-
-function _cached_default_ec(
-    ::Type{DOM}, rule::AR, (::Type{T})
-)::EmbeddedCubature{D,T} where {D,DOM<:AbstractDomain{D},AR<:AbstractRule,T<:Real}
-    lock(_DEFAULT_EC_CACHE_LOCK)
-    try
-        return get!(_DEFAULT_EC_CACHE, DOM) do
-            embedded_cubature(rule, T)
-        end
-    finally
-        unlock(_DEFAULT_EC_CACHE_LOCK)
-    end
-end
-
-_floating_type(::Type{T}) where {T} = typeof(one(T))
-
 """
     default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
 
@@ -57,30 +39,40 @@ Return a default embedded cubature for the domains:
     - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
 function default_embedded_cubature(::Segment{T}) where {T}
-    S = _floating_type(T)
-    return _cached_default_ec(Segment{T}, SEGMENT_GK15, S)
+    S = typeof(one(T))
+    return cache_dec(Segment{S}, SEGMENT_GK15)
 end
 function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
-    S = _floating_type(T)
-    return _cached_default_ec(Simplex{D,T,N}, GrundmannMoeller{D}(7, 5), S)
-end
-function default_embedded_cubature(::Triangle{T}) where {T}
-    S = _floating_type(T)
-    return _cached_default_ec(Triangle{T}, RadonLaurie(), S)
-end
-function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    S = _floating_type(T)
-    return _cached_default_ec(Tetrahedron{T}, GrundmannMoeller{3}(7, 5), S)
+    S = typeof(one(T))
+    if D == 2
+        return cache_dec(Triangle{S}, RadonLaurie())
+    end
+    return cache_dec(Simplex{D,S,N}, GrundmannMoeller{D}(7, 5))
 end
 function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
-    S = _floating_type(T)
-    return _cached_default_ec(Orthotope{D,T}, GenzMalik{D}(), S)
+    S = typeof(one(T))
+    if D == 2
+        return cache_dec(Rectangle{S}, SQUARE_CH25)
+    end
+    if D == 3
+        return cache_dec(Cuboid{S}, CUBE_BE65)
+    end
+    return cache_dec(Orthotope{D,S}, GenzMalik{D}())
 end
-function default_embedded_cubature(::Rectangle{T}) where {T}
-    S = _floating_type(T)
-    return _cached_default_ec(Rectangle{T}, SQUARE_CH25, S)
-end
-function default_embedded_cubature(::Cuboid{T}) where {T}
-    S = _floating_type(T)
-    return _cached_default_ec(Cuboid{T}, CUBE_BE65, S)
+
+# cache for default embedded cubatures
+const CACHE_DEC = Dict{DataType,EmbeddedCubature}()
+const CACHE_DEC_LOCK = ReentrantLock()
+
+function cache_dec(
+    ::Type{DOM}, rule::AR
+)::EmbeddedCubature{D,T} where {D,T,DOM<:AbstractDomain{D,T},AR<:AbstractRule}
+    lock(CACHE_DEC_LOCK)
+    try
+        return get!(CACHE_DEC, DOM) do
+            embedded_cubature(rule, T)
+        end
+    finally
+        unlock(CACHE_DEC_LOCK)
+    end
 end
