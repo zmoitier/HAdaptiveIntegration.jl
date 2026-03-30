@@ -69,7 +69,8 @@ function cache_dec(
 )::EmbeddedCubature{D,T} where {D,T,DOM<:AbstractDomain{D,T},AR<:AbstractRule}
     lock(CACHE_DEC_LOCK)
     try
-        return get!(CACHE_DEC, DOM) do
+        key = T ≠ BigFloat ? DOM : Tuple{DOM,precision(T)}
+        return get!(CACHE_DEC, key) do
             embedded_cubature(rule, T)
         end
     finally
