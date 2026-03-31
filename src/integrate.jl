@@ -35,7 +35,7 @@ from an embedded cubature pair.
   [`allocate_buffer`](@ref) can reduce allocations when calling `integrate` repeatedly.
 - `atol=nothing`: absolute tolerance, if `nothing` is passed, it will be set to `zero(E)`.
 - `rtol=nothing`: relative tolerance, if `nothing` is passed, it will be set to
-  `sqrt(eps(one(E)))`.
+  `iszero(atol) ? sqrt(eps(one(E))) : zero(one(E))`.
 - `maxsubdiv=2^(13 + D)`: maximum number of subdivisions.
 - `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
   estimate of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after each
@@ -86,7 +86,7 @@ end
 
     # set default tolerances if not provided
     εₐ = something(atol, zero(E))
-    εᵣ = something(rtol, sqrt(eps(one(E))))
+    εᵣ = something(rtol, iszero(εₐ) ? sqrt(eps(one(E))) : zero(one(E)))
 
     nb_subdiv = 0
     while true
