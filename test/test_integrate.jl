@@ -2,7 +2,7 @@ using DataStructures: BinaryHeap
 using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
 using HAdaptiveIntegration:
-    allocate_buffer, default_embedded_cubature, default_subdivision, integrate, resum
+    allocate_buffer, default_rule, default_subdivision, integrate, resum
 using LinearAlgebra: norm
 using Test
 
@@ -12,7 +12,7 @@ using Test
         domain = reference_domain(domain_type)
 
         @test typeof(default_subdivision(domain)) <: Function
-        @test typeof(default_embedded_cubature(domain)) <: EmbeddedCubature
+        @test typeof(default_rule(domain)) <: EmbeddedCubature
     end
 end
 
@@ -22,11 +22,11 @@ end
 
     for ec in (
         embedded_cubature(SEGMENT_GK7),
-        default_embedded_cubature(domain),
+        default_rule(domain),
         embedded_cubature(SEGMENT_GK31),
     )
         for (fct, R) in [(x -> exp(x[1]), exp(1) - 1), (x -> 1 / sqrt(x[1]), 2)]
-            I, E = @inferred(integrate(fct, domain; embedded_cubature=ec, buffer=buffer))
+            I, E = @inferred(integrate(fct, domain; rule=ec, buffer=buffer))
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -36,13 +36,12 @@ end
     domain = Triangle((0, 0), (2, 0), (0, 2))
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
-    for ec in
-        (embedded_cubature(GrundmannMoeller{2}(7, 5)), default_embedded_cubature(domain))
+    for ec in (embedded_cubature(GrundmannMoeller{2}(7, 5)), default_rule(domain))
         for (fct, R) in [
             (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
             (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
         ]
-            I, E = @inferred integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            I, E = @inferred integrate(fct, domain; rule=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -55,13 +54,13 @@ end
     for ec in (
         embedded_cubature(GenzMalik{2}()),
         embedded_cubature(SQUARE_CH21),
-        default_embedded_cubature(domain),
+        default_rule(domain),
     )
         for (fct, R) in [
             (x -> exp(x[1] + x[2]), (exp(1) - 1)^2),
             (x -> 1 / norm(x), log(17 + 12 * sqrt(2)) / 2),
         ]
-            I, E = @inferred integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            I, E = @inferred integrate(fct, domain; rule=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -89,12 +88,12 @@ end
 
     for ec in (
         embedded_cubature(GenzMalik{3}()),
-        default_embedded_cubature(domain),
+        default_rule(domain),
         embedded_cubature(CUBE_BE115),
     )
         for (fct, R) in
             [(x -> 1 / (1 + norm(x)^2)^2, π^2 / 32), (x -> 1 / norm(x), 1.1900386819897766)]
-            I, E = @inferred integrate(fct, domain; embedded_cubature=ec, buffer=buffer)
+            I, E = @inferred integrate(fct, domain; rule=ec, buffer=buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -148,7 +147,7 @@ end
     rtol = 1e-4
 
     # collect callback data
-    callback_data = Vector{@NamedTuple{I::Float64,E::Float64,nb_subdiv::Int}}()
+    callback_data = Vector{@NamedTuple{I::Float64, E::Float64, nb_subdiv::Int}}()
     function callback(I, E, nb_subdiv, _)
         push!(callback_data, (; I, E, nb_subdiv))
         return nothing

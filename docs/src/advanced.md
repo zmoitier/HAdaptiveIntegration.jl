@@ -70,7 +70,7 @@ end
 ## Choose custom cubature rules
 
 By default, when calling `integrate(f, domain)`, the package uses a default embedded
-cubature formula for the given `domain` by calling [`default_embedded_cubature`](@ref).
+cubature formula for the given `domain` by calling [`default_rule`](@ref).
 Although these are generally good choices, you can also specify a custom embedded
 cubature formula by passing it as a keyword argument to `integrate`. For example, in the
 case of a triangle, the package defaults to a Radon-Laurie embedded cubature formula of
@@ -85,7 +85,7 @@ using HAdaptiveIntegration.Rule: GrundmannMoeller, embedded_cubature
 t = Triangle((0, 0), (1, 0), (0, 1))
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 ec = embedded_cubature(GrundmannMoeller{2}(13, 11))
-I, E = integrate(f, t; embedded_cubature = ec)
+I, E = integrate(f, t; rule = ec)
 ```
 
 Which cubature rule is best depends on the function being integrated, as well as on the
@@ -99,7 +99,7 @@ const cc = Ref(0) # a counter for the number of function evaluations
 g = x -> (cc[] += 1; f(x))
 rtol = 1e-2
 cc[] = 0; integrate(g, t; rtol); counter_default = cc[]
-cc[] = 0; integrate(g, t; embedded_cubature = ec, rtol); counter_custom = cc[]
+cc[] = 0; integrate(g, t; rule = ec, rtol); counter_custom = cc[]
 counter_default, counter_custom
 ```
 
@@ -109,7 +109,7 @@ evaluations. However, decreasing `rtol` changes the balance:
 ```@example embedded-cubature
 rtol = 1e-8
 cc[] = 0; integrate(g, t; rtol); counter_default = cc[]
-cc[] = 0; integrate(g, t; embedded_cubature = ec, rtol); counter_custom = cc[]
+cc[] = 0; integrate(g, t; rule = ec, rtol); counter_custom = cc[]
 counter_default, counter_custom
 ```
 

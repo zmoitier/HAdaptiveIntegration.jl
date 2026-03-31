@@ -23,9 +23,9 @@ default_subdivision(::Rectangle) = subdivide_rectangle
 default_subdivision(::Cuboid) = subdivide_cuboid
 
 """
-    default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
+    default_rule(domain::DOM) where {DOM<:AbstractDomain}
 
-Return a default embedded cubature for the domains:
+Return a default embedded cubature rule for the domains:
 - dimension 1:
     - [`Segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
@@ -38,42 +38,49 @@ Return a default embedded cubature for the domains:
     - [`Simplex`](@ref): [`GrundmannMoeller`](@ref)`{D}(7, 5)`
     - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
-function default_embedded_cubature(::Segment{T}) where {T}
+function default_rule(::Segment{T}) where {T}
     S = typeof(one(T))
-    return cache_dec(Segment{S}, SEGMENT_GK15)
+    return default_rule_segment(S)
 end
-function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
+function default_rule(::Simplex{D,T,N}) where {D,T,N}
     S = typeof(one(T))
     if D == 2
-        return cache_dec(Triangle{S}, RadonLaurie())
+        return default_rule_triangle(S)
     end
-    return cache_dec(Simplex{D,S,N}, GrundmannMoeller{D}(7, 5))
+    return default_rule_simplex(Val(D), S)
 end
-function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
+function default_rule(::Orthotope{D,T}) where {D,T}
     S = typeof(one(T))
     if D == 2
-        return cache_dec(Rectangle{S}, SQUARE_CH25)
+        return default_rule_rectangle(S)
     end
     if D == 3
-        return cache_dec(Cuboid{S}, CUBE_BE65)
+        return default_rule_cuboid(S)
     end
-    return cache_dec(Orthotope{D,S}, GenzMalik{D}())
+    return default_rule_orthotope(Val(D), S)
 end
 
-# cache for default embedded cubatures
-const CACHE_DEC = Dict{DataType,EmbeddedCubature}()
-const CACHE_DEC_LOCK = ReentrantLock()
-
-function cache_dec(
-    ::Type{DOM}, rule::AR
-)::EmbeddedCubature{D,T} where {D,T,DOM<:AbstractDomain{D,T},AR<:AbstractRule}
-    lock(CACHE_DEC_LOCK)
-    try
-        key = T ≠ BigFloat ? DOM : Tuple{DOM,precision(T)}
-        return get!(CACHE_DEC, key) do
-            embedded_cubature(rule, T)
-        end
-    finally
-        unlock(CACHE_DEC_LOCK)
-    end
+@generated function default_rule_segment(::Type{T}) where {T}
+    ec = embedded_cubature(SEGMENT_GK15, T)
+    return :($ec)
+end
+@generated function default_rule_simplex(::Val{D}, ::Type{T}) where {D,T}
+    ec = embedded_cubature(GrundmannMoeller{D}(7, 5), T)
+    return :($ec)
+end
+@generated function default_rule_triangle(::Type{T}) where {T}
+    ec = embedded_cubature(RadonLaurie(), T)
+    return :($ec)
+end
+@generated function default_rule_orthotope(::Val{D}, ::Type{T}) where {D,T}
+    ec = embedded_cubature(GenzMalik{D}(), T)
+    return :($ec)
+end
+@generated function default_rule_rectangle(::Type{T}) where {T}
+    ec = embedded_cubature(SQUARE_CH25, T)
+    return :($ec)
+end
+@generated function default_rule_cuboid(::Type{T}) where {T}
+    ec = embedded_cubature(CUBE_BE65, T)
+    return :($ec)
 end

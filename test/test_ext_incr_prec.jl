@@ -28,7 +28,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         )
 
         ec0 = embedded_cubature(tec0, Float64)
-        I, E = integrate(fct, domain; embedded_cubature=ec0, rtol=rtol)
+        I, E = integrate(fct, domain; rule=ec0, rtol=rtol)
         @test abs(I - R) > rtol * abs(R)
 
         setprecision(BigFloat, 32; base=10)
@@ -36,7 +36,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         @test typeof(tec1) <: TabulatedEmbeddedCubature{Segment}
         ec1 = embedded_cubature(tec1, Float64)
 
-        I, E = integrate(fct, domain; embedded_cubature=ec1, rtol=rtol)
+        I, E = integrate(fct, domain; rule=ec1, rtol=rtol)
         @test abs(I - R) ≤ rtol * abs(R)
     end
 
@@ -60,7 +60,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         )
 
         ec0 = embedded_cubature(tec0, Float64)
-        I, E = integrate(fct, domain; embedded_cubature=ec0, rtol=rtol)
+        I, E = integrate(fct, domain; rule=ec0, rtol=rtol)
         @test abs(I - R) > rtol * abs(R)
 
         setprecision(BigFloat, 20; base=10)
@@ -68,7 +68,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         @test typeof(tec1) <: TabulatedEmbeddedCubature{Triangle}
         ec1 = embedded_cubature(tec1, Float64)
 
-        I, E = integrate(fct, domain; embedded_cubature=ec1, rtol=rtol)
+        I, E = integrate(fct, domain; rule=ec1, rtol=rtol)
         @test abs(I - R) ≤ rtol * abs(R)
     end
 
@@ -91,7 +91,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         )
 
         ec0 = embedded_cubature(tec0, Float64)
-        I, E = integrate(fct, domain; embedded_cubature=ec0, rtol=rtol)
+        I, E = integrate(fct, domain; rule=ec0, rtol=rtol)
         @test abs(I - R) > rtol * abs(R)
 
         setprecision(BigFloat, 64; base=10)
@@ -99,7 +99,7 @@ global_logger(SimpleLogger(stderr, Logging.Warn))
         @test typeof(tec1) <: TabulatedEmbeddedCubature{Rectangle}
         ec1 = embedded_cubature(tec1, Float64)
 
-        I, E = integrate(fct, domain; embedded_cubature=ec1, rtol=rtol)
+        I, E = integrate(fct, domain; rule=ec1, rtol=rtol)
         @test abs(I - R) ≤ rtol * abs(R)
     end
 end

@@ -2,7 +2,7 @@
     integrate(
         fct,
         domain::AbstractDomain{D};
-        embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
+        rule::EmbeddedCubature{D}=default_rule(domain),
         subdiv_algo=default_subdivision(domain),
         norm=LinearAlgebra.norm,
         buffer=nothing,
@@ -26,8 +26,8 @@ from an embedded cubature pair.
   [`Orthotope`](@ref).
 
 ## Optional arguments
-- `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded
-  cubature. Each supported domain has a [`default_embedded_cubature`](@ref).
+- `rule::EmbeddedCubature{D,T}=default_rule(domain)`: the embedded cubature rule. Each
+  supported domain has a [`default_rule`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
 - `norm=LinearAlgebra.norm`: norm used to estimate the error.
@@ -43,12 +43,12 @@ from an embedded cubature pair.
   of subdivisions `nb_subdiv`, and `buffer`.
 
 ## Notes
-- Iteration stops when `E ≤ atol` or `E ≤ rtol * norm(I)` or `nb_subdiv ≥ maxsubdiv`.
+- Iteration stops when `E ≤ atol` or `E ≤ rtol * norm(I)` or `nb_subdiv == maxsubdiv`.
 """
 function integrate(
     fct,
     domain::AbstractDomain{D};
-    embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
+    rule::EmbeddedCubature{D}=default_rule(domain),
     subdiv_algo=default_subdivision(domain),
     norm=LinearAlgebra.norm,
     buffer=nothing,
@@ -58,23 +58,14 @@ function integrate(
     callback=(_, _, _, _) -> nothing,
 ) where {D}
     return _integrate(
-        fct,
-        domain,
-        embedded_cubature,
-        subdiv_algo,
-        buffer,
-        norm,
-        atol,
-        rtol,
-        maxsubdiv,
-        callback,
+        fct, domain, rule, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv, callback
     )
 end
 
 @noinline function _integrate(
     fct::FCT,
     domain::DOM,
-    ec::EmbeddedCubature,
+    rule::EmbeddedCubature{D},
     subdiv_algo,
     buffer,
     norm,
@@ -82,8 +73,8 @@ end
     rtol,
     maxsubdiv,
     callback,
-) where {FCT,DOM}
-    I, E = ec(fct, domain, norm)
+) where {D,FCT,DOM<:AbstractDomain{D}}
+    I, E = rule(fct, domain, norm)
 
     # initialize or reset the buffer
     buffer = if isnothing(buffer)
@@ -111,7 +102,7 @@ end
         I -= I_dom
         E -= E_dom
         for child in subdiv_algo(domain)
-            I_child, E_child = ec(fct, child, norm)
+            I_child, E_child = rule(fct, child, norm)
             I += I_child
             E += E_child
             push!(buffer, (child, I_child, E_child))
@@ -131,7 +122,7 @@ end
     allocate_buffer(
         fct::FCT,
         domain::DOM;
-        embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
+        rule::EmbeddedCubature{D}=default_rule(domain),
         norm=LinearAlgebra.norm,
     ) where {D,FCT,DOM<:AbstractDomain{D}}
 
@@ -143,11 +134,11 @@ Passing this buffer through the `buffer` keyword can reduce memory allocations w
 function allocate_buffer(
     fct::FCT,
     domain::DOM;
-    embedded_cubature::EmbeddedCubature{D}=default_embedded_cubature(domain),
+    rule::EmbeddedCubature{D}=default_rule(domain),
     norm=LinearAlgebra.norm,
 ) where {D,FCT,DOM<:AbstractDomain{D}}
     # Determine the type of elements returned by the embedded cubature.
-    I, E = embedded_cubature(fct, domain, norm)
+    I, E = rule(fct, domain, norm)
 
     # Create a binary heap to store elements of the form (domain, I, E), where:
     # - `domain` is the current subdomain being processed.
