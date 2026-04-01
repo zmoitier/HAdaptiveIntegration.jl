@@ -34,13 +34,13 @@ end
 #   combinatorial methods, SIAM Journal on Numerical Analysis, volume 15, 1978,
 #   https://doi.org/10.1137/0715019.
 function embedded_cubature(
-    gm::GrundmannMoeller{D}, (::Type{T})=float(Int)
-) where {D,T<:Real}
+        gm::GrundmannMoeller{D}, (::Type{T}) = float(Int)
+    ) where {D, T <: Real}
     sh, sl = (gm.order_high - 1) ÷ 2, (gm.order_low - 1) ÷ 2
 
     # Grundmann-Möller weights computed iteratively instead of using the formula for
     # numerical stability at higher degree.
-    gm_wl = [1 / reduce(*, 1:D; init=T(1))]
+    gm_wl = [1 / reduce(*, 1:D; init = T(1))]
     for _ in 1:sl
         gm_wl = _gm_weight_next(gm_wl, D)
     end
@@ -49,12 +49,12 @@ function embedded_cubature(
         gm_wh = _gm_weight_next(gm_wh, D)
     end
 
-    nodes = Vector{SVector{D,T}}()
+    nodes = Vector{SVector{D, T}}()
     weights_high = Vector{T}()
     weights_low = Vector{T}()
 
     count = 0
-    node_to_idx = Dict{NTuple{D,Rational{Int}},Int}()
+    node_to_idx = Dict{NTuple{D, Rational{Int}}, Int}()
 
     mlt_idx = _multi_indexes(D + 1, sh)
     for i in 0:sh
@@ -72,7 +72,7 @@ function embedded_cubature(
                 count += 1
                 node_to_idx[node] = count
 
-                push!(nodes, SVector{D,T}(node))
+                push!(nodes, SVector{D, T}(node))
                 push!(weights_high, gm_wh[sh - i + 1])
                 if i ≤ sl
                     push!(weights_low, gm_wl[sl - i + 1])
@@ -104,7 +104,7 @@ function _multi_indexes(dim::Int, k_max::Int)
     mlt_idx = [[tuple(k)] for k in 0:k_max]
 
     for d in 2:dim
-        new = [Vector{NTuple{d,Int}}() for _ in 0:k_max]
+        new = [Vector{NTuple{d, Int}}() for _ in 0:k_max]
         for (k, mis) in zip(Iterators.countfrom(0), mlt_idx)
             for mi in mis
                 for n in 0:(k_max - k)

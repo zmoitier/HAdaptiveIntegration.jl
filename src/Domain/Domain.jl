@@ -37,10 +37,10 @@ include("cuboid.jl")
 reference_domain(::Type{<:Segment{T}}) where {T} = reference_segment(T)
 reference_domain(::Type{<:Segment}) = reference_segment()
 
-reference_domain(::Type{<:Simplex{D,T}}) where {D,T} = reference_simplex(Val(D), T)
+reference_domain(::Type{<:Simplex{D, T}}) where {D, T} = reference_simplex(Val(D), T)
 reference_domain(::Type{<:Simplex{D}}) where {D} = reference_simplex(Val(D))
 
-reference_domain(::Type{<:Orthotope{D,T}}) where {D,T} = reference_orthotope(Val(D), T)
+reference_domain(::Type{<:Orthotope{D, T}}) where {D, T} = reference_orthotope(Val(D), T)
 reference_domain(::Type{<:Orthotope{D}}) where {D} = reference_orthotope(Val(D))
 
 end

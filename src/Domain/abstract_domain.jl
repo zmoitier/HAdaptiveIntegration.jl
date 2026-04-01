@@ -14,7 +14,7 @@ Abstract type for integration domains in `D` dimensions with element type `T`.
 - [`reference_domain`](@ref)
 - [`map_to_reference`](@ref)
 """
-abstract type AbstractDomain{D,T} end
+abstract type AbstractDomain{D, T} end
 
 """
     Φ, μ = map_from_reference(domain::DOM) where {DOM<:AbstractDomain}

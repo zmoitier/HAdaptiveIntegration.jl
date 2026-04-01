@@ -7,9 +7,9 @@ using Optim
 using Printf: Format, format
 using StaticArrays
 
-struct AffineMap{D,T,N}
-    A::SMatrix{D,D,T,N}
-    b::SVector{D,T}
+struct AffineMap{D, T, N}
+    A::SMatrix{D, D, T, N}
+    b::SVector{D, T}
 end
 
 function affine_map(A::AbstractMatrix, b::AbstractVector)
@@ -17,19 +17,19 @@ function affine_map(A::AbstractMatrix, b::AbstractVector)
     @assert m == length(b)
 
     T = promote_type(eltype(A), eltype(b))
-    return AffineMap(SMatrix{n,m,T}(A), SVector{m,T}(b))
+    return AffineMap(SMatrix{n, m, T}(A), SVector{m, T}(b))
 end
 
 function affine_map(A::AbstractMatrix)
     n, m = size(A)
-    return AffineMap(SMatrix{n,m}(A), zero(SVector{m,eltype(A)}))
+    return AffineMap(SMatrix{n, m}(A), zero(SVector{m, eltype(A)}))
 end
 
 function (Φ::AffineMap)(x)
     return Φ.A * x + Φ.b
 end
 
-function (Φ::AffineMap{1,T,1})(x) where {T}
+function (Φ::AffineMap{1, T, 1})(x) where {T}
     return Φ.A[1] * first(x) + Φ.b[1]
 end
 
@@ -88,13 +88,13 @@ function orbit_cube()
 end
 
 function assemble(
-    order_high::Int,
-    order_low::Int,
-    points::Tuple{Vector{AffineMap{D,T,N}},NTuple{D,String},String,String}...;
-    subtraction::Bool=false,
-) where {D,T,N}
-    orbits = Vector{Vector{AffineMap{D,T,N}}}()
-    nodes = Vector{SVector{D,T}}()
+        order_high::Int,
+        order_low::Int,
+        points::Tuple{Vector{AffineMap{D, T, N}}, NTuple{D, String}, String, String}...;
+        subtraction::Bool = false,
+    ) where {D, T, N}
+    orbits = Vector{Vector{AffineMap{D, T, N}}}()
+    nodes = Vector{SVector{D, T}}()
     weights_high = Vector{T}()
     weights_low = Vector{T}()
 
@@ -109,19 +109,19 @@ function assemble(
     end
 
     return (
-        orbits=orbits,
-        nodes=nodes,
-        weights_high=weights_high,
-        weights_low=weights_low,
-        order_high=order_high,
-        order_low=order_low,
+        orbits = orbits,
+        nodes = nodes,
+        weights_high = weights_high,
+        weights_low = weights_low,
+        order_high = order_high,
+        order_low = order_low,
     )
 end
 
 # [ nodes[1]..., ..., nodes[end]..., weights_high..., weights_low... ]
 function pack(
-    nodes::Vector{SVector{D,T}}, weights_high::Vector{T}, weights_low::Vector{T}
-) where {D,T}
+        nodes::Vector{SVector{D, T}}, weights_high::Vector{T}, weights_low::Vector{T}
+    ) where {D, T}
     U = Vector{T}()
     for node in nodes
         append!(U, node)
@@ -131,11 +131,11 @@ function pack(
     return U, D, length(weights_high), length(weights_low)
 end
 
-function unpack(U::Vector{T}, orbits::Vector{Vector{AffineMap{D,T,N}}}) where {D,T,N}
+function unpack(U::Vector{T}, orbits::Vector{Vector{AffineMap{D, T, N}}}) where {D, T, N}
     H = length(orbits)
     L = length(U) - H * (D + 1)
 
-    nodes = Vector{SVector{D,T}}()
+    nodes = Vector{SVector{D, T}}()
     weights_high = Vector{T}()
     weights_low = Vector{T}()
     for (i, orbit) in enumerate(orbits)
@@ -155,19 +155,19 @@ end
 
 function integral_chebyshev_orthotope(d::Int, tdm::Int)
     if d ≤ 0
-        return Vector{Vector{Pair{Tuple{},Rational{Int}}}}()
+        return Vector{Vector{Pair{Tuple{}, Rational{Int}}}}()
     end
 
-    indexes = [[(k,) => iseven(k) ? 2//(1 - k * k) : 0//1] for k in 0:tdm]
+    indexes = [[(k,) => iseven(k) ? 2 // (1 - k * k) : 0 // 1] for k in 0:tdm]
 
     for n in 2:d
-        tmp = [Vector{Pair{NTuple{n,Int},Rational{Int}}}() for _ in 0:tdm]
+        tmp = [Vector{Pair{NTuple{n, Int}, Rational{Int}}}() for _ in 0:tdm]
         for (td, idx_val) in zip(Iterators.countfrom(0), indexes)
             for (idx, val) in idx_val
                 for k in 0:(tdm - td)
                     push!(
                         tmp[td + 1 + k],
-                        (k, idx...) => val * (iseven(k) ? 2//(1 - k * k) : 0//1),
+                        (k, idx...) => val * (iseven(k) ? 2 // (1 - k * k) : 0 // 1),
                     )
                 end
             end
@@ -179,9 +179,9 @@ function integral_chebyshev_orthotope(d::Int, tdm::Int)
 end
 
 function remove_odd(
-    indexes::Vector{Vector{Pair{NTuple{D,Int64},Rational{Int64}}}}
-) where {D}
-    new = Vector{Vector{Pair{NTuple{D,Int64},Rational{Int64}}}}()
+        indexes::Vector{Vector{Pair{NTuple{D, Int64}, Rational{Int64}}}}
+    ) where {D}
+    new = Vector{Vector{Pair{NTuple{D, Int64}, Rational{Int64}}}}()
     for pairs in indexes
         tmp = [pair for pair in pairs if pair[2] ≠ 0]
         if !isempty(tmp)
@@ -244,7 +244,7 @@ function increase_precision_orthotope(ec, ::Val{D}) where {D}
     println()
 
     result = optimize(
-        F, U, LBFGS(), Optim.Options(; x_reltol=1e-40, g_tol=1e-50); autodiff=:forward
+        F, U, LBFGS(), Optim.Options(; x_reltol = 1.0e-40, g_tol = 1.0e-50); autodiff = :forward
     )
     display(result)
 
@@ -252,29 +252,29 @@ function increase_precision_orthotope(ec, ::Val{D}) where {D}
     return unpack(V, orbits)
 end
 
-function to_zero(node::SVector{D,T}, tol::T) where {D,T}
+function to_zero(node::SVector{D, T}, tol::T) where {D, T}
     result = Vector{T}()
     for x in node
         push!(result, abs(x) ≤ tol ? zero(T) : x)
     end
-    return SVector{D,T}(result)
+    return SVector{D, T}(result)
 end
 
-function to_reference(ec::EmbeddedCubature{D,T}, dom::AbstractDomain{D,T}) where {D,T}
+function to_reference(ec::EmbeddedCubature{D, T}, dom::AbstractDomain{D, T}) where {D, T}
     _, μ_ref = map_from_reference(reference_domain(typeof(dom)))
     _, μ = map_from_reference(dom)
     λ = μ_ref / μ
     Ψ = map_to_reference(dom)
 
-    nodes = Vector{SVector{D,T}}()
+    nodes = Vector{SVector{D, T}}()
     for node in ec.nodes
-        push!(nodes, Ψ(to_zero(node, T(1e-40))))
+        push!(nodes, Ψ(to_zero(node, T(1.0e-40))))
     end
 
     return EmbeddedCubature(nodes, λ .* ec.weights_high, λ .* ec.weights_low)
 end
 
-function print_embedded_cubature(ec::EmbeddedCubature{D,T}, name::String) where {D,T}
+function print_embedded_cubature(ec::EmbeddedCubature{D, T}, name::String) where {D, T}
     fmt_node = Format("[" * join(fill("\"%.36e\"", D), ", ") * "],")
     fmt_weight = Format("\"%.36e\",")
 
@@ -532,7 +532,7 @@ function cube_be65()
             "8.824405047310198e-2",
             "",
         );
-        subtraction=true,
+        subtraction = true,
     )
     domain = Cuboid((big"-1.0", big"-1.0", big"-1.0"), (big"1.0", big"1.0", big"1.0"))
 
@@ -615,7 +615,7 @@ function cube_be115()
             "1.419962823300713e-2",
             "",
         );
-        subtraction=true,
+        subtraction = true,
     )
     domain = Cuboid((big"-1.0", big"-1.0", big"-1.0"), (big"1.0", big"1.0", big"1.0"))
 

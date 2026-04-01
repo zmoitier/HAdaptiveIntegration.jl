@@ -7,7 +7,7 @@ Alias for a 3-dimensional [`Simplex`](@ref) with 4 vertices of element type `T`.
 - `Tetrahedron(a, b, c, d)`
 - `Tetrahedron{T}(a, b, c, d)`
 """
-const Tetrahedron{T} = Simplex{3,T,4}
+const Tetrahedron{T} = Simplex{3, T, 4}
 
 Tetrahedron{T}(a, b, c, d) where {T} = Simplex{T}(a, b, c, d)
 Tetrahedron(a, b, c, d) = Simplex(a, b, c, d)

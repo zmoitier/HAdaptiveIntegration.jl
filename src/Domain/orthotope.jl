@@ -16,11 +16,11 @@ Axis-aligned orthotope in `D` dimensions, with element type `T`, defined by two 
 - `Orthotope{T}(low_corner, high_corner)`
 - `Orthotope(corners::SVector{2,SVector{D,T}})`
 """
-struct Orthotope{D,T} <: AbstractDomain{D,T}
-    corners::SVector{2,SVector{D,T}}
+struct Orthotope{D, T} <: AbstractDomain{D, T}
+    corners::SVector{2, SVector{D, T}}
 end
 
-function Orthotope{T}(low_corner, high_corner, D::Union{Int,Nothing}=nothing) where {T}
+function Orthotope{T}(low_corner, high_corner, D::Union{Int, Nothing} = nothing) where {T}
     if isnothing(D)
         D = length(low_corner)
         @assert length(high_corner) == D "`low_corner` and `high_corner` must have the \
@@ -32,10 +32,10 @@ function Orthotope{T}(low_corner, high_corner, D::Union{Int,Nothing}=nothing) wh
     @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "must have `low_corner \
 .≤ high_corner`."
 
-    return Orthotope(SVector(SVector{D,T}(low_corner), SVector{D,T}(high_corner)))
+    return Orthotope(SVector(SVector{D, T}(low_corner), SVector{D, T}(high_corner)))
 end
 
-function Orthotope(low_corner, high_corner, D::Union{Int,Nothing}=nothing)
+function Orthotope(low_corner, high_corner, D::Union{Int, Nothing} = nothing)
     if isnothing(D)
         D = length(low_corner)
         @assert length(high_corner) == D "`low_corner` and `high_corner` must have the \
@@ -55,18 +55,18 @@ end
 
 Return the reference `D`-dimensional orthotope `[0, 1]ᴰ` with element type `T`.
 """
-function reference_orthotope(::Val{D}, (::Type{T})=float(Int)) where {D,T}
+function reference_orthotope(::Val{D}, (::Type{T}) = float(Int)) where {D, T}
     return Orthotope(
-        SVector{2}(zeros(SVector{D,T}), SVector{D,T}(ntuple(_ -> oneunit(T), Val(D))))
+        SVector{2}(zeros(SVector{D, T}), SVector{D, T}(ntuple(_ -> oneunit(T), Val(D))))
     )
 end
 
-function map_from_reference(h::Orthotope{D,T}) where {D,T}
+function map_from_reference(h::Orthotope{D, T}) where {D, T}
     diff = h.corners[2] - h.corners[1]
     return (u -> h.corners[1] .+ u .* diff, prod(diff))
 end
 
-function map_to_reference(h::Orthotope{D,T}) where {D,T}
+function map_to_reference(h::Orthotope{D, T}) where {D, T}
     diff = h.corners[2] - h.corners[1]
     @assert all(x -> x > √eps(float(T)), diff) "degenerate $D-dimensional Orthotope: must \
 have `high_corner .> low_corner`."
@@ -79,12 +79,12 @@ end
 
 Subdivide `h` into `2^D` smaller orthotopes by bisecting each axis at its midpoint.
 """
-function subdivide_orthotope(h::Orthotope{D,T}) where {D,T}
+function subdivide_orthotope(h::Orthotope{D, T}) where {D, T}
     a, b = h.corners
     m = (a + b) / 2
 
     return ntuple(Val(2^D)) do k
-        aₖ, bₖ = MVector{D,T}(undef), MVector{D,T}(undef)
+        aₖ, bₖ = MVector{D, T}(undef), MVector{D, T}(undef)
         for j in 1:D
             # `k-1` encodes, in binary, which half (lower or upper) is selected for each
             # dimension `j`. Bit `j` of `k-1` indicates whether the sub-orthotope uses the

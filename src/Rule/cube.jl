@@ -4,12 +4,12 @@ Berntsen-Espelid tabulated embedded cubature for [`Cuboid`](@ref).
 This rule uses 65 nodes with high order 9 and low order 7.
 """
 const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
-    description="Berntsen-Espelid with 65 nodes (CUBE_BE65)",
-    reference="https://epubs.siam.org/doi/10.1137/0725016",
-    order_high=9,
-    order_low=7,
-    precision=35,
-    nodes=[
+    description = "Berntsen-Espelid with 65 nodes (CUBE_BE65)",
+    reference = "https://epubs.siam.org/doi/10.1137/0725016",
+    order_high = 9,
+    order_low = 7,
+    precision = 35,
+    nodes = [
         [
             "5.000000000000000000000000000000000000e-01",
             "5.000000000000000000000000000000000000e-01",
@@ -336,7 +336,7 @@ const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
             "2.374999999999999939416480127938467602e-01",
         ],
     ],
-    weights_high=[
+    weights_high = [
         "4.534029043603724063493904416398377947e-03",
         "4.180006004950540891662277886923538886e-02",
         "4.180006004950540891662277886923538886e-02",
@@ -403,7 +403,7 @@ const CUBE_BE65 = TabulatedEmbeddedCubature{Cuboid}(;
         "1.103050630913774813169437862844004949e-02",
         "1.103050630913774813169437862844004949e-02",
     ],
-    weights_low=[
+    weights_low = [
         "2.004941027550623479622707221631354780e-01",
         "-5.149515884743401061146110712527114715e-02",
         "-5.149515884743401061146110712527114715e-02",
@@ -454,12 +454,12 @@ Berntsen-Espelid tabulated embedded cubature for [`Cuboid`](@ref).
 This rule uses 115 nodes with high order 11 and low order 9.
 """
 const CUBE_BE115 = TabulatedEmbeddedCubature{Cuboid}(;
-    description="Berntsen-Espelid with 115 nodes (CUBE_BE115)",
-    reference="https://epubs.siam.org/doi/10.1137/0725016",
-    order_high=11,
-    order_low=9,
-    precision=35,
-    nodes=[
+    description = "Berntsen-Espelid with 115 nodes (CUBE_BE115)",
+    reference = "https://epubs.siam.org/doi/10.1137/0725016",
+    order_high = 11,
+    order_low = 9,
+    precision = 35,
+    nodes = [
         [
             "5.000000000000000000000000000000000000e-01",
             "5.000000000000000000000000000000000000e-01",
@@ -1036,7 +1036,7 @@ const CUBE_BE115 = TabulatedEmbeddedCubature{Cuboid}(;
             "1.694534331846271884517569099207387233e-02",
         ],
     ],
-    weights_high=[
+    weights_high = [
         "1.655762079079614082501830390720282445e-02",
         "1.360782870596273802297185138525593075e-03",
         "1.360782870596273802297185138525593075e-03",
@@ -1153,7 +1153,7 @@ const CUBE_BE115 = TabulatedEmbeddedCubature{Cuboid}(;
         "1.774953529125892650987155044026350114e-03",
         "1.774953529125892650987155044026350114e-03",
     ],
-    weights_low=[
+    weights_low = [
         "-7.126555267715689919553393363325600921e-02",
         "-2.643302148877228176585036934595512665e-03",
         "-2.643302148877228176585036934595512665e-03",

@@ -14,9 +14,6 @@ repos:
       - id: check-toml
       - id: check-yaml
       - id: end-of-file-fixer
-      - id: file-contents-sorter
-        files: .JuliaFormatter.toml
-        args: [--unique]
       - id: mixed-line-ending
         args: [--fix=lf]
       # - id: no-commit-to-branch
@@ -43,7 +40,7 @@ repos:
     rev: v1.38.0
     hooks:
       - id: yamllint
-  - repo: https://github.com/domluna/JuliaFormatter.jl
-    rev: v2.3.0
+  - repo: https://github.com/fredrikekre/runic-pre-commit
+    rev: v2.0.1
     hooks:
-      - id: julia-formatter
+      - id: runic

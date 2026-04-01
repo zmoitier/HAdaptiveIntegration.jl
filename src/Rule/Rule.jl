@@ -27,7 +27,7 @@ Abstract type for a cubature rule on a domain `DOM`.
 ## Useful (but non-mandatory) methods:
 - [`orders`](@ref)
 """
-abstract type AbstractRule{DOM<:AbstractDomain} end
+abstract type AbstractRule{DOM <: AbstractDomain} end
 
 include("embedded_cubature.jl")
 include("tabulated.jl")

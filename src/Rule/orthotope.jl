@@ -17,26 +17,26 @@ end
 #   numerical integration over an N-dimensional rectangular region, Journal of Computational
 #   and Applied Mathematics, Volume 6, Issue 4, 1980,
 #   https://doi.org/10.1016/0771-050X(80)90039-X.
-function embedded_cubature(::GenzMalik{D}, (::Type{T})=float(Int)) where {D,T<:Real}
+function embedded_cubature(::GenzMalik{D}, (::Type{T}) = float(Int)) where {D, T <: Real}
     # map to the reference domain
     Φ = x -> (x .+ 1) ./ 2
 
     # w₁, ..., w₅ for the reference domain (divided by 2^D)
-    wh = SVector{5,T}(
-        (12_824 - 9_120 * D + 400 * D^2)//19_683,
-        980//6_561,
-        (1_820 - 400 * D)//19_683,
-        200//19_683,
-        6_859//(19_683 * 2^D),
+    wh = SVector{5, T}(
+        (12_824 - 9_120 * D + 400 * D^2) // 19_683,
+        980 // 6_561,
+        (1_820 - 400 * D) // 19_683,
+        200 // 19_683,
+        6_859 // (19_683 * 2^D),
     )
     # w'₁, ..., w'₄ for the reference domain (divided by 2^D)
-    wl = SVector{4,T}(
-        (729 - 950 * D + 50 * D^2)//729, 245//486, (265 - 100 * D)//1_458, 25//729
+    wl = SVector{4, T}(
+        (729 - 950 * D + 50 * D^2) // 729, 245 // 486, (265 - 100 * D) // 1_458, 25 // 729
     )
 
     # start with the node (0, ..., 0)
     node = zeros(T, D)
-    nodes = [Φ(SVector{D,T}(node))]
+    nodes = [Φ(SVector{D, T}(node))]
     weights_high = [wh[1]]
     weights_low = [wl[1]]
 
@@ -47,7 +47,7 @@ function embedded_cubature(::GenzMalik{D}, (::Type{T})=float(Int)) where {D,T<:R
         for i in 1:D
             for s in (1, -1)
                 node[i] = s * λ
-                push!(nodes, Φ(SVector{D,T}(node)))
+                push!(nodes, Φ(SVector{D, T}(node)))
                 push!(weights_high, wₕ)
                 push!(weights_low, wₗ)
             end
@@ -62,7 +62,7 @@ function embedded_cubature(::GenzMalik{D}, (::Type{T})=float(Int)) where {D,T<:R
             for (s₁, s₂) in Iterators.product((1, -1), (1, -1))
                 node[i] = s₁ * λ₄
                 node[j] = s₂ * λ₄
-                push!(nodes, Φ(SVector{D,T}(node)))
+                push!(nodes, Φ(SVector{D, T}(node)))
                 push!(weights_high, wh[4])
                 push!(weights_low, wl[4])
             end
@@ -75,7 +75,7 @@ function embedded_cubature(::GenzMalik{D}, (::Type{T})=float(Int)) where {D,T<:R
     λ₅ = sqrt(T(9) / 19)
     node .= λ₅
     for signs in Iterators.product([(1, -1) for _ in 1:D]...)
-        push!(nodes, Φ(SVector{D,T}(signs .* node)))
+        push!(nodes, Φ(SVector{D, T}(signs .* node)))
         push!(weights_high, wh[5])
     end
 
