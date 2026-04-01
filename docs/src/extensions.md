@@ -56,11 +56,7 @@ nothing # hide
 Now integrate with arbitrary precision:
 
 ```@example increase_precision
-I, E = HAdaptiveIntegration.integrate(
-    f, domain;
-    embedded_cubature = ec_big,
-    rtol = big"1e-64"
-)
+I, E = HAdaptiveIntegration.integrate(f, domain; rule = ec_big, rtol = big"1e-64")
 println("I = $I") # hide
 println("E = $E") # hide
 ```

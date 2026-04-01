@@ -14,18 +14,18 @@ its nodes. The cubature nodes and weights are assumed to be defined on the refer
 - `length(nodes) == length(weights_high)`
 - `length(weights_high) ≥ length(weights_low)`
 """
-struct EmbeddedCubature{D,T}
+struct EmbeddedCubature{D,T<:Real}
     nodes::Vector{SVector{D,T}}
     weights_high::Vector{T}
     weights_low::Vector{T}
 
     function EmbeddedCubature(
         nodes::Vector{SVector{D,T}}, weights_high::Vector{T}, weights_low::Vector{T}
-    ) where {D,T}
+    ) where {D,T<:Real}
         @assert length(nodes) == length(weights_high) "The number of nodes must match the \
         number of high-order weights."
         @assert length(weights_high) ≥ length(weights_low) "weights_high must have a \
-length greater than or equal to weights_low."
+        length greater than or equal to weights_low."
         return new{D,T}(nodes, weights_high, weights_low)
     end
 end
@@ -46,7 +46,7 @@ The constructor can be called from a subtype of [`AbstractRule`](@ref), or from 
 """
 function embedded_cubature(
     nodes, weights_high, weights_low, (::Type{T})=float(Int)
-) where {T}
+) where {T<:Real}
     @assert allequal(length, nodes) "all nodes should have the same length."
     D = length(first(nodes))
 
@@ -58,9 +58,9 @@ function embedded_cubature(
 end
 
 """
-    (ec::EmbeddedCubature{D,T})(
-        fct, domain::AbstractDomain{D,T}, norm=LinearAlgebra.norm
-    ) where {D,T}
+    (ec::EmbeddedCubature{D})(
+        fct, domain::AbstractDomain{D}, norm=LinearAlgebra.norm
+    ) where {D}
 
 Return `I_high` and `norm(I_high - I_low)` where `I_high` and `I_low` are the result of the
 high order cubature and the low order cubature on `domain`. The function `fct` must take a
@@ -68,9 +68,9 @@ high order cubature and the low order cubature on `domain`. The function `fct` m
 addition. Note that there is no check, beyond compatibility of dimension and type, that the
 embedded cubature matches the intended domain geometry.
 """
-function (ec::EmbeddedCubature{D,T})(
-    fct, domain::AbstractDomain{D,T}, norm=LinearAlgebra.norm
-) where {D,T}
+function (ec::EmbeddedCubature{D})(
+    fct, domain::AbstractDomain{D}, norm=LinearAlgebra.norm
+) where {D}
     H, L = length(ec.weights_high), length(ec.weights_low)
     Φ, μ = map_from_reference(domain)
 

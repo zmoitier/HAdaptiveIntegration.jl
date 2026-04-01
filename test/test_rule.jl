@@ -1,8 +1,8 @@
+using Base.Iterators: countfrom
 using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
 using Quadmath
 using Test
-using Base.Iterators: countfrom
 
 function validate_orders(
     ec::EmbeddedCubature{D,T},

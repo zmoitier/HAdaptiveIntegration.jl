@@ -13,7 +13,7 @@ end
 # Based on the article:
 #   D. P. Laurie. 1982. Algorithm 584: CUBTRI: Automatic Cubature over a Triangle. ACM
 #   Trans. Math. Softw. 8, 1982, https://doi.org/10.1145/355993.356001.
-function embedded_cubature(::RadonLaurie, (::Type{T})=float(Int)) where {T}
+function embedded_cubature(::RadonLaurie, (::Type{T})=float(Int)) where {T<:Real}
     ϕ, σ = sqrt(T(15)), sqrt(T(7))
 
     nodes = [SVector{2,T}(fill(1//3, 2))]

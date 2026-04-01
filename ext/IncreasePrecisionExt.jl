@@ -9,7 +9,7 @@ using HAdaptiveIntegration.LinearAlgebra: norm
 using HAdaptiveIntegration.Printf: @sprintf
 using HAdaptiveIntegration.StaticArrays: SVector
 using HAdaptiveIntegration:
-    Orthotope, Segment, Simplex, TabulatedEmbeddedCubature, dimension, orders
+    AbstractDomain, Orthotope, Segment, Simplex, TabulatedEmbeddedCubature, orders
 
 function __init__()
     @debug "Loading IncreasePrecisionExt.jl"
@@ -134,7 +134,7 @@ function increase_precision(
     x_atol=10 * eps(T),
     f_atol=10 * eps(T),
     maxiter::Int=16,
-) where {DOM,T}
+) where {D,DOM<:AbstractDomain{D},T}
     if eps(T) ≥ 10.0^(-tec.precision)
         @info "Tabulated precision $(tec.precision) is sufficient for type $(T). No need \
         to increase precision."
@@ -144,7 +144,6 @@ function increase_precision(
     @info "Increasing to target precision $(-floor(Int, log10(x_atol))) from tabulated \
     precision $(tec.precision). This may take some time."
 
-    D = dimension(DOM)
     U, range_nodes, range_wh, range_wl = pack(tec, T, D)
     order_high, order_low = orders(tec)
     exponent2values, range_low, range_high = _flatten_with_type(

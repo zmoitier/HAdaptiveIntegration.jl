@@ -23,9 +23,9 @@ default_subdivision(::Rectangle) = subdivide_rectangle
 default_subdivision(::Cuboid) = subdivide_cuboid
 
 """
-    default_embedded_cubature(domain::DOM) where {DOM<:AbstractDomain}
+    default_rule(domain::DOM) where {DOM<:AbstractDomain}
 
-Return a default embedded cubature for the domains:
+Return a default embedded cubature rule for the domains:
 - dimension 1:
     - [`Segment`](@ref): [`SEGMENT_GK15`](@ref)
 - dimension 2:
@@ -38,31 +38,49 @@ Return a default embedded cubature for the domains:
     - [`Simplex`](@ref): [`GrundmannMoeller`](@ref)`{D}(7, 5)`
     - [`Orthotope`](@ref): [`GenzMalik`](@ref)`{D}()`
 """
-@generated function default_embedded_cubature(::Segment{T}) where {T}
+function default_rule(::Segment{T}) where {T}
+    S = typeof(one(T))
+    return default_rule_segment(S)
+end
+function default_rule(::Simplex{D,T,N}) where {D,T,N}
+    S = typeof(one(T))
+    if D == 2
+        return default_rule_triangle(S)
+    end
+    return default_rule_simplex(Val(D), S)
+end
+function default_rule(::Orthotope{D,T}) where {D,T}
+    S = typeof(one(T))
+    if D == 2
+        return default_rule_rectangle(S)
+    end
+    if D == 3
+        return default_rule_cuboid(S)
+    end
+    return default_rule_orthotope(Val(D), S)
+end
+
+@generated function default_rule_segment(::Type{T}) where {T}
     ec = embedded_cubature(SEGMENT_GK15, T)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Simplex{D,T,N}) where {D,T,N}
+@generated function default_rule_simplex(::Val{D}, ::Type{T}) where {D,T}
     ec = embedded_cubature(GrundmannMoeller{D}(7, 5), T)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Triangle{T}) where {T}
+@generated function default_rule_triangle(::Type{T}) where {T}
     ec = embedded_cubature(RadonLaurie(), T)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Tetrahedron{T}) where {T}
-    ec = embedded_cubature(GrundmannMoeller{3}(7, 5), T)
-    return :($ec)
-end
-@generated function default_embedded_cubature(::Orthotope{D,T}) where {D,T}
+@generated function default_rule_orthotope(::Val{D}, ::Type{T}) where {D,T}
     ec = embedded_cubature(GenzMalik{D}(), T)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Rectangle{T}) where {T}
+@generated function default_rule_rectangle(::Type{T}) where {T}
     ec = embedded_cubature(SQUARE_CH25, T)
     return :($ec)
 end
-@generated function default_embedded_cubature(::Cuboid{T}) where {T}
+@generated function default_rule_cuboid(::Type{T}) where {T}
     ec = embedded_cubature(CUBE_BE65, T)
     return :($ec)
 end

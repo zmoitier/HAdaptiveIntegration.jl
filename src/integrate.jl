@@ -1,16 +1,16 @@
 """
     integrate(
         fct,
-        domain::AbstractDomain{D,T};
-        embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
+        domain::AbstractDomain{D};
+        rule::EmbeddedCubature{D}=default_rule(domain),
         subdiv_algo=default_subdivision(domain),
-        buffer=nothing,
         norm=LinearAlgebra.norm,
-        atol=zero(T),
-        rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+        buffer=nothing,
+        atol=nothing,
+        rtol=nothing,
         maxsubdiv=2^(13 + D),
         callback=(I, E, nb_subdiv, buffer) -> nothing,
-    ) where {D,T}
+    ) where {D}
 
 Adaptively integrate `fct` over `domain`.
 
@@ -18,23 +18,24 @@ Return `(I, E)` where `I` is the integral estimate and `E` is an error estimate 
 from an embedded cubature pair.
 
 ## Arguments
-- `fct`: a function that maps `SVector{D,T}` to a value `K`. The return type `K` must
-    support addition and multiplication by scalars of type `T`.
+- `fct`: a function that maps `SVector{D,T}` to a value in `K`. The return type `K` must
+  support addition and multiplication by scalars of type `typeof(one(T))`.
 - `domain::AbstractDomain{D,T}`: the integration domain. Currently, we support
   [`Segment`](@ref), [`Triangle`](@ref), [`Rectangle`](@ref), [`Tetrahedron`](@ref),
   [`Cuboid`](@ref), `D`-dimensional [`Simplex`](@ref), and `D`-dimensional
   [`Orthotope`](@ref).
 
 ## Optional arguments
-- `embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain)`: the embedded
-  cubature. Each supported domain has a [`default_embedded_cubature`](@ref).
+- `rule::EmbeddedCubature{D,T}=default_rule(domain)`: the embedded cubature rule. Each
+  supported domain has a [`default_rule`](@ref).
 - `subdiv_algo=default_subdivision(domain)`: the subdivision algorithm, each domain has a
   [`default_subdivision`](@ref).
+- `norm=LinearAlgebra.norm`: norm used to estimate the error.
 - `buffer=nothing`: optional heap used by the adaptive algorithm. Reusing a buffer from
   [`allocate_buffer`](@ref) can reduce allocations when calling `integrate` repeatedly.
-- `norm=LinearAlgebra.norm`: norm used to estimate the error.
-- `atol=zero(T)`: absolute tolerance.
-- `rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T))`: relative tolerance.
+- `atol=nothing`: absolute tolerance, if `nothing` is passed, it will be set to `zero(E)`.
+- `rtol=nothing`: relative tolerance, if `nothing` is passed, it will be set to
+  `iszero(atol) ? sqrt(eps(one(E))) : zero(one(E))`.
 - `maxsubdiv=2^(13 + D)`: maximum number of subdivisions.
 - `callback=(I, E, nb_subdiv, buffer) -> nothing`: a callback function called for each
   estimate of `I` and `E`, including the initial estimate (`nb_subdiv=0`) and after each
@@ -42,38 +43,29 @@ from an embedded cubature pair.
   of subdivisions `nb_subdiv`, and `buffer`.
 
 ## Notes
-- Iteration stops when `E ≤ atol`, `E ≤ rtol * norm(I)`, or `nb_subdiv ≥ maxsubdiv`.
+- Iteration stops when `E ≤ atol` or `E ≤ rtol * norm(I)` or `nb_subdiv == maxsubdiv`.
 """
 function integrate(
     fct,
-    domain::AbstractDomain{D,T};
-    embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
+    domain::AbstractDomain{D};
+    rule::EmbeddedCubature{D}=default_rule(domain),
     subdiv_algo=default_subdivision(domain),
-    buffer=nothing,
     norm=LinearAlgebra.norm,
-    atol=zero(T),
-    rtol=(atol > zero(T)) ? zero(T) : sqrt(eps(T)),
+    buffer=nothing,
+    atol=nothing,
+    rtol=nothing,
     maxsubdiv=2^(13 + D),
-    callback=(I, E, nb_subdiv, buffer) -> nothing,
-) where {D,T}
+    callback=(_, _, _, _) -> nothing,
+) where {D}
     return _integrate(
-        fct,
-        domain,
-        embedded_cubature,
-        subdiv_algo,
-        buffer,
-        norm,
-        atol,
-        rtol,
-        maxsubdiv,
-        callback,
+        fct, domain, rule, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv, callback
     )
 end
 
 @noinline function _integrate(
     fct::FCT,
     domain::DOM,
-    ec::EmbeddedCubature,
+    rule::EmbeddedCubature{D},
     subdiv_algo,
     buffer,
     norm,
@@ -81,25 +73,27 @@ end
     rtol,
     maxsubdiv,
     callback,
-) where {FCT,DOM}
-    nb_subdiv = 0
-
-    I, E = ec(fct, domain, norm)
+) where {D,FCT,DOM<:AbstractDomain{D}}
+    I, E = rule(fct, domain, norm)
 
     # initialize or reset the buffer
     buffer = if isnothing(buffer)
         BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(last, Base.Order.Reverse))
     else
-        empty!(buffer.valtree)
-        buffer
+        empty!(buffer)
     end
     push!(buffer, (domain, I, E))
 
+    # set default tolerances if not provided
+    εₐ = something(atol, zero(E))
+    εᵣ = something(rtol, iszero(εₐ) ? sqrt(eps(one(E))) : zero(one(E)))
+
+    nb_subdiv = 0
     while true
         callback(I, E, nb_subdiv, buffer)
 
         # check termination conditions
-        if (E ≤ atol) || (E ≤ rtol * norm(I)) || (nb_subdiv ≥ maxsubdiv)
+        if (E ≤ εₐ) || (E ≤ εᵣ * norm(I)) || (nb_subdiv == maxsubdiv)
             break
         end
 
@@ -108,7 +102,7 @@ end
         I -= I_dom
         E -= E_dom
         for child in subdiv_algo(domain)
-            I_child, E_child = ec(fct, child, norm)
+            I_child, E_child = rule(fct, child, norm)
             I += I_child
             E += E_child
             push!(buffer, (child, I_child, E_child))
@@ -116,7 +110,7 @@ end
         nb_subdiv += 1
     end
 
-    if nb_subdiv ≥ maxsubdiv
+    if nb_subdiv == maxsubdiv
         @warn "maximum number of subdivisions reached `maxsubdiv=$maxsubdiv`, try \
         increasing the keyword argument `maxsubdiv`."
     end
@@ -126,11 +120,11 @@ end
 
 """
     allocate_buffer(
-        fct,
-        domain::AbstractDomain{D,T};
-        embedded_cubature::EmbeddedCubature{D,T}=default_embedded_cubature(domain),
-        norm=LinearAlgebra.norm
-    ) where {D,T}
+        fct::FCT,
+        domain::DOM;
+        rule::EmbeddedCubature{D}=default_rule(domain),
+        norm=LinearAlgebra.norm,
+    ) where {D,FCT,DOM<:AbstractDomain{D}}
 
 Allocate and return a heap buffer compatible with [`integrate`](@ref).
 
@@ -138,13 +132,13 @@ Passing this buffer through the `buffer` keyword can reduce memory allocations w
 `integrate` is called repeatedly with compatible domain and value types.
 """
 function allocate_buffer(
-    fct,
+    fct::FCT,
     domain::DOM;
-    embedded_cubature::EmbeddedCubature=default_embedded_cubature(domain),
+    rule::EmbeddedCubature{D}=default_rule(domain),
     norm=LinearAlgebra.norm,
-) where {DOM<:AbstractDomain}
+) where {D,FCT,DOM<:AbstractDomain{D}}
     # Determine the type of elements returned by the embedded cubature.
-    I, E = embedded_cubature(fct, domain, norm)
+    I, E = rule(fct, domain, norm)
 
     # Create a binary heap to store elements of the form (domain, I, E), where:
     # - `domain` is the current subdomain being processed.
