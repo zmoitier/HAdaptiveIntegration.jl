@@ -27,7 +27,7 @@ jobs:
       - name: Use Julia cache
         uses: julia-actions/cache@v3
       - name: Install Julia packages
-        run: julia -e 'using Pkg; pkg"add JuliaFormatter"'
+        run: julia -e 'using Pkg; pkg"add Runic"'
       - name: Hack for setup-python cache # https://github.com/actions/setup-python/issues/807
         run: touch requirements.txt
       - name: Setup Python
