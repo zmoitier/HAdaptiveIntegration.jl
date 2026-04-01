@@ -7,7 +7,7 @@ Alias for a 2-dimensional [`Orthotope`](@ref) of element type `T`.
 - `Rectangle(low_corner, high_corner)`
 - `Rectangle{T}(low_corner, high_corner)`
 """
-const Rectangle{T} = Orthotope{2,T}
+const Rectangle{T} = Orthotope{2, T}
 
 Rectangle{T}(low_corner, high_corner) where {T} = Orthotope{T}(low_corner, high_corner, 2)
 Rectangle(low_corner, high_corner) = Orthotope(low_corner, high_corner, 2)

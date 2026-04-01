@@ -7,7 +7,7 @@ Alias for a 3-dimensional [`Orthotope`](@ref) of value type `T`.
 - `Cuboid(low_corner, high_corner)`
 - `Cuboid{T}(low_corner, high_corner)`
 """
-const Cuboid{T} = Orthotope{3,T}
+const Cuboid{T} = Orthotope{3, T}
 
 Cuboid{T}(low_corner, high_corner) where {T} = Orthotope{T}(low_corner, high_corner, 3)
 Cuboid(low_corner, high_corner) = Orthotope(low_corner, high_corner, 3)

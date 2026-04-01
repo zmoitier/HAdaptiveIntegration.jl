@@ -17,22 +17,22 @@ function __init__()
 end
 
 function integral_monomials(::Type{<:Segment}, deg_tot_max::Int)
-    return [[(k,) => 1//(k + 1)] for k in 0:deg_tot_max]
+    return [[(k,) => 1 // (k + 1)] for k in 0:deg_tot_max]
 end
 
 function integral_monomials(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
     @assert (D > 0) && (deg_tot_max ≥ 0) "must have `D > 0` and `k_max ≥ 0`."
 
-    exponent2values = [[(i,) => 1//prod((i + 1):(i + D))] for i in 0:deg_tot_max]
+    exponent2values = [[(i,) => 1 // prod((i + 1):(i + D))] for i in 0:deg_tot_max]
 
     for d in 2:D
-        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
+        new = [Vector{Pair{NTuple{d, Int}, Rational{Int}}}() for _ in 0:deg_tot_max]
         for (k, α2v) in zip(countfrom(0), exponent2values)
             for (α, v) in α2v
                 push!(new[k + 1], (0, α...) => v)
                 t = 1
                 for n in 1:(deg_tot_max - k)
-                    t *= n//(n + k + D)
+                    t *= n // (n + k + D)
                     push!(new[k + 1 + n], (n, α...) => t * v)
                 end
             end
@@ -46,14 +46,14 @@ end
 function integral_monomials(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
     @assert (D > 0) && (deg_tot_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
 
-    exponent2values = [[(i,) => 1//(i + 1)] for i in 0:deg_tot_max]
+    exponent2values = [[(i,) => 1 // (i + 1)] for i in 0:deg_tot_max]
 
     for d in 2:D
-        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
+        new = [Vector{Pair{NTuple{d, Int}, Rational{Int}}}() for _ in 0:deg_tot_max]
         for (k, α2v) in zip(countfrom(0), exponent2values)
             for (α, v) in α2v
                 for n in 0:(deg_tot_max - k)
-                    push!(new[k + 1 + n], (n, α...) => v//(n + 1))
+                    push!(new[k + 1 + n], (n, α...) => v // (n + 1))
                 end
             end
         end
@@ -66,7 +66,7 @@ end
 mutable struct NewtonState{T}
     iter::Int
     x::Vector{T}
-    result::MutableDiffResult{1,Vector{T},Tuple{Matrix{T}}}
+    result::MutableDiffResult{1, Vector{T}, Tuple{Matrix{T}}}
     Δ::Vector{T}
     x_abs_err::T
     f_abs_err::T
@@ -113,11 +113,11 @@ function newton(f, x₀, x_atol, f_atol, maxiter)
 
           iteration = $(ns.iter) / $maxiter
         |xₙ - xₙ₋₁ | = $(@sprintf("%.2e", ns.x_abs_err)) \
-                      $(ns.x_abs_err > x_atol ? "≰" : "≤") \
-                      $(@sprintf("%.2e", x_atol))
+    $(ns.x_abs_err > x_atol ? "≰" : "≤") \
+    $(@sprintf("%.2e", x_atol))
             |f(xₙ)| = $(@sprintf("%.2e", ns.f_abs_err)) \
-                      $(ns.f_abs_err > f_atol ? "≰" : "≤") \
-                      $(@sprintf("%.2e", f_atol))
+    $(ns.f_abs_err > f_atol ? "≰" : "≤") \
+    $(@sprintf("%.2e", f_atol))
     """
 
     if ns.iter ≥ maxiter
@@ -129,12 +129,12 @@ function newton(f, x₀, x_atol, f_atol, maxiter)
 end
 
 function increase_precision(
-    tec::TabulatedEmbeddedCubature{DOM},
-    ::Type{T};
-    x_atol=10 * eps(T),
-    f_atol=10 * eps(T),
-    maxiter::Int=16,
-) where {D,DOM<:AbstractDomain{D},T}
+        tec::TabulatedEmbeddedCubature{DOM},
+        ::Type{T};
+        x_atol = 10 * eps(T),
+        f_atol = 10 * eps(T),
+        maxiter::Int = 16,
+    ) where {D, DOM <: AbstractDomain{D}, T}
     if eps(T) ≥ 10.0^(-tec.precision)
         @info "Tabulated precision $(tec.precision) is sufficient for type $(T). No need \
         to increase precision."
@@ -184,14 +184,14 @@ function increase_precision(
 
     nodes, weights_high, weights_low = unpack(U, range_nodes, range_wh, range_wl, D)
     return TabulatedEmbeddedCubature{DOM}(;
-        description=(tec.description * " (increased precision)"),
-        reference=tec.reference,
-        order_high=tec.order_high,
-        order_low=tec.order_low,
-        precision=(-floor(Int, log10(δ))),
-        nodes=[Vector(string.(node)) for node in nodes],
-        weights_high=string.(weights_high),
-        weights_low=string.(weights_low),
+        description = (tec.description * " (increased precision)"),
+        reference = tec.reference,
+        order_high = tec.order_high,
+        order_low = tec.order_low,
+        precision = (-floor(Int, log10(δ))),
+        nodes = [Vector(string.(node)) for node in nodes],
+        weights_high = string.(weights_high),
+        weights_low = string.(weights_low),
     )
 end
 
@@ -209,13 +209,13 @@ function pack(tec::TabulatedEmbeddedCubature, ::Type{T}, D::Int) where {T}
 end
 
 function unpack(
-    U::Vector{T},
-    range_pts::UnitRange{Int},
-    range_wh::UnitRange{Int},
-    range_wl::UnitRange{Int},
-    D::Int,
-) where {T}
-    nodes = Vector{SVector{D,T}}()
+        U::Vector{T},
+        range_pts::UnitRange{Int},
+        range_wh::UnitRange{Int},
+        range_wl::UnitRange{Int},
+        D::Int,
+    ) where {T}
+    nodes = Vector{SVector{D, T}}()
     for node in partition(U[range_pts], D)
         push!(nodes, SVector{D}(node))
     end
@@ -227,14 +227,14 @@ function unpack(
 end
 
 function _flatten_with_type(
-    exponent2values::Vector{Vector{Pair{NTuple{D,Int},S}}},
-    ::Type{T},
-    order_high::Int,
-    order_low::Int,
-) where {D,S,T}
+        exponent2values::Vector{Vector{Pair{NTuple{D, Int}, S}}},
+        ::Type{T},
+        order_high::Int,
+        order_low::Int,
+    ) where {D, S, T}
     nb_lo, nb_hi = binomial(order_low + D, D), binomial(order_high + D, D)
 
-    result = Vector{Pair{NTuple{D,Int},T}}()
+    result = Vector{Pair{NTuple{D, Int}, T}}()
     for α2v in exponent2values
         append!(result, α2v)
     end

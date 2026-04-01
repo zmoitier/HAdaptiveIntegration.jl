@@ -7,7 +7,7 @@ Alias for a 2-dimensional [`Simplex`](@ref) with 3 vertices of value type `T`.
 - `Triangle(a, b, c)`
 - `Triangle{T}(a, b, c)`
 """
-const Triangle{T} = Simplex{2,T,3}
+const Triangle{T} = Simplex{2, T, 3}
 
 Triangle{T}(a, b, c) where {T} = Simplex{T}(a, b, c)
 Triangle(a, b, c) = Simplex(a, b, c)

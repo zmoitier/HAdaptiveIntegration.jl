@@ -5,13 +5,13 @@ using Quadmath
 using Test
 
 function validate_orders(
-    ec::EmbeddedCubature{D,T},
-    ::Type{DOM},
-    order_high::Int,
-    order_low::Int;
-    atol=zero(T),
-    rtol=(atol > zero(T)) ? zero(T) : 10 * eps(T),
-) where {D,T,DOM}
+        ec::EmbeddedCubature{D, T},
+        ::Type{DOM},
+        order_high::Int,
+        order_low::Int;
+        atol = zero(T),
+        rtol = (atol > zero(T)) ? zero(T) : 10 * eps(T),
+    ) where {D, T, DOM}
     val_ex = integral_monomials(DOM, order_high)
     for (k, α2v) in zip(countfrom(0), val_ex)
         for (α, v) in α2v
@@ -40,22 +40,22 @@ function validate_orders(
 end
 
 function integral_monomials(::Type{<:Segment}, deg_tot_max::Int)
-    return [[(k,) => 1//(k + 1)] for k in 0:deg_tot_max]
+    return [[(k,) => 1 // (k + 1)] for k in 0:deg_tot_max]
 end
 
 function integral_monomials(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
     @assert (D > 0) && (deg_tot_max ≥ 0) "must have `D > 0` and `k_max ≥ 0`."
 
-    exponent2values = [[(i,) => 1//prod((i + 1):(i + D))] for i in 0:deg_tot_max]
+    exponent2values = [[(i,) => 1 // prod((i + 1):(i + D))] for i in 0:deg_tot_max]
 
     for d in 2:D
-        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
+        new = [Vector{Pair{NTuple{d, Int}, Rational{Int}}}() for _ in 0:deg_tot_max]
         for (k, α2v) in zip(countfrom(0), exponent2values)
             for (α, v) in α2v
                 push!(new[k + 1], (0, α...) => v)
                 t = 1
                 for n in 1:(deg_tot_max - k)
-                    t *= n//(n + k + D)
+                    t *= n // (n + k + D)
                     push!(new[k + 1 + n], (n, α...) => t * v)
                 end
             end
@@ -69,14 +69,14 @@ end
 function integral_monomials(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
     @assert (D > 0) && (deg_tot_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
 
-    exponent2values = [[(i,) => 1//(i + 1)] for i in 0:deg_tot_max]
+    exponent2values = [[(i,) => 1 // (i + 1)] for i in 0:deg_tot_max]
 
     for d in 2:D
-        new = [Vector{Pair{NTuple{d,Int},Rational{Int}}}() for _ in 0:deg_tot_max]
+        new = [Vector{Pair{NTuple{d, Int}, Rational{Int}}}() for _ in 0:deg_tot_max]
         for (k, α2v) in zip(countfrom(0), exponent2values)
             for (α, v) in α2v
                 for n in 0:(deg_tot_max - k)
-                    push!(new[k + 1 + n], (n, α...) => v//(n + 1))
+                    push!(new[k + 1 + n], (n, α...) => v // (n + 1))
                 end
             end
         end
@@ -86,7 +86,7 @@ function integral_monomials(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
     return exponent2values
 end
 
-function eval_monomial(ec::EmbeddedCubature{D,T}, α::NTuple{D,Int}) where {D,T}
+function eval_monomial(ec::EmbeddedCubature{D, T}, α::NTuple{D, Int}) where {D, T}
     H, L = length(ec.weights_high), length(ec.weights_low)
 
     v = prod(ec.nodes[1] .^ α)
@@ -109,29 +109,29 @@ end
         T = float(Int)
 
         tec = TabulatedEmbeddedCubature{Segment}(;
-            description="Gauss (SEGMENT_G3)",
-            reference="",
-            precision=16,
-            nodes=[
-                [string(0.5)], [string((1 - √(3 / 5)) / 2)], [string((1 + √(3 / 5)) / 2)]
+            description = "Gauss (SEGMENT_G3)",
+            reference = "",
+            precision = 16,
+            nodes = [
+                [string(0.5)], [string((1 - √(3 / 5)) / 2)], [string((1 + √(3 / 5)) / 2)],
             ],
-            weights_high=[string(4 / 9), string(5 / 18), string(5 / 18)],
-            order_high=5,
-            weights_low=[string(1.0)],
-            order_low=1,
+            weights_high = [string(4 / 9), string(5 / 18), string(5 / 18)],
+            order_high = 5,
+            weights_low = [string(1.0)],
+            order_low = 1,
         )
         @test typeof(tec) <: TabulatedEmbeddedCubature{Segment}
         @test orders(tec) == (5, 1)
 
         ec = embedded_cubature(tec)
-        @test typeof(ec) <: EmbeddedCubature{1,T}
+        @test typeof(ec) <: EmbeddedCubature{1, T}
 
         ec_ref = embedded_cubature(
             [[0.5], [(1 - √(3 / 5)) / 2], [(1 + √(3 / 5)) / 2]],
             [4 / 9, 5 / 18, 5 / 18],
             [1.0],
         )
-        @test typeof(ec_ref) <: EmbeddedCubature{1,T}
+        @test typeof(ec_ref) <: EmbeddedCubature{1, T}
 
         @test ec.nodes ≈ ec_ref.nodes
         @test ec.weights_high ≈ ec_ref.weights_high

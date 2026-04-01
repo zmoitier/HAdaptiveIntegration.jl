@@ -42,14 +42,14 @@ function default_rule(::Segment{T}) where {T}
     S = typeof(one(T))
     return default_rule_segment(S)
 end
-function default_rule(::Simplex{D,T,N}) where {D,T,N}
+function default_rule(::Simplex{D, T, N}) where {D, T, N}
     S = typeof(one(T))
     if D == 2
         return default_rule_triangle(S)
     end
     return default_rule_simplex(Val(D), S)
 end
-function default_rule(::Orthotope{D,T}) where {D,T}
+function default_rule(::Orthotope{D, T}) where {D, T}
     S = typeof(one(T))
     if D == 2
         return default_rule_rectangle(S)
@@ -64,7 +64,7 @@ end
     ec = embedded_cubature(SEGMENT_GK15, T)
     return :($ec)
 end
-@generated function default_rule_simplex(::Val{D}, ::Type{T}) where {D,T}
+@generated function default_rule_simplex(::Val{D}, ::Type{T}) where {D, T}
     ec = embedded_cubature(GrundmannMoeller{D}(7, 5), T)
     return :($ec)
 end
@@ -72,7 +72,7 @@ end
     ec = embedded_cubature(RadonLaurie(), T)
     return :($ec)
 end
-@generated function default_rule_orthotope(::Val{D}, ::Type{T}) where {D,T}
+@generated function default_rule_orthotope(::Val{D}, ::Type{T}) where {D, T}
     ec = embedded_cubature(GenzMalik{D}(), T)
     return :($ec)
 end

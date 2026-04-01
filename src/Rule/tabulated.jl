@@ -22,7 +22,7 @@ weights are defined on the reference domain (use [`reference_domain`](@ref) to i
 - `order_high ≥ order_low ≥ 0`
 - `precision ≥ 0`
 """
-struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
+struct TabulatedEmbeddedCubature{DOM <: AbstractDomain} <: AbstractRule{DOM}
     description::String
     reference::String
     order_high::Int
@@ -33,15 +33,15 @@ struct TabulatedEmbeddedCubature{DOM<:AbstractDomain} <: AbstractRule{DOM}
     weights_low::Vector{String}
 
     function TabulatedEmbeddedCubature{DOM}(;
-        description::String,
-        reference::String,
-        order_high::Int,
-        order_low::Int,
-        precision::Int,
-        nodes::Vector{Vector{String}},
-        weights_high::Vector{String},
-        weights_low::Vector{String},
-    ) where {D,DOM<:AbstractDomain{D}}
+            description::String,
+            reference::String,
+            order_high::Int,
+            order_low::Int,
+            precision::Int,
+            nodes::Vector{Vector{String}},
+            weights_high::Vector{String},
+            weights_low::Vector{String},
+        ) where {D, DOM <: AbstractDomain{D}}
         @assert all(n -> length(n) == D, nodes) "Each node must have length equal to the \
         dimension D"
         @assert length(nodes) == length(weights_high) "The number of nodes must match the \
@@ -74,14 +74,14 @@ function orders(tec::TabulatedEmbeddedCubature)
 end
 
 function embedded_cubature(
-    tec::TabulatedEmbeddedCubature{DOM}, (::Type{T})=float(Int)
-) where {D,DOM<:AbstractDomain{D},T<:Real}
+        tec::TabulatedEmbeddedCubature{DOM}, (::Type{T}) = float(Int)
+    ) where {D, DOM <: AbstractDomain{D}, T <: Real}
     if eps(T) < 10.0^(-tec.precision)
         @warn "The embedded cubature `$(tec.description)` has fewer significant digits \
         than type $T, which may lead to inaccurate computations."
     end
     return EmbeddedCubature(
-        [SVector{D,T}(parse.(T, x)) for x in tec.nodes],
+        [SVector{D, T}(parse.(T, x)) for x in tec.nodes],
         parse.(T, tec.weights_high),
         parse.(T, tec.weights_low),
     )

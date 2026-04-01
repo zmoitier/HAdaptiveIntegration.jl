@@ -14,7 +14,7 @@ One-dimensional segment with element type `T`, defined by `xmin` and `xmax`.
 - `Segment(xmin, xmax)`
 - `Segment{T}(xmin, xmax)`
 """
-struct Segment{T} <: AbstractDomain{1,T}
+struct Segment{T} <: AbstractDomain{1, T}
     xmin::T
     xmax::T
 
@@ -39,7 +39,7 @@ end
 
 Return the reference 1-dimensional segment `[0, 1]` with element type `T`.
 """
-function reference_segment((::Type{T})=float(Int)) where {T}
+function reference_segment((::Type{T}) = float(Int)) where {T}
     return Segment{T}(zero(T), oneunit(T))
 end
 

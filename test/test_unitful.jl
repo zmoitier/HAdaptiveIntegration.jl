@@ -22,14 +22,14 @@ dimension(::Type{<:AbstractDomain{D}}) where {D} = D
 
     @testset "dimensionless domain with unit integrand" begin
         for dom_type in (
-            Segment{T},
-            Triangle{T},
-            Rectangle{T},
-            Tetrahedron{T},
-            Cuboid{T},
-            Simplex{4,T},
-            Orthotope{4,T},
-        )
+                Segment{T},
+                Triangle{T},
+                Rectangle{T},
+                Tetrahedron{T},
+                Cuboid{T},
+                Simplex{4, T},
+                Orthotope{4, T},
+            )
             domain = reference_domain(dom_type)
             I, E = @inferred integrate(p -> sum(p) * 1u"g", domain)
             @test unit(I) == u"g"
@@ -39,14 +39,14 @@ dimension(::Type{<:AbstractDomain{D}}) where {D} = D
 
     @testset "unit domain with dimensionless integrand" begin
         for dom_type in (
-            Segment{U},
-            Triangle{U},
-            Rectangle{U},
-            Tetrahedron{U},
-            Cuboid{U},
-            Simplex{4,U},
-            Orthotope{4,U},
-        )
+                Segment{U},
+                Triangle{U},
+                Rectangle{U},
+                Tetrahedron{U},
+                Cuboid{U},
+                Simplex{4, U},
+                Orthotope{4, U},
+            )
             domain = reference_domain(dom_type)
             dim = dimension(dom_type)
             I, E = @inferred integrate(p -> 1, domain)
@@ -57,14 +57,14 @@ dimension(::Type{<:AbstractDomain{D}}) where {D} = D
 
     @testset "unit domain with unit integrand" begin
         for dom_type in (
-            Segment{U},
-            Triangle{U},
-            Rectangle{U},
-            Tetrahedron{U},
-            Cuboid{U},
-            Simplex{4,U},
-            Orthotope{4,U},
-        )
+                Segment{U},
+                Triangle{U},
+                Rectangle{U},
+                Tetrahedron{U},
+                Cuboid{U},
+                Simplex{4, U},
+                Orthotope{4, U},
+            )
             domain = reference_domain(dom_type)
             dim = dimension(dom_type)
             I, E = @inferred integrate(p -> 1u"g", domain)

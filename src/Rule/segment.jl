@@ -4,10 +4,10 @@ Gauss-Kronrod tabulated embedded cubature for [`Segment`](@ref).
 This rule uses 7 nodes with high order 11 and low order 5.
 """
 const SEGMENT_GK7 = TabulatedEmbeddedCubature{Segment}(;
-    description="Gauss-Kronrod with 7 nodes (SEGMENT_GK7)",
-    reference="https://github.com/JuliaMath/QuadGK.jl",
-    precision=35,
-    nodes=[
+    description = "Gauss-Kronrod with 7 nodes (SEGMENT_GK7)",
+    reference = "https://github.com/JuliaMath/QuadGK.jl",
+    precision = 35,
+    nodes = [
         ["5.000000000000000000000000000000000000e-01"],
         ["8.872983346207416885179265399782399611e-01"],
         ["1.127016653792583114820734600217600389e-01"],
@@ -16,7 +16,7 @@ const SEGMENT_GK7 = TabulatedEmbeddedCubature{Segment}(;
         ["9.802456343540101417117535463145399813e-01"],
         ["1.975436564598985828824645368546001867e-02"],
     ],
-    weights_high=[
+    weights_high = [
         "2.254582693292370711725550435227854583e-01",
         "1.342440449341667203642846403333548124e-01",
         "1.342440449341667203642846403333548124e-01",
@@ -25,13 +25,13 @@ const SEGMENT_GK7 = TabulatedEmbeddedCubature{Segment}(;
         "5.232811301323363259691192859603651912e-02",
         "5.232811301323363259691192859603651912e-02",
     ],
-    order_high=11,
-    weights_low=[
+    order_high = 11,
+    weights_low = [
         "4.444444444444444444444444444444444444e-01",
         "2.777777777777777777777777777777777778e-01",
         "2.777777777777777777777777777777777778e-01",
     ],
-    order_low=5,
+    order_low = 5,
 )
 
 """
@@ -40,10 +40,10 @@ Gauss-Kronrod tabulated embedded cubature for [`Segment`](@ref).
 This rule uses 15 nodes with high order 23 and low order 13.
 """
 const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
-    description="Gauss-Kronrod with 15 nodes (SEGMENT_GK15)",
-    reference="https://github.com/JuliaMath/QuadGK.jl",
-    precision=35,
-    nodes=[
+    description = "Gauss-Kronrod with 15 nodes (SEGMENT_GK15)",
+    reference = "https://github.com/JuliaMath/QuadGK.jl",
+    precision = 35,
+    nodes = [
         ["5.000000000000000000000000000000000000e-01"],
         ["7.029225756886985834533032060384807317e-01"],
         ["2.970774243113014165466967939615192683e-01"],
@@ -60,7 +60,7 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
         ["9.957276855604063196034273487631642583e-01"],
         ["4.272314439593680396572651236835741679e-03"],
     ],
-    weights_high=[
+    weights_high = [
         "1.047410705423639140064995874458571318e-01",
         "9.517528903239270495662820121050684141e-02",
         "9.517528903239270495662820121050684141e-02",
@@ -77,8 +77,8 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
         "1.146766100526461248186600402948479600e-02",
         "1.146766100526461248186600402948479600e-02",
     ],
-    order_high=23,
-    weights_low=[
+    order_high = 23,
+    weights_low = [
         "2.089795918367346938775510204081632653e-01",
         "1.909150252525594724751848877444875669e-01",
         "1.909150252525594724751848877444875669e-01",
@@ -87,7 +87,7 @@ const SEGMENT_GK15 = TabulatedEmbeddedCubature{Segment}(;
         "6.474248308443484663530571633954100916e-02",
         "6.474248308443484663530571633954100916e-02",
     ],
-    order_low=13,
+    order_low = 13,
 )
 
 """
@@ -96,10 +96,10 @@ Gauss-Kronrod tabulated embedded cubature for [`Segment`](@ref).
 This rule uses 31 nodes with high order 47 and low order 29.
 """
 const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
-    description="Gauss-Kronrod with 31 nodes",
-    reference="https://github.com/JuliaMath/QuadGK.jl",
-    precision=35,
-    nodes=[
+    description = "Gauss-Kronrod with 31 nodes",
+    reference = "https://github.com/JuliaMath/QuadGK.jl",
+    precision = 35,
+    nodes = [
         ["5.000000000000000000000000000000000000e-01"],
         ["6.005970469987172611503141516972981039e-01"],
         ["3.994029530012827388496858483027018961e-01"],
@@ -132,7 +132,7 @@ const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
         ["9.990011493466985301425864200761356045e-01"],
         ["9.988506533014698574135799238643954633e-04"],
     ],
-    weights_high=[
+    weights_high = [
         "5.066500350739577450868739638374627339e-02",
         "4.958679936089597966619658674230156553e-02",
         "4.958679936089597966619658674230156553e-02",
@@ -165,8 +165,8 @@ const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
         "2.688739936461674493896025715063824909e-03",
         "2.688739936461674493896025715063824909e-03",
     ],
-    order_high=47,
-    weights_low=[
+    order_high = 47,
+    weights_low = [
         "1.012891209627806364403100999837596574e-01",
         "9.921574266355578822805916322191966241e-02",
         "9.921574266355578822805916322191966241e-02",
@@ -183,5 +183,5 @@ const SEGMENT_GK31 = TabulatedEmbeddedCubature{Segment}(;
         "1.537662099805863417731419678860220886e-02",
         "1.537662099805863417731419678860220886e-02",
     ],
-    order_low=29,
+    order_low = 29,
 )

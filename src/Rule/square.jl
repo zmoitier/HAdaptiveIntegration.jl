@@ -4,12 +4,12 @@ Cools-Haegemans tabulated embedded cubature for [`Rectangle`](@ref).
 This rule uses 21 nodes with high order 7 and low order 5.
 """
 const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
-    description="Cools-Haegemans with 21 nodes (SQUARE_CH21)",
-    reference="https://link.springer.com/article/10.1007/BF01389339",
-    order_high=7,
-    order_low=5,
-    precision=35,
-    nodes=[
+    description = "Cools-Haegemans with 21 nodes (SQUARE_CH21)",
+    reference = "https://link.springer.com/article/10.1007/BF01389339",
+    order_high = 7,
+    order_low = 5,
+    precision = 35,
+    nodes = [
         [
             "5.000000000000000000000000000000000000e-01",
             "5.000000000000000000000000000000000000e-01",
@@ -95,7 +95,7 @@ const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
             "4.691007703066799183081992307245240580e-02",
         ],
     ],
-    weights_high=[
+    weights_high = [
         "1.689802305149250673159321255328970433e-01",
         "5.773210696475967157451779245157955517e-02",
         "5.773210696475967157451779245157955517e-02",
@@ -118,7 +118,7 @@ const SQUARE_CH21 = TabulatedEmbeddedCubature{Rectangle}(;
         "9.772399292424645487535414336354763648e-03",
         "9.772399292424645487535414336354763648e-03",
     ],
-    weights_low=[
+    weights_low = [
         "1.526218418361306486442884511393218447e-01",
         "6.591130130415688306506220703853742741e-02",
         "6.591130130415688306506220703853742741e-02",
@@ -141,12 +141,12 @@ Cools-Haegemans tabulated embedded cubature for [`Rectangle`](@ref).
 This rule uses 25 nodes with high order 9 and low order 7.
 """
 const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
-    description="Cools-Haegemans with 25 nodes (SQUARE_CH25)",
-    reference="https://link.springer.com/article/10.1007/BF01389339",
-    order_high=9,
-    order_low=7,
-    precision=35,
-    nodes=[
+    description = "Cools-Haegemans with 25 nodes (SQUARE_CH25)",
+    reference = "https://link.springer.com/article/10.1007/BF01389339",
+    order_high = 9,
+    order_low = 7,
+    precision = 35,
+    nodes = [
         [
             "5.000000000000000000000000000000000000e-01",
             "5.000000000000000000000000000000000000e-01",
@@ -248,7 +248,7 @@ const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
             "2.307653450123118313399353251609623232e-01",
         ],
     ],
-    weights_high=[
+    weights_high = [
         "8.090864180310654470524179109436875230e-02",
         "3.369626803446566471100225222749401905e-02",
         "3.369626803446566471100225222749401905e-02",
@@ -275,7 +275,7 @@ const SQUARE_CH25 = TabulatedEmbeddedCubature{Rectangle}(;
         "6.807163328620328507696894522217764455e-02",
         "6.807163328620328507696894522217764455e-02",
     ],
-    weights_low=[
+    weights_low = [
         "1.689802306319903682683290932522631273e-01",
         "5.773210696822923076352990074033502715e-02",
         "5.773210696822923076352990074033502715e-02",

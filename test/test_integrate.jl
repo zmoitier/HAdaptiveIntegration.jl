@@ -21,12 +21,12 @@ end
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
-        embedded_cubature(SEGMENT_GK7),
-        default_rule(domain),
-        embedded_cubature(SEGMENT_GK31),
-    )
+            embedded_cubature(SEGMENT_GK7),
+            default_rule(domain),
+            embedded_cubature(SEGMENT_GK31),
+        )
         for (fct, R) in [(x -> exp(x[1]), exp(1) - 1), (x -> 1 / sqrt(x[1]), 2)]
-            I, E = @inferred(integrate(fct, domain; rule=ec, buffer=buffer))
+            I, E = @inferred(integrate(fct, domain; rule = ec, buffer = buffer))
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -38,10 +38,10 @@ end
 
     for ec in (embedded_cubature(GrundmannMoeller{2}(7, 5)), default_rule(domain))
         for (fct, R) in [
-            (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
-            (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
-        ]
-            I, E = @inferred integrate(fct, domain; rule=ec, buffer=buffer)
+                (x -> cos(7 * x[1] + 3 * x[2]), (-3 * cos(14) + 7 * cos(6) - 4) / 84),
+                (x -> 1 / norm(x), 2 * sqrt(2) * asinh(1)),
+            ]
+            I, E = @inferred integrate(fct, domain; rule = ec, buffer = buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -52,15 +52,15 @@ end
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
-        embedded_cubature(GenzMalik{2}()),
-        embedded_cubature(SQUARE_CH21),
-        default_rule(domain),
-    )
+            embedded_cubature(GenzMalik{2}()),
+            embedded_cubature(SQUARE_CH21),
+            default_rule(domain),
+        )
         for (fct, R) in [
-            (x -> exp(x[1] + x[2]), (exp(1) - 1)^2),
-            (x -> 1 / norm(x), log(17 + 12 * sqrt(2)) / 2),
-        ]
-            I, E = @inferred integrate(fct, domain; rule=ec, buffer=buffer)
+                (x -> exp(x[1] + x[2]), (exp(1) - 1)^2),
+                (x -> 1 / norm(x), log(17 + 12 * sqrt(2)) / 2),
+            ]
+            I, E = @inferred integrate(fct, domain; rule = ec, buffer = buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -71,13 +71,13 @@ end
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for (fct, R) in [
-        (
-            x -> exp(x[1] + 3 * x[2] + 5 * x[3]),
-            (3 * exp(5) - 10 * exp(3) + 15 * exp(1) - 8) / 120,
-        ),
-        (x -> 1 / norm(x), 0.3614258523411),
-    ]
-        I, E = @inferred integrate(fct, domain; buffer=buffer)
+            (
+                x -> exp(x[1] + 3 * x[2] + 5 * x[3]),
+                (3 * exp(5) - 10 * exp(3) + 15 * exp(1) - 8) / 120,
+            ),
+            (x -> 1 / norm(x), 0.3614258523411),
+        ]
+        I, E = @inferred integrate(fct, domain; buffer = buffer)
         @test abs(I - R) ≤ E * abs(R)
     end
 end
@@ -87,13 +87,13 @@ end
     buffer = allocate_buffer(x -> zero(x[1]), domain)
 
     for ec in (
-        embedded_cubature(GenzMalik{3}()),
-        default_rule(domain),
-        embedded_cubature(CUBE_BE115),
-    )
+            embedded_cubature(GenzMalik{3}()),
+            default_rule(domain),
+            embedded_cubature(CUBE_BE115),
+        )
         for (fct, R) in
             [(x -> 1 / (1 + norm(x)^2)^2, π^2 / 32), (x -> 1 / norm(x), 1.1900386819897766)]
-            I, E = @inferred integrate(fct, domain; rule=ec, buffer=buffer)
+            I, E = @inferred integrate(fct, domain; rule = ec, buffer = buffer)
             @test abs(I - R) ≤ E * abs(R)
         end
     end
@@ -116,11 +116,11 @@ end
     fct = x -> exp(x[1])
 
     buffer = allocate_buffer(fct, domain)
-    I, E = @inferred integrate(fct, domain; buffer=buffer)
+    I, E = @inferred integrate(fct, domain; buffer = buffer)
     I2, E2 = resum(buffer)
 
-    @test isapprox(I, I2; rtol=1.0e-12)
-    @test isapprox(E, E2; atol=1.0e-12)
+    @test isapprox(I, I2; rtol = 1.0e-12)
+    @test isapprox(E, E2; atol = 1.0e-12)
 end
 
 @testset "No allocations" begin
@@ -129,14 +129,14 @@ end
         domain = reference_domain(domain_type)
         fct = x -> sum(abs2, x)^(-0.25)
         buffer = allocate_buffer(fct, domain)
-        rtol = 1e-4
+        rtol = 1.0e-4
 
-        nb_alloc = @allocations integrate(fct, domain; buffer=buffer, rtol=rtol)
+        nb_alloc = @allocations integrate(fct, domain; buffer = buffer, rtol = rtol)
         @test nb_alloc > 0
 
         # We expect the function below to have zero allocs, but that seems to be true only
         # on recent Julia versions (1.12+), so we mark the test as broken on older versions.
-        nb_alloc = @allocations integrate(fct, domain; buffer=buffer, rtol=rtol)
+        nb_alloc = @allocations integrate(fct, domain; buffer = buffer, rtol = rtol)
         @test nb_alloc == 0 broken = (VERSION < v"1.12")
     end
 end
@@ -144,7 +144,7 @@ end
 @testset "Callback" begin
     domain = Segment(0, 1)
     fct = x -> sqrt(x[1])
-    rtol = 1e-4
+    rtol = 1.0e-4
 
     # collect callback data
     callback_data = Vector{@NamedTuple{I::Float64, E::Float64, nb_subdiv::Int}}()
@@ -153,7 +153,7 @@ end
         return nothing
     end
 
-    I, E = @inferred integrate(fct, domain; callback=callback, rtol=rtol)
+    I, E = @inferred integrate(fct, domain; callback = callback, rtol = rtol)
 
     # callback is called at least once (initial estimate)
     @test length(callback_data) ≥ 1

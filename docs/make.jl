@@ -4,24 +4,24 @@ using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
 
 DocMeta.setdocmeta!(
-    HAdaptiveIntegration, :DocTestSetup, :(using HAdaptiveIntegration); recursive=true
+    HAdaptiveIntegration, :DocTestSetup, :(using HAdaptiveIntegration); recursive = true
 )
 
 makedocs(;
-    modules=[HAdaptiveIntegration],
-    authors="Zois Moitier,Luiz M. Faria",
-    repo="https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/{commit}{path}#{line}",
-    sitename="HAdaptiveIntegration.jl",
-    format=Documenter.HTML(;
-        canonical="https://zmoitier.github.io/HAdaptiveIntegration.jl"
+    modules = [HAdaptiveIntegration],
+    authors = "Zois Moitier,Luiz M. Faria",
+    repo = "https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/{commit}{path}#{line}",
+    sitename = "HAdaptiveIntegration.jl",
+    format = Documenter.HTML(;
+        canonical = "https://zmoitier.github.io/HAdaptiveIntegration.jl"
     ),
-    pages=[
+    pages = [
         "Home" => "index.md",
         "Advanced usage" => "advanced.md",
         "Extensions" => "extensions.md",
         "docstrings.md",
     ],
-    pagesonly=true,
+    pagesonly = true,
 )
 
-deploydocs(; repo="github.com/zmoitier/HAdaptiveIntegration.jl", devbranch="main")
+deploydocs(; repo = "github.com/zmoitier/HAdaptiveIntegration.jl", devbranch = "main")

@@ -6,11 +6,11 @@ using Test
 Float = float(Int)
 
 # Volume test
-function volume_test(subdiv_algo, domain::AbstractDomain{D,T}) where {D,T}
+function volume_test(subdiv_algo, domain::AbstractDomain{D, T}) where {D, T}
     sub_domains = subdiv_algo(domain)
     _, μ = map_from_reference(domain)
     μ_sub_sum = sum(v for (_, v) in map_from_reference.(sub_domains))
-    return isapprox(μ_sub_sum, μ; rtol=10 * eps(T))
+    return isapprox(μ_sub_sum, μ; rtol = 10 * eps(T))
 end
 
 @testset "Domain construction" begin
@@ -21,14 +21,14 @@ end
     end
 
     @testset "Simplex" begin
-        @test typeof(Simplex((0, 0), [0, 0], SVector(0, 0))) <: Simplex{2,Float,3}
-        @test typeof(Simplex{Float128}([0], [0])) <: Simplex{1,Float128,2}
-        @test typeof(Simplex(BigInt[0], BigInt[0])) <: Simplex{1,BigFloat,2}
+        @test typeof(Simplex((0, 0), [0, 0], SVector(0, 0))) <: Simplex{2, Float, 3}
+        @test typeof(Simplex{Float128}([0], [0])) <: Simplex{1, Float128, 2}
+        @test typeof(Simplex(BigInt[0], BigInt[0])) <: Simplex{1, BigFloat, 2}
 
         @test typeof(Triangle((0, 0), (0, 0), (0, 0))) <: Triangle{Float}
         @test typeof(Triangle{Float128}((0, 0), (0, 0), (0, 0))) <: Triangle{Float128}
         @test typeof(Triangle(BigInt[0, 0], BigInt[0, 0], BigInt[0, 0])) <:
-            Triangle{BigFloat}
+        Triangle{BigFloat}
 
         @test typeof(
             Tetrahedron(zeros(Int, 3), zeros(Int, 3), zeros(Int, 3), zeros(Int, 3))
@@ -46,9 +46,9 @@ end
     end
 
     @testset "Orthotope" begin
-        @test typeof(Orthotope((0,), [1])) <: Orthotope{1,Float}
-        @test typeof(Orthotope(BigInt[0], SVector(1))) <: Orthotope{1,BigFloat}
-        @test typeof(Orthotope{Float128}([0], [1])) <: Orthotope{1,Float128}
+        @test typeof(Orthotope((0,), [1])) <: Orthotope{1, Float}
+        @test typeof(Orthotope(BigInt[0], SVector(1))) <: Orthotope{1, BigFloat}
+        @test typeof(Orthotope{Float128}([0], [1])) <: Orthotope{1, Float128}
 
         @test typeof(Rectangle((-1, -1), (1, 1))) <: Rectangle{Float}
         @test typeof(Rectangle{Float128}((-1, -1), (1, 1))) <: Rectangle{Float128}
@@ -88,11 +88,11 @@ end
         @test typeof(reference_domain(Tetrahedron)) <: Tetrahedron{Float}
         @test typeof(reference_domain(Tetrahedron{Float128})) <: Tetrahedron{Float128}
 
-        @test typeof(reference_domain(Simplex{4})) <: Simplex{4,Float,5}
-        @test typeof(reference_domain(Simplex{4,Float128})) <: Simplex{4,Float128,5}
-        @test typeof(reference_domain(Simplex{4,Float128,5})) <: Simplex{4,Float128,5}
+        @test typeof(reference_domain(Simplex{4})) <: Simplex{4, Float, 5}
+        @test typeof(reference_domain(Simplex{4, Float128})) <: Simplex{4, Float128, 5}
+        @test typeof(reference_domain(Simplex{4, Float128, 5})) <: Simplex{4, Float128, 5}
 
-        r = reference_domain(Simplex{4,Int})
+        r = reference_domain(Simplex{4, Int})
         @test r.vertices == SVector(
             SVector(0, 0, 0, 0),
             SVector(1, 0, 0, 0),
@@ -103,7 +103,7 @@ end
 
         s = Simplex(
             (-0.13, -0.78, -0.22, 0.04),
-            (0.70, -0.23, -0.37, -0.72),
+            (0.7, -0.23, -0.37, -0.72),
             (-0.06, 0.57, -0.34, 1.05),
             (-0.27, -0.12, 0.14, -0.47),
             (0.68, 0.12, -0.66, -1.49),
@@ -111,12 +111,12 @@ end
         Φ, _ = map_from_reference(s)
         Ψ = map_to_reference(s)
         for v in (
-            SVector(0, 0, 0, 0),
-            SVector(1, 0, 0, 0),
-            SVector(0, 1, 0, 0),
-            SVector(0, 0, 1, 0),
-            SVector(0, 0, 0, 1),
-        )
+                SVector(0, 0, 0, 0),
+                SVector(1, 0, 0, 0),
+                SVector(0, 1, 0, 0),
+                SVector(0, 0, 1, 0),
+                SVector(0, 0, 0, 1),
+            )
             @test Ψ(Φ(v)) ≈ v
         end
 
@@ -125,29 +125,29 @@ end
     end
 
     @testset "Orthotope" begin
-        @test typeof(reference_domain(Rectangle)) <: Orthotope{2,Float}
-        @test typeof(reference_domain(Rectangle{Float128})) <: Orthotope{2,Float128}
+        @test typeof(reference_domain(Rectangle)) <: Orthotope{2, Float}
+        @test typeof(reference_domain(Rectangle{Float128})) <: Orthotope{2, Float128}
 
-        @test typeof(reference_domain(Cuboid)) <: Orthotope{3,Float}
-        @test typeof(reference_domain(Cuboid{Float128})) <: Orthotope{3,Float128}
+        @test typeof(reference_domain(Cuboid)) <: Orthotope{3, Float}
+        @test typeof(reference_domain(Cuboid{Float128})) <: Orthotope{3, Float128}
 
-        @test typeof(reference_domain(Orthotope{4})) <: Orthotope{4,Float}
-        @test typeof(reference_domain(Orthotope{4,Float128})) <: Orthotope{4,Float128}
+        @test typeof(reference_domain(Orthotope{4})) <: Orthotope{4, Float}
+        @test typeof(reference_domain(Orthotope{4, Float128})) <: Orthotope{4, Float128}
 
-        r = reference_domain(Orthotope{4,Int})
-        @test typeof(r) <: Orthotope{4,Int}
+        r = reference_domain(Orthotope{4, Int})
+        @test typeof(r) <: Orthotope{4, Int}
         @test r.corners == SVector(SVector(0, 0, 0, 0), SVector(1, 1, 1, 1))
 
         h = Orthotope((0.21, -0.58, -0.98, -1.25), (0.43, 1.75, 0.65, 1.87))
         Φ, _ = map_from_reference(h)
         Ψ = map_to_reference(h)
         for v in (
-            SVector(0, 0, 0, 0),
-            SVector(1, 0, 0, 0),
-            SVector(0, 1, 0, 0),
-            SVector(0, 0, 1, 0),
-            SVector(0, 0, 0, 1),
-        )
+                SVector(0, 0, 0, 0),
+                SVector(1, 0, 0, 0),
+                SVector(0, 1, 0, 0),
+                SVector(0, 0, 1, 0),
+                SVector(0, 0, 0, 1),
+            )
             @test Ψ(Φ(v)) ≈ v
         end
 
@@ -177,7 +177,7 @@ end
     @testset "tetrahedron" begin
         t = Tetrahedron(
             (-0.13, -0.78, -0.22),
-            (0.70, -0.23, -0.37),
+            (0.7, -0.23, -0.37),
             (-0.06, 0.57, -0.34),
             (-0.27, -0.12, 0.14),
         )
@@ -186,7 +186,7 @@ end
     end
 
     @testset "cuboid" begin
-        c = Cuboid((-0.38, -0.92, -0.43), (0.15, 0.30, 0.51))
+        c = Cuboid((-0.38, -0.92, -0.43), (0.15, 0.3, 0.51))
         @test volume_test(subdivide_cuboid, c)
         @test volume_test(subdivide_orthotope, c)
     end
@@ -194,7 +194,7 @@ end
     @testset "4-simplex" begin
         s = Simplex(
             (-0.13, -0.78, -0.22, 0.04),
-            (0.70, -0.23, -0.37, -0.72),
+            (0.7, -0.23, -0.37, -0.72),
             (-0.06, 0.57, -0.34, 1.05),
             (-0.27, -0.12, 0.14, -0.47),
             (0.68, 0.12, -0.66, -1.49),

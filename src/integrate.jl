@@ -46,39 +46,39 @@ from an embedded cubature pair.
 - Iteration stops when `E ≤ atol` or `E ≤ rtol * norm(I)` or `nb_subdiv == maxsubdiv`.
 """
 function integrate(
-    fct,
-    domain::AbstractDomain{D};
-    rule::EmbeddedCubature{D}=default_rule(domain),
-    subdiv_algo=default_subdivision(domain),
-    norm=LinearAlgebra.norm,
-    buffer=nothing,
-    atol=nothing,
-    rtol=nothing,
-    maxsubdiv=2^(13 + D),
-    callback=(_, _, _, _) -> nothing,
-) where {D}
+        fct,
+        domain::AbstractDomain{D};
+        rule::EmbeddedCubature{D} = default_rule(domain),
+        subdiv_algo = default_subdivision(domain),
+        norm = LinearAlgebra.norm,
+        buffer = nothing,
+        atol = nothing,
+        rtol = nothing,
+        maxsubdiv = 2^(13 + D),
+        callback = (_, _, _, _) -> nothing,
+    ) where {D}
     return _integrate(
         fct, domain, rule, subdiv_algo, buffer, norm, atol, rtol, maxsubdiv, callback
     )
 end
 
 @noinline function _integrate(
-    fct::FCT,
-    domain::DOM,
-    rule::EmbeddedCubature{D},
-    subdiv_algo,
-    buffer,
-    norm,
-    atol,
-    rtol,
-    maxsubdiv,
-    callback,
-) where {D,FCT,DOM<:AbstractDomain{D}}
+        fct::FCT,
+        domain::DOM,
+        rule::EmbeddedCubature{D},
+        subdiv_algo,
+        buffer,
+        norm,
+        atol,
+        rtol,
+        maxsubdiv,
+        callback,
+    ) where {D, FCT, DOM <: AbstractDomain{D}}
     I, E = rule(fct, domain, norm)
 
     # initialize or reset the buffer
     buffer = if isnothing(buffer)
-        BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(Base.Order.By(last, Base.Order.Reverse))
+        BinaryHeap{Tuple{DOM, typeof(I), typeof(E)}}(Base.Order.By(last, Base.Order.Reverse))
     else
         empty!(buffer)
     end
@@ -132,11 +132,11 @@ Passing this buffer through the `buffer` keyword can reduce memory allocations w
 `integrate` is called repeatedly with compatible domain and value types.
 """
 function allocate_buffer(
-    fct::FCT,
-    domain::DOM;
-    rule::EmbeddedCubature{D}=default_rule(domain),
-    norm=LinearAlgebra.norm,
-) where {D,FCT,DOM<:AbstractDomain{D}}
+        fct::FCT,
+        domain::DOM;
+        rule::EmbeddedCubature{D} = default_rule(domain),
+        norm = LinearAlgebra.norm,
+    ) where {D, FCT, DOM <: AbstractDomain{D}}
     # Determine the type of elements returned by the embedded cubature.
     I, E = rule(fct, domain, norm)
 
@@ -145,7 +145,7 @@ function allocate_buffer(
     # - `I` is the integral value over the subdomain.
     # - `E` is the error estimate over the subdomain.
     # The heap is ordered by the maximum error (E) in descending order.
-    buffer = BinaryHeap{Tuple{DOM,typeof(I),typeof(E)}}(
+    buffer = BinaryHeap{Tuple{DOM, typeof(I), typeof(E)}}(
         Base.Order.By(last, Base.Order.Reverse)
     )
 
@@ -165,8 +165,8 @@ summation algorithm to reduce floating-point round-off error.
 https://doi.org/10.1007/s00607-005-0139-x
 """
 function resum(
-    buffer::BinaryHeap{Tuple{DOM,IT,ET}}; norm=LinearAlgebra.norm
-) where {DOM,IT,ET}
+        buffer::BinaryHeap{Tuple{DOM, IT, ET}}; norm = LinearAlgebra.norm
+    ) where {DOM, IT, ET}
     I = cᵢ = zero(IT)
     E = cₑ = zero(ET)
     for (_, I_dom, E_dom) in buffer.valtree
