@@ -44,6 +44,12 @@ from an embedded cubature pair.
 
 ## Notes
 - Iteration stops when `E ≤ atol` or `E ≤ rtol * norm(I)` or `nb_subdiv == maxsubdiv`.
+- For this function to be thread safe, you need three conditions:
+  1. `fct` must be thread safe.
+  2. If a `buffer` is provided via the use of [`allocate_buffer`](@ref), you need to create
+     a new buffer for each thread. The default is thread safe.
+  3. If a `callback` function is provided, it must be thread safe. The default is thread
+     safe.
 """
 function integrate(
         fct,

@@ -162,3 +162,12 @@ various aspects of the underlying algorithm (*e.g.* passing a different cubature
 a buffer to avoid memory allocations, etc.). For more details, see the docstring of the
 [`integrate`](@ref) function, as well as the next section on
 [advanced usage](@ref advanced-usage).
+
+!!! warning "Thread safety"
+    For the function [`integrate`](@ref) do be thread safe, you need three conditions:
+    1. The `fct` to integrate must be thread safe.
+    2. If a `buffer` is provided (see [Reduce memory allocations](@ref reduce-mem-alloc)),
+       you need to create a new buffer for each thread. The default is thread safe.
+    3. If a `callback` function is provided (see
+       [Track convergence progress](@ref callback-fct) ), it must be thread safe. The
+       default is thread safe.
