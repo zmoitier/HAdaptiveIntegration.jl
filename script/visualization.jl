@@ -1,27 +1,30 @@
 using GLMakie
-using HAdaptiveIntegration:
+using HAdaptiveIntegration.Domain:
     AbstractDomain,
-    AbstractRule,
-    EmbeddedCubature,
-    GrundmannMoeller,
+    Cuboid,
     Orthotope,
     Rectangle,
-    SEGMENT_GK15,
-    SEGMENT_GK31,
-    SQUARE_CH21,
-    SQUARE_CH25,
-    SQUARE_GM17,
     Segment,
     Simplex,
-    TRIANGLE_GM19,
-    TRIANGLE_RL19,
-    TabulatedEmbeddedCubature,
+    Tetrahedron,
     Triangle,
+    map_from_reference
+using HAdaptiveIntegration.Rule:
+    AbstractRule,
+    CUBE_BE115,
+    CUBE_BE65,
+    EmbeddedCubature,
+    GenzMalik,
+    GrundmannMoeller,
+    RadonLaurie,
+    SEGMENT_GK15,
+    SEGMENT_GK31,
+    SEGMENT_GK7,
+    SQUARE_CH21,
+    SQUARE_CH25,
+    TabulatedEmbeddedCubature,
     embedded_cubature,
-    map_from_reference,
-    orders,
-    rectangle,
-    triangle
+    orders
 using StaticArrays
 
 function vertices(domain::Triangle)
@@ -29,39 +32,70 @@ function vertices(domain::Triangle)
 end
 
 function vertices(domain::Rectangle)
+    a, b = domain.corners
+    return [a, SVector(b[1], a[2]), b, SVector(a[1], b[2])]
+end
+
+function vertices(domain::Tetrahedron)
+    return Vector(domain.vertices)
+end
+
+function vertices(domain::Cuboid)
+    a, b = domain.corners
     return [
-        domain.low_corner,
-        SVector(domain.high_corner[1], domain.low_corner[2]),
-        domain.high_corner,
-        SVector(domain.low_corner[1], domain.high_corner[2]),
+        a,
+        SVector(b[1], a[2], a[3]),
+        SVector(a[1], b[2], a[3]),
+        SVector(b[1], b[2], a[3]),
+        SVector(a[1], a[2], b[3]),
+        SVector(b[1], a[2], b[3]),
+        SVector(a[1], b[2], b[3]),
+        b,
     ]
 end
 
-function color_weighs(weights::Vector{Float64})
+edges(::Tetrahedron) = ((1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4))
+
+function edges(::Cuboid)
+    return (
+        (1, 2),
+        (1, 3),
+        (2, 4),
+        (3, 4),
+        (5, 6),
+        (5, 7),
+        (6, 8),
+        (7, 8),
+        (1, 5),
+        (2, 6),
+        (3, 7),
+        (4, 8),
+    )
+end
+
+function color_weighs(weights::Vector{T}) where {T<:Real}
     tab10 = Makie.to_colormap(:tab10)
     return [w > 0 ? (tab10[4], 0.75) : (tab10[1], 0.75) for w in weights]
 end
 
-function size_weights(weights::Vector{Float64}, w_max::Float64)
+function size_weights(weights::Vector{T}, w_max::T) where {T<:Real}
     return 32 * sqrt.(abs.(weights) ./ w_max)
 end
 
-function plot_rule(rule::AbstractRule{Segment})
-    ec = embedded_cubature(rule)
+function _plot_segment(ec::EmbeddedCubature, dh::Int, dl::Int)
     H, L = length(ec.weights_high), length(ec.weights_low)
-    dh, dl = orders(rule)
 
-    nodes = reinterpret(Float64, ec.nodes)
+    nodes = reinterpret(Float32, ec.nodes)
 
     fig = Figure()
-    ax = Axis(fig[1, 1]; title=rule.description)
+    ax = Axis(fig[1, 1])
     tab10 = Makie.to_colormap(:tab10)
 
     scatter!(ax, nodes[1:L], zeros(L); color=tab10[1])
     scatter!(
         ax,
         nodes[1:L],
-        ec.weights_low ./ maximum(ec.weights_low);
+        ec.weights_low ./ maximum(abs.(ec.weights_low));
         marker=:xcross,
         color=tab10[1],
         label="low order = $dl",
@@ -71,7 +105,7 @@ function plot_rule(rule::AbstractRule{Segment})
     scatter!(
         ax,
         nodes,
-        ec.weights_high ./ maximum(ec.weights_high);
+        ec.weights_high ./ maximum(abs.(ec.weights_high));
         marker=:cross,
         color=tab10[2],
         label="high order = $dh",
@@ -82,11 +116,11 @@ function plot_rule(rule::AbstractRule{Segment})
     return fig
 end
 
-function plot(
+function _plot_2d(
     ec::EmbeddedCubature{2}, domain::AbstractDomain{2}, order_high::Int, order_low::Int
 )
     L = length(ec.weights_low)
-    Φ = map_from_reference(domain)
+    Φ, _ = map_from_reference(domain)
     nodes = Φ.(ec.nodes)
 
     fig = Figure()
@@ -125,34 +159,117 @@ function plot(
     return fig
 end
 
-function plot_rule(rule::AbstractRule{Simplex{2,3}})
-    ec = embedded_cubature(rule)
-    oh, ol = orders(rule)
-    domain = triangle((1, 0), (-0.5, √3 / 2), (-0.5, -√3 / 2))
+function _plot_3d(
+    ec::EmbeddedCubature{3}, domain::AbstractDomain{3}, order_high::Int, order_low::Int
+)
+    L = length(ec.weights_low)
+    Φ, _ = map_from_reference(domain)
+    nodes = Φ.(ec.nodes)
 
-    return plot(ec, domain, oh, ol)
+    fig = Figure()
+
+    ax_args = Dict(:aspect => :data, :xlabel => "x", :ylabel => "y", :zlabel => "z")
+    axs = [
+        Axis3(fig[1, 1]; title="high order = $order_high", ax_args...),
+        Axis3(fig[1, 2]; title="low order = $order_low", ax_args...),
+    ]
+
+    pts = vertices(domain)
+    for ax in axs
+        for (i, j) in edges(domain)
+            p, q = pts[i], pts[j]
+            lines!(ax, [p[1], q[1]], [p[2], q[2]], [p[3], q[3]]; color=:black, linewidth=1)
+        end
+    end
+
+    W = max(maximum(abs.(ec.weights_high)), maximum(abs.(ec.weights_low)))
+    scatter!(
+        axs[1],
+        nodes[1:L];
+        color=color_weighs(ec.weights_high[1:L]),
+        markersize=size_weights(ec.weights_high[1:L], W),
+    )
+    scatter!(
+        axs[1],
+        nodes[(L + 1):end];
+        color=color_weighs(ec.weights_high[(L + 1):end]),
+        marker=:xcross,
+        markersize=size_weights(ec.weights_high[(L + 1):end], W),
+    )
+    scatter!(
+        axs[2],
+        nodes[1:L];
+        color=color_weighs(ec.weights_low),
+        markersize=size_weights(ec.weights_low, W),
+    )
+
+    return fig
 end
 
-function plot_rule(rule::AbstractRule{Orthotope{2}})
-    ec = embedded_cubature(rule)
+function plot_rule(
+    rule::AbstractRule{DOM}
+) where {DOM<:Union{Segment,Simplex{1},Orthotope{1}}}
+    ec = embedded_cubature(rule, Float32)
     oh, ol = orders(rule)
-    domain = rectangle((-1, -1), (1, 1))
+    return _plot_segment(ec, oh, ol)
+end
 
-    return plot(ec, domain, oh, ol)
+function plot_rule(rule::AbstractRule{DOM}) where {DOM<:Union{Triangle,Simplex{2}}}
+    ec = embedded_cubature(rule, Float32)
+    oh, ol = orders(rule)
+    domain = Triangle{Float32}((1, 0), (-0.5, √3 / 2), (-0.5, -√3 / 2))
+    return _plot_2d(ec, domain, oh, ol)
+end
+
+function plot_rule(rule::AbstractRule{DOM}) where {DOM<:Union{Rectangle,Orthotope{2}}}
+    ec = embedded_cubature(rule, Float32)
+    oh, ol = orders(rule)
+    domain = Rectangle{Float32}((-1, -1), (1, 1))
+    return _plot_2d(ec, domain, oh, ol)
+end
+
+function plot_rule(rule::AbstractRule{DOM}) where {DOM<:Union{Tetrahedron,Simplex{3}}}
+    ec = embedded_cubature(rule, Float32)
+    oh, ol = orders(rule)
+
+    s3, s6 = sqrt(3), sqrt(6)
+    domain = Tetrahedron{Float32}(
+        (0, 0, 0), (1, 0, 0), (1 / 2, s3 / 2, 0), (1 / 2, s3 / 6, s6 / 3)
+    )
+    return _plot_3d(ec, domain, oh, ol)
+end
+
+function plot_rule(rule::AbstractRule{DOM}) where {DOM<:Union{Cuboid,Orthotope{3}}}
+    ec = embedded_cubature(rule, Float32)
+    oh, ol = orders(rule)
+    domain = Cuboid{Float32}((-1, -1, -1), (1, 1, 1))
+    return _plot_3d(ec, domain, oh, ol)
 end
 
 function main()
-    # fig = plot_rule(SEGMENT_GK15)
-    # fig = plot_rule(SEGMENT_GK31)
-
-    # fig = plot_rule(SQUARE_CH25)
-    # fig = plot_rule(SQUARE_CH21)
-    # fig = plot_rule(SQUARE_GM17)
-
-    fig = plot_rule(TRIANGLE_RL19)
-    # fig = plot_rule(TRIANGLE_GM19)
-
-    display(fig)
+    print("""
+    Available rules (# default):
+      > Segment:
+        - GenzMalik{1}()
+        - GrundmannMoeller{1}(deg_high, deg_low)
+        - SEGMENT_GK7
+        # SEGMENT_GK15
+        - SEGMENT_GK31
+      > Triangle:
+        - GrundmannMoeller{2}(deg_high, deg_low)
+        # RadonLaurie()
+      > Rectangle:
+        - GenzMalik{2}()
+        - SQUARE_CH21
+        # SQUARE_CH25
+      > Tetrahedron:
+        # GrundmannMoeller{3}(7, 5)
+        - GrundmannMoeller{3}(deg_high, deg_low)
+      > Cuboid:
+        # CUBE_BE65
+        - CUBE_BE115
+        - GenzMalik{3}()
+    """)
 
     return nothing
 end
