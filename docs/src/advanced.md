@@ -6,7 +6,7 @@ CurrentModule = HAdaptiveIntegration
 
 We now cover the options available for the [`integrate`](@ref) function.
 
-## Reduce memory allocations
+## [Reduce memory allocations](@id reduce-mem-alloc)
 
 When calling `integrate(f, domain)`, the package allocates memory for storing the various
 subregions that are generated during the adaptive integration process. Here is what it looks
@@ -29,7 +29,7 @@ passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
 using HAdaptiveIntegration: allocate_buffer
 
 buffer = allocate_buffer(f, t)
-integrate(f,t; buffer)
+integrate(f, t; buffer)
 b = @benchmark integrate($f, $t; buffer = $buffer)
 @assert b.allocs == 0 # hide
 b # hide
@@ -39,7 +39,7 @@ Provided evaluating `f` does not allocate, and the `buffer` has a sufficiently l
 capacity, `integrate` will not allocate memory during the integration process, as shown in
 the benchmark above.
 
-## Track convergence progress
+## [Track convergence progress](@id callback-fct)
 
 The `callback` keyword argument allows you to monitor the progress of the adaptive
 integration. The callback function is called for each estimated value of `I` and `E`,
@@ -60,10 +60,10 @@ history = @NamedTuple{I::Float64, E::Float64, nb_subdiv::Int}[]
 I, E = integrate(f, t; callback = (I, E, nb_subdiv, _) -> push!(history, (; I, E, nb_subdiv)))
 
 using Printf
-@printf("  %4s | %14s | %12s\n", "step", "I", "E")
-@printf("  %4s-+-%14s-+-%12s\n", "----", "--------------", "------------")
+@printf("  %4s | %16s | %12s\n", "step", "I", "E")
+@printf("  %4s-+-%16s-+-%12s\n", "----", "----------------", "------------")
 foreach(history) do h
-    @printf("  %4d | %14.10f | %12.4e\n", h.nb_subdiv, h.I, h.E)
+    @printf("  %4d | %16.12f | %12.4e\n", h.nb_subdiv, h.I, h.E)
 end
 ```
 
