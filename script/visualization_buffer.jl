@@ -2,7 +2,14 @@ using BenchmarkTools
 using GLMakie
 using HAdaptiveIntegration: HAdaptiveIntegration as HAI
 using HCubature: HCubature as HC
+using LinearAlgebra
 using Printf: @sprintf
+
+const ε = eps(Float64)
+
+function peak(x::Float64)
+    return 1 + exp(-32 * x^2)
+end
 
 function _compute_buffers_and_stats(f, a, b, rtol::Real)
     hai_domain = HAI.Orthotope(a, b)
@@ -18,7 +25,9 @@ function _compute_buffers_and_stats(f, a, b, rtol::Real)
 
     diff_abs = abs(hai_I - hc_I)
     diff_rel = diff_abs / abs((hc_I + hai_I) / 2)
-    lims_err = (min(hai_E_range[1], hc_E_range[1]), max(hai_E_range[2], hc_E_range[2]))
+    range_err = (
+        max(ε, min(hai_E_range[1], hc_E_range[1])), max(hai_E_range[2], hc_E_range[2])
+    )
 
     return (
         hai_buffer=hai_buffer,
@@ -31,7 +40,7 @@ function _compute_buffers_and_stats(f, a, b, rtol::Real)
         hc_E_range=hc_E_range,
         diff_abs=diff_abs,
         diff_rel=diff_rel,
-        lims_err=lims_err,
+        range_err=range_err,
     )
 end
 
@@ -100,15 +109,15 @@ function plot_buffer_2d(f, rtol::Real, draw_edges::Bool=false)
 
     hai_a = map(x -> x[1].corners[1], stats.hai_buffer.valtree)
     hai_b = map(x -> x[1].corners[2], stats.hai_buffer.valtree)
-    hai_E = map(x -> x[3], stats.hai_buffer.valtree)
-    draw_2d_boxes!(axs[1], hai_a, hai_b, hai_E, stats.lims_err; draw_edges=draw_edges)
-    Colorbar(fig[1, 2]; colormap=:viridis, limits=stats.lims_err, scale=log10)
+    hai_E = map(x -> max(x[3], ε), stats.hai_buffer.valtree)
+    draw_2d_boxes!(axs[1], hai_a, hai_b, hai_E, stats.range_err; draw_edges=draw_edges)
+    Colorbar(fig[1, 2]; colormap=:viridis, limits=stats.range_err, scale=log10)
 
     hc_a = map(x -> x.a, stats.hc_buffer.valtree)
     hc_b = map(x -> x.b, stats.hc_buffer.valtree)
-    hc_E = map(x -> x.E, stats.hc_buffer.valtree)
-    draw_2d_boxes!(axs[2], hc_a, hc_b, hc_E, stats.lims_err; draw_edges=draw_edges)
-    Colorbar(fig[1, 4]; colormap=:viridis, limits=stats.lims_err, scale=log10)
+    hc_E = map(x -> max(x.E, ε), stats.hc_buffer.valtree)
+    draw_2d_boxes!(axs[2], hc_a, hc_b, hc_E, stats.range_err; draw_edges=draw_edges)
+    Colorbar(fig[1, 4]; colormap=:viridis, limits=stats.range_err, scale=log10)
 
     return fig
 end
@@ -173,15 +182,15 @@ function plot_buffer_3d(f, rtol::Real, draw_edges::Bool=false)
 
     hai_a = map(x -> x[1].corners[1], stats.hai_buffer.valtree)
     hai_b = map(x -> x[1].corners[2], stats.hai_buffer.valtree)
-    hai_E = map(x -> x[3], stats.hai_buffer.valtree)
-    draw_3d_boxes!(axs[1], hai_a, hai_b, hai_E, stats.lims_err; draw_edges=draw_edges)
-    Colorbar(fig[1, 2]; colormap=:viridis, limits=stats.lims_err, scale=log10)
+    hai_E = map(x -> max(x[3], ε), stats.hai_buffer.valtree)
+    draw_3d_boxes!(axs[1], hai_a, hai_b, hai_E, stats.range_err; draw_edges=draw_edges)
+    Colorbar(fig[1, 2]; colormap=:viridis, limits=stats.range_err, scale=log10)
 
     hc_a = map(x -> x.a, stats.hc_buffer.valtree)
     hc_b = map(x -> x.b, stats.hc_buffer.valtree)
-    hc_E = map(x -> x.E, stats.hc_buffer.valtree)
-    draw_3d_boxes!(axs[2], hc_a, hc_b, hc_E, stats.lims_err; draw_edges=draw_edges)
-    Colorbar(fig[1, 4]; colormap=:viridis, limits=stats.lims_err, scale=log10)
+    hc_E = map(x -> max(x.E, ε), stats.hc_buffer.valtree)
+    draw_3d_boxes!(axs[2], hc_a, hc_b, hc_E, stats.range_err; draw_edges=draw_edges)
+    Colorbar(fig[1, 4]; colormap=:viridis, limits=stats.range_err, scale=log10)
 
     return fig
 end
