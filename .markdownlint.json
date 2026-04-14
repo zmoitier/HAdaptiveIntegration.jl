@@ -7,6 +7,7 @@
     "line_length": 1000,
     "tables": false
   },
+  "MD025": false,
   "MD033": false,
   "MD041": false,
   "MD046": false,

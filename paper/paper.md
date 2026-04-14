@@ -17,34 +17,39 @@ affiliations:
     index: 1
   - name: Inria, Unité de Mathématiques Appliquées, ENSTA, Institut Polytechnique de Paris, 91120 Palaiseau, France
     index: 2
-date: 23 February 2026
+date: 19 March 2026
 bibliography: paper.bib
 ---
 
 # Summary
 
 <!--
-A description of the high-level functionality and purpose of the software for a diverse, non-specialist audience.
+A description of the high-level functionality and purpose of the software for a diverse,
+non-specialist audience.
 -->
 
-`HAdaptiveIntegration.jl` is a Julia package designed for numerical integration over multidimensional domains.
-It approximates integrals of the form
+`HAdaptiveIntegration` is a Julia package for adaptive numerical integration on
+multidimensional simplices and orthotopes. It approximates integrals of the form
 $$
   I = \int_{\Omega} f(\boldsymbol{x}) \, \mathrm{d}\boldsymbol{x}
 $$
 where
 
-- $f \colon \mathbb{R}^d \to \mathbb{F}$ is any Julia function mapping $d$-dimensional vectors to elements of type $\mathbb{F}$ supporting multiplication by a real scalar, addition and a norm (*i.e.* a normed real vector space);
-- $\Omega \subset \mathbb{R}^d$ is the integration domain: simplices and orthotopes are supported.
+- $f \colon \mathbb{R}^d \to \mathbb{F}$ is any Julia function mapping $d$-dimensional
+  vectors to elements of type $\mathbb{F}$ supporting multiplication by a real scalar,
+  addition and a norm (*i.e.* a normed real vector space);
+- $\Omega \subset \mathbb{R}^d$ is the integration domain: simplices and orthotopes are
+  supported.
 
-The package employs an adaptive approach, dynamically refining the integration domain as needed.
-It uses embedded cubature rules to provide error estimates, aiming to achieve high accuracy while minimizing function evaluations.
+The algorithm adaptively subdivides the domain and uses embedded cubature rules to estimate
+errors, targeting high accuracy with fewer function evaluations.
 
-<!-- Features include:
-- Adaptive integration over simplices and orthotope of **any dimension**,
-- Utilization of **efficient tabulated cubatures** for low-dimensional simplices and orthotopes,
-- Support for custom embedded cubature rules,
-- Arbitrary precision arithmetic. -->
+**Key Features:**
+
+- Adaptive integration over simplices and orthotopes of arbitrary dimension.
+- Efficient tabulated cubature rules for low-dimensional simplices and orthotopes.
+- Support for custom embedded cubature rules.
+- Arbitrary-precision arithmetic.
 
 ## Usage
 
