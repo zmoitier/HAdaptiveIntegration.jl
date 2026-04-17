@@ -136,7 +136,7 @@ $$
 $$
 Where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{\Omega}$ are the cubature point on the reference domain, $h_1, \ldots, h_{\mathsf{H}} \in \mathbb{R}$ are the $\mathcal{H}$ cubature weights, $\ell_1, \ldots, \ell_{\mathsf{L}} \in \mathbb{R}$ are the $\mathcal{L}$ cubature weights, and $\mathsf{H} > \mathsf{L}$ so the $\mathcal{H}$ rule has more points than the $\mathcal{L}$ rule.
 The pair $(\mathcal{H}, \mathcal{L})$ is called an embedded cubature because the $\mathcal{L}$ rule use a subset of the points of the $\mathcal{H}$ rule.
-In accordance with the number of point evaluation of the two cubature rule, $\mathcal{H}$ has order $d_{\mathcal{H}}$ and $\mathcal{L}$ has order $d_{\mathcal{L}}$ with $d_{\mathcal{H}} \geq d_{\mathcal{L}}$.
+In accordance with the number of point evaluation of the two cubature rule, $\mathcal{H}$ has order $k_{\mathcal{H}}$ and $\mathcal{L}$ has order $k_{\mathcal{L}}$ with $k_{\mathcal{H}} \geq k_{\mathcal{L}}$.
 The order of a cubature rule is the highest integer $k \in \mathbb{N}$ such that the cubature is exact on the space of polynomials with total degree less or equal than $k$.
 
 For a domain $\Omega$, we define the map $\phi \colon \widehat{\Omega} \to \Omega$ from the reference domain to the physical domain.
@@ -191,47 +191,69 @@ At the end $(I_n, E_n)$ is return as the integral value and error estimate.
 
 ## Implementation
 
-The implementation follows closely the algorithm describe in [The adaptive algorithm].
-One important implementation detail is that it uses a mutable binary heap to store the partition $\mathcal{P}_n$.
+The implementation follows closely the algorithm describe in section [The adaptive algorithm].
+One important implementation detail is the uses a binary heap to store the partition $\mathcal{P}_n$.
 As this data structure allows efficient retrieval of a maximum local error, as well as efficient `pop` and `push` operation.
 In addition, in the case of doing multiple integral on the same domain type and function signature, we can pre-allocate the heap and pass it to the `integrate` function via the `buffer` keyword to reduce the number of allocation.
 
 ## Extended precision
 
 As said in the [Summary] section, `integrate` support arbitrary precision.
-However, only the rules from [@GrundmannMoeller1978; @GenzMalik1980] are generated using explicit formula, all the other are tabulated with a finite decimal precision which is incompatible with arbitrary precision.
-All the tabulated rule are stored in quadruple precision.
-But, if we want to use tabulated rule with higher precision, it can be done by first increasing the precision of the rule.
-`HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which reconstructs higher-precision tabulated rules by solving the polynomial exactness conditions with Newton iterations and automatic differentiation through `ForwardDiff` [@ForwardDiff2016].
+However, only the rules from [@GrundmannMoeller1978; @GenzMalik1980] are generated using explicit formula, all the other are tabulated with a finite decimal precision (quadruple precision) which is incompatible with arbitrary precision.
+`HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which compute higher-precision rules from a tabulated rule by solving the polynomial exactness conditions with Newton iterations and automatic differentiation through `ForwardDiff` [@ForwardDiff2016].
 
-This design keeps the default package lightweight while enabling high-precision workflows
-when needed. In the test suite, deliberately reduced-precision tabulated rules fail to reach
-relative accuracies around $10^{-14}$ after conversion to `Float64`, whereas their
-reconstructed higher-precision counterparts recover the requested accuracy. The same
-mechanism can then be used together with `BigFloat` domains and functions for validation
-studies or sensitive numerical experiments.
+To be more precise, let $\widehat{\Omega}$ be a reference domain and $(\mathcal{H}, \mathcal{L})$ be an embedded cubature on $\widehat{\Omega}$ with orders $k_{\mathcal{H}} \geq k_{\mathcal{L}}$.
+Let's call $\mathbb{P}_k$ the space of polynomial with total degree less or equal than $k$, and denote $b_1, \ldots, b_{K_{\mathcal{H}}}$ a basis of $\mathbb{P}_{k_{\mathcal{H}}}$ such that $b_1, \ldots, b_{K_{\mathcal{L}}}$ is a basis of $\mathbb{P}_{k_{\mathcal{L}}}$.
+By definition, we have $K_{\mathcal{H}} = \dim\mathbb{P}_{k_{\mathcal{H}}}$ and $K_{\mathcal{L}} = \dim\mathbb{P}_{k_{\mathcal{L}}}$.
+Let's define $\boldsymbol{u}^{\mathcal{H}, \mathcal{L}} = (\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}}, h_1, \ldots, h_{\mathsf{H}}, \ell_1, \ldots, \ell_{\mathsf{L}})$ the embedded cubature data.
+We define the function $F \colon \mathbb{R}^{(d+1) \mathsf{H} + \mathsf{L}} \to \mathbb{R}^{K_{\mathcal{H}} + K_{\mathcal{L}}}$ by
+$$
+  F\left( \boldsymbol{u}^{\mathcal{H}, \mathcal{L}} \right) =
+  \begin{pmatrix}
+    \mathcal{H}(b_1) - \int_{\widehat{\Omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+    \\[1ex]
+    \vdots
+    \\[1ex]
+    \mathcal{H}(b_{K_{\mathcal{H}}}) - \int_{\widehat{\Omega}} b_{K_{\mathcal{H}}}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+    \\[2ex]
+    \mathcal{L}(b_1) - \int_{\widehat{\Omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+    \\[1ex]
+    \vdots
+    \\[1ex]
+    \mathcal{L}(b_{K_{\mathcal{L}}}) - \int_{\widehat{\Omega}} b_{K_{\mathcal{L}}}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+  \end{pmatrix}.
+$$
+The goal is to find a root of the function $F$ with higher precision than the stored precision, for a tabulated rule $\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$, we already have $\lVert F(\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}) \rVert_2 = \varepsilon \ll 0$.
+We want to find a $\tilde{\boldsymbol{u}}$ such that $\lVert F(\tilde{\boldsymbol{u}}) \rVert_2 = \eta < \varepsilon$, to do that we use a least-square Newton method, [@XiaoGimbutas2010{section 2.3}].
+Set $\boldsymbol{u}_0 = \boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$ and define the iteration
+$$
+  \boldsymbol{u}_{p+1} = \boldsymbol{u}_p - \boldsymbol{\delta}_p
+  \qquad \text{where} \
+  \boldsymbol{\delta}_p = \arg\min \left\{ \lVert \boldsymbol{w} \rVert_2 \mid \operatorname{J}_F(\boldsymbol{u}_p) \boldsymbol{w} = F(\boldsymbol{u}_p) \right\},\tag{N}
+$$
+and $\operatorname{J}_F(\boldsymbol{u}_p)$ is the Jacobian matrix of $F$ at the point $\boldsymbol{u}_p$.
+The iteration stop when $\lVert \boldsymbol{u}_{p+1} - \boldsymbol{u}_p \rVert_2 \leq \mathtt{x\_atol}$ (absolute tolerance of successive iterate), $\lVert F(\boldsymbol{u}_p) \rVert_2 \leq \mathtt{f\_atol}$ (absolute tolerance of function value), or $p = p_{\max}$ (maximum number of iterations).
+
+**Remark.** In (N), $\operatorname{J}_F(\boldsymbol{u}_p) \boldsymbol{w} = F(\boldsymbol{u}_p)$ is solved via the least square method (just `\` in `Julia`).
+It is written that way because, we usually have $K_{\mathcal{H}} + K_{\mathcal{L}} < (d+1) \mathsf{H} + \mathsf{L}$, so $\operatorname{J}_F(\boldsymbol{u}_p)$ is a rectangular matrix with more column than rows.
+Therefore, we choose the vector in the null space of $\operatorname{J}_F(\boldsymbol{u}_p)$ with the smallest magnitude.
+
+**Remark.** `IncreasePrecisionExt` uses the monomial basis because of the ease of uses and the exact values of the integrals is known explicitly.
+However, this basis is not well condition, that means that in practice in order to have a rule at precision $10^{-m}$ you need to increase the precision using `BigFloat` with a higher precision $10^{-(m+q)}$.
 
 # Research impact statement
 
 <!--
-Evidence of realized impact (publications, external use, integrations) or credible near-term
-significance (benchmarks, reproducible materials, community-readiness signals). The evidence
-should be compelling and specific, not aspirational.
+Evidence of realized impact (publications, external use, integrations) or credible near-term significance (benchmarks, reproducible materials, community-readiness signals).
+The evidence should be compelling and specific, not aspirational.
 -->
 
-`HAdaptiveIntegration` is ready for direct use in research code. The repository includes
-API documentation, advanced examples covering custom cubature and subdivision strategies, an
-extension for arbitrary-precision workflows, and an automated test suite spanning segments,
-triangles, rectangles, tetrahedra, cuboids, and four-dimensional simplices and orthotopes.
-Continuous integration checks tests, documentation, and linting, which lowers the barrier
-to adoption in reproducible computational projects.
+`HAdaptiveIntegration` is ready for direct use.
+The repository includes API documentation, advanced examples covering custom cubature and subdivision strategies, an extension for arbitrary-precision workflows, and an automated test suite spanning all supported domain.
+Continuous integration checks tests, documentation, and linting.
 
-Its near-term impact is strongest in workflows that already manipulate simplicial cells,
-such as finite-element, boundary-element, and high-order discretization codes, because those
-applications benefit from integrating directly on triangles and tetrahedra instead of first
-rewriting problems on rectangular boxes. The package also serves validation and sensitivity
-studies through its support for arbitrary-precision arithmetic, which is uncommon among
-lightweight adaptive cubature packages.
+`HAdaptiveIntegration` has been interface in [@Integrals] which is part of the SciML ecosystem.
+And, it was featured in the [This month in Julia world - 2026-02](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110) Newsletter.
 
 # Complexity estimates
 
