@@ -29,6 +29,29 @@ Abstract type for a cubature rule on a domain `DOM`.
 """
 abstract type AbstractRule{DOM <: AbstractDomain} end
 
+"""
+    embedded_cubature(ar::AbstractRule, T=float(Int))
+
+    embedded_cubature(nodes, weights_high, weights_low, T=float(Int))
+
+Construct an embedded cubature with element type `T`.
+
+The constructor can be called from a subtype of [`AbstractRule`](@ref), or from explicit
+`nodes`, `weights_high`, and `weights_low` data. Available rule types include:
+- [`TabulatedEmbeddedCubature`](@ref)
+- [`RadonLaurie`](@ref)
+- [`GrundmannMoeller`](@ref)
+- [`GenzMalik`](@ref)
+"""
+function embedded_cubature end
+
+"""
+    orders(rule::AR) where {AR<:AbstractRule}
+
+Return `(order_high, order_low)` for `rule`.
+"""
+function orders end
+
 include("embedded_cubature.jl")
 include("tabulated.jl")
 

@@ -109,15 +109,27 @@ function newton(f, x₀, x_atol, f_atol, maxiter)
         )
     end
 
+    xae_str = join(
+        (
+            @sprintf("%.2e", ns.x_abs_err),
+            ns.x_abs_err > x_atol ? "≰" : "≤",
+            @sprintf("%.2e", x_atol),
+        ),
+        " ",
+    )
+    fae_str = join(
+        (
+            @sprintf("%.2e", ns.f_abs_err),
+            ns.f_abs_err > f_atol ? "≰" : "≤",
+            @sprintf("%.2e", f_atol),
+        ),
+        " ",
+    )
     @info """Newton convergence report:
 
-          iteration = $(ns.iter) / $maxiter
-        |xₙ - xₙ₋₁ | = $(@sprintf("%.2e", ns.x_abs_err)) \
-    $(ns.x_abs_err > x_atol ? "≰" : "≤") \
-    $(@sprintf("%.2e", x_atol))
-            |f(xₙ)| = $(@sprintf("%.2e", ns.f_abs_err)) \
-    $(ns.f_abs_err > f_atol ? "≰" : "≤") \
-    $(@sprintf("%.2e", f_atol))
+           iteration = $(ns.iter) / $maxiter
+        |xₙ - xₙ₋₁ | = $xae_str
+             |f(xₙ)| = $fae_str
     """
 
     if ns.iter ≥ maxiter

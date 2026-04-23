@@ -47,9 +47,9 @@ struct TabulatedEmbeddedCubature{DOM <: AbstractDomain} <: AbstractRule{DOM}
         @assert length(nodes) == length(weights_high) "The number of nodes must match the \
         number of high-order weights"
         @assert length(weights_high) ≥ length(weights_low) "The length of high order \
-weights must be greater or equal to the length of low-order weights"
+        weights must be greater or equal to the length of low-order weights"
         @assert order_high ≥ order_low ≥ 0 "order_high must be greater than or equal to \
-order_low and orders must be non-negative"
+        order_low and orders must be non-negative"
         @assert precision ≥ 0
         return new{DOM}(
             description,
@@ -64,11 +64,6 @@ order_low and orders must be non-negative"
     end
 end
 
-"""
-    orders(rule::AR) where {AR<:AbstractRule}
-
-Return `(order_high, order_low)` for `rule`.
-"""
 function orders(tec::TabulatedEmbeddedCubature)
     return tec.order_high, tec.order_low
 end

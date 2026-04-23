@@ -146,7 +146,7 @@ end
         @test validate_orders(embedded_cubature(rl), Triangle, 8, 5)
     end
 
-    @testset "Grundmann-Möller" begin
+    @testset "Grundmann-Moeller" begin
         @test_throws AssertionError typeof(GrundmannMoeller{1}(7, 6))
         @test_throws AssertionError typeof(GrundmannMoeller{1}(5, 7))
 
