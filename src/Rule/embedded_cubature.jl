@@ -30,20 +30,6 @@ struct EmbeddedCubature{D, T <: Real}
     end
 end
 
-"""
-    embedded_cubature(ar::AbstractRule, T=float(Int))
-
-    embedded_cubature(nodes, weights_high, weights_low, T=float(Int))
-
-Construct an embedded cubature with element type `T`.
-
-The constructor can be called from a subtype of [`AbstractRule`](@ref), or from explicit
-`nodes`, `weights_high`, and `weights_low` data. Available rule types include:
-- [`TabulatedEmbeddedCubature`](@ref)
-- [`RadonLaurie`](@ref)
-- [`GrundmannMoeller`](@ref)
-- [`GenzMalik`](@ref)
-"""
 function embedded_cubature(
         nodes, weights_high, weights_low, (::Type{T}) = float(Int)
     ) where {T <: Real}
