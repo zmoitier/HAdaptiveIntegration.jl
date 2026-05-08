@@ -3,7 +3,7 @@ using HAdaptiveIntegration
 using LinearAlgebra
 using Printf
 
-function log_linear_regression(x::Vector{T}, y::Vector{T}) where {T<:Real}
+function log_linear_regression(x::Vector{T}, y::Vector{T}) where {T <: Real}
     A = hcat(ones(T, length(x)), log10.(x))
     c = A \ log10.(y)
     return (10^c[1], c[2])
@@ -34,8 +34,8 @@ function main()
         return nothing
     end
 
-    I, E = integrate(fct, triangle; embedded_cubature=ec, callback=callback)
-    absolute_error = abs.(estimated_values .- Iₑₓ) .+ 1e-16
+    I, E = integrate(fct, triangle; embedded_cubature = ec, callback = callback)
+    absolute_error = abs.(estimated_values .- Iₑₓ) .+ 1.0e-16
 
     k = round(Int, 0.6 * length(nb_evaluations))
     c_I, s_I = log_linear_regression(nb_evaluations[k:end], absolute_error[k:end])
@@ -43,27 +43,27 @@ function main()
 
     fig = Figure()
     ax = Axis(
-        fig[1, 1]; xlabel="Number of function evaluations", xscale=log10, yscale=log10
+        fig[1, 1]; xlabel = "Number of function evaluations", xscale = log10, yscale = log10
     )
 
-    scatterlines!(ax, nb_evaluations, absolute_error; label="|I - Iₑₓ|")
-    scatterlines!(ax, nb_evaluations, estimated_errors; label="E")
+    scatterlines!(ax, nb_evaluations, absolute_error; label = "|I - Iₑₓ|")
+    scatterlines!(ax, nb_evaluations, estimated_errors; label = "E")
 
     b = last(nb_evaluations)
     lines!(
         ax,
         nb_evaluations[k:end],
         (√10 * c_I) * nb_evaluations[k:end] .^ s_I;
-        color=:black,
-        label=@sprintf("slope %.2f", s_I),
+        color = :black,
+        label = @sprintf("slope %.2f", s_I),
     )
     lines!(
         ax,
         nb_evaluations[k:end],
         (√10 * c_E) * nb_evaluations[k:end] .^ s_E;
-        linestyle=:dash,
-        color=:black,
-        label=@sprintf("slope %.2f", s_E),
+        linestyle = :dash,
+        color = :black,
+        label = @sprintf("slope %.2f", s_E),
     )
 
     axislegend(ax)

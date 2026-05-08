@@ -14,13 +14,13 @@ function square()
 
     εᵣₑₗ = sqrt(eps(Float64))
 
-    @show HAI.integrate(fct, dom; rtol=εᵣₑₗ)
-    display(@benchmark HAI.integrate($fct, $dom; rtol=$εᵣₑₗ))
+    @show HAI.integrate(fct, dom; rtol = εᵣₑₗ)
+    display(@benchmark HAI.integrate($fct, $dom; rtol = $εᵣₑₗ))
 
     println()
 
-    @show HC.hcubature(fct, a, b; rtol=εᵣₑₗ)
-    display(@benchmark HC.hcubature($fct, $a, $b; rtol=$εᵣₑₗ))
+    @show HC.hcubature(fct, a, b; rtol = εᵣₑₗ)
+    display(@benchmark HC.hcubature($fct, $a, $b; rtol = $εᵣₑₗ))
 
     return nothing
 end
@@ -37,13 +37,13 @@ function cube()
 
     εᵣₑₗ = sqrt(eps(Float64))
 
-    @show HAI.integrate(fct, dom; rtol=εᵣₑₗ)
-    display(@benchmark HAI.integrate($fct, $dom; rtol=$εᵣₑₗ))
+    @show HAI.integrate(fct, dom; rtol = εᵣₑₗ)
+    display(@benchmark HAI.integrate($fct, $dom; rtol = $εᵣₑₗ))
 
     println()
 
-    @show HC.hcubature(fct, a, b; rtol=εᵣₑₗ)
-    display(@benchmark HC.hcubature($fct, $a, $b; rtol=$εᵣₑₗ))
+    @show HC.hcubature(fct, a, b; rtol = εᵣₑₗ)
+    display(@benchmark HC.hcubature($fct, $a, $b; rtol = $εᵣₑₗ))
 
     return nothing
 end
@@ -61,13 +61,13 @@ function tesseract()
 
     εᵣₑₗ = eps(Float64)^0.25
 
-    @show HAI.integrate(fct, dom; rtol=εᵣₑₗ)
-    display(@benchmark HAI.integrate($fct, $dom; rtol=$εᵣₑₗ))
+    @show HAI.integrate(fct, dom; rtol = εᵣₑₗ)
+    display(@benchmark HAI.integrate($fct, $dom; rtol = $εᵣₑₗ))
 
     println()
 
-    @show HC.hcubature(fct, a, b; rtol=εᵣₑₗ)
-    display(@benchmark HC.hcubature($fct, $a, $b; rtol=$εᵣₑₗ))
+    @show HC.hcubature(fct, a, b; rtol = εᵣₑₗ)
+    display(@benchmark HC.hcubature($fct, $a, $b; rtol = $εᵣₑₗ))
 
     return nothing
 end
