@@ -77,7 +77,7 @@ end
     return :($ec)
 end
 @generated function default_rule_rectangle(::Type{T}) where {T}
-    ec = embedded_cubature(SQUARE_CH25, T)
+    ec = embedded_cubature(GenzMalik{2}(), T)
     return :($ec)
 end
 @generated function default_rule_cuboid(::Type{T}) where {T}
