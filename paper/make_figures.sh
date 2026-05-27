@@ -3,6 +3,8 @@ set -e
 
 dir="$(cd "$(dirname "$0")" && pwd)"
 
+julia --project="$dir" -e "using Pkg; Pkg.instantiate()"
+
 for script in cvg_triangle.jl cvg_tetrahedron.jl cvg_rectangle.jl cvg_cuboid.jl; do
     echo ""
     echo "============================================================"

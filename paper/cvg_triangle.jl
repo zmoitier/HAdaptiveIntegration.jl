@@ -81,6 +81,8 @@ hai_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
 fig_cvg = Figure(size = (1200, 500))
 
+c_hai = Makie.wong_colors()[1]
+
 axes_cvg = Axis[]
 legend_plots = Any[]
 for (col, hai, Iref, fct, title) in (
@@ -100,16 +102,16 @@ for (col, hai, Iref, fct, title) in (
         )
     )[end]
 
-    p1 = scatterlines!(ax, hai.N, abs.(hai.I .- Iref) ./ abs(Iref); marker = :circle)
-    p2 = scatterlines!(ax, hai.N, hai.E ./ abs(Iref); marker = :rect)
+    p1 = scatterlines!(ax, hai.N, abs.(hai.I .- Iref) ./ abs(Iref); color = c_hai, marker = :circle)
+    p2 = scatterlines!(ax, hai.N, hai.E ./ abs(Iref); color = c_hai, marker = :rect, linestyle = :dash)
     idx_ref = length(hai.N)
     p3 = lines!(
         ax, hai.N, (abs(hai.I[idx_ref] - Iref) / abs(Iref)) .* (hai.N ./ hai.N[idx_ref]) .^ (-high / 2);
-        color = :black, linestyle = :dash,
+        color = :black, linestyle = :dot, linewidth = 2,
     )
     p4 = lines!(
         ax, hai.N, (hai.E[idx_ref] / abs(Iref)) .* (hai.N ./ hai.N[idx_ref]) .^ (-low / 2);
-        color = :gray, linestyle = :dash,
+        color = :gray, linestyle = :dot, linewidth = 2,
     )
 
     add_mesh_inset!(fig_cvg[1, col], fct)

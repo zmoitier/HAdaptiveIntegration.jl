@@ -81,16 +81,16 @@ for (col, hai, hc, Iref, title) in (
     )[end]
 
     p1 = scatterlines!(ax, hai.N, abs.(hai.I .- Iref) ./ abs(Iref); color = c_hai, marker = :circle)
-    p2 = scatterlines!(ax, hai.N, hai.E ./ abs(Iref); color = c_hai, marker = :rect)
+    p2 = scatterlines!(ax, hai.N, hai.E ./ abs(Iref); color = c_hai, marker = :rect, linestyle = :dash)
     p3 = scatterlines!(ax, hc.N, abs.(hc.I .- Iref) ./ abs(Iref); color = c_hc, marker = :circle)
-    p4 = scatterlines!(ax, hc.N, hc.E ./ abs(Iref); color = c_hc, marker = :rect)
+    p4 = scatterlines!(ax, hc.N, hc.E ./ abs(Iref); color = c_hc, marker = :rect, linestyle = :dash)
 
     idx_ref = length(hai.N)
     N_ref = hai.N[idx_ref]
     e_ref = abs(hai.I[idx_ref] - Iref) / abs(Iref)
     est_ref = hai.E[idx_ref] / abs(Iref)
-    p5 = lines!(ax, hai.N, e_ref .* (hai.N ./ N_ref) .^ (-high / 3); color = :black, linestyle = :dash)
-    p6 = lines!(ax, hai.N, est_ref .* (hai.N ./ N_ref) .^ (-low / 3); color = :gray, linestyle = :dash)
+    p5 = lines!(ax, hai.N, e_ref .* (hai.N ./ N_ref) .^ (-high / 3); color = :black, linestyle = :dot, linewidth = 2)
+    p6 = lines!(ax, hai.N, est_ref .* (hai.N ./ N_ref) .^ (-low / 3); color = :gray, linestyle = :dot, linewidth = 2)
 
     col == 1 && append!(legend_entries, [p1, p2, p3, p4, p5, p6])
 end
