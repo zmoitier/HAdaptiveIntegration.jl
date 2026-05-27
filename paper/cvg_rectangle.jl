@@ -44,7 +44,9 @@ function add_mesh_inset!(fig_pos, fct)
 end
 
 function reference(f)
-    I, E = hcubature(f, zeros(2), ones(2); rtol = 1.0e-10, maxevals = typemax(Int))
+    dom = Rectangle((0.0, 0.0), (1.0, 1.0))
+    ec = embedded_cubature(QRULE)
+    I, E = integrate(f, dom; rule = ec, rtol = REFTOL, maxsubdiv = typemax(Int))
     return I, E
 end
 
@@ -77,21 +79,14 @@ function run_convergence(fct)
     return hai, hc, Iref, high, low
 end
 
-## definitions
-ϵ = 0.025
-x₀ = SVector(1 / pi, 1 / pi)
-r₀ = 0.5
-
-fct_point = (x) -> scaled_mollifier(norm(x - x₀), ϵ, 2)
-fct_curve = (x) -> scaled_mollifier(abs(norm(x) - r₀), ϵ, 1)
-fct_line = (x) -> scaled_mollifier(abs(x[1] - 1 / π), ϵ, 1)
+fct_point, fct_sphere, fct_plane = make_features(2)
 
 println("Running convergence for point feature...")
 hai_point, hc_point, Iref_point, high, low = run_convergence(fct_point)
-println("Running convergence for curve feature...")
-hai_curve, hc_curve, Iref_curve, _, _ = run_convergence(fct_curve)
-println("Running convergence for line feature...")
-hai_line, hc_line, Iref_line, _, _ = run_convergence(fct_line)
+println("Running convergence for hypersphere feature...")
+hai_sphere, hc_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
+println("Running convergence for hyperplane feature...")
+hai_plane, hc_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
 fig = Figure(size = (1300, 520))
 
@@ -102,8 +97,8 @@ axes = Axis[]
 legend_entries = Any[]
 for (col, hai, hc, Iref, fct, title) in (
         (1, hai_point, hc_point, Iref_point, fct_point, "Point Feature"),
-        (2, hai_curve, hc_curve, Iref_curve, fct_curve, "Curve Feature"),
-        (3, hai_line, hc_line, Iref_line, fct_line, "Line Feature"),
+        (2, hai_sphere, hc_sphere, Iref_sphere, fct_sphere, "Hypersphere Feature"),
+        (3, hai_plane, hc_plane, Iref_plane, fct_plane, "Hyperplane Feature"),
     )
     ylab = col == 1 ? "Relative error" : ""
     ax = push!(

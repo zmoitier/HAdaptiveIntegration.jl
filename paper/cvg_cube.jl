@@ -12,7 +12,9 @@ const QRULE = CUBE_BE65
 # const QRULE = GenzMalik{3}()
 
 function reference(f)
-    I, E = hcubature(f, zeros(3), ones(3); rtol = 1.0e-12, maxevals = typemax(Int))
+    ec = embedded_cubature(QRULE)
+    dom = Cuboid((0.0, 0.0, 0.0), (1.0, 1.0, 1.0))
+    I, E = integrate(f, dom; rule = ec, rtol = REFTOL, maxsubdiv = typemax(Int))
     return I, E
 end
 
@@ -45,20 +47,13 @@ function run_convergence(fct)
     return hai, hc, Iref, high, low
 end
 
-## definitions
-ϵ = 0.05
-x₀ = SVector(1 / pi, 1 / pi, 1 / pi)
-r₀ = 0.5
-
-fct_point = (x) -> scaled_mollifier(norm(x - x₀), ϵ, 3)
-fct_sphere = (x) -> scaled_mollifier(dot(x, x) - r₀^2, ϵ, 1)
-fct_plane = (x) -> scaled_mollifier(x[1] - 1 / π, ϵ, 1)
+fct_point, fct_sphere, fct_plane = make_features(3)
 
 println("Running convergence for point feature...")
 hai_point, hc_point, Iref_point, high, low = run_convergence(fct_point)
-println("Running convergence for sphere feature...")
+println("Running convergence for hypersphere feature...")
 hai_sphere, hc_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
-println("Running convergence for plane feature...")
+println("Running convergence for hyperplane feature...")
 hai_plane, hc_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
 fig = Figure(size = (1300, 520))
@@ -70,8 +65,8 @@ axes = Axis[]
 legend_entries = Any[]
 for (col, hai, hc, Iref, title) in (
         (1, hai_point, hc_point, Iref_point, "Point Feature"),
-        (2, hai_sphere, hc_sphere, Iref_sphere, "Sphere Feature"),
-        (3, hai_plane, hc_plane, Iref_plane, "Plane Feature"),
+        (2, hai_sphere, hc_sphere, Iref_sphere, "Hypersphere Feature"),
+        (3, hai_plane, hc_plane, Iref_plane, "Hyperplane Feature"),
     )
     ylab = col == 1 ? "Relative error" : ""
     ax = push!(

@@ -1,4 +1,3 @@
-using Quadmath
 using HAdaptiveIntegration: integrate, Triangle, allocate_buffer
 using HAdaptiveIntegration.Rule: RadonLaurie, embedded_cubature, orders
 using CairoMakie
@@ -7,19 +6,21 @@ using LinearAlgebra
 
 include("util.jl")
 
+const QRULE = RadonLaurie()
+
 function reference(f)
-    f_128 = (x) -> f(Float128.(x))
-    rule = embedded_cubature(RadonLaurie(), Float128)
-    dom = Triangle{Float128}((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    I, E = integrate(f_128, dom; rtol = Float128(1.0e-10), rule = rule)
+    ec = embedded_cubature(QRULE)
+    dom = Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+    I, E = integrate(f, dom; rule = ec, rtol = REFTOL, maxsubdiv = typemax(Int))
     return I, E
 end
 
 function run_convergence(fct)
-    high, low = orders(RadonLaurie()) .+ 1
+    high, low = orders(QRULE) .+ 1
     counter = Ref(0)
     fct_count = (x) -> (counter[] += 1; fct(x))
     dom = Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
+    ec = embedded_cubature(QRULE)
 
     rtol_vec = [1 / 10^i for i in 1:10]
     Iref, _ = reference(fct)
@@ -28,7 +29,7 @@ function run_convergence(fct)
 
     for (i, rtol) in enumerate(rtol_vec)
         counter[] = 0
-        I, E = integrate(fct_count, dom; rtol = rtol)
+        I, E = integrate(fct_count, dom; rule = ec, rtol = rtol)
         hai.I[i], hai.E[i], hai.N[i] = I, E, counter[]
     end
 
@@ -69,21 +70,14 @@ function add_mesh_inset!(fig_pos, fct)
     return lines!(ax, xt, yt; color = :black, linewidth = 2)
 end
 
-## definitions
-ϵ = 0.025
-x₀ = SVector(1 / pi, 1 / pi)
-r₀ = 0.5
-
-fct_point = (x) -> scaled_mollifier(norm(x - x₀), ϵ, 2)
-fct_curve = (x) -> scaled_mollifier(dot(x, x) - r₀^2, ϵ, 1)
-fct_line = (x) -> scaled_mollifier(x[1] - 1 / π, ϵ, 1)
+fct_point, fct_sphere, fct_plane = make_features(2)
 
 println("Running convergence for point feature...")
 hai_point, Iref_point, high, low = run_convergence(fct_point)
-println("Running convergence for curve feature...")
-hai_curve, Iref_curve, _, _ = run_convergence(fct_curve)
-println("Running convergence for line feature...")
-hai_line, Iref_line, _, _ = run_convergence(fct_line)
+println("Running convergence for hypersphere feature...")
+hai_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
+println("Running convergence for hyperplane feature...")
+hai_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
 fig_cvg = Figure(size = (1200, 500))
 
@@ -91,8 +85,8 @@ axes_cvg = Axis[]
 legend_plots = Any[]
 for (col, hai, Iref, fct, title) in (
         (1, hai_point, Iref_point, fct_point, "Point Feature"),
-        (2, hai_curve, Iref_curve, fct_curve, "Curve Feature"),
-        (3, hai_line, Iref_line, fct_line, "Line Feature"),
+        (2, hai_sphere, Iref_sphere, fct_sphere, "Hypersphere Feature"),
+        (3, hai_plane, Iref_plane, fct_plane, "Hyperplane Feature"),
     )
     ylab = col == 1 ? "Relative error" : ""
     ax = push!(

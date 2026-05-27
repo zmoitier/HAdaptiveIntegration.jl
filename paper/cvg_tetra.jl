@@ -1,4 +1,3 @@
-using Quadmath
 using HAdaptiveIntegration: integrate, Tetrahedron
 using HAdaptiveIntegration.Rule: GrundmannMoeller, embedded_cubature, orders
 using CairoMakie
@@ -7,20 +6,21 @@ using LinearAlgebra
 
 include("util.jl")
 
+const QRULE = GrundmannMoeller{3}(7, 5)
+
 function reference(f)
-    T = Float64
-    f_ext = (x) -> f(T.(x))
-    rule = embedded_cubature(GrundmannMoeller{3}(7, 5), T)
-    dom = Tetrahedron{T}((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
-    I, E = integrate(f_ext, dom; rtol = T(1.0e-10), rule = rule, maxsubdiv = 10^6)
+    ec = embedded_cubature(QRULE)
+    dom = Tetrahedron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+    I, E = integrate(f, dom; rule = ec, rtol = REFTOL, maxsubdiv = typemax(Int))
     return I, E
 end
 
 function run_convergence(fct)
-    high, low = orders(GrundmannMoeller{3}(7, 5)) .+ 1
+    high, low = orders(QRULE) .+ 1
     counter = Ref(0)
     fct_count = (x) -> (counter[] += 1; fct(x))
     dom = Tetrahedron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
+    ec = embedded_cubature(QRULE)
 
     rtol_vec = [1 / 10^i for i in 1:8]
     Iref, _ = reference(fct)
@@ -29,27 +29,20 @@ function run_convergence(fct)
 
     for (i, rtol) in enumerate(rtol_vec)
         counter[] = 0
-        I, E = integrate(fct_count, dom; rtol = rtol)
+        I, E = integrate(fct_count, dom; rule = ec, rtol = rtol)
         hai.I[i], hai.E[i], hai.N[i] = I, E, counter[]
     end
 
     return hai, Iref, high, low
 end
 
-## definitions
-ϵ = 0.05
-x₀ = SVector(1 / pi, 1 / pi, 1 / pi)
-r₀ = 0.5
-
-fct_point = (x) -> scaled_mollifier(norm(x - x₀), ϵ, 3)
-fct_surface = (x) -> scaled_mollifier(dot(x, x) - r₀^2, ϵ, 1)
-fct_plane = (x) -> scaled_mollifier(x[1] - 1 / π, ϵ, 1)
+fct_point, fct_sphere, fct_plane = make_features(3)
 
 println("Running convergence for point feature...")
 hai_point, Iref_point, high, low = run_convergence(fct_point)
-println("Running convergence for surface feature...")
-hai_curve, Iref_curve, _, _ = run_convergence(fct_surface)
-println("Running convergence for plane feature...")
+println("Running convergence for hypersphere feature...")
+hai_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
+println("Running convergence for hyperplane feature...")
 hai_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
 fig_cvg = Figure(size = (1200, 500))
@@ -58,8 +51,8 @@ axes_cvg = Axis[]
 legend_plots = Any[]
 for (col, hai, Iref, title) in (
         (1, hai_point, Iref_point, "Point Feature"),
-        (2, hai_curve, Iref_curve, "Surface Feature"),
-        (3, hai_plane, Iref_plane, "Plane Feature"),
+        (2, hai_sphere, Iref_sphere, "Hypersphere Feature"),
+        (3, hai_plane, Iref_plane, "Hyperplane Feature"),
     )
     ylab = col == 1 ? "Relative error" : ""
     ax = push!(
