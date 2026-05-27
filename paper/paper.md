@@ -268,7 +268,7 @@ And, it was featured in the [This month in Julia world - 2026-02](https://discou
 
 ## Isotropic (nearly-)singularities
 
-## Submanifold (nearly-)singularities
+## Sub-manifold (nearly-)singularities
 -->
 
 # Benchmarks (comparison with `HCubature.jl`)
