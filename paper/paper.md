@@ -24,7 +24,7 @@ bibliography: paper.bib
 # Summary
 
 <!--
-A description of the high-level functionality and purpose of the software for a diverse, 
+A description of the high-level functionality and purpose of the software for a diverse,
 non-specialist audience.
 -->
 
@@ -38,8 +38,8 @@ where
 - $f \colon \mathbb{R}^d \to \mathbb{F}$ is any Julia function mapping $d$-dimensional
   vectors to elements of type $\mathbb{F}$ supporting multiplication by a real scalar,
   addition and a norm (*i.e.* a normed real vector space);
-- $\Omega \subset \mathbb{R}^d$ is the integration domain: simplices and orthotopes are
-  supported.
+- $\Omega \subset \mathbb{R}^d$ is the integration domain: simplices and axis-aligned
+  orthotopes are supported.
 
 The package targets adaptive cubature in low to moderate dimension, with a particular
 emphasis on domains that arise naturally in mesh-based scientific computing. 
@@ -90,8 +90,9 @@ posteriori error estimate.
 # Statement of need
 
 <!--
-A section that clearly illustrates the research purpose of the software and places it in the context of related work.
-This should clearly state what problems the software is designed to solve, who the target audience is, and its relation to other work.
+A section that clearly illustrates the research purpose of the software and places it in the
+context of related work. This should clearly state what problems the software is designed to
+solve, who the target audience is, and its relation to other work.
 -->
 
 Adaptive numerical integration is a routine building block in scientific computing,
@@ -103,21 +104,23 @@ physical cells. In Julia, existing packages already cover important parts of thi
 `Cuba.jl` exposes a family of multidimensional integration methods, including stochastic
 ones, for rectangular domains [@Cuba].
 
-The missing piece addressed by `HAdaptiveIntegration` is a Julia-native integrator that
-handles simplices and orthotopes through a common interface, including triangles,
-tetrahedra, higher-dimensional simplices, and low-dimensional orthotopes with specialized
-tabulated rules. This is particularly useful for researchers working with simplicial meshes,
-where mapping everything to boxes or maintaining separate code paths is inconvenient and can
-obscure geometric intent. The package targets users who need deterministic adaptive
-integration with explicit error estimates, access to custom cubature and subdivision
-strategies, and the option to move beyond `Float64` arithmetic when validation or sensitive
-applications require it.
+The main contribution is that, to our knowledge, there were no Julia package capable of
+doing adaptive integration on simplices (triangles, tetrahedra, etc). The second
+contribution is the use of specialized tabulated rules, which allow to have higher order
+scheme than `HCubature.jl`. We design the package in such way that there is a simple common
+interface for integrating over simplices and orthotopes. And, it is easy to change the rule.
+Therefore extending the package with new rule is straightforward. The package targets users
+who need deterministic adaptive integration with explicit error estimates, access to custom
+cubature and subdivision strategies, and the option to move beyond `Float64` arithmetic when
+validation or sensitive applications require it.
 
 # State of the field
 
 <!--
-A description of how this software compares to other commonly-used packages in the research area.
-If related tools exist, provide a clear “build vs. contribute” justification explaining your unique scholarly contribution and why existing alternatives are insufficient.
+A description of how this software compares to other commonly-used packages in the research
+area. If related tools exist, provide a clear “build vs. contribute” justification
+explaining your unique scholarly contribution and why existing alternatives are
+insufficient.
 -->
 
 `HAdaptiveIntegration` is best viewed as complementary to the existing Julia ecosystem
@@ -141,11 +144,39 @@ tetrahedra, rectangles, cuboids, and their higher-dimensional counterparts.
 # Software design
 
 <!--
-An explanation of the trade-offs you weighed, the design/architecture you chose, and why it matters for your research application.
-This should demonstrate meaningful design thinking beyond a superficial code structure description.
+An explanation of the trade-offs you weighed, the design/architecture you chose, and why it
+matters for your research application. This should demonstrate meaningful design thinking
+beyond a superficial code structure description.
 -->
 
 ## Embedded cubatures
+
+At the core of automatic adaptive integration, there is a cubature pair
+$(\mathcal{H}, \mathcal{L})$, define on the reference domain $\widehat{K}$ by
+$$
+  \mathcal{H}(f) = \sum_{1 \leq i \leq \mathsf{H}} h_i \, f(\boldsymbol{x}_i)
+  \quad \text{and} \quad
+  \mathcal{L}(f) = \sum_{1 \leq i \leq \mathsf{L}} \ell_i \, f(\boldsymbol{x}_i),
+  \qquad \forall f \in \mathscr{C}^0(\widehat{K}).
+$$
+Where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{K}$ are the
+cubature point, $h_1, \ldots, h_{\mathsf{H}} \in \mathbb{R}$ are the $\mathcal{H}$ cubature
+weights, $\ell_1, \ldots, \ell_{\mathsf{L}} \in \mathbb{R}$ are the $\mathcal{L}$ cubature
+weights, and $\mathsf{H} > \mathsf{L}$ so the $\mathcal{H}$ rule has more points than the
+$\mathcal{L}$ rule. The pair $(\mathcal{H}, \mathcal{L})$ is called an embedded because the
+$\mathcal{L}$ rule use a subset of the points of the $\mathcal{H}$ rule. In accordance with
+the number of point evaluation of the two cubature rule, $\mathcal{H}$ has order
+$d_{\mathcal{H}}$ and $\mathcal{L}$ has order $d_{\mathcal{L}}$ with
+$d_{\mathcal{H}} \geq d_{\mathcal{L}}$. The order of a cubature rule is the highest
+$k \in \mathbb{N}$ such that the cubature is exact on the space of polynomials with total
+degree less than $k$.
+
+For a domain $K$, we define the map $\phi \colon \widehat{K} \to K$ from the reference domain to the physical domain.
+$$
+  I_K = \lvert\det J_\phi\rvert \ \mathcal{H}(f \circ \phi)
+  \qquad
+  E_K = \lvert\det J_\phi\rvert \ \lVert \mathcal{H}(f \circ \phi) - \mathcal{L}(f \circ \phi) \rVert
+$$
 
 Each local estimate is produced by an embedded cubature pair $(Q_h, Q_l)$ defined on a
 reference domain. The higher-order rule $Q_h$ provides the integral estimate on the current
@@ -164,6 +195,15 @@ pairs, generic orthotopes use Genz-Malik rules, and low-dimensional rectangles a
 use tabulated formulas. Users can replace these defaults by supplying their own
 `EmbeddedCubature`, which keeps the adaptive driver independent from any single cubature
 family.
+
+|                                         |                                 |
+|:----------------------------------------|:--------------------------------|
+| 1d. Segment [@Laurie1997]               |                                 |
+| 2d. Triangle [@Laurie1982]              | Rectangle [@CoolsHaegemans1989] |
+| 3d. Tetrahedron [@GrundmannMoeller1978] | Cuboid [@BerntsenEspelid1988]   |
+| $n$d. Simplex [@GrundmannMoeller1978]   | Orthotope [@GenzMalik1980]      |
+
+Table: For each dimension and domain give the default rules used.
 
 ## Adaptive algorithm
 
@@ -188,8 +228,9 @@ an optional callback exposes convergence information for diagnostics or benchmar
 # Research impact statement
 
 <!--
-Evidence of realized impact (publications, external use, integrations) or credible near-term significance (benchmarks, reproducible materials, community-readiness signals).
-The evidence should be compelling and specific, not aspirational.
+Evidence of realized impact (publications, external use, integrations) or credible near-term
+significance (benchmarks, reproducible materials, community-readiness signals). The evidence
+should be compelling and specific, not aspirational.
 -->
 
 `HAdaptiveIntegration` is ready for direct use in research code. The repository includes
