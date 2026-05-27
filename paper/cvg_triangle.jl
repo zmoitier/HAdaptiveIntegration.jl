@@ -7,39 +7,36 @@ using StaticArrays
 include("util.jl")
 
 const QRULE = RadonLaurie()
+const DOMAIN = Triangle((0, 0), (1, 0), (0, 1))
+const EC = embedded_cubature(QRULE)
+const RTOL_VALUES = [1 / 10^i for i in 1:10]
 
-function reference(f)
-    ec = embedded_cubature(QRULE)
-    dom = Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    I, E = integrate(f, dom; rule = ec, rtol = REFTOL, maxsubdiv = typemax(Int))
+function reference(integrand)
+    I, E = integrate(integrand, DOMAIN; rule = EC, rtol = REFTOL, maxsubdiv = typemax(Int))
     return I, E
 end
 
-function run_convergence(fct)
+function run_convergence(integrand)
     high, low = orders(QRULE) .+ 1
     counter = Ref(0)
-    fct_count = (x) -> (counter[] += 1; fct(x))
-    dom = Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    ec = embedded_cubature(QRULE)
+    counted_integrand = (x) -> (counter[] += 1; integrand(x))
 
-    rtol_vec = [1 / 10^i for i in 1:10]
-    Iref, _ = reference(fct)
+    Iref, _ = reference(integrand)
 
-    hai = (I = zeros(length(rtol_vec)), E = zeros(length(rtol_vec)), N = zeros(length(rtol_vec)))
+    hai = (I = zeros(length(RTOL_VALUES)), E = zeros(length(RTOL_VALUES)), N = zeros(length(RTOL_VALUES)))
 
-    for (i, rtol) in enumerate(rtol_vec)
+    for (i, rtol) in enumerate(RTOL_VALUES)
         counter[] = 0
-        I, E = integrate(fct_count, dom; rule = ec, rtol = rtol)
+        I, E = integrate(counted_integrand, DOMAIN; rule = EC, rtol = rtol)
         hai.I[i], hai.E[i], hai.N[i] = I, E, counter[]
     end
 
     return hai, Iref, high, low
 end
 
-function add_mesh_inset!(fig_pos, fct)
-    dom = Triangle((0.0, 0.0), (1.0, 0.0), (0.0, 1.0))
-    buffer = allocate_buffer(fct, dom)
-    integrate(fct, dom; buffer)
+function add_mesh_inset!(fig_pos, integrand)
+    buffer = allocate_buffer(integrand, DOMAIN)
+    integrate(integrand, DOMAIN; buffer)
 
     ax = Axis(
         fig_pos;
@@ -57,7 +54,7 @@ function add_mesh_inset!(fig_pos, fct)
     n = 150
     xs = range(0, 1, length = n)
     ys = range(0, 1, length = n)
-    z = [xi + yi < 1 ? fct(SVector(xi, yi)) : NaN for xi in xs, yi in ys]
+    z = [xi + yi < 1 ? integrand(SVector(xi, yi)) : NaN for xi in xs, yi in ys]
     heatmap!(ax, xs, ys, z; colormap = :viridis, alpha = 0.6)
 
     # adaptive mesh lines in semi-transparent white
@@ -66,8 +63,32 @@ function add_mesh_inset!(fig_pos, fct)
         xt, yt = plot_triangle(tri)
         lines!(ax, xt, yt; color = (:white, 0.25), linewidth = 0.5)
     end
-    xt, yt = plot_triangle(dom)
+    xt, yt = plot_triangle(DOMAIN)
+
     return lines!(ax, xt, yt; color = :black, linewidth = 2)
+end
+
+function plot_hai_panel!(ax, hai_data, Iref, high, low, order_dim, color)
+    p1 = scatterlines!(ax, hai_data.N, abs.(hai_data.I .- Iref) ./ abs(Iref); color = color, marker = :circle)
+    p2 = scatterlines!(ax, hai_data.N, hai_data.E ./ abs(Iref); color = color, marker = :rect, linestyle = :dash)
+    idx_ref = length(hai_data.N)
+    p3 = lines!(
+        ax,
+        hai_data.N,
+        (abs(hai_data.I[idx_ref] - Iref) / abs(Iref)) .* (hai_data.N ./ hai_data.N[idx_ref]) .^ (-high / order_dim);
+        color = :black,
+        linestyle = :dot,
+        linewidth = 2,
+    )
+    p4 = lines!(
+        ax,
+        hai_data.N,
+        (hai_data.E[idx_ref] / abs(Iref)) .* (hai_data.N ./ hai_data.N[idx_ref]) .^ (-low / order_dim);
+        color = :gray,
+        linestyle = :dot,
+        linewidth = 2,
+    )
+    return p1, p2, p3, p4
 end
 
 fct_point, fct_sphere, fct_plane = make_features(2)
@@ -85,7 +106,7 @@ c_hai = Makie.wong_colors()[1]
 
 axes_cvg = Axis[]
 legend_plots = Any[]
-for (col, hai, Iref, fct, title) in (
+for (col, hai_data, Iref, integrand, title) in (
         (1, hai_point, Iref_point, fct_point, "Point Feature"),
         (2, hai_sphere, Iref_sphere, fct_sphere, "Hypersphere Feature"),
         (3, hai_plane, Iref_plane, fct_plane, "Hyperplane Feature"),
@@ -102,19 +123,9 @@ for (col, hai, Iref, fct, title) in (
         )
     )[end]
 
-    p1 = scatterlines!(ax, hai.N, abs.(hai.I .- Iref) ./ abs(Iref); color = c_hai, marker = :circle)
-    p2 = scatterlines!(ax, hai.N, hai.E ./ abs(Iref); color = c_hai, marker = :rect, linestyle = :dash)
-    idx_ref = length(hai.N)
-    p3 = lines!(
-        ax, hai.N, (abs(hai.I[idx_ref] - Iref) / abs(Iref)) .* (hai.N ./ hai.N[idx_ref]) .^ (-high / 2);
-        color = :black, linestyle = :dot, linewidth = 2,
-    )
-    p4 = lines!(
-        ax, hai.N, (hai.E[idx_ref] / abs(Iref)) .* (hai.N ./ hai.N[idx_ref]) .^ (-low / 2);
-        color = :gray, linestyle = :dot, linewidth = 2,
-    )
+    p1, p2, p3, p4 = plot_hai_panel!(ax, hai_data, Iref, high, low, 2, c_hai)
 
-    add_mesh_inset!(fig_cvg[1, col], fct)
+    add_mesh_inset!(fig_cvg[1, col], integrand)
 
     col == 1 && append!(legend_plots, [p1, p2, p3, p4])
 end

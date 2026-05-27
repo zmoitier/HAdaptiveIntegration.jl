@@ -319,14 +319,15 @@ The exponent $1/2$ comes from the relation $h \sim N^{-1/d}$ with $d = 2$: in tw
 All three features show qualitatively similar convergence behavior.
 
 ![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit triangle as a function of the number of evaluations ($N$).
-Insets show the adaptive sub-triangulation at default tolerance.\label{fig:cvg_triangle}](cvg_triangle.png)
+Insets show the adaptive sub-domain at default tolerance and the integrand as a heatmap.\label{fig:cvg_triangle}](cvg_triangle.png)
 
 The same behavior extends to higher-dimensional simplices.
 \autoref{fig:cvg_tetrahedron} repeats the study on the unit tetrahedron using the `GrundmannMoeller` embedded rule [@GrundmannMoeller1978], which is available for simplices of arbitrary dimension.
 The convergence rates now follow $\mathcal{O}(N^{-(k+1)/3})$ by the same argument with $d = 3$: each cell has volume $h^3$, so $N \propto h^{-3}$ and the error scales as $\mathcal{O}(N^{-(k+1)/3})$.
 The estimated error again tracks the actual error reliably across all three features.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit tetrahedron as a function of the number of evaluations ($N$).\label{fig:cvg_tetrahedron}](cvg_tetrahedron.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit tetrahedron as a function of the number of evaluations ($N$).
+Insets show the adaptive sub-domain at `rtol` equal $10^{-2}$ and the isovalues of the integrand.\label{fig:cvg_tetrahedron}](cvg_tetrahedron.png)
 
 ## Orthotopes and comparison with `HCubature.jl`
 
@@ -337,14 +338,16 @@ For the point and hypersphere features, where the localized region is not aligne
 For the axis-aligned line feature at $x_1 = 1/\pi$, `HCubature.jl` has a clear advantage: its estimator detects that the error is concentrated in the $x_1$ direction and refines exclusively along that axis, while `HAdaptiveIntegration` bisects uniformly in both directions, multiplying the number of evaluations by $2^d$ at each step.
 This case illustrates a known limitation of uniform subdivision, and anisotropic splitting remains a direction for future development.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.\label{fig:cvg_rectangle}](cvg_rectangle.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.
+Insets show the adaptive sub-domain at default tolerance and the integrand as a heatmap.\label{fig:cvg_rectangle}](cvg_rectangle.png)
 
 The same comparison is repeated for the unit cube in \autoref{fig:cvg_cube}.
 Here `HAdaptiveIntegration` uses the default `BerntsenEspelid` rule [@BerntsenEspelid1988] while `HCubature.jl` uses its own built-in rule, so unlike the 2D case the comparison does not isolate subdivision strategy alone — the cubature rules also differ.
 Nevertheless, the qualitative picture is the same: for the point and hypersphere features the two solvers are comparable, while for the hyperplane feature `HCubature.jl` retains its advantage from estimator-driven refinement.
 The cost of uniform bisection grows as $2^d$ per step, which makes the gap more pronounced in 3D and reinforces anisotropic splitting as a priority for future work.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit cube, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.\label{fig:cvg_cube}](cvg_cube.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit cube, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.
+Insets show the adaptive sub-domain at `rtol` equal $10^{-2}$ and the isovalues of the integrand.\label{fig:cvg_cube}](cvg_cube.png)
 
 # AI usage disclosure
 
