@@ -50,21 +50,25 @@ Its main features are:
 
 ## Usage
 
-The package is centered around a single function, `integrate(f, domain)`, together with constructors for common domains.
+The package is centered around a single function, `integrate(f, domain; kwargs...)`, together with constructors for common domains. The usual workflow is comprised of the following two steps:
 
-**Create a domain.**
-There are seven domain constructors:
+**1. Create a domain.**
+There are two main domain constructors:
 
-- `Segment`: defined by its two end points;
-- `Triangle`, `Tetrahedron`, `Simplex`: defined by its vertices;
-- `Rectangle`, `Cuboid`, `Orthotope`: defined by its low and high corner.
+- `Simplex`: defined by its vertices;
+- `Orthotope`: defined by its low and high corner.
+
+For convenience, the following aliases are provided for the most common cases: `Segment`,
+`Triangle`, `Tetrahedron`, `Rectangle`, `Cuboid`.
 
 For example:
+
 ```julia
 using HAdaptiveIntegration
 segment     = Segment(0, 1)
 triangle    = Triangle((0,0), (1,0), (0,1))
 rectangle   = Rectangle((0,0), (1,1))
+simplex4    = Simplex((0,0,0,0), (1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
 ```
 
 **Integrate.**
@@ -77,6 +81,13 @@ I, E = integrate(f, rectangle)
 ```
 
 The return value is a pair `(I, E)`, where `I` is the integral estimate and `E` is an a posteriori error estimate.
+
+Additionally, the `integrate` function accepts keyword arguments to control the stopping
+condition of the adaptive algorithm and the choice of embedded cubature. The most important ones, controlling the stopping condition, are:
+
+- `atol`: absolute tolerance for the error estimate;
+- `rtol`: relative tolerance for the error estimate;
+- `maxsubdiv`: maximum number of subdivisions.
 
 # Statement of need
 
@@ -119,10 +130,10 @@ An explanation of the trade-offs you weighed, the design/architecture you chose,
 This should demonstrate meaningful design thinking beyond a superficial code structure description.
 -->
 
-The `HAdaptiveIntegration` package is organized with extending it in mind.
+The `HAdaptiveIntegration` package is organized so as to make it easy to use and extend.
 It has two submodules: the `Domain` module which define the possible integration domain and how to subdivide them; and the `Rule` module which define the integration rules.
-There is different type of rules, the explicit rules which are computed using explicit formula, and tabulated rules which are stored in a decimal format.
-The package has basically one entry point the `integrate` function.
+There are different types of rules: explicit rules which are computed using explicit formulas, and tabulated rules which are stored in a decimal format.
+The package has basically one entry point: the `integrate` function.
 The automatic adaptive algorithm it uses has two component: an embedded cubature and a subdivision strategy described in the following sections [Embedded cubature] and [The adaptive algorithm].
 
 ## Embedded cubature
@@ -140,15 +151,15 @@ In accordance with the number of point evaluation of the two cubature rule, $\ma
 The order of a cubature rule is the highest integer $k \in \mathbb{N}$ such that the cubature is exact on the space of polynomials with total degree less or equal than $k$.
 
 For a domain $\omega$, we define the map $\phi \colon \widehat{\omega} \to \omega$ from the reference domain to the physical domain.
-Using the embedded cubature, we define the *local* estimated integral value $I_\omega$ and the *local* estimated error $E_\omega$ by 
+Using the embedded cubature, we define the *local* estimated integral value $I_\omega$ and the *local* estimated error $E_\omega$ by
 $$
   I_\omega = \lvert\det \operatorname{J}_\phi\rvert \ \mathcal{H}(f \circ \phi)
   \quad \text{and} \quad
   E_\omega = \lvert\det \operatorname{J}_\phi\rvert \ \lVert \mathcal{H}(f \circ \phi) - \mathcal{L}(f \circ \phi) \rVert,
 $$
-where $\operatorname{J}_\phi$ is the Jacobian of $\phi$ which is constant for simplices and axis-aligned orthotopes.
+where $\operatorname{J}_\phi$ is the Jacobian of $\phi$ (which is constant for simplices and axis-aligned orthotopes) and $\lVert \cdot \rVert$ is the chosen norm on $\mathbb{T}$.
 
-Each domain type has a default embedded cubature resume in Table 1.
+Each domain type has a default embedded cubature summarized in Table 1.
 
 |                                           |                                   |
 | :---------------------------------------- | :-------------------------------- |
@@ -168,7 +179,7 @@ $$
   \mathcal{P}_{n+1} = \left[ \mathcal{P}_n \setminus \left\{\omega_0\right\} \right] \cup \left\{\omega_1, \ldots, \omega_{2^d}\right \},
   \qquad \forall n \in \mathbb{N},
 $$
-where $\omega_0$ is chosen such that $E_{\omega_0} = \max \{E_\omega : \omega \in \mathcal{P}_n\}$, and $\omega_1, \ldots, \omega_{2^d}$ are subdomain from the subdivision of $\omega_0$.
+where $\omega_0$ is chosen such that $E_{\omega_0} = \max \{E_\omega : \omega \in \mathcal{P}_n\}$, and $\omega_1, \ldots, \omega_{2^d}$ are subdomains given by a subdivision of $\omega_0$.
 The subdivision follows the geometry of the domain.
 In dimension $d$, orthotopes are bisected along each axis, producing $2^d$ subdomains, while simplices are subdivided by midpoint edge simplex refinement, again producing $2^d$ subdomain, see [@SimplexSubdiv].
 
@@ -178,7 +189,7 @@ $$
   \quad \text{and} \quad
   E_n = \sum_{\omega \in \mathcal{P}_n} E_\omega.
 $$
-For this type of algorithm, the stopping condition is control by three parameters: the absolute tolerance $\mathtt{atol} \geq 0$, the relative tolerance $\mathtt{rtol} \geq 0$, and the number of subdivision maximum $n_{\max} \in \mathbb{N}$.
+For this type of algorithm, the stopping condition is control by three parameters: the absolute tolerance $\mathtt{atol} \geq 0$, the relative tolerance $\mathtt{rtol} \geq 0$, and the number of maximum subdivisions $n_{\max} \in \mathbb{N}$.
 The subdivision process stops when
 $$
   E_n \leq \mathtt{atol}
@@ -192,7 +203,7 @@ At the end $(I_n, E_n)$ is return as the integral value and error estimate.
 ## Implementation
 
 The implementation follows closely the algorithm describe in section [The adaptive algorithm].
-One important implementation detail is the uses a binary heap to store the partition $\mathcal{P}_n$.
+One important implementation detail is the use a binary heap to store the partition $\mathcal{P}_n$.
 More precisely, a max binary heap storing $\{(\omega, I_\omega, E_\omega) : \omega \in \mathcal{P}_n \}$ is used, and the comparison only involve $E_\omega$.
 As this data structure allows efficient retrieval of a maximum local error, as well as efficient `pop` and `push` operation.
 In addition, in the case of doing multiple integral on the same domain type and function signature, we can pre-allocate the heap and pass it to the `integrate` function via the `buffer` keyword to reduce the number of allocation.
@@ -224,9 +235,8 @@ $$
     \mathcal{L}(b_{K_{\mathcal{L}}}) - \int_{\widehat{\Omega}} b_{K_{\mathcal{L}}}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
   \end{pmatrix}.
 $$
-The goal is to find a root of the function $F$ with higher precision than the stored precision, for a tabulated rule $\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$, we already have $\lVert F(\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}) \rVert_2 = \varepsilon \ll 0$.
-We want to find a $\tilde{\boldsymbol{u}}$ such that $\lVert F(\tilde{\boldsymbol{u}}) \rVert_2 = \eta < \varepsilon$, to do that we use a least-square Newton method, [@XiaoGimbutas2010{section 2.3}].
-Set $\boldsymbol{u}_0 = \boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$ and define the iteration
+The goal is to find a root of the function $F$ with higher precision than the stored precision. For a tabulated rule $\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$, we already have $\lVert F(\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}) \rVert_2 = \varepsilon \ll 0$, and we want to find a $\tilde{\boldsymbol{u}}$ such that $\lVert F(\tilde{\boldsymbol{u}}) \rVert_2 = \eta < \varepsilon$. To do that we use a least-square Newton method, [@XiaoGimbutas2010{section 2.3}].
+In detail, set $\boldsymbol{u}_0 = \boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$ and define the iteration
 $$
   \boldsymbol{u}_{p+1} = \boldsymbol{u}_p - \boldsymbol{\delta}_p
   \qquad \text{where} \
@@ -240,7 +250,7 @@ It is written that way because, we usually have $K_{\mathcal{H}} + K_{\mathcal{L
 Therefore, we choose the vector in the null space of $\operatorname{J}_F(\boldsymbol{u}_p)$ with the smallest magnitude.
 
 **Remark.** `IncreasePrecisionExt` uses the monomial basis because of the ease of uses and the exact values of the integrals is known explicitly.
-However, this basis is not well condition, that means that in practice in order to have a rule at precision $\varepsilon = 10^{-m}$ you need to increase the precision using `BigFloat` with a higher precision $\varepsilon^\alpha$ with $\alpha > 1$.
+However, this basis is not well condition, that means that in practice in order to have a rule at precision $\varepsilon = 10^{-m}$ you need to increase the precision using `BigFloat` with a higher precision $\varepsilon^\alpha$ with $\alpha > 1$. Using a better basis, such as the $L^2$-orthogonal basis, should improve the conditioning number of the problem.
 
 **Remark.** The tabulated rules have the same symmetries as the reference domain.
 However, for simplicity, we did not impose the symmetry in this method, so it does not preserve symmetry.
@@ -258,8 +268,7 @@ The evidence should be compelling and specific, not aspirational.
 The repository includes API documentation, advanced examples covering the pre-allocation of the buffer, the `callback` mechanism, the custom cubature, an extension for arbitrary-precision workflows, and an automated test suite spanning all supported domain.
 Continuous integration checks tests, documentation, and linting.
 
-`HAdaptiveIntegration` has been interface in [@Integrals] which is part of the SciML ecosystem.
-And, it was featured in the [This month in Julia world - 2026-02](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110) Newsletter.
+`HAdaptiveIntegration` was featured in the [This month in Julia world - 2026-02](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110) Newsletter. It has been interfaced in [@Integrals], which is part of the SciML ecosystem. It is also used as the backend for a nearly-singular integration method in [@Inti].
 
 <!--
 # Complexity estimates
@@ -271,17 +280,67 @@ And, it was featured in the [This month in Julia world - 2026-02](https://discou
 ## Sub-manifold (nearly-)singularities
 -->
 
-# Benchmarks (comparison with `HCubature.jl`)
+<!-- # Benchmarks (comparison with `HCubature.jl`) -->
 
-## Uniform regularity
+# Example gallery
 
-## Isotropic (nearly-)singularities
+We now showcase some interesting usecases of the package for integrands with localized
+features, which is where we expect the package to be most useful. We begin with simplifices,
+which are the most common domain in mesh-based scientific computing (and also the most novel
+feature of the package), and then move to orthotopes, where we provide a brief comparison
+with `HCubature.jl`.
 
-## Sub-manifold (nearly-)singularities
+In the examples that follow we make use of the following mollified delta function to create
+localized features in the integrand:
 
-Representative comparisons against `HCubature.jl` on orthotopes confirm the intended scope of the package. On a smooth integral over the unit square, $f(x) = \exp(x_1 + x_2)$ with `rtol = 1e-8`, `HAdaptiveIntegration` required 125 function evaluations versus 493 for `HCubature.jl`, and the observed runtime on a local Linux run was about 1.1 microseconds versus 3.8 microseconds. On a more difficult corner-singular square test, $f(x) = (x_1^2 + x_2^2 + 10^{-8})^{-1/2}$ with `rtol = 1e-6`, the counts were 2125 versus 2941 evaluations, again in favor of `HAdaptiveIntegration`.
+$$
+\eta(r) = \frac{1}{\sqrt{2\pi}}e^{-r^2/2}
+$$
 
-The same trend appears in three dimensions for low-dimensional orthotopes with specialized rules: on the unit cuboid with $f(x) = \exp(x_1 + x_2 + x_3)$ and `rtol = 1e-6`, `HAdaptiveIntegration` used 65 evaluations versus 429 for `HCubature.jl`. However, the crossover expected from the state-of-the-field discussion is also visible: on a smooth four-dimensional orthotope with `rtol = 1e-4`, `HCubature.jl` used fewer evaluations (171 versus 969) and was faster on the same machine. These measurements support the intended positioning of `HAdaptiveIntegration`: low-dimensional simplices and orthotopes, especially when geometry-specific tabulated rules are available, while `HCubature.jl` remains a strong choice for higher-dimensional boxes.
+Multidimensional integrands with a localized features on more complex domains can be created by
+
+$$
+\delta_\epsilon(\phi(\boldsymbol{x})) = \frac{1}{\epsilon^d}\eta(\phi(\boldsymbol{x})/\epsilon)
+$$
+
+where $\phi$ is a function that vanishes on the desired location of the localized feature,
+and $\epsilon$ controls the width of the feature. In particular, we focus on two types of features:
+
+- **Point feature:** $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x} -
+  \boldsymbol{x}_0\rVert_2$, which creates a sharp peak at the point $\boldsymbol{x}_0$.
+- **Codimension one features**: $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x}\rVert_2 - r$,
+  which creates a sharp ridge along the hyper-sphere of radius $r$.
+
+## Simplices
+
+The subdivision automatically refines the mesh around the feature, leaving the rest of the
+domain sparsely meshed \autoref{fig:triangle_meshes}.
+
+![Adaptive meshes for the point feature (left) and the curve feature (right). The color maps
+the integrand $f(\boldsymbol{x})$, and the lines show the adaptive
+sub-simplices.\label{fig:triangle_meshes}](triangle_meshes.png)
+
+The convergence plots in \autoref{fig:cvg_triangle} display both the actual error and the
+estimated error returned by the solver. The dashed lines show the expected convergence rates
+for the underlying `RadonLaurie` embedded rule.
+
+![Convergence of the actual and estimated errors for the point and curve features as a
+function of the number of evaluations ($N$).\label{fig:cvg_triangle}](cvg_triangle.png)
+
+A similar result is obtained for higher order simplices; we show the results for a
+tetrahedron in \autoref{fig:cvg_tetrahedron}. The dashed lines show the expected convergence
+rates for the underlying `GrundmannMoeller` embedded rule.
+
+![Convergence of the actual and estimated errors for the point and curve features as a
+function of the number of evaluations ($N$) for a
+tetrahedron.\label{fig:cvg_tetrahedron}](cvg_tetrahedron.png)
+
+## Orthotopes and comparison with `HCubature.jl`
+
+- Also supported
+- Sometimes better than `HCubature.jl` because of higher order quadratures employed (and
+  maybe slightly better to split uniformly in such cases).
+- In general, anisotripic splitting is preferred and remains as future work
 
 # AI usage disclosure
 
