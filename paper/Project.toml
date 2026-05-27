@@ -1,0 +1,5 @@
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+HAdaptiveIntegration = "eaa5ad34-b243-48e9-b09c-54bc0655cecf"
+HCubature = "19dc6840-f33b-545b-b366-655c7e3ffd49"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
