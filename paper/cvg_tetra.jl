@@ -23,20 +23,14 @@ function run_convergence(fct)
     dom = Tetrahedron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))
 
     rtol_vec = [1 / 10^i for i in 1:8]
-    Iref, Eref = reference(fct)
+    Iref, _ = reference(fct)
 
-    hai = (
-        I = zeros(length(rtol_vec)),
-        E = zeros(length(rtol_vec)),
-        N = zeros(length(rtol_vec)),
-    )
+    hai = (I = zeros(length(rtol_vec)), E = zeros(length(rtol_vec)), N = zeros(length(rtol_vec)))
 
     for (i, rtol) in enumerate(rtol_vec)
         counter[] = 0
         I, E = integrate(fct_count, dom; rtol = rtol)
-        hai.I[i] = I
-        hai.E[i] = E
-        hai.N[i] = counter[]
+        hai.I[i], hai.E[i], hai.N[i] = I, E, counter[]
     end
 
     return hai, Iref, high, low
@@ -44,59 +38,64 @@ end
 
 ## definitions
 ϵ = 0.05
-x₀ = SVector(1 / 3, 1 / 5, 1 / 7)
+x₀ = SVector(1 / pi, 1 / pi, 1 / pi)
 r₀ = 0.5
 
-# Standardized integrands for mesh plot and convergence
 fct_point = (x) -> scaled_mollifier(norm(x - x₀), ϵ, 3)
-fct_curve = (x) -> scaled_mollifier(abs(norm(x) - r₀), ϵ, 3)
+fct_surface = (x) -> scaled_mollifier(dot(x, x) - r₀^2, ϵ, 1)
+fct_plane = (x) -> scaled_mollifier(x[1] - 1 / π, ϵ, 1)
 
-# Generate Convergence Plots
 println("Running convergence for point feature...")
 hai_point, Iref_point, high, low = run_convergence(fct_point)
-println("Running convergence for curve feature...")
-hai_curve, Iref_curve, _, _ = run_convergence(fct_curve)
+println("Running convergence for surface feature...")
+hai_curve, Iref_curve, _, _ = run_convergence(fct_surface)
+println("Running convergence for plane feature...")
+hai_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
-fig_cvg = Figure(size = (800, 400))
+fig_cvg = Figure(size = (1200, 500))
 
-# Point Subplot
-ax_cvg1 = Axis(
-    fig_cvg[1, 1], xlabel = "N (number of evaluations)", ylabel = "Relative error",
-    xscale = log10, yscale = log10, title = "Point Feature"
+axes_cvg = Axis[]
+legend_plots = Any[]
+for (col, hai, Iref, title) in (
+        (1, hai_point, Iref_point, "Point Feature"),
+        (2, hai_curve, Iref_curve, "Surface Feature"),
+        (3, hai_plane, Iref_plane, "Plane Feature"),
+    )
+    ylab = col == 1 ? "Relative error" : ""
+    ax = push!(
+        axes_cvg, Axis(
+            fig_cvg[1, col];
+            xlabel = "N (number of evaluations)",
+            ylabel = ylab,
+            xscale = log10,
+            yscale = log10,
+            title = title,
+        )
+    )[end]
+
+    p1 = scatterlines!(ax, hai.N, abs.(hai.I .- Iref) ./ abs(Iref); marker = :circle)
+    p2 = scatterlines!(ax, hai.N, hai.E ./ abs(Iref); marker = :rect)
+    idx_ref = length(hai.N)
+    p3 = lines!(
+        ax, hai.N, (abs(hai.I[idx_ref] - Iref) / abs(Iref)) .* (hai.N ./ hai.N[idx_ref]) .^ (-high / 3);
+        color = :black, linestyle = :dash,
+    )
+    p4 = lines!(
+        ax, hai.N, (hai.E[idx_ref] / abs(Iref)) .* (hai.N ./ hai.N[idx_ref]) .^ (-low / 3);
+        color = :gray, linestyle = :dash,
+    )
+
+    col == 1 && append!(legend_plots, [p1, p2, p3, p4])
+end
+
+linkaxes!(axes_cvg...)
+Legend(
+    fig_cvg[2, :],
+    legend_plots,
+    ["Actual error", "Estimated error", L"\mathcal{O}(N^{-%$(high)/3})", L"\mathcal{O}(N^{-%$(low)/3})"];
+    orientation = :horizontal,
+    framevisible = false,
 )
-scatterlines!(ax_cvg1, hai_point.N, abs.(hai_point.I .- Iref_point) ./ abs(Iref_point); marker = :circle, label = "Actual error")
-scatterlines!(ax_cvg1, hai_point.N, hai_point.E ./ abs(Iref_point); marker = :rect, label = "Estimated error")
 
-# dashed lines for slopes
-lines!(
-    ax_cvg1, hai_point.N, (abs(hai_point.I[end] - Iref_point) / abs(Iref_point)) .* (hai_point.N ./ hai_point.N[end]) .^ (-high / 3);
-    color = :black, linestyle = :dash, label = L"\mathcal{O}(N^{-%$(high)/3})"
-)
-lines!(
-    ax_cvg1, hai_point.N, (hai_point.E[end] / abs(Iref_point)) .* (hai_point.N ./ hai_point.N[end]) .^ (-low / 3);
-    color = :gray, linestyle = :dash, label = L"\mathcal{O}(N^{-%$(low)/3})"
-)
-
-axislegend(ax_cvg1; position = :lb)
-
-# Curve Subplot
-ax_cvg2 = Axis(
-    fig_cvg[1, 2], xlabel = "N (number of evaluations)",
-    xscale = log10, yscale = log10, title = "Surface Feature"
-)
-scatterlines!(ax_cvg2, hai_curve.N, abs.(hai_curve.I .- Iref_curve) ./ abs(Iref_curve); marker = :circle, label = "Actual error")
-scatterlines!(ax_cvg2, hai_curve.N, hai_curve.E ./ abs(Iref_curve); marker = :rect, label = "Estimated error")
-
-lines!(
-    ax_cvg2, hai_curve.N, (abs(hai_curve.I[end] - Iref_curve) / abs(Iref_curve)) .* (hai_curve.N ./ hai_curve.N[end]) .^ (-high / 3);
-    color = :black, linestyle = :dash, label = L"\mathcal{O}(N^{-%$(high)/2})"
-)
-lines!(
-    ax_cvg2, hai_curve.N, (hai_curve.E[end] / abs(Iref_curve)) .* (hai_curve.N ./ hai_curve.N[end]) .^ (-low / 3);
-    color = :gray, linestyle = :dash, label = L"\mathcal{O}(N^{-%$(low)/2})"
-)
-
-axislegend(ax_cvg2; position = :lb)
-
-save("cvg_tetrahedron.png", fig_cvg)
+save(joinpath(@__DIR__, "cvg_tetrahedron.png"), fig_cvg)
 println("Saved cvg_tetrahedron.png")
