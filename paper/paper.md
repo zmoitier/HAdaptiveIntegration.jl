@@ -30,7 +30,7 @@ A description of the high-level functionality and purpose of the software for a 
 `HAdaptiveIntegration.jl` is a `Julia` [@Julia] package for automatic adaptive numerical integration on multidimensional simplices and axis-aligned orthotopes.
 It approximates integrals of the form
 $$
-  I = \int_{\Omega} f(\boldsymbol{x}) \, \operatorname{d}\boldsymbol{x}
+  I = \int_{\Omega} f(\boldsymbol{x}) \, \operatorname{d}\!\boldsymbol{x}
 $$
 where:
 
@@ -123,36 +123,35 @@ The `HAdaptiveIntegration` package is organized with extending it in mind.
 It has two submodules: the `Domain` module which define the possible integration domain and how to subdivide them; and the `Rule` module which define the integration rules.
 There is different type of rules, the explicit rules which are computed using explicit formula, and tabulated rules which are stored in a decimal format.
 The package has basically one entry point the `integrate` function.
-The automatic adaptive algorithm uses embedded cubature and subdivision strategy describe in the follow section [Embedded cubatures] and [Adaptive algorithm].
+The automatic adaptive algorithm it uses has two component: an embedded cubature and a subdivision strategy described in the following sections [Embedded cubature] and [The adaptive algorithm].
 
-## Embedded cubatures
+## Embedded cubature
 
-At the core of automatic adaptive integration method, there is a cubature pair $(\mathcal{H}, \mathcal{L})$, define on the reference domain $\widehat{K}$ by
+At the core of adaptive numerical integration method, there is a cubature pair $(\mathcal{H}, \mathcal{L})$, define on the reference domain $\widehat{\Omega}$ ($\{\boldsymbol{x} \in \mathbb{R}_+^d \mid x_1 + \cdots + x_d \leq 1\}$ for simplices or $[0, 1]^d$ for orthotopes) by
 $$
   \mathcal{H}(f) = \sum_{1 \leq i \leq \mathsf{H}} h_i \, f(\boldsymbol{x}_i)
   \quad \text{and} \quad
   \mathcal{L}(f) = \sum_{1 \leq i \leq \mathsf{L}} \ell_i \, f(\boldsymbol{x}_i),
-  \qquad \forall f \in \mathscr{C}^0(\widehat{K}).
+  \qquad \forall f \in \mathscr{C}^0(\widehat{\Omega}).
 $$
-Where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{K}$ are the cubature point on the reference domain, $h_1, \ldots, h_{\mathsf{H}} \in \mathbb{R}$ are the $\mathcal{H}$ cubature weights, $\ell_1, \ldots, \ell_{\mathsf{L}} \in \mathbb{R}$ are the $\mathcal{L}$ cubature weights, and $\mathsf{H} > \mathsf{L}$ so the $\mathcal{H}$ rule has more points than the $\mathcal{L}$ rule.
+Where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{\Omega}$ are the cubature point on the reference domain, $h_1, \ldots, h_{\mathsf{H}} \in \mathbb{R}$ are the $\mathcal{H}$ cubature weights, $\ell_1, \ldots, \ell_{\mathsf{L}} \in \mathbb{R}$ are the $\mathcal{L}$ cubature weights, and $\mathsf{H} > \mathsf{L}$ so the $\mathcal{H}$ rule has more points than the $\mathcal{L}$ rule.
 The pair $(\mathcal{H}, \mathcal{L})$ is called an embedded cubature because the $\mathcal{L}$ rule use a subset of the points of the $\mathcal{H}$ rule.
 In accordance with the number of point evaluation of the two cubature rule, $\mathcal{H}$ has order $d_{\mathcal{H}}$ and $\mathcal{L}$ has order $d_{\mathcal{L}}$ with $d_{\mathcal{H}} \geq d_{\mathcal{L}}$.
-The order of a cubature rule is the highest $k \in \mathbb{N}$ such that the cubature is exact on the space of polynomials with total degree less than $k$.
+The order of a cubature rule is the highest integer $k \in \mathbb{N}$ such that the cubature is exact on the space of polynomials with total degree less or equal than $k$.
 
-For a domain $K$, we define the map $\phi \colon \widehat{K} \to K$ from the reference domain to the physical domain.
-Using the embedded cubature, we define the estimated integral value $I_K$ and the estimated error $E_K$ by 
+For a domain $\Omega$, we define the map $\phi \colon \widehat{\Omega} \to \Omega$ from the reference domain to the physical domain.
+Using the embedded cubature, we define the estimated integral value $I_\Omega$ and the estimated error $E_\Omega$ by 
 $$
-  I_K = \lvert\det J_\phi\rvert \ \mathcal{H}(f \circ \phi)
+  I_\Omega = \lvert\det \operatorname{J}_\phi\rvert \ \mathcal{H}(f \circ \phi)
   \quad \text{and} \quad
-  E_K = \lvert\det J_\phi\rvert \ \lVert \mathcal{H}(f \circ \phi) - \mathcal{L}(f \circ \phi) \rVert,
+  E_\Omega = \lvert\det \operatorname{J}_\phi\rvert \ \lVert \mathcal{H}(f \circ \phi) - \mathcal{L}(f \circ \phi) \rVert,
 $$
-where $J_\phi$ is the Jacobian of $\phi$ which is constant for simplices and axis-aligned
-orthotopes.
+where $\operatorname{J}_\phi$ is the Jacobian of $\phi$ which is constant for simplices and axis-aligned orthotopes.
 
 Each domain type has a default embedded cubature resume in Table 1.
 
 |                                           |                                   |
-|:------------------------------------------|:----------------------------------|
+| :---------------------------------------- | :-------------------------------- |
 | 1d. `Segment` [@Laurie1997]               |                                   |
 | 2d. `Triangle` [@Laurie1982]              | `Rectangle` [@CoolsHaegemans1989] |
 | 3d. `Tetrahedron` [@GrundmannMoeller1978] | `Cuboid` [@BerntsenEspelid1988]   |
@@ -160,36 +159,50 @@ Each domain type has a default embedded cubature resume in Table 1.
 
 Table 1: For each dimension and domain give the default rules used.
 
-## Adaptive algorithm
+## The adaptive algorithm
 
-The adaptive driver maintains a collection of active subdomains in a max-heap keyed by the
-local error estimate. Starting from the initial domain, the algorithm repeatedly removes the
-subdomain with the largest estimated error, subtracts its previous contribution from the
-running totals, subdivides it, evaluates the children, and inserts them back into the heap.
-This greedy strategy concentrates work where the current error indicator is largest while
-keeping the global estimate available after every refinement.
+Now, we have a way of computing an estimated integral value and error on a domain.
+Given a function $f$ and an initial domain $\Omega$, the adaptive algorithm constructs a sequence of nested partitions.
+It starts with $\mathcal{P}_0 = \{(\Omega, I_\Omega, E_\Omega)\}$ then
+$$
+  \mathcal{P}_{n+1} = \left[\mathcal{P}_n \setminus \left\{(\omega_0, I_{\omega_0}, E_{\omega_0})\right \}\right] \cup \left\{(\omega_1, I_{\omega_1}, E_{\omega_1}), \ldots, (\omega_{2^d}, I_{\omega_{2^d}}, E_{\omega_{2^d}})\right \},
+  \qquad \forall n \in \mathbb{N},
+$$
+where $\omega_0$ is chosen such that $E_{\omega_0} = \max_{(\omega, I_\omega, E_\omega) \in \mathcal{P}_n} E_\omega$, and $\omega_1, \ldots, \omega_{2^d}$ are subdomain from the subdivision of $\omega_0$.
+The subdivision follows the geometry of the domain.
+In dimension $d$, orthotopes are bisected along each axis, producing $2^d$ subdomains, while simplices are subdivided by midpoint edge simplex refinement, again producing $2^d$ subdomain, see [@SimplexSubdiv].
 
-Subdivision follows the geometry of the domain. Orthotopes are bisected along each axis,
-producing $2^d$ children, while simplices are subdivided by midpoint-based simplicial
-refinement, again producing $2^d$ children in dimension $d$. Integration stops when the
-global error estimate satisfies either an absolute tolerance or a relative tolerance,
+Associated to the ${(\mathcal{P}_n)}_{n \in \mathbb{N}}$ sequence, we define the global integral value $I_n$ and error $E_n$ estimators by
 $$
-E \leq \mathtt{atol} \quad \text{or} \quad E \leq \mathtt{rtol}\,\lVert I \rVert,
+  I_n = \sum_{(\omega, I_\omega, E_\omega) \in \mathcal{P}_n} I_\omega
+  \quad \text{and} \quad
+  E_n = \sum_{(\omega, I_\omega, E_\omega) \in \mathcal{P}_n} E_\omega.
 $$
-or when a user-specified maximum number of subdivisions is reached. Two implementation
-details matter in practice: reusable heap buffers allow allocation-free repeated calls, and
-an optional callback exposes convergence information for diagnostics or benchmarking.
+For this type of algorithm, the stopping condition is control by three parameters: the absolute tolerance $\mathtt{atol} \geq 0$, the relative tolerance $\mathtt{rtol} \geq 0$, and the number of subdivision maximum $n_{\max} \in \mathbb{N}$.
+The subdivision process stops when
+$$
+  E_n \leq \mathtt{atol}
+  \quad \text{or} \quad
+  E_n \leq \mathtt{rtol}\, \lVert I_n \rVert
+  \quad \text{or} \quad
+  n = n_{\max}.
+$$
+At the end $(I_n, E_n)$ is return as the integral value and error estimate.
+
+## Implementation
+
+The implementation follows closely the algorithm describe in [The adaptive algorithm].
+One important implementation detail is that it uses a mutable binary heap to store the partition $\mathcal{P}_n$.
+As this data structure allows efficient retrieval of a maximum local error, as well as efficient `pop` and `push` operation.
+In addition, in the case of doing multiple integral on the same domain type and function signature, we can pre-allocate the heap and pass it to the `integrate` function via the `buffer` keyword to reduce the number of allocation.
 
 ## Extended precision
 
-Only the rules from [@GrundmannMoeller1978; @GenzMalik1980] are generated using explicit formula, all the other are tabulated.
-
-Low-dimensional tabulated cubatures are stored with finite decimal precision. For demanding
-accuracy targets, this tabulation error can become the limiting factor even if the integrand
-itself is evaluated in `BigFloat` arithmetic. `HAdaptiveIntegration` addresses this with the
-optional `IncreasePrecisionExt` extension, which reconstructs higher-precision tabulated
-rules by solving the polynomial exactness conditions with Newton iterations and automatic
-differentiation through `ForwardDiff`.
+As said in the [Summary] section, `integrate` support arbitrary precision.
+However, only the rules from [@GrundmannMoeller1978; @GenzMalik1980] are generated using explicit formula, all the other are tabulated with a finite decimal precision which is incompatible with arbitrary precision.
+All the tabulated rule are stored in quadruple precision.
+But, if we want to use tabulated rule with higher precision, it can be done by first increasing the precision of the rule.
+`HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which reconstructs higher-precision tabulated rules by solving the polynomial exactness conditions with Newton iterations and automatic differentiation through `ForwardDiff` [@ForwardDiff2016].
 
 This design keeps the default package lightweight while enabling high-precision workflows
 when needed. In the test suite, deliberately reduced-precision tabulated rules fail to reach
