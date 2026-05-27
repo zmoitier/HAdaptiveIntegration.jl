@@ -1,9 +1,9 @@
-using HCubature
-using HAdaptiveIntegration: integrate, Cuboid
-using HAdaptiveIntegration.Rule: CUBE_BE65, GenzMalik, embedded_cubature, orders
 using CairoMakie
-using StaticArrays
+using HAdaptiveIntegration.Rule: CUBE_BE65, GenzMalik, embedded_cubature, orders
+using HAdaptiveIntegration: Cuboid, integrate
+using HCubature
 using LinearAlgebra
+using StaticArrays
 
 include("util.jl")
 

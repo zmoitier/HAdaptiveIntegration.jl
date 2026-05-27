@@ -1,9 +1,9 @@
-using HCubature
-using HAdaptiveIntegration: integrate, Rectangle, allocate_buffer
-using HAdaptiveIntegration.Rule: GenzMalik, embedded_cubature, orders, SQUARE_CH25
 using CairoMakie
-using StaticArrays
+using HAdaptiveIntegration.Rule: GenzMalik, SQUARE_CH25, embedded_cubature, orders
+using HAdaptiveIntegration: Rectangle, allocate_buffer, integrate
+using HCubature
 using LinearAlgebra
+using StaticArrays
 
 include("util.jl")
 

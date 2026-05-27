@@ -97,7 +97,7 @@ This should clearly state what problems the software is designed to solve, who t
 -->
 
 Adaptive numerical integration is a routine building block in scientific computing, including finite-element and boundary-element methods, validation of semi-analytical formula, and parameter studies where repeated integrals must be computed over reference or physical cells.
-In `Julia`, existing packages already cover important parts of this space: `QuadGK.jl` [@QuadGK] is the natural tool for one-dimensional adaptive integration, `HCubature.jl` [@HCubature] provides adaptive cubature on axis-aligned orthotopes, and `Cuba.jl` [@Cuba] exposes a family of multidimensional integration methods, including stochastic ones, for rectangular domains.
+In `Julia`, existing packages already cover important parts of this space: `QuadGK.jl` [@QuadGK] is the package to use for one-dimensional adaptive integration, `HCubature.jl` [@HCubature] provides adaptive cubature on axis-aligned orthotopes, and `Cuba.jl` [@Cuba] exposes a family of multidimensional integration methods, including stochastic ones, for rectangular domains.
 
 The main contribution is that, to our knowledge, there were no `Julia` packages capable of doing adaptive integration on simplices (triangles, tetrahedra, etc.).
 The second contribution is the use of specialized tabulated rules, which allow higher-order schemes than `HCubature.jl`.
@@ -143,7 +143,7 @@ $$
   \mathcal{L}(f) = \sum_{1 \leq i \leq \mathsf{L}} \ell_i \, f(\boldsymbol{x}_i),
   \qquad \forall f \in \mathscr{C}^0(\widehat{\omega}).
 $$
-where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{\Omega}$ are the cubature points on the reference domain, $h_1, \ldots, h_{\mathsf{H}} \in \mathbb{R}$ are the $\mathcal{H}$ cubature weights, $\ell_1, \ldots, \ell_{\mathsf{L}} \in \mathbb{R}$ are the $\mathcal{L}$ cubature weights, and $\mathsf{H} > \mathsf{L}$ so the $\mathcal{H}$ rule has more points than the $\mathcal{L}$ rule.
+where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{\omega}$ are the cubature points on the reference domain, $h_1, \ldots, h_{\mathsf{H}} \in \mathbb{R}$ are the $\mathcal{H}$ cubature weights, $\ell_1, \ldots, \ell_{\mathsf{L}} \in \mathbb{R}$ are the $\mathcal{L}$ cubature weights, and $\mathsf{H} > \mathsf{L}$ so the $\mathcal{H}$ rule has more points than the $\mathcal{L}$ rule.
 The pair $(\mathcal{H}, \mathcal{L})$ is called an embedded cubature because the $\mathcal{L}$ rule uses a subset of the points of the $\mathcal{H}$ rule.
 In accordance with the number of point evaluations of the two cubature rules, $\mathcal{H}$ has order $k_{\mathcal{H}}$ and $\mathcal{L}$ has order $k_{\mathcal{L}}$ with $k_{\mathcal{H}} > k_{\mathcal{L}}$.
 The order of a cubature rule is the highest integer $k \in \mathbb{N}$ such that the cubature is exact on the space of polynomials with total degree less or equal than $k$.
@@ -157,16 +157,15 @@ $$
 $$
 where $\operatorname{J}_\phi$ is the Jacobian of $\phi$ (which is constant for simplices and axis-aligned orthotopes) and $\lVert \cdot \rVert$ is the chosen norm on $\mathbb{T}$.
 
-Each domain type has a default embedded cubature summarized in Table 1.
+Each domain type has a default embedded cubature summarized in \autoref{tbl:default-rule}.
 
-|                                           |                                   |
-| :---------------------------------------- | :-------------------------------- |
-| 1d. `Segment` [@Laurie1997]               |                                   |
-| 2d. `Triangle` [@Laurie1982]              | `Rectangle` [@CoolsHaegemans1989] |
-| 3d. `Tetrahedron` [@GrundmannMoeller1978] | `Cuboid` [@BerntsenEspelid1988]   |
-| $n$d. `Simplex` [@GrundmannMoeller1978]   | `Orthotope` [@GenzMalik1980]      |
-
-Table 1: For each dimension and domain give the default rules used.
+|                                           |                                 |
+| :---------------------------------------- | :------------------------------ |
+| 1d. `Segment` [@Laurie1997]               |                                 |
+| 2d. `Triangle` [@Laurie1982]              | `Rectangle` [@GenzMalik1980]    |
+| 3d. `Tetrahedron` [@GrundmannMoeller1978] | `Cuboid` [@BerntsenEspelid1988] |
+| $n$d. `Simplex` [@GrundmannMoeller1978]   | `Orthotope` [@GenzMalik1980]    |
+: For each dimension and domain give the default rules used.\label{tbl:default-rule}
 
 ## The adaptive algorithm
 
@@ -268,144 +267,82 @@ Continuous integration checks tests, documentation, and linting.
 
 `HAdaptiveIntegration` was featured in the [This month in Julia world - 2026-02](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110) Newsletter. It has been interfaced in [@Integrals], which is part of the SciML ecosystem. It is also used as the backend for a nearly-singular integration method in [@Inti].
 
-<!--
-# Complexity estimates
-
-## Uniform regularity
-
-## Isotropic (nearly-)singularities
-
-## Sub-manifold (nearly-)singularities
--->
-
-<!-- # Benchmarks (comparison with `HCubature.jl`) -->
-
 # Example gallery
 
-We now showcase the package on integrands with localized features, which is where adaptive
-integration is most useful. We begin with simplices, which are the most common domain in
-mesh-based scientific computing and the most novel feature of the package, then move to
-orthotopes, where we provide a brief comparison with `HCubature.jl`.
+We now showcase the package on integrands with localized features, which is where adaptive integration is most useful.
+We begin with simplices, which are the most common domain in mesh-based scientific computing and the most novel feature of the package, then move to orthotopes, where we provide a brief comparison with `HCubature.jl`.
 
 All examples are constructed from the standard Gaussian kernel
 
 $$
-\eta(r) = \frac{1}{\sqrt{2\pi}} e^{-r^2/2},
+  \eta(r) = \frac{1}{\sqrt{2\pi}} e^{-r^2/2},
 $$
 
-which satisfies $\int_{-\infty}^{\infty} \eta(r) \operatorname{d}\!r = 1$ and is smooth,
-non-negative, and peaks at $r = 0$.  Given a level-set function $\phi \colon
-\mathbb{R}^d \to \mathbb{R}$ that vanishes on the desired feature location $\Gamma =
-\phi^{-1}(0)$, we define the mollified integrand
+which satisfies $\int_{-\infty}^{\infty} \eta(r) \operatorname{d}\!r = 1$ and is smooth, non-negative, and peaks at $r = 0$.
+Given a level-set function $\phi \colon \mathbb{R}^d \to \mathbb{R}$ that vanishes on the desired feature location $\Gamma = \phi^{-1}(0)$, we define the mollified integrand
 
 $$
-\delta_\epsilon(\phi(\boldsymbol{x})) = \frac{1}{\varepsilon^c} \eta \left(\frac{\phi(\boldsymbol{x})}{\varepsilon}\right),
+  \delta_\epsilon(\phi(\boldsymbol{x})) = \frac{1}{\varepsilon^c} \eta \left(\frac{\phi(\boldsymbol{x})}{\varepsilon}\right),
 $$
 
-where $\varepsilon > 0$ controls the width and $c$ is the **codimension** of $\Gamma$ in
-$\mathbb{R}^d$ (chosen so that the total mass of the integrand remains $O(1)$ as
-$\varepsilon \to 0$). The qualitative behavior of $\delta_\epsilon(\phi(\boldsymbol{x}))$ is
-that of a smooth, yet sharply peaked function, concentrated around $\Gamma$.
+where $\varepsilon > 0$ controls the width and $c$ is the **codimension** of $\Gamma$ in $\mathbb{R}^d$ (chosen so that the total mass of the integrand remains $\mathcal{O}(1)$ as $\varepsilon \to 0$).
+The qualitative behavior of $\delta_\epsilon(\phi(\boldsymbol{x}))$ is that of a smooth, yet sharply peaked function, concentrated around $\Gamma$.
 
 In the examples below we use three canonical feature geometries:
 
-- **Point:** $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x} - \boldsymbol{x}_0\rVert_2$,
-  codimension $c = d$, producing a sharp isotropic peak at $\boldsymbol{x}_0$.
-- **Hypersphere:** $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x}\rVert_2^2 - r^2$,
-  codimension $c = 1$, producing a ridge along the hypersphere of radius $r$.
-- **Hyperplane:** $\phi(\boldsymbol{x}) = x_1 - c_0$, codimension $c = 1$, producing a
-  ridge along the axis-aligned hyperplane $x_1 = c_0$.
+- **Point:** $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x} - \boldsymbol{x}_0\rVert_2$, codimension $c = d$, producing a sharp isotropic peak at $\boldsymbol{x}_0$.
+- **Hypersphere:** $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x}\rVert_2^2 - r^2$, codimension $c = 1$, producing a ridge along the hypersphere of radius $r$.
+- **Hyperplane:** $\phi(\boldsymbol{x}) = x_1 - c_0$, codimension $c = 1$, producing a ridge along the axis-aligned hyperplane $x_1 = c_0$.
 
-The hyperplane case is geometrically special: because the feature is aligned with a
-coordinate axis, axis-aligned subdivision strategies can exploit this structure, which makes
-it a useful benchmark for comparing `HAdaptiveIntegration` (uniform subdivision) against
-`HCubature.jl` (estimator-driven directional subdivision). We pick $\boldsymbol{x}_0 =
-\tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, and $c_0 = 1/\pi$ so that the features are well
-contained in the unit simplex and unit cube.
+The hyperplane case is geometrically special: because the feature is aligned with a coordinate axis, axis-aligned subdivision strategies can exploit this structure, which makes it a useful benchmark for comparing `HAdaptiveIntegration` (uniform subdivision) against `HCubature.jl` (estimator-driven directional subdivision).
+We pick $\boldsymbol{x}_0 = \tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, and $c_0 = 1/\pi$ so that the features are well contained in the unit simplex and unit cube.
 
-Each convergence plot is produced by sweeping the requested relative tolerance
-`rtol` $= 10^{-i}$ for $i = 1, \ldots, 10$ (and $i = 1, \ldots, 8$ for the
-three-dimensional cases, where each refinement step is more expensive), and recording $N$,
-the total number of integrand evaluations, alongside the returned integral estimate and error
-estimate.
-The *actual* error at each tolerance is measured against a reference solution obtained by
-running `HAdaptiveIntegration` with the same embedded rule at `rtol` $= 10^{-12}$.
+Each convergence plot is produced by sweeping the requested relative tolerance $\mathtt{rtol} = 10^{-i}$ for $i = 1, \ldots, 10$ (and $i = 1, \ldots, 8$ for the three-dimensional cases, where each refinement step is more expensive), and recording $N$, the total number of integrand evaluations, alongside the returned integral estimate and error estimate.
+The *actual* error at each tolerance is measured against a reference solution obtained by running `HAdaptiveIntegration` with the same embedded rule at $\mathtt{rtol} = 10^{-12}$.
 The *estimated* error is the a posteriori quantity returned directly by the solver.
 
 ## Simplices
 
-\autoref{fig:cvg_triangle} shows convergence results for the three features on the unit
-triangle using the default `RadonLaurie` embedded rule [@Laurie1982].  The inset in each
-panel shows the adaptive sub-triangles at default tolerance: refinement concentrates tightly
-around the feature, leaving the rest of the domain sparsely covered.  Two observations are
-consistent across all three features.  First, the estimated error returned by the solver
-reliably tracks the actual error throughout the refinement, confirming that the embedded
-rule provides a sound a posteriori indicator.  Second, once the mesh is fine enough to
-resolve the feature, the solver recovers the asymptotic convergence rate predicted by the
-cubature order: the actual error follows the high-order slope
-$\mathcal{O}(N^{-k_{\mathcal{H}}/2})$ and the estimated error follows the low-order slope
-$\mathcal{O}(N^{-k_{\mathcal{L}}/2})$, where $N$ is the number of function evaluations.
-The exponent $1/2$ comes from the relation $h \sim N^{-1/d}$ with $d = 2$: in two dimensions
-each cell has area $h^2$, so $N \propto h^{-2}$, and a rule of order $k$ with error
-$\mathcal{O}(h^k)$ gives $\mathcal{O}(N^{-k/2})$ overall.
+\autoref{fig:cvg_triangle} shows convergence results for the three features on the unit triangle using the default `RadonLaurie` embedded rule [@Laurie1982].
+The inset in each panel shows the adaptive sub-triangles at default tolerance: refinement concentrates tightly around the feature, leaving the rest of the domain sparsely covered.
+Two observations are consistent across all three features.
+First, the estimated error returned by the solver reliably tracks the actual error throughout the refinement, confirming that the embedded rule provides a sound a posteriori indicator.
+Second, once the mesh is fine enough to resolve the feature, the solver recovers the asymptotic convergence rate predicted by the cubature order: the actual error follows the high-order slope $\mathcal{O}(N^{-(k_{\mathcal{H}}+1)/2})$ and the estimated error follows the low-order slope $\mathcal{O}(N^{-(k_{\mathcal{L}}+1)/2})$, where $N$ is the number of function evaluations.
+The exponent $1/2$ comes from the relation $h \sim N^{-1/d}$ with $d = 2$: in two dimensions each cell has area $h^2$, so $N \propto h^{-2}$, and a rule of order $k$ with error $\mathcal{O}(h^{k+1})$ gives $\mathcal{O}(N^{-(k+1)/2})$ overall.
 All three features show qualitatively similar convergence behavior.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane
-features on the unit triangle as a function of the number of evaluations ($N$). Insets show
-the adaptive sub-triangulation at default
-tolerance.\label{fig:cvg_triangle}](cvg_triangle.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit triangle as a function of the number of evaluations ($N$).
+Insets show the adaptive sub-triangulation at default tolerance.\label{fig:cvg_triangle}](cvg_triangle.png)
 
-The same behavior extends to higher-dimensional simplices.  \autoref{fig:cvg_tetrahedron}
-repeats the study on the unit tetrahedron using the `GrundmannMoeller` embedded rule
-[@GrundmannMoeller1978], which is available for simplices of arbitrary dimension.  The
-convergence rates now follow $\mathcal{O}(N^{-k/3})$ by the same argument with $d = 3$: each
-cell has volume $h^3$, so $N \propto h^{-3}$ and the error scales as
-$\mathcal{O}(N^{-k/3})$.  The estimated error again tracks the actual error reliably across
-all three features.
+The same behavior extends to higher-dimensional simplices.
+\autoref{fig:cvg_tetrahedron} repeats the study on the unit tetrahedron using the `GrundmannMoeller` embedded rule [@GrundmannMoeller1978], which is available for simplices of arbitrary dimension.
+The convergence rates now follow $\mathcal{O}(N^{-(k+1)/3})$ by the same argument with $d = 3$: each cell has volume $h^3$, so $N \propto h^{-3}$ and the error scales as $\mathcal{O}(N^{-(k+1)/3})$.
+The estimated error again tracks the actual error reliably across all three features.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane
-features on the unit tetrahedron as a function of the number of evaluations
-($N$).\label{fig:cvg_tetrahedron}](cvg_tetrahedron.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit tetrahedron as a function of the number of evaluations ($N$).\label{fig:cvg_tetrahedron}](cvg_tetrahedron.png)
 
 ## Orthotopes and comparison with `HCubature.jl`
 
-The same `integrate` interface applies to orthotopes without any change.  The convergence
-plots in \autoref{fig:cvg_rectangle} compare `HAdaptiveIntegration` against `HCubature.jl`
-on the unit square for three representative integrands.  Both solvers use the same
-Genz–Malik rule [@GenzMalik1980], so the comparison isolates the effect of the subdivision
-strategy: uniform bisection in all dimensions for `HAdaptiveIntegration` versus
-estimator-driven axis-aligned bisection for `HCubature.jl`.  For the point and hypersphere
-features, where the localized region is not aligned with any coordinate axis, the two
-strategies perform similarly.  For the axis-aligned line feature at $x_1 = 1/\pi$,
-`HCubature.jl` has a clear advantage: its estimator detects that the error is concentrated
-in the $x_1$ direction and refines exclusively along that axis, while `HAdaptiveIntegration`
-bisects uniformly in both directions, multiplying the number of evaluations by $2^d$ at each
-step.  This case illustrates a known limitation of uniform subdivision, and anisotropic
-splitting remains a direction for future development.
+The same `integrate` interface applies to orthotopes without any change.
+The convergence plots in \autoref{fig:cvg_rectangle} compare `HAdaptiveIntegration` against `HCubature.jl` on the unit square for three representative integrands.
+Both solvers use the same Genz–Malik rule [@GenzMalik1980], so the comparison isolates the effect of the subdivision strategy: uniform bisection in all dimensions for `HAdaptiveIntegration` versus estimator-driven axis-aligned bisection for `HCubature.jl`.
+For the point and hypersphere features, where the localized region is not aligned with any coordinate axis, the two strategies perform similarly.
+For the axis-aligned line feature at $x_1 = 1/\pi$, `HCubature.jl` has a clear advantage: its estimator detects that the error is concentrated in the $x_1$ direction and refines exclusively along that axis, while `HAdaptiveIntegration` bisects uniformly in both directions, multiplying the number of evaluations by $2^d$ at each step.
+This case illustrates a known limitation of uniform subdivision, and anisotropic splitting remains a direction for future development.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane
-features on the unit square, comparing `HAdaptiveIntegration` (HAI) with
-`HCubature.jl`.\label{fig:cvg_rectangle}](cvg_rectangle.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.\label{fig:cvg_rectangle}](cvg_rectangle.png)
 
-The same comparison is repeated for the unit cube in \autoref{fig:cvg_cube}.  Here
-`HAdaptiveIntegration` uses the default `BerntsenEspelid` rule [@BerntsenEspelid1988] while
-`HCubature.jl` uses its own built-in rule, so unlike the 2D case the comparison does not
-isolate subdivision strategy alone — the cubature rules also differ.  Nevertheless, the
-qualitative picture is the same: for the point and hypersphere features the two solvers are
-comparable, while for the hyperplane feature `HCubature.jl` retains its advantage from
-estimator-driven refinement.  The cost of uniform bisection grows as $2^d$ per step, which
-makes the gap more pronounced in 3D and reinforces anisotropic splitting as a priority for
-future work.
+The same comparison is repeated for the unit cube in \autoref{fig:cvg_cube}.
+Here `HAdaptiveIntegration` uses the default `BerntsenEspelid` rule [@BerntsenEspelid1988] while `HCubature.jl` uses its own built-in rule, so unlike the 2D case the comparison does not isolate subdivision strategy alone — the cubature rules also differ.
+Nevertheless, the qualitative picture is the same: for the point and hypersphere features the two solvers are comparable, while for the hyperplane feature `HCubature.jl` retains its advantage from estimator-driven refinement.
+The cost of uniform bisection grows as $2^d$ per step, which makes the gap more pronounced in 3D and reinforces anisotropic splitting as a priority for future work.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane
-features on the unit cube, comparing `HAdaptiveIntegration` (HAI) with
-`HCubature.jl`.\label{fig:cvg_cube}](cvg_cube.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit cube, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.\label{fig:cvg_cube}](cvg_cube.png)
 
 # AI usage disclosure
 
-Generative AI was used for developing the code and to help draft and edit parts of this
-manuscript.  All text produced with AI assistance was reviewed, revised, and verified by the
-authors before inclusion in the code or paper.
+Generative AI was used for developing the code and to help draft and edit parts of this manuscript.
+All text produced with AI assistance was reviewed, revised, and verified by the authors before inclusion in the code or paper.
 
 <!-- # Acknowledgements -->
 

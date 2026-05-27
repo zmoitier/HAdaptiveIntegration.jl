@@ -1,6 +1,6 @@
+using HAdaptiveIntegration: Rectangle, Triangle
 using LinearAlgebra
 using StaticArrays
-using HAdaptiveIntegration: Triangle, Rectangle
 
 ## Relative tolerance for reference solutions
 const REFTOL = 1.0e-12

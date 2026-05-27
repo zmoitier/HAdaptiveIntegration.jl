@@ -1,8 +1,8 @@
-using HAdaptiveIntegration: integrate, Tetrahedron
-using HAdaptiveIntegration.Rule: GrundmannMoeller, embedded_cubature, orders
 using CairoMakie
-using StaticArrays
+using HAdaptiveIntegration.Rule: GrundmannMoeller, embedded_cubature, orders
+using HAdaptiveIntegration: Tetrahedron, integrate
 using LinearAlgebra
+using StaticArrays
 
 include("util.jl")
 

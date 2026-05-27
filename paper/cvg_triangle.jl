@@ -1,8 +1,8 @@
-using HAdaptiveIntegration: integrate, Triangle, allocate_buffer
-using HAdaptiveIntegration.Rule: RadonLaurie, embedded_cubature, orders
 using CairoMakie
-using StaticArrays
+using HAdaptiveIntegration.Rule: RadonLaurie, embedded_cubature, orders
+using HAdaptiveIntegration: Triangle, allocate_buffer, integrate
 using LinearAlgebra
+using StaticArrays
 
 include("util.jl")
 

@@ -1,19 +1,14 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 set -e
-
-makefigs=false
 
 for arg in "$@"; do
     case $arg in
-        makefigs=true)  makefigs=true ;;
-        makefigs=false) makefigs=false ;;
+        --makefigs)
+        echo "=== Generating figures ==="
+        bash "$(dirname "$0")/make_figures.sh"
+        ;;
     esac
 done
-
-if [ "$makefigs" = true ]; then
-    echo "=== Generating figures ==="
-    bash "$(dirname "$0")/generate_figures.sh"
-fi
 
 docker run --rm \
     --volume $PWD/paper:/data \
