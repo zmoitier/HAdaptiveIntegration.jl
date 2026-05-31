@@ -218,27 +218,25 @@ Convergence plots sweep $\mathtt{rtol} = 10^{-i}$ ($i = 1, \ldots, 10$; up to $8
 
 ## Simplices
 
-\autoref{fig:cvg_triangle} and \autoref{fig:cvg_tetrahedron} show convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available for arbitrary dimension).
+\autoref{fig:cvg_simplex} show convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available for arbitrary dimension).
 Two observations hold across all features and both cases: the estimated error reliably tracks the actual error, confirming a sound a posteriori indicator; and once the feature is resolved, errors follow $\mathcal{O}(N^{-(k+1)/d})$ with $k = k_h$ or $k_\ell$ and the exponent from $N \propto h^{-d}$.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit triangle as a function of the number of evaluations ($N$).
-Insets show the adaptive sub-domain at default tolerance and the integrand as a heatmap.\label{fig:cvg_triangle}](cvg_triangle.png)
+![](cvg_triangle.png)
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit tetrahedron as a function of the number of evaluations ($N$).
-Insets show the adaptive sub-domain at `rtol` equal $10^{-2}$ and the isovalues of the integrand.\label{fig:cvg_tetrahedron}](cvg_tetrahedron.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit triangle (top row) and unit tetrahedron (bottom row) as a function of the number of evaluations ($N$).
+Insets show the adaptive sub-domain at default tolerance and the integrand as a heatmap (top row), and at $10^{-2}$ relative tolerance and the isovalues of the integrand (bottom row).\label{fig:cvg_simplex}](cvg_tetrahedron.png)
 
 ## Orthotopes and comparison with `HCubature.jl`
 
-\autoref{fig:cvg_rectangle} and \autoref{fig:cvg_cube} compare `HAdaptiveIntegration` against `HCubature.jl` on the unit square and cube.
-In 2D both use the Genz–Malik rule [@GenzMalik1980], isolating the subdivision strategy; in 3D the cubature rules also differ (Berntsen-Espelid [@BerntsenEspelid1988] for `HAdaptiveIntegration`).
+\autoref{fig:cvg_orthotope} compare `HAdaptiveIntegration` against `HCubature.jl` on the unit square and cube.
+In 2D both use the Genz-Malik rule [@GenzMalik1980], isolating the subdivision strategy; in 3D the cubature rules also differ (Berntsen-Espelid [@BerntsenEspelid1988] for `HAdaptiveIntegration`).
 For the point and hypersphere features the solvers are comparable in both dimensions.
 For the hyperplane, `HCubature.jl` has a clear advantage — its estimator refines exclusively along $x_1$ rather than bisecting uniformly in all $d$ directions — and this gap grows with $d$, motivating anisotropic splitting as future work.
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.
-Insets show the adaptive sub-domain at default tolerance and the integrand as a heatmap.\label{fig:cvg_rectangle}](cvg_rectangle.png)
+![](cvg_rectangle.png)
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit cube, comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.
-Insets show the adaptive sub-domain at `rtol` equal $10^{-2}$ and the isovalues of the integrand.\label{fig:cvg_cube}](cvg_cube.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square (top row) and the unit cube (bottom row), comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`.
+Insets show the adaptive sub-domain at default tolerance and the integrand as a heatmap (top row), and at $10^{-2}$ relative tolerance and the isovalues of the integrand (bottom row).\label{fig:cvg_orthotope}](cvg_cube.png)
 
 # AI usage disclosure
 
