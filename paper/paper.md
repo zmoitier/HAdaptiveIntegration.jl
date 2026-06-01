@@ -27,8 +27,7 @@ It approximates integrals of the form
 $$
   I = \int_{\Omega} f(\boldsymbol{x}) \, \operatorname{d}\!\boldsymbol{x}
 $$
-where $f \colon \mathbb{R}^d \to \mathbb{T}$ maps to any type $\mathbb{T}$ forming a normed real vector space (*e.g.* $\mathbb{T} = \mathbb{R},\ \mathbb{C},\ \mathbb{R}^n$), and $\Omega \subset \mathbb{R}^d$ is a simplex (triangles, tetrahedra, etc.) or axis-aligned orthotope (rectangle, cuboid, etc.).
-where $f \colon \mathbb{R}^d \to \mathbb{T}$ takes values in a normed real vector space (*e.g.* $\mathbb{T} = \mathbb{R},\ \mathbb{C},\ \mathbb{R}^n$), and $\Omega \subset \mathbb{R}^d$ is a simplex (triangles, tetrahedra, etc.) or axis-aligned orthotope (rectangle, cuboid, etc.).
+where $f \colon \mathbb{R}^d \to \mathbb{T}$ takes values in a normed real vector space (*e.g.* $\mathbb{T} = \mathbb{R},\ \mathbb{C},\ \mathbb{R}^n$), and $\Omega \subset \mathbb{R}^d$ is a simplex (triangles, tetrahedra, etc.) or an axis-aligned orthotope (rectangle, cuboid, etc.).
 `HAdaptiveIntegration` combines uniform subdivision with embedded cubature to return both an integral estimate and an a posteriori error estimate.
 
 Its main features are:
@@ -43,7 +42,7 @@ Its main features are:
 The package is centered on a single function, `integrate(f, domain; kwargs...)`, together with constructors for common domains.
 The workflow has two steps:
 
-**Create a domain** using `Simplex` (defined by its vertices) or `Orthotope` (defined by its low and high corner), with aliases `Segment`, `Triangle`, `Tetrahedron`, `Rectangle`, `Cuboid`.
+**Create a domain** using `Simplex` (defined by its vertices) or `Orthotope` (defined by its lower and upper corners), with aliases `Segment`, `Triangle`, `Tetrahedron`, `Rectangle`, `Cuboid`.
 
 ```julia
 using HAdaptiveIntegration
@@ -61,7 +60,7 @@ I, E = integrate(f, triangle)
 I, E = integrate(f, rectangle)
 ```
 
-The function returns a pair `(I, E)`, where `I` is the integral estimate and `E` is its a posteriori error estimate. Key stopping-condition keywords are `atol`, `rtol`, and `maxsubdiv`.
+The function returns a pair `(I, E)`, where `I` is the integral estimate and `E` is its a posteriori error estimate. The main stopping-condition keywords are `atol`, `rtol`, and `maxsubdiv`.
 
 # Statement of need
 
@@ -73,7 +72,7 @@ To our knowledge, no `Julia` package supported adaptive integration on simplices
 
 `HAdaptiveIntegration` is complementary to the existing `Julia` ecosystem.
 `QuadGK.jl` [@QuadGK] remains the right choice in one dimension.
-`HCubature.jl` [@HCubature] is often preferable for medium- to high-dimensional orthotopes, where its estimator-driven axis-aligned bisection outperforms uniform subdivision when the integrand varies primarily along one direction.
+`HCubature.jl` [@HCubature] is often preferable for medium- to high-dimensional orthotopes, where its estimator-driven axis-aligned bisection can outperform uniform subdivision when the integrand varies primarily along one direction.
 `Cuba.jl` [@Cuba] is better suited for high-dimensional problems where stochastic methods dominate.
 The distinct contribution of `HAdaptiveIntegration` is support for simplices of arbitrary dimension together with orthotopes under one API, with efficient tabulated rules in low dimensions. This combination is not provided by the packages above.
 
@@ -149,7 +148,7 @@ When computing multiple integrals of the same type, the heap can be pre-allocate
 
 As noted above, `integrate` supports arbitrary precision.
 Only the rules from [@GrundmannMoeller1978; @GenzMalik1980] are generated from explicit formulas; the others are tabulated at quadruple precision and are therefore incompatible with arbitrary precision.
-`HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which refines a tabulated rule by solving the polynomial exactness conditions with Newton iterations and automatic differentiation through `ForwardDiff.jl` [@ForwardDiff2016].
+`HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which refines a tabulated rule by solving the polynomial exactness conditions with Newton iterations and automatic differentiation in `ForwardDiff.jl` [@ForwardDiff2016].
 
 More precisely, let $\widehat{\omega}$ be a reference domain and $(\mathcal{H}, \mathcal{L})$ be an embedded cubature on $\widehat{\omega}$ with orders $k_h > k_\ell$.
 Let $b_1, \ldots, b_{K_h}$ be a basis of $\mathbb{P}_{k_h}$ (polynomials of total degree $\leq k_h$) such that $b_1, \ldots, b_{K_\ell}$ is a basis of $\mathbb{P}_{k_\ell}$.
@@ -157,30 +156,27 @@ Define $\boldsymbol{u}^{\mathcal{H}, \mathcal{L}} = (\boldsymbol{x}_1, \ldots, \
 $$
   F\left( \boldsymbol{u}^{\mathcal{H}, \mathcal{L}} \right) =
   \begin{pmatrix}
-    \mathcal{H}(b_1) - \int_{\widehat{\Omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+    \mathcal{H}(b_1) - \int_{\widehat{\omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
     \\[1ex]
     \vdots
     \\[1ex]
-    \mathcal{H}(b_{K_h}) - \int_{\widehat{\Omega}} b_{K_h}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+    \mathcal{H}(b_{K_h}) - \int_{\widehat{\omega}} b_{K_h}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
     \\[2ex]
-    \mathcal{L}(b_1) - \int_{\widehat{\Omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+    \mathcal{L}(b_1) - \int_{\widehat{\omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
     \\[1ex]
     \vdots
     \\[1ex]
-    \mathcal{L}(b_{K_\ell}) - \int_{\widehat{\Omega}} b_{K_\ell}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
+    \mathcal{L}(b_{K_\ell}) - \int_{\widehat{\omega}} b_{K_\ell}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
   \end{pmatrix}.
 $$
 Starting from a tabulated rule with $\lVert F(\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}) \rVert_2 = \varepsilon \ll 1$, we seek $\tilde{\boldsymbol{u}}$ with $\lVert F(\tilde{\boldsymbol{u}}) \rVert_2 = \eta < \varepsilon$ via a least-squares Newton method [@XiaoGimbutas2010, section 2.3].
 Setting $\boldsymbol{u}_0 = \boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$, the iteration is
 $$
-  \boldsymbol{u}_{p+1} = \boldsymbol{u}_p - \boldsymbol{\delta}_p
-  \qquad \text{where} \
-  \boldsymbol{\delta}_p = \arg\min \left\{ \lVert \boldsymbol{w} \rVert_2 \mid \operatorname{J}_F(\boldsymbol{u}_p) \boldsymbol{w} = F(\boldsymbol{u}_p) \right\},\tag{N}
+  \boldsymbol{u}_{p+1} = \boldsymbol{u}_p - \operatorname{J}_F(\boldsymbol{u}_p)^\dagger F(\boldsymbol{u}_p),\tag{N}
 $$
-and $\operatorname{J}_F(\boldsymbol{u}_p)$ is the Jacobian matrix of $F$ at the point $\boldsymbol{u}_p$.
+$\operatorname{J}_F(\boldsymbol{u}_p)$ is the Jacobian matrix of $F$ at the point $\boldsymbol{u}_p$, and $\operatorname{J}_F(\boldsymbol{u}_p)^\dagger$ is the pseudo-inverse.
+In `Julia`, this is implemented with the `\` operator.
 The iteration stops when $\lVert \boldsymbol{u}_{p+1} - \boldsymbol{u}_p \rVert_2 \leq \mathtt{x\_atol}$ (absolute tolerance of successive iterates) or $\lVert F(\boldsymbol{u}_p) \rVert_2 \leq \mathtt{f\_atol}$ (absolute tolerance of function value) or $p = p_{\max}$ (maximum number of iterations).
-
-**Remark.** The system in (N) is solved by least squares ("`\`" in `Julia`) because $K_h + K_\ell < (d+1) \mathsf{H} + \mathsf{L}$ makes $\operatorname{J}_F(\boldsymbol{u}_p)$ a wide rectangular matrix; the minimum-norm solution is selected.
 
 **Remark.** The monomial basis is convenient but poorly conditioned, so achieving precision $\varepsilon$ requires `BigFloat` arithmetic at a higher internal precision $\eta < \varepsilon$; an $\mathrm{L}^2$-orthogonal basis would improve conditioning.
 
@@ -189,7 +185,7 @@ The iteration stops when $\lVert \boldsymbol{u}_{p+1} - \boldsymbol{u}_p \rVert_
 # Research impact statement
 
 The repository includes API documentation, examples (buffer pre-allocation, `callback` mechanism, custom cubature, arbitrary-precision workflows), an automated test suite, and continuous integration covering tests, documentation, and linting.
-`HAdaptiveIntegration` has been featured in the [Julia world newsletter](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110), interfaced in [Integrals.jl](https://github.com/SciML/Integrals.jl) (SciML ecosystem), used as a backend in [@Inti], and adopted as a dependency of [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl/releases/tag/v0.57.0).
+`HAdaptiveIntegration` has been featured in the [Julia world newsletter](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110), interfaced via [Integrals.jl](https://github.com/SciML/Integrals.jl) (SciML ecosystem), used as a backend in [@Inti], and adopted as a dependency of [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl/releases/tag/v0.57.0).
 
 # Example gallery
 
@@ -207,12 +203,12 @@ We consider three canonical geometries:
 
 We set $\boldsymbol{x}_0 = \tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, and $x_* = 1/\pi$ so that the features are well contained in the domain.
 The hyperplane is axis-aligned, making it a useful benchmark for comparing uniform versus estimator-driven subdivision.
-Convergence plots sweep $\mathtt{rtol} = 10^{-i}$ ($i = 1, \ldots, 10$; up to $8$ in 3D), recording total evaluations $N$, the returned error estimate, and the actual error against a reference at $\mathtt{rtol} = 10^{-12}$.
+Convergence plots sweep $\mathtt{rtol} = 10^{-i}$ ($i = 1, \ldots, 10$; up to $8$ in 3D), recording the total number of evaluations $N$, the returned error estimate, and the actual error against a reference solution computed at $\mathtt{rtol} = 10^{-12}$.
 
 ## Simplices
 
-\autoref{fig:cvg_simplex} shows convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available for arbitrary dimension).
-Two observations hold across all features and both cases: the estimated error reliably tracks the actual error, confirming a sound a posteriori indicator; and once the feature is resolved, errors follow $\mathcal{O}(N^{-(k+1)/d})$ with $k = k_h$ or $k_\ell$ and the exponent from $N \propto h^{-d}$.
+\autoref{fig:cvg_simplex} shows convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available in arbitrary dimension).
+Two observations hold across all features and both geometries: the estimated error reliably tracks the actual error, confirming a sound a posteriori indicator; and once the feature is resolved, errors follow $\mathcal{O}(N^{-(k+1)/d})$ with $k = k_h$ or $k_\ell$ and the exponent implied by $N \propto h^{-d}$.
 
 ![](cvg_triangle.png)
 
@@ -221,7 +217,7 @@ Two observations hold across all features and both cases: the estimated error re
 ## Orthotopes and comparison with `HCubature.jl`
 
 \autoref{fig:cvg_orthotope} compares `HAdaptiveIntegration` against `HCubature.jl` on the unit square and cube.
-In 2D both use the Genz-Malik rule [@GenzMalik1980], isolating the subdivision strategy; in 3D the cubature rules also differ (Berntsen-Espelid [@BerntsenEspelid1988] for `HAdaptiveIntegration`).
+In 2D, both use the Genz-Malik rule [@GenzMalik1980], isolating the subdivision strategy; in 3D, the cubature rules also differ (Berntsen-Espelid [@BerntsenEspelid1988] for `HAdaptiveIntegration`).
 For the point and hypersphere features the solvers are comparable in both dimensions.
 For the hyperplane, `HCubature.jl` has a clear advantage because its estimator refines exclusively along $x_1$ rather than bisecting uniformly in all $d$ directions, and this gap grows with $d$, motivating anisotropic splitting as future work.
 
@@ -231,7 +227,7 @@ For the hyperplane, `HCubature.jl` has a clear advantage because its estimator r
 
 # AI usage disclosure
 
-Generative AI was used for developing the code and to help draft and edit parts of this manuscript.
+Generative AI was used to help develop the code and to draft and edit parts of this manuscript.
 All text produced with AI assistance was reviewed, revised, and verified by the authors before inclusion in the code or paper.
 
 # References
