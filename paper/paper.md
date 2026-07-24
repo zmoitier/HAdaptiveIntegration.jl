@@ -111,6 +111,9 @@ Each domain type has a default embedded cubature summarized in \autoref{tbl:defa
 | $n$d. `Simplex` [@GrundmannMoeller1978]   | `Orthotope` [@GenzMalik1980]    |
 : Default embedded cubature rules by domain.\label{tbl:default-rule}
 
+> todo: add `struct` description
+> todo: add plot of embedded cubature (triangle and square)
+
 ## The adaptive algorithm
 
 Given a function $f$ and an initial domain $\Omega$, the adaptive algorithm constructs a sequence of nested partitions.
@@ -119,7 +122,7 @@ $$
   \mathcal{P}_{n+1} = \left[ \mathcal{P}_n \setminus \left\{\omega^*\right\} \right] \cup \left\{\omega^*_1, \ldots, \omega^*_{2^d}\right \},
   \qquad \forall n \in \mathbb{N},
 $$
-where $\omega^*$ is chosen such that $E_{\omega^*} = \max \{E_\omega : \omega \in \mathcal{P}_n\}$, and $\omega^*_1, \ldots, \omega^*_{2^d}$ are subdomains given by a subdivision of $\omega^*$.
+where $\omega^*$ is chosen such that $E_{\omega^*} = \max \{E_\omega : \omega \in \mathcal{P}_n\}$, and $\omega^*_1, \ldots, \omega^*_{2^d}$ are subdomains given by a partition of $\omega^*$.
 In dimension $d$, orthotopes are bisected along each axis and simplices by midpoint edge refinement [@SimplexSubdiv], both producing $2^d$ subdomains.
 
 For the sequence ${(\mathcal{P}_n)}_{n \in \mathbb{N}}$, we define the global integral value $I_n$ and error $E_n$ estimators by
@@ -139,10 +142,14 @@ $$
 $$
 At the end, $(I_n, E_n)$ is returned as the integral value and error estimate.
 
+> todo: add plot of subdivision (triangle, tetrahedron, square, cube)
+
 ## Implementation
 
 The implementation uses a max binary heap from [DataStructures.jl](https://github.com/JuliaCollections/DataStructures.jl) to store $\{(\omega, I_\omega, E_\omega) : \omega \in \mathcal{P}_n \}$, ordered by $E_\omega$, for efficient retrieval of the maximum local error.
 When computing multiple integrals of the same type, the heap can be pre-allocated and passed via the `buffer` keyword to reduce allocations.
+
+> todo: expand on implementation detail
 
 ## Extended precision
 
