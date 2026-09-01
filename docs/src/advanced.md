@@ -21,9 +21,9 @@ f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 @benchmark integrate($f, $t)
 ```
 
-While the overhead associated to these (small) allocations is usually negligible, there are
-circumstances where one may want to avoid allocations altogether. This can be achieved by
-passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
+While the overhead associated with these (small) allocations is usually negligible, there
+are circumstances where one may want to avoid allocations altogether. This can be achieved
+by passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
 
 ```@example buffering
 using HAdaptiveIntegration: allocate_buffer
@@ -31,23 +31,36 @@ using HAdaptiveIntegration: allocate_buffer
 buffer = allocate_buffer(f, t)
 integrate(f, t; buffer)
 b = @benchmark integrate($f, $t; buffer = $buffer)
-@assert b.allocs == 0 # hide
-b # hide
+@assert b.allocs == 0  # hide
+b  # hide
 ```
 
 Provided evaluating `f` does not allocate, and the `buffer` has a sufficiently large
 capacity, `integrate` will not allocate memory during the integration process, as shown in
 the benchmark above.
 
+!!! note "When to use a buffer"
+    Buffer pre-allocation is useful in **hot loops** where `integrate` is called repeatedly,
+    *e.g.*, in optimization or parameter fitting. For one-off integrations, the overhead is
+    negligible.
+
 ## [Track convergence progress](@id callback-fct)
 
 The `callback` keyword argument allows you to monitor the progress of the adaptive
-integration. The callback function is called for each estimated value of `I` and `E`,
-including the initial estimate (`nb_subdiv=0`) and after each subdivision. It receives the
-current integral `I`, error estimate `E`, number of subdivisions `nb_subdiv`, and the
-internal `buffer`.
+integration. The callback function is called after each subdivision and receives:
 
-Here is a simple example that collects the convergence history:
+| Argument    | Type      | Description                               |
+| ----------- | --------- | ----------------------------------------- |
+| `I`         | `Float64` | Current integral estimate                 |
+| `E`         | `Float64` | Error estimate (absolute, not relative)   |
+| `nb_subdiv` | `Int`     | Number of subdivisions performed so far   |
+| `buffer`    |           | Internal buffer (passed for advanced use) |
+
+!!! note
+    The integration stops when `E ≤ max(atol, rtol * |I|)`. Use `atol` and `rtol` keyword
+    arguments to control the tolerance.
+
+Here is a practical example to print the history convergence:
 
 ```@example callback
 using HAdaptiveIntegration
@@ -70,13 +83,12 @@ end
 ## Choose custom cubature rules
 
 By default, when calling `integrate(f, domain)`, the package uses a default embedded
-cubature formula for the given `domain` by calling [`default_rule`](@ref).
-Although these are generally good choices, you can also specify a custom embedded
-cubature formula by passing it as a keyword argument to `integrate`. For example, in the
-case of a triangle, the package defaults to a Radon-Laurie embedded cubature formula of
-orders 5 and 7 (see the `rules_simplex.jl` file for more details). If you want
-_e.g._ to use an embedded cubature based on the [`GrundmannMoeller`](@ref) rule of order 13,
-you can do
+cubature formula for the given `domain` by calling [`default_rule`](@ref). Although these
+are generally good choices, you can also specify a custom embedded cubature formula by
+passing it as a keyword argument to `integrate`. For example, in the case of a triangle, the
+package defaults to a Radon-Laurie embedded cubature formula of high order 8 and low order 5
+(see [`RadonLaurie`](@ref)). If you want _e.g._ to use an embedded cubature based on the
+[`GrundmannMoeller`](@ref) rule of high order 13 and low order 11, you can do
 
 ```@example embedded-cubature
 using HAdaptiveIntegration
@@ -95,7 +107,7 @@ number of function evaluations required to achieve a given accuracy for the defa
 Radon-Laurie cubature and the `GrundmannMoeller` cubature rule above:
 
 ```@example embedded-cubature
-const cc = Ref(0) # a counter for the number of function evaluations
+const cc = Ref(0)  # a counter for the number of function evaluations
 g = x -> (cc[] += 1; f(x))
 rtol = 1e-2
 cc[] = 0; integrate(g, t; rtol); counter_default = cc[]
@@ -136,11 +148,11 @@ for your specific application!
     end # hide
     ```
 
-To add a custom embedded cubature for a given domain, you must write a constructor _e.g._
-`my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref) object (see
-the function [`embedded_cubature`](@ref) in the file
+To add a custom embedded cubature for a given domain, you must write a constructor, _e.g._,
+`my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref). See the file
+at
 [`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl)
-for some examples on how this is done). PRs with new schemes are more than welcome!
+for examples. PRs with new schemes are more than welcome!
 
 ## Define custom subdivision strategies
 
@@ -161,18 +173,23 @@ Here are the subdivided triangles:
 subdiv_algo(t)
 ```
 
-But is also possible (and maybe desirable) to split the triangle into 2 smaller triangles
+But it is also possible (and maybe desirable) to split the triangle into 2 smaller triangles
 instead. The following function accomplishes this:
 
 ```@example default-subdivision
 using StaticArrays
 
 function subdivide_triangle2(t::Triangle{T}) where {T}
-        a, b, c = t.vertices
-        bc = (b + c) / 2
-        return (Triangle{T}(SVector(bc, a, b)), Triangle{T}(SVector(bc, c, a)))
-    end
+    a, b, c = t.vertices
+    bc = (b + c) / 2
+    return (Triangle{T}(SVector(bc, a, b)), Triangle{T}(SVector(bc, c, a)))
+end
+subdivide_triangle2(t)  # hide
 ```
+
+!!! warning
+    Non-default subdivision strategies may affect convergence. The default (4-way split)
+    typically requires fewer subdivisions than the 2-way split shown above.
 
 Passing `subdivide_triangle2` as the `subdiv_algo` to `integrate` will use this instead of
 the default:

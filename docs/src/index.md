@@ -19,8 +19,8 @@ certain tolerance is reached. Features include:
 
 ## Installation
 
-The package can be installed with the Julia package manager.
-From the Julia REPL, type `]` to enter the Pkg REPL mode and run
+The package can be installed with the Julia package manager. From the Julia REPL, type `]`
+to enter the Pkg REPL mode and run
 
 ```julia
 pkg> add HAdaptiveIntegration
@@ -74,12 +74,14 @@ more details):
   - [`Tetrahedron`](@ref)
   - [`Cuboid`](@ref)
 - In arbitrary dimension:
-  - [`Simplex`](@ref) — [en.wikipedia.org/wiki/Simplex](https://en.wikipedia.org/wiki/Simplex)
-  - [`Orthotope`](@ref) — [en.wikipedia.org/wiki/Hyperrectangle](https://en.wikipedia.org/wiki/Hyperrectangle)
+  - [`Simplex`](@ref) —
+    [en.wikipedia.org/wiki/Simplex](https://en.wikipedia.org/wiki/Simplex)
+  - [`Orthotope`](@ref) —
+    [en.wikipedia.org/wiki/Hyperrectangle](https://en.wikipedia.org/wiki/Hyperrectangle)
 
 ### Simplices
 
-To integrate the above function over a ``d``-dimensional simplices (triangle, tetrahedron,
+To integrate the above function over a ``d``-dimensional simplex (triangle, tetrahedron,
 ...), defined by their vertices, we can use
 
 - Triangle
