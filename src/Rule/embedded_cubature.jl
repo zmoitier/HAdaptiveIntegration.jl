@@ -33,8 +33,10 @@ end
 function embedded_cubature(
         nodes, weights_high, weights_low, (::Type{T}) = float(Int)
     ) where {T <: Real}
-    @assert allequal(length, nodes) "all nodes should have the same length."
+    @assert !isempty(nodes) "`nodes` must not be empty."
+
     D = length(first(nodes))
+    @assert all(n -> length(n) == D, nodes) "all nodes should have the same length."
 
     return EmbeddedCubature(
         [SVector{D, T}(node) for node in nodes],

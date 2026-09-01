@@ -29,10 +29,10 @@ function Orthotope{T}(low_corner, high_corner, D::Union{Int, Nothing} = nothing)
         @assert length(low_corner) == D "low_corner must have length $D."
         @assert length(high_corner) == D "high_corner must have length $D."
     end
-    @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "must have `low_corner \
-    .≤ high_corner`."
+    lo, hi = SVector{D, T}(low_corner), SVector{D, T}(high_corner)
+    @assert all(lo .≤ hi) "must have `low_corner .≤ high_corner`."
 
-    return Orthotope(SVector(SVector{D, T}(low_corner), SVector{D, T}(high_corner)))
+    return Orthotope(SVector(lo, hi))
 end
 
 function Orthotope(low_corner, high_corner, D::Union{Int, Nothing} = nothing)
@@ -44,10 +44,10 @@ function Orthotope(low_corner, high_corner, D::Union{Int, Nothing} = nothing)
         @assert length(low_corner) == D "low_corner must have length $D."
         @assert length(high_corner) == D "high_corner must have length $D."
     end
-    @assert all(a ≤ b for (a, b) in zip(low_corner, high_corner)) "must have `low_corner \
-    .≤ high_corner`."
+    lo, hi = float(SVector{D}(low_corner)), float(SVector{D}(high_corner))
+    @assert all(lo .≤ hi) "must have `low_corner .≤ high_corner`."
 
-    return Orthotope(SVector(float(SVector{D}(low_corner)), float(SVector{D}(high_corner))))
+    return Orthotope(SVector(lo, hi))
 end
 
 """

@@ -49,7 +49,7 @@ dimension(::Type{<:AbstractDomain{D}}) where {D} = D
             )
             domain = reference_domain(dom_type)
             dim = dimension(dom_type)
-            I, E = @inferred integrate(p -> 1, domain)
+            I, E = @inferred integrate(_ -> 1, domain)
             @test unit(I) == unit(1u"m"^dim)
             @test unit(E) == unit(1u"m"^dim)
         end
@@ -67,7 +67,7 @@ dimension(::Type{<:AbstractDomain{D}}) where {D} = D
             )
             domain = reference_domain(dom_type)
             dim = dimension(dom_type)
-            I, E = @inferred integrate(p -> 1u"g", domain)
+            I, E = @inferred integrate(_ -> 1u"g", domain)
             @test unit(I) == unit(1u"g" * 1u"m"^dim)
             @test unit(E) == unit(1u"g" * 1u"m"^dim)
         end

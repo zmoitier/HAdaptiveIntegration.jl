@@ -1,4 +1,3 @@
-using DataStructures: BinaryHeap
 using HAdaptiveIntegration.Domain
 using HAdaptiveIntegration.Rule
 using HAdaptiveIntegration:
