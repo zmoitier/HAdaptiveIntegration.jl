@@ -98,3 +98,8 @@ This package includes rules for arbitrary `d`-dimensional simplices and orthotop
   slow, so it may be better to use stochastic methods such as
   [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
   [`Cuba.jl`](https://github.com/giordano/Cuba.jl).
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for how to
+report a bug, ask a question, or submit a pull request.
