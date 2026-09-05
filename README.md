@@ -26,7 +26,10 @@ targeting high accuracy with fewer function evaluations.
 - Adaptive integration over simplices and orthotopes of arbitrary dimension.
 - Efficient tabulated cubature rules for low-dimensional simplices and orthotopes.
 - Support for custom embedded cubature rules.
-- Arbitrary-precision arithmetic.
+- Arbitrary-precision arithmetic, via a `ForwardDiff` extension that re-derives
+  tabulated rules at higher precision (install `ForwardDiff` to enable it).
+- Compatibility with [`Unitful.jl`](https://github.com/JuliaPhysics/Unitful.jl)
+  quantities as integrand values and domain coordinates.
 
 ## Installation
 
@@ -71,31 +74,32 @@ Common keyword arguments:
 - `atol` (absolute tolerance) and `rtol` (relative tolerance) to control stopping
   tolerances.
 - `maxsubdiv` to cap the number of refinements.
+- `buffer` to reuse heap memory across repeated `integrate` calls (see
+  `allocate_buffer`); useful for reducing allocations in a hot loop.
+- `callback` to observe each estimate during refinement, receiving
+  `(I, E, nb_subdiv, buffer)` on every step.
 
 For full API details and advanced usage, see the
 [stable documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable/) or the
-[latest development documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev/).
+[development documentation](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev/).
 
 ## Related Packages and When to Use Them
 
-`HAdaptiveIntegration` draws inspiration from the
-[`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) package, which offers a similar
-approach for integrating over orthotopes in any dimension. Key differences:
+`HAdaptiveIntegration` is inspired by
+[`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl), which adaptively integrates
+over orthotopes in any dimension. `HAdaptiveIntegration` adds support for simplices of
+any dimension and uses tabulated cubatures for low-dimensional orthotopes, where it can
+be competitive with `HCubature` using fewer function evaluations.
 
-- `HAdaptiveIntegration` supports integration over simplices of any dimension, whereas
-  `HCubature` is focused on orthotopes.
-- For low-dimensional orthotopes such as squares and cubes, `HAdaptiveIntegration` employs
-  tabulated cubatures for efficiency. In these domains it can be competitive with
-  `HCubature` while using fewer function evaluations.
-
-This package includes rules for arbitrary `d`-dimensional simplices and orthotopes, but:
+This package ships rules for arbitrary `d`-dimensional simplices and orthotopes, but
+other packages may suit your case better:
 
 - for `d=1` (where both `1`-simplex and `1`-orthotope reduce to a segment),
   [`QuadGK.jl`](https://github.com/JuliaMath/QuadGK.jl) is usually preferable;
 - for medium-dimensional orthotopes,
   [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) may be faster;
-- for large-dimensional simplices or orthotopes, deterministic adaptive cubature may become
-  slow, so it may be better to use stochastic methods such as
+- for large-dimensional simplices or orthotopes, deterministic adaptive cubature may
+  become slow, so consider stochastic methods such as
   [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
   [`Cuba.jl`](https://github.com/giordano/Cuba.jl).
 

@@ -87,7 +87,7 @@ cubature formula for the given `domain` by calling [`default_rule`](@ref). Altho
 are generally good choices, you can also specify a custom embedded cubature formula by
 passing it as a keyword argument to `integrate`. For example, in the case of a triangle, the
 package defaults to a Radon-Laurie embedded cubature formula of high order 8 and low order 5
-(see [`RadonLaurie`](@ref)). If you want _e.g._ to use an embedded cubature based on the
+(see [`RadonLaurie`](@ref)). If you want *e.g.* to use an embedded cubature based on the
 [`GrundmannMoeller`](@ref) rule of high order 13 and low order 11, you can do
 
 ```@example embedded-cubature
@@ -148,7 +148,7 @@ for your specific application!
     end # hide
     ```
 
-To add a custom embedded cubature for a given domain, you must write a constructor, _e.g._,
+To add a custom embedded cubature for a given domain, you must write a constructor, *e.g.*,
 `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref). See the file
 at
 [`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl)
