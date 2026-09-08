@@ -142,7 +142,7 @@ $$
 $$
 At the end, $(I_n, E_n)$ is returned as the integral value and error estimate.
 
-> todo: add plot of subdivision (triangle, tetrahedron, square, cube)
+![One level of uniform subdivision for the four supported domain types: a triangle and tetrahedron (simplices) split into $2^{D}$ similar children by joining edge midpoints, and a rectangle and cuboid (orthotopes) bisected along each axis. \label{fig:subdivision}](image/subdivision.pdf)
 
 ## Implementation
 
@@ -211,6 +211,8 @@ We consider three canonical geometries:
 We set $\boldsymbol{x}_0 = \tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, and $x_* = 1/\pi$ so that the features are well contained in the domain.
 The hyperplane is axis-aligned, making it a useful benchmark for comparing uniform versus estimator-driven subdivision.
 Convergence plots sweep $\mathtt{rtol} = 10^{-i}$ ($i = 1, \ldots, 10$; up to $8$ in 3D), recording the total number of evaluations $N$, the returned error estimate, and the actual error against a reference solution computed at $\mathtt{rtol} = 10^{-12}$.
+
+When the cost of evaluating $f$ at a single point dominates the per-point overhead of the algorithm itself (a few clock cycles per node), the wall-clock time is roughly $N$ times the average cost of a single evaluation, making $N$ a hardware-independent proxy for runtime.
 
 ## Simplices
 
