@@ -4,7 +4,15 @@ using HAdaptiveIntegration.Domain: Cuboid, Orthotope, Rectangle, Simplex, Tetrah
 using LinearAlgebra
 using StaticArrays
 
-const COLORS = [Makie.cgrad(:tab10, 10, categorical = true)[i] for i in 1:8]
+# Mix a color toward white by fraction f (f=1 keeps the color, f=0 is white).
+# Lightens/desaturates without transparency.
+function dim(color, f)
+    c = f * RGBf(color) + (1 - f) * RGBf(1, 1, 1)
+    return RGBAf(c.r, c.g, c.b, 1)
+end
+
+const COLORS2 = [dim(Makie.cgrad(:tab10, 10, categorical = true)[i], 0.35) for i in 1:8]
+const COLORS3 = [dim(Makie.cgrad(:tab10, 10, categorical = true)[i], 0.65) for i in 1:8]
 
 const EDGE_COLOR = :black
 
@@ -31,24 +39,22 @@ function translate(h::Orthotope{D, T}, t::SVector{D, T}) where {D, T}
     return Orthotope{D, T}(map(c -> c + t, h.corners))
 end
 
-function explode_offset(sub, b, offset)
-    b_sub = barycenter(sub)
-    isapprox(b_sub, b) && return zero(b_sub)
-    return offset * normalize(b_sub - b)
+function explode_offset(sub, b, factor)
+    return factor * (barycenter(sub) - b)
 end
 
 function view_direction(azimuth, elevation)
     return SVector{3, Float64}(cos(elevation) * cos(azimuth), cos(elevation) * sin(azimuth), sin(elevation))
 end
 
-function plot_subdivisions!(ax, domain, subdivide, draw!, offset, view_dir = nothing)
+function plot_subdivisions!(ax, domain, subdivide, draw!, offset, view_dir = nothing; colors = COLORS2)
     b = barycenter(domain)
     subs = collect(subdivide(domain))
     if view_dir !== nothing
-        # Painter's algorithm: draw far-to-near so transparent meshes overlap correctly.
+        # Painter's algorithm: draw far-to-near so opaque meshes render in correct order.
         sort!(subs; by = s -> dot(barycenter(s) + explode_offset(s, b, offset), view_dir))
     end
-    for (sub, color) in zip(subs, COLORS)
+    for (sub, color) in zip(subs, colors)
         draw!(ax, translate(sub, explode_offset(sub, b, offset)), color)
     end
     return nothing
@@ -67,7 +73,7 @@ function plot_triangle!(fig, col)
     ax = Axis(fig[2, col]; aspect = DataAspect())
     hidedecorations!(ax)
     hidespines!(ax)
-    plot_subdivisions!(ax, reference_domain(Triangle), subdivide_triangle, draw_triangle!, 0.02)
+    plot_subdivisions!(ax, reference_domain(Triangle), subdivide_triangle, draw_triangle!, 0.1)
     return nothing
 end
 
@@ -80,7 +86,7 @@ function plot_rectangle!(fig, col)
     ax = Axis(fig[2, col]; aspect = DataAspect())
     hidedecorations!(ax)
     hidespines!(ax)
-    plot_subdivisions!(ax, reference_domain(Rectangle), subdivide_rectangle, draw_rectangle!, 0.02)
+    plot_subdivisions!(ax, reference_domain(Rectangle), subdivide_rectangle, draw_rectangle!, 0.1)
     return nothing
 end
 
@@ -97,7 +103,7 @@ function plot_tetrahedron!(fig, col)
     )
     hidedecorations!(ax)
     hidespines!(ax)
-    plot_subdivisions!(ax, reference_domain(Tetrahedron), subdivide_tetrahedron, draw_tetrahedron!, 0.15, view_direction(azimuth, elevation))
+    plot_subdivisions!(ax, reference_domain(Tetrahedron), subdivide_tetrahedron, draw_tetrahedron!, 0.5, view_direction(azimuth, elevation); colors = COLORS3)
     return nothing
 end
 
@@ -116,7 +122,7 @@ function plot_cuboid!(fig, col)
     )
     hidedecorations!(ax)
     hidespines!(ax)
-    plot_subdivisions!(ax, reference_domain(Cuboid), subdivide_cuboid, draw_cuboid!, 0.1, view_direction(azimuth, elevation))
+    plot_subdivisions!(ax, reference_domain(Cuboid), subdivide_cuboid, draw_cuboid!, 0.5, view_direction(azimuth, elevation); colors = COLORS3)
     return nothing
 end
 
