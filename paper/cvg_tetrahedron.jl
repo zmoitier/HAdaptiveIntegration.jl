@@ -138,7 +138,7 @@ hai_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
 println("Running convergence for hyperplane feature...")
 hai_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
-fig_cvg = Figure(size = (1200, 500))
+fig_cvg = Figure(size = (1200, 500), fontsize = 25)
 
 c_hai = Makie.wong_colors()[1]
 
@@ -177,5 +177,5 @@ Legend(
     framevisible = false,
 )
 
-save(joinpath(@__DIR__, "cvg_tetrahedron.png"), fig_cvg)
+save(joinpath(@__DIR__, "cvg_tetrahedron.png"), fig_cvg; px_per_unit = 8)
 println("Saved cvg_tetrahedron.png")

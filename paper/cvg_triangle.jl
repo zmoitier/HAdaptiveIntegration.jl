@@ -6,6 +6,8 @@ using StaticArrays
 
 include("util.jl")
 
+set_theme!(paper_theme())
+
 const QRULE = RadonLaurie()
 const DOMAIN = Triangle((0, 0), (1, 0), (0, 1))
 const EC = embedded_cubature(QRULE)
@@ -50,22 +52,20 @@ function add_mesh_inset!(fig_pos, integrand)
     hidedecorations!(ax)
     hidespines!(ax)
 
-    # heatmap of the integrand
-    n = 150
+    n = 6000
     xs = range(0, 1, length = n)
     ys = range(0, 1, length = n)
     z = [xi + yi < 1 ? integrand(SVector(xi, yi)) : NaN for xi in xs, yi in ys]
-    heatmap!(ax, xs, ys, z; colormap = :viridis, alpha = 0.6)
+    heatmap!(ax, xs, ys, z; colormap = :viridis, alpha = 0.6, rasterize = 160)
 
-    # adaptive mesh lines in semi-transparent white
     for el in buffer.valtree
         tri = el[1]
         xt, yt = plot_triangle(tri)
-        lines!(ax, xt, yt; color = (:white, 0.25), linewidth = 0.5)
+        lines!(ax, xt, yt; color = (:white, 0.7), linewidth = 0.15)
     end
     xt, yt = plot_triangle(DOMAIN)
 
-    return lines!(ax, xt, yt; color = :black, linewidth = 2)
+    return lines!(ax, xt, yt; color = :black, linewidth = 0.7)
 end
 
 function plot_hai_panel!(ax, hai_data, Iref, high, low, order_dim, color)
@@ -78,7 +78,7 @@ function plot_hai_panel!(ax, hai_data, Iref, high, low, order_dim, color)
         (abs(hai_data.I[idx_ref] - Iref) / abs(Iref)) .* (hai_data.N ./ hai_data.N[idx_ref]) .^ (-high / order_dim);
         color = :black,
         linestyle = :dot,
-        linewidth = 2,
+        linewidth = 0.7,
     )
     p4 = lines!(
         ax,
@@ -86,7 +86,7 @@ function plot_hai_panel!(ax, hai_data, Iref, high, low, order_dim, color)
         (hai_data.E[idx_ref] / abs(Iref)) .* (hai_data.N ./ hai_data.N[idx_ref]) .^ (-low / order_dim);
         color = :gray,
         linestyle = :dot,
-        linewidth = 2,
+        linewidth = 0.7,
     )
     return p1, p2, p3, p4
 end
@@ -100,7 +100,7 @@ hai_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
 println("Running convergence for hyperplane feature...")
 hai_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
-fig_cvg = Figure(size = (1200, 500))
+fig_cvg = Figure(size = FIG_SIZE)
 
 c_hai = Makie.wong_colors()[1]
 
@@ -139,5 +139,5 @@ Legend(
     framevisible = false,
 )
 
-save(joinpath(@__DIR__, "cvg_triangle.png"), fig_cvg)
-println("Saved cvg_triangle.png")
+save_figure(fig_cvg, "cvg_triangle.pdf")
+println("Saved cvg_triangle.pdf")

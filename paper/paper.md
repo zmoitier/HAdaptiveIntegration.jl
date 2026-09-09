@@ -219,7 +219,7 @@ When the cost of evaluating $f$ at a single point dominates the per-point overhe
 \autoref{fig:cvg_simplex} shows convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available in arbitrary dimension).
 Two observations hold across all features and both geometries: the estimated error reliably tracks the actual error, confirming a sound a posteriori indicator; and once the feature is resolved, errors follow $\mathcal{O}(N^{-(k+1)/d})$ with $k = k_h$ or $k_\ell$ and the exponent implied by $N \propto h^{-d}$.
 
-![](cvg_triangle.png)
+![](cvg_triangle.pdf)
 
 ![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit triangle (top) and unit tetrahedron (bottom) versus the number of evaluations ($N$). Insets show representative adaptive sub-domains and integrand visualizations.\label{fig:cvg_simplex}](cvg_tetrahedron.png)
 
@@ -230,7 +230,7 @@ In 2D, both use the Genz-Malik rule [@GenzMalik1980], isolating the subdivision 
 For the point and hypersphere features the solvers are comparable in both dimensions.
 For the hyperplane, `HCubature.jl` has a clear advantage because its estimator refines exclusively along $x_1$ rather than bisecting uniformly in all $d$ directions, and this gap grows with $d$, motivating anisotropic splitting as future work.
 
-![](cvg_rectangle.png)
+![](cvg_rectangle.pdf)
 
 ![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square (top) and the unit cube (bottom), comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`. Insets show representative adaptive sub-domains and integrand visualizations.\label{fig:cvg_orthotope}](cvg_cube.png)
 

@@ -7,6 +7,8 @@ using StaticArrays
 
 include("util.jl")
 
+set_theme!(paper_theme())
+
 ## Quadrature rule used for HAdaptiveIntegration (swap to e.g. SQUARE_CH25 to compare)
 const QRULE = GenzMalik{2}()
 # const QRULE = SQUARE_CH25
@@ -30,18 +32,18 @@ function add_mesh_inset!(fig_pos, integrand)
     hidedecorations!(ax)
     hidespines!(ax)
 
-    n = 150
+    n = 6000
     xs = range(0, 1, length = n)
     ys = range(0, 1, length = n)
     z = [integrand(SVector(xi, yi)) for xi in xs, yi in ys]
-    heatmap!(ax, xs, ys, z; colormap = :viridis, alpha = 0.6)
+    heatmap!(ax, xs, ys, z; colormap = :viridis, alpha = 0.6, rasterize = 160)
 
     for el in buffer.valtree
         rect = el[1]
         xr, yr = plot_rectangle(rect)
-        lines!(ax, xr, yr; color = (:white, 0.25), linewidth = 0.5)
+        lines!(ax, xr, yr; color = (:white, 0.7), linewidth = 0.15)
     end
-    return lines!(ax, [0, 1, 1, 0, 0], [0, 0, 1, 1, 0]; color = :black, linewidth = 2)
+    return lines!(ax, [0, 1, 1, 0, 0], [0, 0, 1, 1, 0]; color = :black, linewidth = 0.7)
 end
 
 function reference(integrand)
@@ -84,8 +86,8 @@ function plot_hai_hc_panel!(ax, hai_data, hc_data, Iref, high, low, order_dim, c
     N_ref = hai_data.N[idx_ref]
     e_ref = abs(hai_data.I[idx_ref] - Iref) / abs(Iref)
     est_ref = hai_data.E[idx_ref] / abs(Iref)
-    p5 = lines!(ax, hai_data.N, e_ref .* (hai_data.N ./ N_ref) .^ (-high / order_dim); color = :black, linestyle = :dot, linewidth = 2)
-    p6 = lines!(ax, hai_data.N, est_ref .* (hai_data.N ./ N_ref) .^ (-low / order_dim); color = :gray, linestyle = :dot, linewidth = 2)
+    p5 = lines!(ax, hai_data.N, e_ref .* (hai_data.N ./ N_ref) .^ (-high / order_dim); color = :black, linestyle = :dot, linewidth = 0.7)
+    p6 = lines!(ax, hai_data.N, est_ref .* (hai_data.N ./ N_ref) .^ (-low / order_dim); color = :gray, linestyle = :dot, linewidth = 0.7)
     return p1, p2, p3, p4, p5, p6
 end
 
@@ -98,7 +100,7 @@ hai_sphere, hc_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
 println("Running convergence for hyperplane feature...")
 hai_plane, hc_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
-fig = Figure(size = (1300, 520))
+fig = Figure(size = FIG_SIZE)
 
 c_hai = Makie.wong_colors()[1]
 c_hc = Makie.wong_colors()[2]
@@ -141,5 +143,5 @@ Legend(
     orientation = :horizontal,
     framevisible = false,
 )
-save(joinpath(@__DIR__, "cvg_rectangle.png"), fig)
-println("Saved cvg_rectangle.png")
+save_figure(fig, "cvg_rectangle.pdf")
+println("Saved cvg_rectangle.pdf")

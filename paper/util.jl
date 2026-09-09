@@ -45,3 +45,18 @@ function plot_rectangle(rect::Rectangle)
     y = [l[2], l[2], h[2], h[2], l[2]]
     return x, y
 end
+
+const FIG_SIZE = (390, 190)
+
+function paper_theme()
+    return Theme(
+        fontsize = 8,
+        figure_padding = 4,
+        Axis = (titlesize = 8, xlabelsize = 8, spinewidth = 0.6, xgridwidth = 0.4, ygridwidth = 0.4),
+        Lines = (linewidth = 1.0,),
+        ScatterLines = (linewidth = 1.0, markersize = 4),
+        Legend = (framevisible = false, labelsize = 8, patchsize = (16.0f0, 8.0f0)),
+    )
+end
+
+save_figure(fig, name) = save(joinpath(@__DIR__, name), fig; pt_per_unit = 1)

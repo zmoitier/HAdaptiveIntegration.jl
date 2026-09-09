@@ -151,7 +151,7 @@ hai_sphere, hc_sphere, Iref_sphere, _, _ = run_convergence(fct_sphere)
 println("Running convergence for hyperplane feature...")
 hai_plane, hc_plane, Iref_plane, _, _ = run_convergence(fct_plane)
 
-fig = Figure(size = (1300, 520))
+fig = Figure(size = (1300, 520), fontsize = 27)
 
 c_hai = Makie.wong_colors()[1]
 c_hc = Makie.wong_colors()[2]
@@ -196,5 +196,5 @@ Legend(
 )
 
 outpath = joinpath(@__DIR__, "cvg_cube.png")
-save(outpath, fig)
+save(outpath, fig; px_per_unit = 8)
 println("Saved $(outpath)")
