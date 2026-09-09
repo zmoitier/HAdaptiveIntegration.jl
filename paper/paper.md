@@ -22,20 +22,21 @@ bibliography: paper.bib
 
 # Summary
 
-`HAdaptiveIntegration.jl` is a `Julia` [@Julia] package for automatic adaptive numerical integration on multidimensional simplices and axis-aligned orthotopes.
-It approximates integrals of the form
+`HAdaptiveIntegration.jl` is a `Julia` [@Julia] package that computes the numerical value of an integral of a function over a geometric region in any number of dimensions, automatically refining where the function is hard to resolve, and returning both the value and an a posteriori error estimate.
+Such integrals arise in finite-element and boundary-element methods and in parameter studies over integrands with localized features.
+More precisely, it performs adaptive numerical integration on simplices (triangles, tetrahedra, and their higher-dimensional analogs) and axis-aligned orthotopes (rectangles, boxes, and their higher-dimensional analogs), approximating integrals of the form
 $$
   I = \int_{\Omega} f(\boldsymbol{x}) \, \operatorname{d}\!\boldsymbol{x}
 $$
-where $f \colon \mathbb{R}^d \to \mathbb{T}$ takes values in a normed real vector space (*e.g.* $\mathbb{T} = \mathbb{R},\ \mathbb{C},\ \mathbb{R}^n$), and $\Omega \subset \mathbb{R}^d$ is a simplex (triangles, tetrahedra, etc.) or an axis-aligned orthotope (rectangle, cuboid, etc.).
-`HAdaptiveIntegration` combines uniform subdivision with embedded cubature to return both an integral estimate and an a posteriori error estimate.
+where $f \colon \mathbb{R}^d \to \mathbb{T}$ takes values in a normed real vector space (*e.g.* $\mathbb{T} = \mathbb{R},\ \mathbb{C},\ \mathbb{R}^n$), and $\Omega \subset \mathbb{R}^d$ is a simplex or an axis-aligned orthotope.
+`HAdaptiveIntegration` combines isotropic subdivision with embedded cubature to return both an integral estimate and an a posteriori error estimate.
 
 Its main features are:
 
 - Adaptive integration over simplices and orthotopes of arbitrary dimension;
 - Efficient tabulated cubature rules for low-dimensional domains;
 - Support for user-defined cubature rules and subdivision strategies;
-- Arbitrary-precision arithmetic.
+- Arbitrary-precision arithmetic (formula-based rules natively; tabulated rules via an optional extension).
 
 ## Usage
 
@@ -46,10 +47,8 @@ The workflow has two steps:
 
 ```julia
 using HAdaptiveIntegration
-segment     = Segment(0, 1)
-triangle    = Triangle((0,0), (1,0), (0,1))
-rectangle   = Rectangle((0,0), (1,1))
-simplex4    = Simplex((0,0,0,0), (1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1))
+triangle  = Triangle((0,0), (1,0), (0,1))
+rectangle = Rectangle((0,0), (1,1))
 ```
 
 **Integrate** using the same interface for both domain types:
@@ -65,14 +64,13 @@ The function returns a pair `(I, E)`, where `I` is the integral estimate and `E`
 # Statement of need
 
 Adaptive numerical integration is a fundamental building block in scientific computing, including finite-element and boundary-element methods and parameter studies over reference or physical cells.
-To our knowledge, no `Julia` package supported adaptive integration on simplices before this work.
-`HAdaptiveIntegration` fills this gap while also providing specialized tabulated rules for higher-order accuracy, a single unified interface for both simplices and orthotopes, user-extensible cubature, and optional arbitrary-precision arithmetic.
+`HAdaptiveIntegration` provides adaptive integration over simplices and orthotopes, with specialized tabulated rules for higher-order accuracy, a single unified interface for both domain types, user-extensible cubature, and optional arbitrary-precision arithmetic.
 
 # State of the field
 
 `HAdaptiveIntegration` is complementary to the existing `Julia` ecosystem.
 `QuadGK.jl` [@QuadGK] remains the right choice in one dimension.
-`HCubature.jl` [@HCubature] is often preferable for medium- to high-dimensional orthotopes, where its estimator-driven axis-aligned bisection can outperform uniform subdivision when the integrand varies primarily along one direction.
+`HCubature.jl` [@HCubature] is often preferable for medium- to high-dimensional orthotopes, where its estimator-driven axis-aligned bisection can outperform isotropic subdivision when the integrand varies primarily along one direction.
 `Cuba.jl` [@Cuba] is better suited for high-dimensional problems where stochastic methods dominate.
 The distinct contribution of `HAdaptiveIntegration` is support for simplices of arbitrary dimension together with orthotopes under one API, with efficient tabulated rules in low dimensions. This combination is not provided by the packages above.
 
@@ -91,7 +89,8 @@ $$
   \qquad \forall f \in \mathscr{C}^0(\widehat{\omega}).
 $$
 where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{\omega}$ are the cubature points, $h_i$ the $\mathcal{H}$ weights, $\ell_i$ the $\mathcal{L}$ weights, and $\mathsf{H} > \mathsf{L}$.
-The $\mathcal{L}$ rule uses a subset of the $\mathcal{H}$ points (hence *embedded*), and the two rules have polynomial exactness orders $k_h > k_\ell$, where the order is the highest degree $k$ for which the rule integrates all polynomials exactly.
+The $\mathcal{L}$ rule reuses the first $\mathsf{L}$ nodes of $\mathcal{H}$ (hence *embedded*) with in general different weights $\ell_i \neq h_i$, so the pair costs only $\mathsf{H}$ evaluations rather than $\mathsf{H}+\mathsf{L}$.
+The two rules have polynomial exactness orders $k_h > k_\ell$, where the order is the highest degree $k$ for which the rule integrates all polynomials exactly.
 
 For a domain $\omega$ with reference map $\phi \colon \widehat{\omega} \to \omega$, the *local* estimated integral value $I_\omega$ and error $E_\omega$ are
 $$
@@ -101,18 +100,22 @@ $$
 $$
 where $\operatorname{J}_\phi$ is the Jacobian of $\phi$ (which is constant for simplices and axis-aligned orthotopes) and $\lVert \cdot \rVert$ is the chosen norm on $\mathbb{T}$.
 
-Each domain type has a default embedded cubature summarized in \autoref{tbl:default-rule}.
+Each domain type has a default embedded cubature summarized in \autoref{tbl:default-rule}, and visualized for the triangle and rectangle \autoref{fig:embedded_cubature}.
 
-|                                           |                                 |
-| :---------------------------------------- | :------------------------------ |
-| 1d. `Segment` [@Laurie1997]               |                                 |
-| 2d. `Triangle` [@Laurie1982]              | `Rectangle` [@GenzMalik1980]    |
-| 3d. `Tetrahedron` [@GrundmannMoeller1978] | `Cuboid` [@BerntsenEspelid1988] |
-| $n$d. `Simplex` [@GrundmannMoeller1978]   | `Orthotope` [@GenzMalik1980]    |
-: Default embedded cubature rules by domain.\label{tbl:default-rule}
+| Dimension | Domain | $k_h$ | $k_\ell$ | Reference |
+| :-- | :-- | --: | --: | :-- |
+| 1d | `Segment` | 23 | 13 | [@Laurie1997] |
+| 2d | `Triangle` | 8 | 5 | [@Laurie1982] |
+| 2d | `Rectangle` | 7 | 5 | [@GenzMalik1980] |
+| 3d | `Tetrahedron` | 7 | 5 | [@GrundmannMoeller1978] |
+| 3d | `Cuboid` | 9 | 7 | [@BerntsenEspelid1988] |
+| $n$d | `Simplex` | 7 | 5 | [@GrundmannMoeller1978] |
+| $n$d | `Orthotope` | 7 | 5 | [@GenzMalik1980] |
+: Default embedded cubature rules by domain, where $k_h$ and $k_\ell$ are the polynomial exactness orders of the high and low rules. \label{tbl:default-rule}
 
-> todo: add `struct` description
-> todo: add plot of embedded cubature (triangle and square)
+![Plots of the default embedded cubature rules used for the triangle and rectangle. Cross markers show the $\mathcal{H}$ nodes and circle markers the $\mathsf{L}$ shared nodes reused by $\mathcal{L}$; color encodes the weight. \label{fig:embedded_cubature}](image/embedded_cubature.pdf)
+
+An embedded cubature is stored as an `EmbeddedCubature` struct holding the shared nodes together with separate high- and low-order weight vectors, so the node ordering in the tabulated data is load-bearing.
 
 ## The adaptive algorithm
 
@@ -141,6 +144,7 @@ $$
   n = n_{\max}.
 $$
 At the end, $(I_n, E_n)$ is returned as the integral value and error estimate.
+When neither `atol` nor `rtol` is supplied, the default is `atol = T(0)` and `rtol = sqrt(eps(T))` where `T` is the domain's element type; if `maxsubdiv` is reached without meeting the tolerance, a warning is issued and the current estimate is returned.
 
 ![One level of uniform subdivision for the four supported domain types: a triangle and tetrahedron (simplices) split into $2^{D}$ similar children by joining edge midpoints, and a rectangle and cuboid (orthotopes) bisected along each axis. \label{fig:subdivision}](image/subdivision.pdf)
 
@@ -154,7 +158,7 @@ When computing multiple integrals of the same type, the heap can be pre-allocate
 ## Extended precision
 
 As noted above, `integrate` supports arbitrary precision.
-Only the rules from [@GrundmannMoeller1978; @GenzMalik1980] are generated from explicit formulas; the others are tabulated at quadruple precision and are therefore incompatible with arbitrary precision.
+Only the rules from @GrundmannMoeller1978 and @GenzMalik1980 are generated from explicit formulas; the others are tabulated at quadruple precision and are therefore incompatible with arbitrary precision.
 `HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which refines a tabulated rule by solving the polynomial exactness conditions with Newton iterations and automatic differentiation in `ForwardDiff.jl` [@ForwardDiff2016].
 
 More precisely, let $\widehat{\omega}$ be a reference domain and $(\mathcal{H}, \mathcal{L})$ be an embedded cubature on $\widehat{\omega}$ with orders $k_h > k_\ell$.
@@ -192,24 +196,25 @@ The iteration stops when $\lVert \boldsymbol{u}_{p+1} - \boldsymbol{u}_p \rVert_
 # Research impact statement
 
 The repository includes API documentation, examples (buffer pre-allocation, `callback` mechanism, custom cubature, arbitrary-precision workflows), an automated test suite, and continuous integration covering tests, documentation, and linting.
-`HAdaptiveIntegration` has been featured in the [Julia world newsletter](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110), interfaced via [Integrals.jl](https://github.com/SciML/Integrals.jl) (SciML ecosystem), used as a backend in [@Inti], and adopted as a dependency of [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl/releases/tag/v0.57.0).
+`HAdaptiveIntegration` has been featured in the [Julia world newsletter](https://discourse.julialang.org/t/this-month-in-julia-world-2026-02/136110), interfaced via [Integrals.jl](https://github.com/SciML/Integrals.jl) (SciML ecosystem), used as a backend in @Inti, and adopted as a dependency of [`Meshes.jl`](https://github.com/JuliaGeometry/Meshes.jl/releases/tag/v0.57.0).
 
 # Example gallery
 
 We showcase the package on integrands with localized features constructed from the mollified integrand
 $$
-  \delta_\epsilon(\phi(\boldsymbol{x})) = \frac{1}{\varepsilon^c} \eta \left(\frac{\phi(\boldsymbol{x})}{\varepsilon}\right),
-  \qquad \eta(r) = \frac{1}{\sqrt{2\pi}} e^{-r^2/2},
+  \rho_\delta(\psi(\boldsymbol{x})) = \frac{1}{\delta^c} \rho \left(\frac{\psi(\boldsymbol{x})}{\delta}\right),
+  \qquad \rho(r) = \frac{1}{\sqrt{2\pi}} e^{-r^2/2},
 $$
-where $\phi$ is a level-set function vanishing on the feature $\Gamma = \phi^{-1}(0)$ and $c$ is the codimension of $\Gamma$ (so the total mass stays $\mathcal{O}(1)$ as $\varepsilon \to 0$).
+where $\psi$ is a level-set function vanishing on $\Gamma = \psi^{-1}(0)$ and $c$ is the codimension of $\Gamma$ (so the total mass stays $\mathcal{O}(1)$ as $\delta \to 0$).
+The function $\rho_\delta \circ \psi$ has fast variation where $\psi(\boldsymbol{x}) \approx 0$.
 We consider three canonical geometries:
 
-- **Point:** $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x} - \boldsymbol{x}_0\rVert_2$, codimension $c = d$;
-- **Hypersphere:** $\phi(\boldsymbol{x}) = \lVert\boldsymbol{x}\rVert_2^2 - r^2$, codimension $c = 1$;
-- **Hyperplane:** $\phi(\boldsymbol{x}) = x_1 - x_*$, codimension $c = 1$.
+- **Point:** $\psi(\boldsymbol{x}) = \lVert\boldsymbol{x} - \boldsymbol{x}_0\rVert_2$, codimension $c = d$ (point refinement);
+- **Hypersphere:** $\psi(\boldsymbol{x}) = \lVert\boldsymbol{x}\rVert_2^2 - r^2$, codimension $c = 1$ (curve/surface refinement);
+- **Hyperplane:** $\psi(\boldsymbol{x}) = x_1 - x_*$, codimension $c = 1$ (axis-aligned hyperplane refinement).
 
-We set $\boldsymbol{x}_0 = \tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, and $x_* = 1/\pi$ so that the features are well contained in the domain.
-The hyperplane is axis-aligned, making it a useful benchmark for comparing uniform versus estimator-driven subdivision.
+We set $\delta = 0.05$, $\boldsymbol{x}_0 = \tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, and $x_* = 1/\pi$.
+The hyperplane is axis-aligned, making it a useful benchmark for comparing isotropic versus estimator-driven subdivision.
 Convergence plots sweep $\mathtt{rtol} = 10^{-i}$ ($i = 1, \ldots, 10$; up to $8$ in 3D), recording the total number of evaluations $N$, the returned error estimate, and the actual error against a reference solution computed at $\mathtt{rtol} = 10^{-12}$.
 
 When the cost of evaluating $f$ at a single point dominates the per-point overhead of the algorithm itself (a few clock cycles per node), the wall-clock time is roughly $N$ times the average cost of a single evaluation, making $N$ a hardware-independent proxy for runtime.
@@ -219,9 +224,9 @@ When the cost of evaluating $f$ at a single point dominates the per-point overhe
 \autoref{fig:cvg_simplex} shows convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available in arbitrary dimension).
 Two observations hold across all features and both geometries: the estimated error reliably tracks the actual error, confirming a sound a posteriori indicator; and once the feature is resolved, errors follow $\mathcal{O}(N^{-(k+1)/d})$ with $k = k_h$ or $k_\ell$ and the exponent implied by $N \propto h^{-d}$.
 
-![](cvg_triangle.pdf)
+![](image/cvg_triangle.pdf)
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit triangle (top) and unit tetrahedron (bottom) versus the number of evaluations ($N$). Insets show representative adaptive sub-domains and integrand visualizations.\label{fig:cvg_simplex}](cvg_tetrahedron.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit triangle (top) and unit tetrahedron (bottom) versus the number of evaluations ($N$). Insets show representative adaptive sub-domains and integrand visualizations. \label{fig:cvg_simplex}](image/cvg_tetrahedron.png)
 
 ## Orthotopes and comparison with `HCubature.jl`
 
@@ -230,9 +235,9 @@ In 2D, both use the Genz-Malik rule [@GenzMalik1980], isolating the subdivision 
 For the point and hypersphere features the solvers are comparable in both dimensions.
 For the hyperplane, `HCubature.jl` has a clear advantage because its estimator refines exclusively along $x_1$ rather than bisecting uniformly in all $d$ directions, and this gap grows with $d$, motivating anisotropic splitting as future work.
 
-![](cvg_rectangle.pdf)
+![](image/cvg_rectangle.pdf)
 
-![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square (top) and the unit cube (bottom), comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`. Insets show representative adaptive sub-domains and integrand visualizations.\label{fig:cvg_orthotope}](cvg_cube.png)
+![Convergence of the actual and estimated errors for the point, hypersphere, and hyperplane features on the unit square (top) and the unit cube (bottom), comparing `HAdaptiveIntegration` (HAI) with `HCubature.jl`. Insets show representative adaptive sub-domains and integrand visualizations. \label{fig:cvg_orthotope}](image/cvg_cube.png)
 
 # AI usage disclosure
 
