@@ -24,12 +24,11 @@ bibliography: paper.bib
 
 `HAdaptiveIntegration.jl` is a `Julia` [@Julia] package that computes the numerical value of an integral of a function over a geometric region in any number of dimensions, automatically refining where the function is hard to resolve, and returning both the value and an a posteriori error estimate.
 Such integrals arise in finite-element and boundary-element methods and in parameter studies over integrands with localized features.
-More precisely, it performs adaptive numerical integration on simplices (triangles, tetrahedra, and their higher-dimensional analogs) and axis-aligned orthotopes (rectangles, boxes, and their higher-dimensional analogs), approximating integrals of the form
+More precisely, it performs adaptive numerical integration on simplices (triangles, tetrahedra, and their higher-dimensional analogs) and axis-aligned orthotopes (rectangles, cuboid, and their higher-dimensional analogs), approximating integrals of the form
 $$
   I = \int_{\Omega} f(\boldsymbol{x}) \, \operatorname{d}\!\boldsymbol{x}
 $$
 where $f \colon \mathbb{R}^d \to \mathbb{T}$ takes values in a normed real vector space (*e.g.* $\mathbb{T} = \mathbb{R},\ \mathbb{C},\ \mathbb{R}^n$), and $\Omega \subset \mathbb{R}^d$ is a simplex or an axis-aligned orthotope.
-`HAdaptiveIntegration` combines isotropic subdivision with embedded cubature to return both an integral estimate and an a posteriori error estimate.
 
 Its main features are:
 
@@ -59,38 +58,38 @@ I, E = integrate(f, triangle)
 I, E = integrate(f, rectangle)
 ```
 
-The function returns a pair `(I, E)`, where `I` is the integral estimate and `E` is its a posteriori error estimate. The main stopping-condition keywords are `atol`, `rtol`, and `maxsubdiv`.
+The function returns a pair `(I, E)`, where `I` is the integral estimate and `E` is an a posteriori error estimate. The main stopping-condition keywords are `atol`, `rtol`, and `maxsubdiv`.
 
 # Statement of need
 
 Adaptive numerical integration is a fundamental building block in scientific computing, including finite-element and boundary-element methods and parameter studies over reference or physical cells.
-`HAdaptiveIntegration` provides adaptive integration over simplices and orthotopes, with specialized tabulated rules for higher-order accuracy, a single unified interface for both domain types, user-extensible cubature, and optional arbitrary-precision arithmetic.
+`HAdaptiveIntegration` provides this for simplices and orthotopes, with a single unified interface, user-extensible cubature, and optional arbitrary-precision arithmetic.
 
 # State of the field
 
 `HAdaptiveIntegration` is complementary to the existing `Julia` ecosystem.
 `QuadGK.jl` [@QuadGK] remains the right choice in one dimension.
-`HCubature.jl` [@HCubature] is often preferable for medium- to high-dimensional orthotopes, where its estimator-driven axis-aligned bisection can outperform isotropic subdivision when the integrand varies primarily along one direction.
+`HCubature.jl` [@HCubature] is often preferable for medium- to high-dimensional orthotopes, where its estimator-driven axis-aligned bisection can outperform isotropic subdivision if the integrand varies primarily along one direction.
 `Cuba.jl` [@Cuba] is better suited for high-dimensional problems where stochastic methods dominate.
 The distinct contribution of `HAdaptiveIntegration` is support for simplices of arbitrary dimension together with orthotopes under one API, with efficient tabulated rules in low dimensions. This combination is not provided by the packages above.
 
 # Software design
 
-`HAdaptiveIntegration` has two submodules: `Domain`, which defines integration domains and their subdivision; and `Rule`, which defines integration rules (either computed from explicit formulas or tabulated in decimal format).
-Its single entry point is `integrate`, whose adaptive algorithm combines embedded cubature with a subdivision strategy.
+The package has two submodules: `Domain` (domains and subdivision) and `Rule` (cubature rules, formula-based or tabulated), with `integrate` as the single entry point.
 
-## Embedded cubature
+## Method
 
-At the core of an adaptive numerical integration method is a cubature pair $(\mathcal{H}, \mathcal{L})$, defined on the reference domain $\widehat{\omega}$ (equal to $\{\boldsymbol{x} \in \mathbb{R}_+^d \mid x_1 + \cdots + x_d \leq 1\}$ for simplices or $[0, 1]^d$ for orthotopes) by
+### Embedded cubature
+
+At the core of an adaptive numerical integration method is a cubature pair $(\mathcal{H}, \mathcal{L})$, defined on the reference domain $\widehat{\omega}$ (the unit simplex or $[0,1]^d$) by
 $$
   \mathcal{H}(f) = \sum_{1 \leq i \leq \mathsf{H}} h_i \, f(\boldsymbol{x}_i)
   \quad \text{and} \quad
   \mathcal{L}(f) = \sum_{1 \leq i \leq \mathsf{L}} \ell_i \, f(\boldsymbol{x}_i),
-  \qquad \forall f \in \mathscr{C}^0(\widehat{\omega}).
 $$
-where $\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}} \in \widehat{\omega}$ are the cubature points, $h_i$ the $\mathcal{H}$ weights, $\ell_i$ the $\mathcal{L}$ weights, and $\mathsf{H} > \mathsf{L}$.
-The $\mathcal{L}$ rule reuses the first $\mathsf{L}$ nodes of $\mathcal{H}$ (hence *embedded*) with in general different weights $\ell_i \neq h_i$, so the pair costs only $\mathsf{H}$ evaluations rather than $\mathsf{H}+\mathsf{L}$.
-The two rules have polynomial exactness orders $k_h > k_\ell$, where the order is the highest degree $k$ for which the rule integrates all polynomials exactly.
+where $\boldsymbol{x}_i$ are the nodes, $h_i$ and $\ell_i$ the respective weights, and $\mathsf{H} > \mathsf{L}$.
+The $\mathcal{L}$ rule reuses the first $\mathsf{L}$ nodes of $\mathcal{H}$ (hence *embedded*) with generally different weights $\ell_i \neq h_i$, so the pair costs only $\mathsf{H}$ evaluations rather than $\mathsf{H}+\mathsf{L}$.
+The two rules have polynomial exactness orders $k_h > k_\ell$ (the highest total degree integrated exactly).
 
 For a domain $\omega$ with reference map $\phi \colon \widehat{\omega} \to \omega$, the *local* estimated integral value $I_\omega$ and error $E_\omega$ are
 $$
@@ -98,9 +97,9 @@ $$
   \quad \text{and} \quad
   E_\omega = \lvert\det \operatorname{J}_\phi\rvert \ \lVert \mathcal{H}(f \circ \phi) - \mathcal{L}(f \circ \phi) \rVert,
 $$
-where $\operatorname{J}_\phi$ is the Jacobian of $\phi$ (which is constant for simplices and axis-aligned orthotopes) and $\lVert \cdot \rVert$ is the chosen norm on $\mathbb{T}$.
+where $\operatorname{J}_\phi$ is the (constant) Jacobian and $\lVert \cdot \rVert$ is the norm on $\mathbb{T}$.
 
-Each domain type has a default embedded cubature summarized in \autoref{tbl:default-rule}, and visualized for the triangle and rectangle \autoref{fig:embedded_cubature}.
+Default rules per domain are summarized in \autoref{tbl:default-rule} and visualized in \autoref{fig:embedded_cubature}.
 
 | Dimension | Domain | $k_h$ | $k_\ell$ | Reference |
 | :-- | :-- | --: | --: | :-- |
@@ -115,9 +114,7 @@ Each domain type has a default embedded cubature summarized in \autoref{tbl:defa
 
 ![Plots of the default embedded cubature rules used for the triangle and rectangle. Cross markers show the $\mathcal{H}$ nodes and circle markers the $\mathsf{L}$ shared nodes reused by $\mathcal{L}$; color encodes the weight. \label{fig:embedded_cubature}](image/embedded_cubature.pdf)
 
-An embedded cubature is stored as an `EmbeddedCubature` struct holding the shared nodes together with separate high- and low-order weight vectors, so the node ordering in the tabulated data is load-bearing.
-
-## The adaptive algorithm
+### The adaptive algorithm
 
 Given a function $f$ and an initial domain $\Omega$, the adaptive algorithm constructs a sequence of nested partitions.
 It starts with $\mathcal{P}_0 = \{\Omega\}$ and iterates by
@@ -128,66 +125,36 @@ $$
 where $\omega^*$ is chosen such that $E_{\omega^*} = \max \{E_\omega : \omega \in \mathcal{P}_n\}$, and $\omega^*_1, \ldots, \omega^*_{2^d}$ are subdomains given by a partition of $\omega^*$.
 In dimension $d$, orthotopes are bisected along each axis and simplices by midpoint edge refinement [@SimplexSubdiv], both producing $2^d$ subdomains.
 
-For the sequence ${(\mathcal{P}_n)}_{n \in \mathbb{N}}$, we define the global integral value $I_n$ and error $E_n$ estimators by
+For the sequence ${(\mathcal{P}_n)}_{n \in \mathbb{N}}$, we define the global integral and error estimators $\mathcal{I}_n$ and $\mathcal{E}_n$ by
 $$
-  I_n = \sum_{\omega \in \mathcal{P}_n} I_\omega
+  \mathcal{I}_n = \sum_{\omega \in \mathcal{P}_n} I_\omega
   \quad \text{and} \quad
-  E_n = \sum_{\omega \in \mathcal{P}_n} E_\omega.
+  \mathcal{E}_n = \sum_{\omega \in \mathcal{P}_n} E_\omega.
 $$
-For this type of algorithm, the stopping condition is controlled by three parameters: the absolute tolerance $\mathtt{atol} \geq 0$, the relative tolerance $\mathtt{rtol} \geq 0$, and the maximum number of subdivisions $n_{\max} \in \mathbb{N}$.
-The subdivision process stops when
-$$
-  E_n \leq \mathtt{atol}
-  \quad \text{or} \quad
-  E_n \leq \mathtt{rtol}\, \lVert I_n \rVert
-  \quad \text{or} \quad
-  n = n_{\max}.
-$$
-At the end, $(I_n, E_n)$ is returned as the integral value and error estimate.
-When neither `atol` nor `rtol` is supplied, the default is `atol = T(0)` and `rtol = sqrt(eps(T))` where `T` is the domain's element type; if `maxsubdiv` is reached without meeting the tolerance, a warning is issued and the current estimate is returned.
+The process stops when $\mathcal{E}_n \leq \mathtt{atol}$ (absolute tolerance) or $\mathcal{E}_n \leq \mathtt{rtol}\,\lVert \mathcal{I}_n \rVert$ (relative tolerance), or $n = \mathtt{maxsubdiv}$ (maximum number of subdivisions), and returns $(\mathcal{I}_n, \mathcal{E}_n)$.
 
-![One level of uniform subdivision for the four supported domain types: a triangle and tetrahedron (simplices) split into $2^{D}$ similar children by joining edge midpoints, and a rectangle and cuboid (orthotopes) bisected along each axis. \label{fig:subdivision}](image/subdivision.pdf)
+![One level of isotropic subdivision for a triangle and tetrahedron split by joining edge midpoints, and a rectangle and cuboid bisected along each axis. \label{fig:subdivision}](image/subdivision.pdf)
 
 ## Implementation
 
-The implementation uses a max binary heap from [DataStructures.jl](https://github.com/JuliaCollections/DataStructures.jl) to store $\{(\omega, I_\omega, E_\omega) : \omega \in \mathcal{P}_n \}$, ordered by $E_\omega$, for efficient retrieval of the maximum local error.
-When computing multiple integrals of the same type, the heap can be pre-allocated and passed via the `buffer` keyword to reduce allocations.
+The only domain structs are `Simplex{D,T,N}` (with $N = D+1$ vertices) and `Orthotope{D,T}` (low and high corners); `Segment`, `Triangle`, `Tetrahedron`, `Rectangle`, and `Cuboid` are type aliases, so dimension-specific defaults are selected by ordinary dispatch rather than run-time branching.
+Vertices and cubature nodes are `SVector`s, so the dimension $D$ is part of the type and the inner evaluation loop is stack-allocated and specialized per $(D, T)$.
+Default rules are built by `@generated` functions, so the `EmbeddedCubature` for a given element type is constructed once at compile time.
+An `EmbeddedCubature` stores the shared nodes together with separate high- and low-order weight vectors, with the first $\mathsf{L}$ nodes being those of the low-order rule.
+Rules are tabulated on the reference domain and mapped by `map_from_reference`, which returns $(\phi, \lvert\det \operatorname{J}_\phi\rvert)$ with constant Jacobian.
 
-> todo: expand on implementation detail
+The adaptive set lives in a max binary heap from [DataStructures.jl](https://github.com/JuliaCollections/DataStructures.jl), ordered by local error, and `integrate` maintains $(\mathcal{I}_n, \mathcal{E}_n)$ incrementally.
+When computing many integrals of the same type, the heap can be pre-allocated and passed via the `buffer` keyword so that, provided the integrand does not allocate, the only allocation is the returned pair; see the documentation for a zero-allocation benchmark.
+Defaults are `atol = 0`, `rtol = sqrt(eps(T))` for element type `T`, and $\mathtt{maxsubdiv} = 2^{13+D}$; if `maxsubdiv` is reached, a warning is issued and the current estimate is returned.
+The same code path runs with `Float64`, `BigFloat`, and [`Unitful.jl`](https://github.com/JuliaPhysics/Unitful.jl) quantities.
+Extensibility is provided through the `rule`, and `norm` keywords on `integrate`, which let users plug in their own cubature and error norm.
 
 ## Extended precision
 
 As noted above, `integrate` supports arbitrary precision.
-Only the rules from @GrundmannMoeller1978 and @GenzMalik1980 are generated from explicit formulas; the others are tabulated at quadruple precision and are therefore incompatible with arbitrary precision.
-`HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which refines a tabulated rule by solving the polynomial exactness conditions with Newton iterations and automatic differentiation in `ForwardDiff.jl` [@ForwardDiff2016].
-
-More precisely, let $\widehat{\omega}$ be a reference domain and $(\mathcal{H}, \mathcal{L})$ be an embedded cubature on $\widehat{\omega}$ with orders $k_h > k_\ell$.
-Let $b_1, \ldots, b_{K_h}$ be a basis of $\mathbb{P}_{k_h}$ (polynomials of total degree $\leq k_h$) such that $b_1, \ldots, b_{K_\ell}$ is a basis of $\mathbb{P}_{k_\ell}$.
-Define $\boldsymbol{u}^{\mathcal{H}, \mathcal{L}} = (\boldsymbol{x}_1, \ldots, \boldsymbol{x}_{\mathsf{H}}, h_1, \ldots, h_{\mathsf{H}}, \ell_1, \ldots, \ell_{\mathsf{L}})$ as the embedded cubature data, and the function $F \colon \mathbb{R}^{(d+1) \mathsf{H} + \mathsf{L}} \to \mathbb{R}^{K_h + K_\ell}$ by
-$$
-  F\left( \boldsymbol{u}^{\mathcal{H}, \mathcal{L}} \right) =
-  \begin{pmatrix}
-    \mathcal{H}(b_1) - \int_{\widehat{\omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
-    \\[1ex]
-    \vdots
-    \\[1ex]
-    \mathcal{H}(b_{K_h}) - \int_{\widehat{\omega}} b_{K_h}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
-    \\[2ex]
-    \mathcal{L}(b_1) - \int_{\widehat{\omega}} b_1(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
-    \\[1ex]
-    \vdots
-    \\[1ex]
-    \mathcal{L}(b_{K_\ell}) - \int_{\widehat{\omega}} b_{K_\ell}(\boldsymbol{x}) \operatorname{d}\!\boldsymbol{x}
-  \end{pmatrix}.
-$$
-Starting from a tabulated rule with $\lVert F(\boldsymbol{u}^{\mathcal{H}, \mathcal{L}}) \rVert_2 = \varepsilon \ll 1$, we seek $\tilde{\boldsymbol{u}}$ with $\lVert F(\tilde{\boldsymbol{u}}) \rVert_2 = \eta < \varepsilon$ via a least-squares Newton method [@XiaoGimbutas2010, section 2.3].
-Setting $\boldsymbol{u}_0 = \boldsymbol{u}^{\mathcal{H}, \mathcal{L}}$, the iteration is
-$$
-  \boldsymbol{u}_{p+1} = \boldsymbol{u}_p - \operatorname{J}_F(\boldsymbol{u}_p)^\dagger F(\boldsymbol{u}_p),\tag{N}
-$$
-$\operatorname{J}_F(\boldsymbol{u}_p)$ is the Jacobian matrix of $F$ at the point $\boldsymbol{u}_p$, and $\operatorname{J}_F(\boldsymbol{u}_p)^\dagger$ is the pseudo-inverse.
-In `Julia`, this is implemented with the `\` operator.
-The iteration stops when $\lVert \boldsymbol{u}_{p+1} - \boldsymbol{u}_p \rVert_2 \leq \mathtt{x\_atol}$ (absolute tolerance of successive iterates) or $\lVert F(\boldsymbol{u}_p) \rVert_2 \leq \mathtt{f\_atol}$ (absolute tolerance of function value) or $p = p_{\max}$ (maximum number of iterations).
+Only the rules from @GrundmannMoeller1978 and @GenzMalik1980 are generated from explicit formulas and are already arbitrary-precision; the others are tabulated at quadruple precision and therefore incompatible with it.
+`HAdaptiveIntegration` addresses this with the optional `IncreasePrecisionExt` extension, which refines a tabulated rule's nodes and weights by a least-squares Newton iteration on the polynomial-exactness (moment) conditions for both $\mathcal{H}$ and $\mathcal{L}$, with Jacobians from `ForwardDiff.jl` [@ForwardDiff2016], following [@XiaoGimbutas2010, section 2.3].
+The full construction, including the definition of the refinement operator and its stopping criteria, is given in the documentation.
 
 **Remark.** The monomial basis is convenient but poorly conditioned, so achieving precision $\varepsilon$ requires `BigFloat` arithmetic at a higher internal precision $\eta < \varepsilon$; an $\mathrm{L}^2$-orthogonal basis would improve conditioning.
 
@@ -205,23 +172,21 @@ $$
   \rho_\delta(\psi(\boldsymbol{x})) = \frac{1}{\delta^c} \rho \left(\frac{\psi(\boldsymbol{x})}{\delta}\right),
   \qquad \rho(r) = \frac{1}{\sqrt{2\pi}} e^{-r^2/2},
 $$
-where $\psi$ is a level-set function vanishing on $\Gamma = \psi^{-1}(0)$ and $c$ is the codimension of $\Gamma$ (so the total mass stays $\mathcal{O}(1)$ as $\delta \to 0$).
-The function $\rho_\delta \circ \psi$ has fast variation where $\psi(\boldsymbol{x}) \approx 0$.
+where $\psi$ is a level-set function vanishing on $\Gamma = \psi^{-1}(0)$, $c$ the codimension of $\Gamma$, so the total mass stays $\mathcal{O}(1)$ as $\delta \to 0$; $\rho_\delta \circ \psi$ varies rapidly near $\Gamma$.
 We consider three canonical geometries:
 
 - **Point:** $\psi(\boldsymbol{x}) = \lVert\boldsymbol{x} - \boldsymbol{x}_0\rVert_2$, codimension $c = d$ (point refinement);
 - **Hypersphere:** $\psi(\boldsymbol{x}) = \lVert\boldsymbol{x}\rVert_2^2 - r^2$, codimension $c = 1$ (curve/surface refinement);
 - **Hyperplane:** $\psi(\boldsymbol{x}) = x_1 - x_*$, codimension $c = 1$ (axis-aligned hyperplane refinement).
 
-We set $\delta = 0.05$, $\boldsymbol{x}_0 = \tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, and $x_* = 1/\pi$.
-The hyperplane is axis-aligned, making it a useful benchmark for comparing isotropic versus estimator-driven subdivision.
+We set $\delta = 0.05$, $\boldsymbol{x}_0 = \tfrac{1}{\pi}(1, \ldots, 1)$, $r = 1/2$, $x_* = 1/\pi$; the axis-aligned hyperplane benchmarks isotropic versus estimator-driven subdivision.
 Convergence plots sweep $\mathtt{rtol} = 10^{-i}$ ($i = 1, \ldots, 10$; up to $8$ in 3D), recording the total number of evaluations $N$, the returned error estimate, and the actual error against a reference solution computed at $\mathtt{rtol} = 10^{-12}$.
 
 When the cost of evaluating $f$ at a single point dominates the per-point overhead of the algorithm itself (a few clock cycles per node), the wall-clock time is roughly $N$ times the average cost of a single evaluation, making $N$ a hardware-independent proxy for runtime.
 
 ## Simplices
 
-\autoref{fig:cvg_simplex} shows convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available in arbitrary dimension).
+\autoref{fig:cvg_simplex} shows convergence on the unit triangle ($d=2$, Radon-Laurie rule [@Laurie1982]) and tetrahedron ($d=3$, Grundmann-Möller rule [@GrundmannMoeller1978], available in arbitrary dimensions).
 Two observations hold across all features and both geometries: the estimated error reliably tracks the actual error, confirming a sound a posteriori indicator; and once the feature is resolved, errors follow $\mathcal{O}(N^{-(k+1)/d})$ with $k = k_h$ or $k_\ell$ and the exponent implied by $N \propto h^{-d}$.
 
 ![](image/cvg_triangle.pdf)
