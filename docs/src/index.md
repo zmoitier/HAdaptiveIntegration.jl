@@ -6,21 +6,16 @@ CurrentModule = HAdaptiveIntegration
 
 ## Overview
 
-`HAdaptiveIntegration.jl` is a Julia package for approximating integrals of functions over
-various predefined [`AbstractDomain`](@ref)s. It uses *embedded cubature* rules to build
-error estimates, and refines the integration domain by splitting its mesh elements until a
-certain tolerance is reached. Features include:
+`HAdaptiveIntegration.jl` is a Julia package for approximating integrals of functions over various predefined [`AbstractDomain`](@ref)s. It uses *embedded cubature* rules to build error estimates, and refines the integration domain by splitting its mesh elements until a certain tolerance is reached. Features include:
 
 - Adaptive integration over **simplices and orthotope of any dimension**
-- Use of **efficient (tabulated) cubatures** for low-dimensional simplices (triangle and
-  tetrahedron) and orthotope (rectangle and cuboid)
+- Use of **efficient (tabulated) cubatures** for low-dimensional simplices (triangle and tetrahedron) and orthotope (rectangle and cuboid)
 - Support for custom cubature rules
 - Arbitrary precision arithmetic
 
 ## Installation
 
-The package can be installed with the Julia package manager. From the Julia REPL, type `]`
-to enter the Pkg REPL mode and run
+The package can be installed with the Julia package manager. From the Julia REPL, type `]` to enter the Pkg REPL mode and run
 
 ```julia
 pkg> add HAdaptiveIntegration
@@ -40,16 +35,13 @@ using HAdaptiveIntegration
 
 ## Basic usage
 
-The main function exported by this package is [`integrate(f, Ω)`](@ref), which is used to
-approximate
+The main function exported by this package is [`integrate(f, Ω)`](@ref), which is used to approximate
 
 ```math
 I = \int_{\Omega} f(x) \, \mathrm{d}x
 ```
 
-where ``\Omega \subset \mathbb{R}^d`` is a [`AbstractDomain`](@ref) object, and
-``f \colon \mathbb{R}^d \to \mathbb{F}`` is a function. Here is a simple example: first, we
-define a function,
+where ``\Omega \subset \mathbb{R}^d`` is a [`AbstractDomain`](@ref) object, and ``f \colon \mathbb{R}^d \to \mathbb{F}`` is a function. Here is a simple example: first, we define a function,
 
 ```@example quickstart
 fct = x -> cis(sum(x)) / (sum(abs2, x) + 1e-2)
@@ -57,13 +49,9 @@ nothing # hide
 ```
 
 !!! warning "Function signature"
-    The function `f` must accept a single argument `x` which is an abstract vector of length
-    `d`, the dimension of the domain (concretely, `f` is called through `f(::SVector)`). The
-    return type `T` of `f` can be any type that supports the operations `+(T, T)`,
-    `norm(T)`, and multiplication by a scalar (*e.g.* vectors or matrices).
+    The function `f` must accept a single argument `x` which is an abstract vector of length `d`, the dimension of the domain (concretely, `f` is called through `f(::SVector)`). The return type `T` of `f` can be any type that supports the operations `+(T, T)`, `norm(T)`, and multiplication by a scalar (*e.g.* vectors or matrices).
 
-`Domain`s are constructed using the following functions (see their respective docstrings for
-more details):
+`Domain`s are constructed using the following functions (see their respective docstrings for more details):
 
 - In 1 dimension:
   - [`Segment`](@ref)
@@ -74,15 +62,12 @@ more details):
   - [`Tetrahedron`](@ref)
   - [`Cuboid`](@ref)
 - In arbitrary dimension:
-  - [`Simplex`](@ref) —
-    [en.wikipedia.org/wiki/Simplex](https://en.wikipedia.org/wiki/Simplex)
-  - [`Orthotope`](@ref) —
-    [en.wikipedia.org/wiki/Hyperrectangle](https://en.wikipedia.org/wiki/Hyperrectangle)
+  - [`Simplex`](@ref) — [en.wikipedia.org/wiki/Simplex](https://en.wikipedia.org/wiki/Simplex)
+  - [`Orthotope`](@ref) — [en.wikipedia.org/wiki/Hyperrectangle](https://en.wikipedia.org/wiki/Hyperrectangle)
 
 ### Simplices
 
-To integrate the above function over a ``d``-dimensional simplex (triangle, tetrahedron,
-...), defined by their vertices, we can use
+To integrate the above function over a ``d``-dimensional simplex (triangle, tetrahedron, ...), defined by their vertices, we can use
 
 - Triangle
 
@@ -90,8 +75,8 @@ To integrate the above function over a ``d``-dimensional simplex (triangle, tetr
   I, E = integrate(fct, Triangle((0, 0), (1, 0), (0, 1)))
   ```
 
-  The result `I` is the integral of `f` over a triangle with vertices `(0,0)`, `(1,0)`, and
-  `(0,1)`, and `E` is an error estimate.
+  The result `I` is the integral of `f` over a triangle with vertices `(0,0)`, `(1,0)`, and `(0,1)`, and `E` is an error estimate.
+
 - Tetrahedron
 
   ```@example quickstart
@@ -108,13 +93,11 @@ To integrate the above function over a ``d``-dimensional simplex (triangle, tetr
          )
   ```
 
-  The keyword arguments `atol` and `rtol` can be used to control the desired absolute and
-  relative error tolerances, respectively.
+  The keyword arguments `atol` and `rtol` can be used to control the desired absolute and relative error tolerances, respectively.
 
 ### Orthotopes (*a.k.a.* hyperrectangle)
 
-To integrate the same function over a ``d``-dimensional axis-aligned orthotope (rectangle,
-cuboid, and hyperrectangle), defined by their low and high corners, we can use
+To integrate the same function over a ``d``-dimensional axis-aligned orthotope (rectangle, cuboid, and hyperrectangle), defined by their low and high corners, we can use
 
 - Rectangle
 
@@ -136,40 +119,21 @@ cuboid, and hyperrectangle), defined by their low and high corners, we can use
 
 !!! tip "Related package to integration over an orthotope (hyperrectangle)"
     This package contains rule for an arbitrary ``d``-dimensional orthotope, however:
-    - For ``d=1``, you may want to check
-      [`QuadGk.jl`](https://github.com/JuliaMath/QuadGK.jl), as it is specialized to do
-      adaptive integration over the segment.
-    - For ``d \geq 4``, you may want to check
-      [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl), as it supports adaptive
-      integration over arbitrarily high-dimensional axis-aligned orthotope.
-    - For large ``d``, you may want to check
-      [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
-      [`Cuba.jl`](https://github.com/giordano/Cuba.jl), as they use stochastic method.
+    - For ``d=1``, you may want to check [`QuadGk.jl`](https://github.com/JuliaMath/QuadGK.jl), as it is specialized to do adaptive integration over the segment.
+    - For ``d \geq 4``, you may want to check [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl), as it supports adaptive integration over arbitrarily high-dimensional axis-aligned orthotope.
+    - For large ``d``, you may want to check [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or [`Cuba.jl`](https://github.com/giordano/Cuba.jl), as they use stochastic method.
 
 !!! note "When to use HAdaptiveIntegration.jl"
-    **Best fit:** low- to medium-dimensional simplices, low-dimensional orthotopes,
-    deterministic adaptive integration, arbitrary-precision workflows.
+    **Best fit:** low- to medium-dimensional simplices, low-dimensional orthotopes, deterministic adaptive integration, arbitrary-precision workflows.
 
-    **In practice:** use [`QuadGK.jl`](https://github.com/JuliaMath/QuadGK.jl) for 1D
-    integration; [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) may be faster
-    on some medium-dimensional orthotopes; consider
-    [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or
-    [`Cuba.jl`](https://github.com/giordano/Cuba.jl) for high-dimensional problems.
+    **In practice:** use [`QuadGK.jl`](https://github.com/JuliaMath/QuadGK.jl) for 1D integration; [`HCubature.jl`](https://github.com/JuliaMath/HCubature.jl) may be faster on some medium-dimensional orthotopes; consider [`MCIntegration.jl`](https://github.com/numericalEFT/MCIntegration.jl) or [`Cuba.jl`](https://github.com/giordano/Cuba.jl) for high-dimensional problems.
 
 ## Going further
 
-In the previous examples we covered the basic usage of the [`integrate`](@ref) function.
-There are, however, other options that can be passed to `integrate` in order to customize
-various aspects of the underlying algorithm (*e.g.* passing a different cubature rule, using
-a buffer to avoid memory allocations, etc.). For more details, see the docstring of the
-[`integrate`](@ref) function, as well as the next section on
-[advanced usage](@ref advanced-usage).
+In the previous examples we covered the basic usage of the [`integrate`](@ref) function. There are, however, other options that can be passed to `integrate` in order to customize various aspects of the underlying algorithm (*e.g.* passing a different cubature rule, using a buffer to avoid memory allocations, etc.). For more details, see the docstring of the [`integrate`](@ref) function, as well as the next section on [advanced usage](@ref advanced-usage).
 
 !!! warning "Thread safety"
     For the function [`integrate`](@ref) to be thread safe, you need three conditions:
     1. The `fct` to integrate must be thread safe.
-    2. If a `buffer` is provided (see [Reduce memory allocations](@ref reduce-mem-alloc)),
-       you need to create a new buffer for each thread. The default is thread safe.
-    3. If a `callback` function is provided (see
-       [Track convergence progress](@ref callback-fct)), it must be thread safe. The default
-       is thread safe.
+    2. If a `buffer` is provided (see [Reduce memory allocations](@ref reduce-mem-alloc)), you need to create a new buffer for each thread. The default is thread safe.
+    3. If a `callback` function is provided (see [Track convergence progress](@ref callback-fct)), it must be thread safe. The default is thread safe.

@@ -8,9 +8,7 @@ We now cover the options available for the [`integrate`](@ref) function.
 
 ## [Reduce memory allocations](@id reduce-mem-alloc)
 
-When calling `integrate(f, domain)`, the package allocates memory for storing the various
-subregions that are generated during the adaptive integration process. Here is what it looks
-like in practice:
+When calling `integrate(f, domain)`, the package allocates memory for storing the various subregions that are generated during the adaptive integration process. Here is what it looks like in practice:
 
 ```@example buffering
 using HAdaptiveIntegration
@@ -21,9 +19,7 @@ f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 @benchmark integrate($f, $t)
 ```
 
-While the overhead associated with these (small) allocations is usually negligible, there
-are circumstances where one may want to avoid allocations altogether. This can be achieved
-by passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
+While the overhead associated with these (small) allocations is usually negligible, there are circumstances where one may want to avoid allocations altogether. This can be achieved by passing a buffer to the [`integrate`](@ref) using [`allocate_buffer`](@ref):
 
 ```@example buffering
 using HAdaptiveIntegration: allocate_buffer
@@ -35,19 +31,14 @@ b = @benchmark integrate($f, $t; buffer = $buffer)
 b  # hide
 ```
 
-Provided evaluating `f` does not allocate, and the `buffer` has a sufficiently large
-capacity, `integrate` will not allocate memory during the integration process, as shown in
-the benchmark above.
+Provided evaluating `f` does not allocate, and the `buffer` has a sufficiently large capacity, `integrate` will not allocate memory during the integration process, as shown in the benchmark above.
 
 !!! note "When to use a buffer"
-    Buffer pre-allocation is useful in **hot loops** where `integrate` is called repeatedly,
-    *e.g.*, in optimization or parameter fitting. For one-off integrations, the overhead is
-    negligible.
+    Buffer pre-allocation is useful in **hot loops** where `integrate` is called repeatedly, *e.g.*, in optimization or parameter fitting. For one-off integrations, the overhead is negligible.
 
 ## [Track convergence progress](@id callback-fct)
 
-The `callback` keyword argument allows you to monitor the progress of the adaptive
-integration. The callback function is called after each subdivision and receives:
+The `callback` keyword argument allows you to monitor the progress of the adaptive integration. The callback function is called after each subdivision and receives:
 
 | Argument    | Type      | Description                               |
 | ----------- | --------- | ----------------------------------------- |
@@ -57,8 +48,7 @@ integration. The callback function is called after each subdivision and receives
 | `buffer`    |           | Internal buffer (passed for advanced use) |
 
 !!! note
-    The integration stops when `E ≤ max(atol, rtol * |I|)`. Use `atol` and `rtol` keyword
-    arguments to control the tolerance.
+    The integration stops when `E ≤ max(atol, rtol * |I|)`. Use `atol` and `rtol` keyword arguments to control the tolerance.
 
 Here is a practical example to print the history convergence:
 
@@ -82,13 +72,7 @@ end
 
 ## Choose custom cubature rules
 
-By default, when calling `integrate(f, domain)`, the package uses a default embedded
-cubature formula for the given `domain` by calling [`default_rule`](@ref). Although these
-are generally good choices, you can also specify a custom embedded cubature formula by
-passing it as a keyword argument to `integrate`. For example, in the case of a triangle, the
-package defaults to a Radon-Laurie embedded cubature formula of high order 8 and low order 5
-(see [`RadonLaurie`](@ref)). If you want *e.g.* to use an embedded cubature based on the
-[`GrundmannMoeller`](@ref) rule of high order 13 and low order 11, you can do
+By default, when calling `integrate(f, domain)`, the package uses a default embedded cubature formula for the given `domain` by calling [`default_rule`](@ref). Although these are generally good choices, you can also specify a custom embedded cubature formula by passing it as a keyword argument to `integrate`. For example, in the case of a triangle, the package defaults to a Radon-Laurie embedded cubature formula of high order 8 and low order 5 (see [`RadonLaurie`](@ref)). If you want *e.g.* to use an embedded cubature based on the [`GrundmannMoeller`](@ref) rule of high order 13 and low order 11, you can do
 
 ```@example embedded-cubature
 using HAdaptiveIntegration
@@ -100,11 +84,7 @@ ec = embedded_cubature(GrundmannMoeller{2}(13, 11))
 I, E = integrate(f, t; rule = ec)
 ```
 
-Which cubature rule is best depends on the function being integrated, as well as on the
-desired accuracy; as a rule of thumb, higher-order cubature rules will perform better for
-globally smooth functions `f` or higher accuracy requirements. Here is a short study on the
-number of function evaluations required to achieve a given accuracy for the default
-Radon-Laurie cubature and the `GrundmannMoeller` cubature rule above:
+Which cubature rule is best depends on the function being integrated, as well as on the desired accuracy; as a rule of thumb, higher-order cubature rules will perform better for globally smooth functions `f` or higher accuracy requirements. Here is a short study on the number of function evaluations required to achieve a given accuracy for the default Radon-Laurie cubature and the `GrundmannMoeller` cubature rule above:
 
 ```@example embedded-cubature
 const cc = Ref(0)  # a counter for the number of function evaluations
@@ -115,8 +95,7 @@ cc[] = 0; integrate(g, t; rule = ec, rtol); counter_custom = cc[]
 counter_default, counter_custom
 ```
 
-For `rtol = 1e-2`, we see that the default cubature rule requires fewer function
-evaluations. However, decreasing `rtol` changes the balance:
+For `rtol = 1e-2`, we see that the default cubature rule requires fewer function evaluations. However, decreasing `rtol` changes the balance:
 
 ```@example embedded-cubature
 rtol = 1e-8
@@ -125,8 +104,7 @@ cc[] = 0; integrate(g, t; rule = ec, rtol); counter_custom = cc[]
 counter_default, counter_custom
 ```
 
-This example illustrates that testing is necessary to determine which cubature rule is best
-for your specific application!
+This example illustrates that testing is necessary to determine which cubature rule is best for your specific application!
 
 !!! tip "Available embedded cubature formulas"
     The list of available embedded cubature formulas is:
@@ -148,17 +126,11 @@ for your specific application!
     end # hide
     ```
 
-To add a custom embedded cubature for a given domain, you must write a constructor, *e.g.*,
-`my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref). See the file
-at
-[`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl)
-for examples. PRs with new schemes are more than welcome!
+To add a custom embedded cubature for a given domain, you must write a constructor, *e.g.*, `my_custom_cubature(args...)` that returns a valid [`EmbeddedCubature`](@ref). See the file at [`Rule/triangle.jl`](https://github.com/zmoitier/HAdaptiveIntegration.jl/blob/main/src/Rule/triangle.jl) for examples. PRs with new schemes are more than welcome!
 
 ## Define custom subdivision strategies
 
-The package uses a default subdivision strategy for the given `domain` by calling
-[`default_subdivision`](@ref). For example, by default triangles are subdivided into 4
-smaller triangles by connecting the midpoints of the edges:
+The package uses a default subdivision strategy for the given `domain` by calling [`default_subdivision`](@ref). For example, by default triangles are subdivided into 4 smaller triangles by connecting the midpoints of the edges:
 
 ```@example default-subdivision
 using HAdaptiveIntegration
@@ -173,8 +145,7 @@ Here are the subdivided triangles:
 subdiv_algo(t)
 ```
 
-But it is also possible (and maybe desirable) to split the triangle into 2 smaller triangles
-instead. The following function accomplishes this:
+But it is also possible (and maybe desirable) to split the triangle into 2 smaller triangles instead. The following function accomplishes this:
 
 ```@example default-subdivision
 using StaticArrays
@@ -188,16 +159,13 @@ subdivide_triangle2(t)  # hide
 ```
 
 !!! warning
-    Non-default subdivision strategies may affect convergence. The default (4-way split)
-    typically requires fewer subdivisions than the 2-way split shown above.
+    Non-default subdivision strategies may affect convergence. The default (4-way split) typically requires fewer subdivisions than the 2-way split shown above.
 
-Passing `subdivide_triangle2` as the `subdiv_algo` to `integrate` will use this instead of
-the default:
+Passing `subdivide_triangle2` as the `subdiv_algo` to `integrate` will use this instead of the default:
 
 ```@example default-subdivision
 f = x -> 1 / (x[1]^2 + x[2]^2 + 1e-2)
 I, E = integrate(f, t; subdiv_algo = subdivide_triangle2)
 ```
 
-Which subdivision strategy is best depends on the function being integrated; for the example
-presented above, it turns out the default strategy is more efficient!
+Which subdivision strategy is best depends on the function being integrated; for the example presented above, it turns out the default strategy is more efficient!
