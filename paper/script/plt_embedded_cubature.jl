@@ -7,7 +7,7 @@ const CMAP = reverse(cgrad(:managua))
 include("utils.jl")
 
 function weight_colors(weights, wmin, wmax)
-    return [CMAP[(w-wmin)/(wmax-wmin)] for w in weights]
+    return [CMAP[(w - wmin) / (wmax - wmin)] for w in weights]
 end
 
 function domain_outline(tri::Triangle)
@@ -43,29 +43,29 @@ function plot_cubature!(fig, col, DOM; font_size)
     wmax = max(maximum(abs, ec.weights_high), maximum(abs, ec.weights_low))
     wmin = -wmax
 
-    ax = Axis(fig[1, col]; aspect=DataAspect())
+    ax = Axis(fig[1, col]; aspect = DataAspect())
     hidedecorations!(ax)
     hidespines!(ax)
 
-    lines!(ax, domain_outline(dom); color=:black, linewidth=1)
+    lines!(ax, domain_outline(dom); color = :black, linewidth = 1)
 
     scatter!(
         ax, node_points(ec.nodes);
-        marker=:xcross,
-        color=weight_colors(ec.weights_high, wmin, wmax),
-        markersize=12,
+        marker = :xcross,
+        color = weight_colors(ec.weights_high, wmin, wmax),
+        markersize = 12,
     )
 
     scatter!(
         ax, node_points(ec.nodes[1:L]);
-        marker=:circle,
-        color=:transparent,
-        strokecolor=weight_colors(ec.weights_low, wmin, wmax),
-        strokewidth=2,
-        markersize=20,
+        marker = :circle,
+        color = :transparent,
+        strokecolor = weight_colors(ec.weights_low, wmin, wmax),
+        strokewidth = 2,
+        markersize = 20,
     )
 
-    Colorbar(fig[1, col+1]; colormap=CMAP, colorrange=(wmin, wmax), ticklabelsize=font_size)
+    Colorbar(fig[1, col + 1]; colormap = CMAP, colorrange = (wmin, wmax), ticklabelsize = font_size)
 
     return wmin, wmax
 end
@@ -73,7 +73,7 @@ end
 function main()
     fig_w, fig_h, font_size = figure_sizes(1, 1 / 2)
     set_theme!(paper_theme(font_size))
-    fig = Figure(size=(fig_w, fig_h))
+    fig = Figure(size = (fig_w, fig_h))
 
     plot_cubature!(fig, 1, Triangle; font_size)
     plot_cubature!(fig, 3, Rectangle; font_size)
@@ -81,20 +81,20 @@ function main()
     Legend(
         fig[2, :],
         [
-            [Makie.MarkerElement(marker=:xcross, markersize=12)],
+            [Makie.MarkerElement(marker = :xcross, markersize = 12)],
             [
                 Makie.MarkerElement(
-                    marker=:circle,
-                    color=:transparent,
-                    strokecolor=:black,
-                    strokewidth=2,
-                    markersize=20,
+                    marker = :circle,
+                    color = :transparent,
+                    strokecolor = :black,
+                    strokewidth = 2,
+                    markersize = 20,
                 ),
             ],
         ],
         ["High order", "Low order"];
-        labelsize=font_size,
-        orientation=:horizontal,
+        labelsize = font_size,
+        orientation = :horizontal,
     )
 
     save("./paper/image/embedded_cubature.pdf", fig)

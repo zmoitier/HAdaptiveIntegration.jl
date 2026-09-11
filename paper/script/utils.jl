@@ -6,7 +6,7 @@ const REFTOL = 1.0e-12
 
 ## Feature parameters shared across all example scripts
 const FEATURE_ϵ = 0.05
-const FEATURE_r₀ = 2/3
+const FEATURE_r₀ = 2 / 3
 const FEATURE_c₀ = 1 / π
 
 """
@@ -19,9 +19,9 @@ function make_features(d::Int)
     x₀ = SVector(ntuple(_ -> 1 / π, d)...)
     fct_point = (x) -> scaled_mollifier(norm(x - x₀), FEATURE_ϵ, d)
 
-    y = setindex(zeros(SVector{d,Float64}), 1.0, 1)
+    y = setindex(zeros(SVector{d, Float64}), 1.0, 1)
     function fct_sphere(x)
-        return scaled_mollifier(sum(abs2, x-y) - FEATURE_r₀^2, FEATURE_ϵ, 1)
+        return scaled_mollifier(sum(abs2, x - y) - FEATURE_r₀^2, FEATURE_ϵ, 1)
     end
 
     fct_plane = (x) -> scaled_mollifier(x[1] - FEATURE_c₀, FEATURE_ϵ, 1)
@@ -52,11 +52,11 @@ Keyword arguments:
 - `font_size_pt`: TeX font size in pt.  Default `10` pt = JOSS body font.
 """
 function figure_sizes(
-    width_fraction::Real,
-    height_fraction::Real;
-    textwidth_bp::Real=385.89,
-    font_size_pt::Real=10
-)
+        width_fraction::Real,
+        height_fraction::Real;
+        textwidth_bp::Real = 385.89,
+        font_size_pt::Real = 10
+    )
 
     # Makie PDF export: 1 px = 1/96 in (0.75 bp); 1 pt (TeX) = 1/72.27 in.
     textwidth_px = textwidth_bp * 96 / 72      # bp → px
@@ -70,19 +70,19 @@ end
 
 function paper_theme(font_size::Real)
     return Theme(
-        fontsize=font_size,
-        figure_padding=4,
-        Axis=(
-            titlesize=font_size-2,
-            xlabelsize=font_size,
-            xticklabelsize=font_size - 2,
-            yticklabelsize=font_size - 2,
-            spinewidth=0.6,
-            xgridwidth=0.4,
-            ygridwidth=0.4,
+        fontsize = font_size,
+        figure_padding = 4,
+        Axis = (
+            titlesize = font_size - 2,
+            xlabelsize = font_size,
+            xticklabelsize = font_size - 2,
+            yticklabelsize = font_size - 2,
+            spinewidth = 0.6,
+            xgridwidth = 0.4,
+            ygridwidth = 0.4,
         ),
-        Lines=(linewidth=1.0,),
-        ScatterLines=(linewidth=1.0, markersize=4),
-        Legend=(framevisible=false, labelsize=font_size, patchsize=(16.0f0, 8.0f0)),
+        Lines = (linewidth = 1.0,),
+        ScatterLines = (linewidth = 1.0, markersize = 4),
+        Legend = (framevisible = false, labelsize = font_size, patchsize = (16.0f0, 8.0f0)),
     )
 end
