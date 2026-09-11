@@ -14,7 +14,7 @@
 multidimensional simplices and orthotopes. It computes integrals of the form
 
 ```math
-I = \int_{\Omega} f(x) \, \mathrm{d}x
+I = \int_{\Omega} f(x) \, \mathrm{d}\!x
 ```
 
 where $f$ is a Julia function and $\Omega$ is the integration domain. The algorithm
