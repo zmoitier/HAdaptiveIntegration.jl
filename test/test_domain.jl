@@ -71,7 +71,7 @@ end
         @test r.xmax == 1
 
         s = Segment(-0.13, 0.78)
-        Φ, μ = map_from_reference(s)
+        Φ, _ = map_from_reference(s)
         Ψ = map_to_reference(s)
         for v in (0, 1)
             @test Ψ(Φ(v)) ≈ v
