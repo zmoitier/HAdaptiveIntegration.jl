@@ -1,22 +1,22 @@
 # How to reproduce the figures and paper
 
-## Prerequisite
+## Prerequisites
 
-- [`Julia`](https://julialang.org/) version `1.12`
+- [`Julia`](https://julialang.org/) version `1.13`
 - [Docker](https://www.docker.com/)
 
-## The figures
-
-Use
+## Figures
 
 ```bash
-bash paper/make_figures.sh
+bash paper/script/make_figures.sh
 ```
+
+This instantiates the project environment and runs every script in `paper/script/`, writing the figures to `paper/image/`.
 
 ## Paper
 
-To generate the paper, start `docker` and, use
+Start Docker, then run
 
 ```bash
-bash paper/generate.sh
+bash paper/script/make_paper.sh
 ```
