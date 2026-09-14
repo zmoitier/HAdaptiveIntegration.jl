@@ -164,14 +164,14 @@ function increase_precision(
 
     L = length(range_wl)
     function G(U::Vector{S}) where {S}
-        nodes = @view U[range_nodes]
+        pts = @view U[range_nodes]
         wh = @view U[range_wh]
         wl = @view U[range_wl]
 
         V = Vector{S}(undef, range_high.stop + range_low.stop)
         for (k, (α, vₑₓ)) in enumerate(exponent2values[range_low])
             vh, vl = zero(S), zero(S)
-            for (i, node) in enumerate(partition(nodes, D))
+            for (i, node) in enumerate(partition(pts, D))
                 r = prod(node .^ α)
                 vh += wh[i] * r
                 if i ≤ L
@@ -183,7 +183,7 @@ function increase_precision(
         end
         for (k, (α, vₑₓ)) in enumerate(exponent2values[range_high])
             vh = zero(S)
-            for (i, node) in enumerate(partition(nodes, D))
+            for (i, node) in enumerate(partition(pts, D))
                 vh += wh[i] * prod(node .^ α)
             end
             V[range_low.stop + k] = vh - vₑₓ

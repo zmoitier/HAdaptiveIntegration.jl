@@ -14,7 +14,7 @@ function validate_orders(
     ) where {D, T, DOM}
     val_ex = integral_monomials(DOM, order_high)
     for (k, α2v) in zip(countfrom(0), val_ex)
-        for (α, v) in α2v
+        for (α, _) in α2v
             vh, vl = eval_monomial(ec, α)
 
             vs = [(vh, "high order")]

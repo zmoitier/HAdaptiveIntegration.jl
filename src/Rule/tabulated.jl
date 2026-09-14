@@ -42,8 +42,9 @@ struct TabulatedEmbeddedCubature{DOM <: AbstractDomain} <: AbstractRule{DOM}
             weights_high::Vector{String},
             weights_low::Vector{String},
         ) where {D, DOM <: AbstractDomain{D}}
-        @assert all(n -> length(n) == D, nodes) "Each node must have length equal to the \
-        dimension D"
+        for (i, n) in enumerate(nodes)
+            @assert length(n) == D "nodes[$i] must have length equal to the dimension D"
+        end
         @assert length(nodes) == length(weights_high) "The number of nodes must match the \
         number of high-order weights"
         @assert length(weights_high) ≥ length(weights_low) "The length of high order \
