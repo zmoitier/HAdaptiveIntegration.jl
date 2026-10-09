@@ -33,7 +33,7 @@ Its main features are:
 
 - Adaptive integration over simplices and orthotopes of arbitrary dimension;
 - Efficient tabulated cubature rules for low-dimensional domains;
-- Support for user-defined cubature rules and subdivision strategies;
+- Support for user-defined cubature rules and subdivision strategies; and
 - Arbitrary-precision arithmetic (formula-based rules natively; tabulated rules via an optional extension).
 
 ## Usage
