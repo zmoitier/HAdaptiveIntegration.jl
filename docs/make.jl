@@ -19,6 +19,7 @@ makedocs(;
         "Home" => "index.md",
         "Advanced usage" => "advanced.md",
         "Extensions" => "extensions.md",
+        "Citing and contributing" => "contributing.md",
         "docstrings.md",
     ],
     pagesonly = true,

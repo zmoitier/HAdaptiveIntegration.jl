@@ -1,0 +1,38 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Faria
+  given-names: Luiz
+  orcid: "https://orcid.org/0000-0002-8090-934X"
+- family-names: Moitier
+  given-names: Zoïs
+  orcid: "https://orcid.org/0000-0003-1736-5754"
+contact:
+- family-names: Moitier
+  given-names: Zoïs
+  orcid: "https://orcid.org/0000-0003-1736-5754"
+doi: 10.5281/zenodo.23188591
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Faria
+    given-names: Luiz
+    orcid: "https://orcid.org/0000-0002-8090-934X"
+  - family-names: Moitier
+    given-names: Zoïs
+    orcid: "https://orcid.org/0000-0003-1736-5754"
+  date-published: 2026-10-09
+  doi: 10.21105/joss.10833
+  issn: 2475-9066
+  issue: 126
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 10833
+  title: "HAdaptiveIntegration.jl: Adaptive numerical integration over
+    simplices and orthotopes"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.10833"
+  volume: 11
+title: "`HAdaptiveIntegration.jl`: Adaptive numerical integration over
+  simplices and orthotopes"

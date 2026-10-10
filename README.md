@@ -1,14 +1,15 @@
 # HAdaptiveIntegration
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.10833/status.svg)](https://doi.org/10.21105/joss.10833)
+[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable)
+[![In development documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev)
+
 [![Lint workflow Status](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Lint.yml/badge.svg?branch=main)](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Lint.yml?query=branch%3Amain)
 [![Test workflow status](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Test.yml/badge.svg?branch=main)](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Test.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/zmoitier/HAdaptiveIntegration.jl)
 [![Docs workflow Status](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Docs.yml/badge.svg?branch=main)](https://github.com/zmoitier/HAdaptiveIntegration.jl/actions/workflows/Docs.yml?query=branch%3Amain)
 [![code style: runic](https://img.shields.io/badge/code_style-%E1%9A%B1%E1%9A%A2%E1%9A%BE%E1%9B%81%E1%9A%B2-black)](https://github.com/fredrikekre/Runic.jl)
 [![BestieTemplate](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/JuliaBesties/BestieTemplate.jl/main/docs/src/assets/badge.json)](https://github.com/JuliaBesties/BestieTemplate.jl)
-
-[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://zmoitier.github.io/HAdaptiveIntegration.jl/stable)
-[![In development documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://zmoitier.github.io/HAdaptiveIntegration.jl/dev)
 
 `HAdaptiveIntegration` is a Julia package for adaptive numerical integration on
 multidimensional simplices and orthotopes. It computes integrals of the form
@@ -107,3 +108,22 @@ other packages may suit your case better:
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for how to
 report a bug, ask a question, or submit a pull request.
+
+## Citing
+
+If you use this package in your research, please cite our article in the Journal of Open Source Software ([doi:10.21105/joss.10833](https://doi.org/10.21105/joss.10833)):
+
+```bibtex
+@article{FariaMoitier2026,
+  doi = {10.21105/joss.10833},
+  url = {https://doi.org/10.21105/joss.10833},
+  year = {2026},
+  publisher = {The Open Journal},
+  volume = {11},
+  number = {126},
+  pages = {10833},
+  author = {Faria, Luiz and Moitier, Zoïs},
+  title = {HAdaptiveIntegration.jl: Adaptive numerical integration over simplices and orthotopes},
+  journal = {Journal of Open Source Software}
+}
+```
