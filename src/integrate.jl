@@ -160,37 +160,39 @@ end
 
 # paranoia about accumulated round-off, see re-sum from QuadGK.jl
 """
-    resum(buffer; norm=LinearAlgebra.norm)
+    resum(buffer)
 
-Re-sum integral and error contributions stored in `buffer`.
+Re-sum integral and error value contributions stored in `buffer`.
 
-This is more expensive than a plain sum, but it uses the Kahan-Babuška-Neumaier [1]
-summation algorithm to reduce floating-point round-off error.
+This is more expensive than a plain sum, but it uses compensated summation, based on the
+error-free transformation `two_sum` [1], to reduce floating-point round-off error.
 
-[1] Klein, A. A Generalized Kahan-Babuška-Summation-Algorithm. Computing 76, 279-293 (2006).
-https://doi.org/10.1007/s00607-005-0139-x
+[1] T. Ogita, S. M. Rump, and S. Oishi, Accurate Sum and Dot Product. SIAM J. Sci. Comput.
+26(6), 1955-1988 (2005). https://doi.org/10.1137/030601818
 """
-function resum(
-        buffer::BinaryHeap{Tuple{DOM, IT, ET}}; norm = LinearAlgebra.norm
-    ) where {DOM, IT, ET}
+function resum(buffer::BinaryHeap{Tuple{DOM, IT, ET}}) where {DOM, IT, ET}
     I = cᵢ = zero(IT)
     E = cₑ = zero(ET)
     for (_, I_dom, E_dom) in buffer.valtree
-        tᵢ = I + I_dom
-        if norm(I) ≥ norm(I_dom)
-            cᵢ += (I - tᵢ) + I_dom
-        else
-            cᵢ += (I_dom - tᵢ) + I
-        end
-        I = tᵢ
+        I, eᵢ = two_sum(I, I_dom)
+        cᵢ += eᵢ
 
-        tₑ = E + E_dom
-        if norm(E) ≥ norm(E_dom)
-            cₑ += (E - tₑ) + E_dom
-        else
-            cₑ += (E_dom - tₑ) + E
-        end
-        E = tₑ
+        E, eₑ = two_sum(E, E_dom)
+        cₑ += eₑ
     end
     return I + cᵢ, E + cₑ
+end
+
+"""
+    two_sum(a, b)
+
+Return `(s, e)` such that `s = fl(a + b)` and `s + e = a + b` exactly.
+
+Here `fl(x)` denotes `x` rounded to the nearest floating-point number.
+"""
+function two_sum(a::T, b::T) where {T}
+    s = a + b
+    a₀ = s - b
+    b₁ = s - a₀
+    return s, (a - a₀) + (b - b₁)
 end
