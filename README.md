@@ -27,10 +27,10 @@ targeting high accuracy with fewer function evaluations.
 - Adaptive integration over simplices and orthotopes of arbitrary dimension.
 - Efficient tabulated cubature rules for low-dimensional simplices and orthotopes.
 - Support for custom embedded cubature rules.
-- Arbitrary-precision arithmetic, via a `ForwardDiff` extension that re-derives
-  tabulated rules at higher precision (install `ForwardDiff` to enable it).
-- Compatibility with [`Unitful.jl`](https://github.com/JuliaPhysics/Unitful.jl)
-  quantities as integrand values and domain coordinates.
+- Extended-precision arithmetic: natively up to quadruple precision; for higher precision,
+  load `ForwardDiff` to enable the `IncreasePrecisionExt` extension.
+- Compatibility with [`Unitful.jl`](https://github.com/JuliaPhysics/Unitful.jl) quantities
+  as integrand values and domain coordinates.
 
 ## Installation
 
