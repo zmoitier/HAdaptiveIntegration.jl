@@ -16,21 +16,21 @@ function __init__()
     return nothing
 end
 
-function integral_monomials(::Type{<:Segment}, deg_tot_max::Int)
-    return [[(k,) => 1 // (k + 1)] for k in 0:deg_tot_max]
+function monomial_moments(::Type{<:Segment}, deg_tot_max::Int)
+    return [[(k,) => big(1) // (k + 1)] for k in 0:deg_tot_max]
 end
 
-function integral_monomials(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
-    @assert (D > 0) && (deg_tot_max ≥ 0) "must have `D > 0` and `k_max ≥ 0`."
+function monomial_moments(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
+    @assert (D > 0) && (deg_tot_max ≥ 0) "must have `D > 0` and `deg_tot_max ≥ 0`."
 
-    exponent2values = [[(i,) => 1 // prod((i + 1):(i + D))] for i in 0:deg_tot_max]
+    exponent2values = [[(i,) => big(1) // prod((i + 1):(i + D))] for i in 0:deg_tot_max]
 
     for d in 2:D
-        new = [Vector{Pair{NTuple{d, Int}, Rational{Int}}}() for _ in 0:deg_tot_max]
+        new = [Vector{Pair{NTuple{d, Int}, Rational{BigInt}}}() for _ in 0:deg_tot_max]
         for (k, α2v) in zip(countfrom(0), exponent2values)
             for (α, v) in α2v
                 push!(new[k + 1], (0, α...) => v)
-                t = 1
+                t = one(Rational{BigInt})
                 for n in 1:(deg_tot_max - k)
                     t *= n // (n + k + D)
                     push!(new[k + 1 + n], (n, α...) => t * v)
@@ -43,13 +43,13 @@ function integral_monomials(::Type{<:Simplex{D}}, deg_tot_max::Int) where {D}
     return exponent2values
 end
 
-function integral_monomials(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
-    @assert (D > 0) && (deg_tot_max ≥ 0) "must have `dim > 0` and `k_max ≥ 0`."
+function monomial_moments(::Type{<:Orthotope{D}}, deg_tot_max::Int) where {D}
+    @assert (D > 0) && (deg_tot_max ≥ 0) "must have `D > 0` and `deg_tot_max ≥ 0`."
 
-    exponent2values = [[(i,) => 1 // (i + 1)] for i in 0:deg_tot_max]
+    exponent2values = [[(i,) => big(1) // (i + 1)] for i in 0:deg_tot_max]
 
     for d in 2:D
-        new = [Vector{Pair{NTuple{d, Int}, Rational{Int}}}() for _ in 0:deg_tot_max]
+        new = [Vector{Pair{NTuple{d, Int}, Rational{BigInt}}}() for _ in 0:deg_tot_max]
         for (k, α2v) in zip(countfrom(0), exponent2values)
             for (α, v) in α2v
                 for n in 0:(deg_tot_max - k)
@@ -70,19 +70,14 @@ mutable struct NewtonState{T}
     Δ::Vector{T}
     x_abs_err::T
     f_abs_err::T
-
-    function NewtonState(x₀::Vector{T}, f::Function) where {T}
-        result = JacobianResult(f(x₀), x₀)
-        jacobian!(result, f, x₀)
-        Δ = jacobian(result) \ value(result)
-        x₁ = x₀ - Δ
-        x_abs_err = norm(Δ, Inf)
-        f_abs_err = norm(value(result), Inf)
-        return new{T}(1, x₁, result, Δ, x_abs_err, f_abs_err)
-    end
 end
 
-function iter!(ns::NewtonState{T}, f::Function) where {T}
+function init_ns(x₀::Vector{T}, nb_eqs::Int) where {T}
+    result = JacobianResult(similar(x₀, nb_eqs), x₀)
+    return NewtonState{T}(0, copy(x₀), result, similar(x₀), T(Inf), T(Inf))
+end
+
+function iter_ns!(ns::NewtonState{T}, f::Function) where {T}
     jacobian!(ns.result, f, ns.x)
     ns.Δ .= jacobian(ns.result) \ value(ns.result)
     ns.x .-= ns.Δ
@@ -92,44 +87,31 @@ function iter!(ns::NewtonState{T}, f::Function) where {T}
     return ns
 end
 
-function newton(f, x₀, x_atol, f_atol, maxiter)
-    ns = NewtonState(x₀, f)
-
+function log_iter(ns::NewtonState)
     @info @sprintf(
-        "iter %3d: |xₙ - xₙ₋₁| = %.2e, |f(xₙ)| = %.2e", ns.iter, ns.x_abs_err, ns.f_abs_err,
+        "iter %3d: |xₙ - xₙ₋₁| = %.2e, |f(xₙ₋₁)| = %.2e",
+        ns.iter,
+        ns.x_abs_err,
+        ns.f_abs_err,
     )
+    return nothing
+end
+
+compare_str(err, tol) = @sprintf("%.2e %s %.2e", err, err > tol ? "≰" : "≤", tol)
+
+function newton(f, x₀, nb_eqs, x_atol, f_atol, maxiter)
+    ns = init_ns(x₀, nb_eqs)
 
     while (ns.x_abs_err > x_atol) && (ns.f_abs_err > f_atol) && (ns.iter < maxiter)
-        iter!(ns, f)
-        @info @sprintf(
-            "iter %3d: |xₙ - xₙ₋₁| = %.2e, |f(xₙ)| = %.2e",
-            ns.iter,
-            ns.x_abs_err,
-            ns.f_abs_err,
-        )
+        iter_ns!(ns, f)
+        log_iter(ns)
     end
 
-    xae_str = join(
-        (
-            @sprintf("%.2e", ns.x_abs_err),
-            ns.x_abs_err > x_atol ? "≰" : "≤",
-            @sprintf("%.2e", x_atol),
-        ),
-        " ",
-    )
-    fae_str = join(
-        (
-            @sprintf("%.2e", ns.f_abs_err),
-            ns.f_abs_err > f_atol ? "≰" : "≤",
-            @sprintf("%.2e", f_atol),
-        ),
-        " ",
-    )
     @info """Newton convergence report:
 
            iteration = $(ns.iter) / $maxiter
-        |xₙ - xₙ₋₁ | = $xae_str
-             |f(xₙ)| = $fae_str
+        |xₙ - xₙ₋₁ | = $(compare_str(ns.x_abs_err, x_atol))
+           |f(xₙ₋₁)| = $(compare_str(ns.f_abs_err, f_atol))
     """
 
     if ns.iter ≥ maxiter
@@ -153,22 +135,23 @@ function increase_precision(
         return tec
     end
 
-    @info "Increasing to target precision $(-floor(Int, log10(x_atol))) from tabulated \
+    @info "Increasing to target precision $(nb_digits(x_atol, T)) from tabulated \
     precision $(tec.precision). This may take some time."
 
-    U, range_nodes, range_wh, range_wl = pack(tec, T, D)
+    U, range_nodes, range_wh, range_wl = pack(tec, T)
     order_high, order_low = orders(tec)
-    exponent2values, range_low, range_high = _flatten_with_type(
-        integral_monomials(DOM, order_high), T, order_high, order_low
+    exponent2values, range_low, range_high = flatten_moments(
+        monomial_moments(DOM, order_high), T, order_high, order_low
     )
 
     L = length(range_wl)
+    nb_eqs = range_high.stop + range_low.stop
     function G(U::Vector{S}) where {S}
         pts = @view U[range_nodes]
         wh = @view U[range_wh]
         wl = @view U[range_wl]
 
-        V = Vector{S}(undef, range_high.stop + range_low.stop)
+        V = Vector{S}(undef, nb_eqs)
         for (k, (α, vₑₓ)) in enumerate(exponent2values[range_low])
             vh, vl = zero(S), zero(S)
             for (i, node) in enumerate(partition(pts, D))
@@ -192,7 +175,7 @@ function increase_precision(
         return V
     end
 
-    U, δ = newton(G, U, x_atol, f_atol, maxiter)
+    U, δ = newton(G, U, nb_eqs, x_atol, f_atol, maxiter)
 
     nodes, weights_high, weights_low = unpack(U, range_nodes, range_wh, range_wl, D)
     return TabulatedEmbeddedCubature{DOM}(;
@@ -200,15 +183,24 @@ function increase_precision(
         reference = tec.reference,
         order_high = tec.order_high,
         order_low = tec.order_low,
-        precision = (-floor(Int, log10(δ))),
+        precision = nb_digits(δ, T),
         nodes = [Vector(string.(node)) for node in nodes],
         weights_high = string.(weights_high),
         weights_low = string.(weights_low),
     )
 end
 
+# Number of correct significant digits guaranteed by an absolute error `err`, capped by the
+# precision of `T`.
+function nb_digits(err, ::Type{T}) where {T}
+    max_digits = floor(Int, -log10(eps(T)))
+    return iszero(err) ? max_digits : min(floor(Int, -log10(err)), max_digits)
+end
+
 # [ nodes[1]..., ..., nodes[end]..., weights_high..., weights_low... ]
-function pack(tec::TabulatedEmbeddedCubature, ::Type{T}, D::Int) where {T}
+function pack(
+        tec::TabulatedEmbeddedCubature{DOM}, ::Type{T}
+    ) where {D, DOM <: AbstractDomain{D}, T}
     U = Vector{T}()
     for node in tec.nodes
         append!(U, parse.(T, node))
@@ -217,7 +209,8 @@ function pack(tec::TabulatedEmbeddedCubature, ::Type{T}, D::Int) where {T}
     append!(U, parse.(T, tec.weights_low))
 
     H, L = length(tec.weights_high), length(tec.weights_low)
-    return U, 1:(D * H), (H * D + 1):(H * D + H), (H * D + H + 1):(H * D + H + L)
+    N = D * H
+    return U, 1:N, (N + 1):(N + H), (N + H + 1):(N + H + L)
 end
 
 function unpack(
@@ -238,19 +231,14 @@ function unpack(
     return (nodes, weights_high, weights_low)
 end
 
-function _flatten_with_type(
+function flatten_moments(
         exponent2values::Vector{Vector{Pair{NTuple{D, Int}, S}}},
         ::Type{T},
         order_high::Int,
         order_low::Int,
     ) where {D, S, T}
     nb_lo, nb_hi = binomial(order_low + D, D), binomial(order_high + D, D)
-
-    result = Vector{Pair{NTuple{D, Int}, T}}()
-    for α2v in exponent2values
-        append!(result, α2v)
-    end
-
+    result = [α => T(v) for α2v in exponent2values for (α, v) in α2v]
     return result, 1:nb_lo, (nb_lo + 1):nb_hi
 end
 
